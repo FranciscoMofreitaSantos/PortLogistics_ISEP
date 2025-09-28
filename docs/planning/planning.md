@@ -44,10 +44,10 @@ Throughout the project development period, the distribution of *tasks / requirem
 
 | Task                                                                                                         | Sprint A            | Sprint B | Sprint C |
 |--------------------------------------------------------------------------------------------------------------|---------------------|----------|----------|
-| [Glossary](./global-artifacts/01.requirements-engineering/glossary.md)                                       | 1230444             |          |          |
-| [Use Case Diagram (UCD)](./global-artifacts/01.requirements-engineering/use-case-diagram.md)                 | 1231274             |          |          |
-| [Supplementary Specification](./global-artifacts/01.requirements-engineering/supplementary-specification.md) | 1231274             |          |          |
-| [Domain Model (DDD)](./domain-model/LAPR5_project.svg)                                                       | All team members    |          |          |
+| [Glossary](global-artifacts/01.requirements-engineering/glossary.md)                                       | 1230444             |          |          |
+| [Use Case Diagram (UCD)](global-artifacts/01.requirements-engineering/use-case-diagram.md)                 | 1231274             |          |          |
+| [Supplementary Specification](global-artifacts/01.requirements-engineering/supplementary-specification.md) | 1231274             |          |          |
+| [Domain Model (DDD)](domain-model/LAPR5_project.svg)                                                       | All team members    |          |          |
 | [Readme.md](../../README.md)                                                                                 | 1231274 & 1230564   |          |          |
 | [Planning.md](./planning.md)                                                                                 | 1231274             |          |          |
 | [Others documentations]()                                                                                    | 1231274 & 1230564   |          |          |

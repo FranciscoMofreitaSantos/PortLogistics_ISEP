@@ -1,5 +1,30 @@
 # Sustainable and Intelligent Port Logistics System
 
+
+## 1. Description of the Project
+
+The Port Management System is a software solution designed to support the back-office operations of the **Port of Thessaloniki**, one of the main international ports in Greece and a gateway to the Balkans and Southeastern Europe.  
+The system enables the management of vessels, docks, storage areas, shipping agent organizations, and vessel visit notifications (VVNs), integrating functionalities across multiple roles (Port Authority Officer, Shipping Agent Representative, Shipping Agent Organization, System Administrator, Staff Member).  
+
+Key features include:  
+- **Vessel and Vessel Type Management** (registration, classification, operational constraints).  
+- **Dock and Storage Area Management** (capacity, occupancy, assignments).  
+- **Shipping Agent Organization and Representative Management** (registration, validation, communication).  
+- **Vessel Visit Notification Workflow** (submission, approval/rejection, dock assignment, auditing).  
+- **Staff and Resource Allocation** (qualifications, assignments to operations).  
+
+Developed as part of the **5th semester of the Degree in Informatics Engineering (LEI) at ISEP (2025-2026 academic year)**, the project follows a **Scrum methodology** across three sprints, integrating knowledge from five course units: **EAPLI, ESINF, RCOMP, ARQCP, and LAPR5**.  
+
+---
+
+## 2. Planning and Technical Documentation
+
+[Planning and Technical Documentation](docs/planning/planning.md)
+
+[FURPS+](docs/planning/global-artifacts/01.requirements-engineering/supplementary-specification.md)
+
+---
+
 ## Project Overview
 This project is developed within the scope of the **5th Semester Integrative Project (LEI-ISEP, 2025/26)**.  
 The goal is to design and implement a **next-generation information system** to support **sustainable and intelligent port operations**, integrating knowledge from multiple domains such as:
