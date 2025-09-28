@@ -42,31 +42,32 @@ The project is divided into **three sprints**, each with specific deadlines and 
 
 Throughout the project development period, the distribution of *tasks / requirements / features* by the team members will be tracked in GitHub Issues and documented in the following way:
 
-| Task                       | Sprint A                                     | Sprint B | Sprint C |
-|----------------------------| -------------------------------------------- | -------- | -------- |
+| Task                       | Sprint A                                    | Sprint B | Sprint C |
+|----------------------------|---------------------------------------------| -------- | -------- |
 | Glossary                   | [1230444](docs/global-artifacts/glossary.md) |          |          |
-| Use Case Diagram (UCD)     | [1231274](docs/global-artifacts/ucd.md)      |          |          |
-| Supplementary Specification | [1231274](docs/global-artifacts/furps.md)    |          |          |
-| Domain Model (DDD)         | [All team members](docs/domain-model)        |          |          |
-| Readme.md                  | [1231274](README.md)                         |          |          |
-| Planning.md                | [1231274](docs/planning.md)                  |          |          |
+| Use Case Diagram (UCD)     | [1231274](docs/global-artifacts/ucd.md)     |          |          |
+| Supplementary Specification | [1231274](docs/global-artifacts/furps.md)   |          |          |
+| Domain Model (DDD)         | [All team members](docs/domain-model)       |          |          |
+| Readme.md                  | [1231274 & 1230564](README.md)              |          |          |
+| Planning.md                | [1231274](docs/planning.md)                 |          |          |
+| Others documentations      | [1231274 & 1230564](README.md)              |          |          |
 
 
-| Task - US'S Back-end Module(s) | Sprint A                 | Sprint B | Sprint C |
-|--------------------------------|--------------------------| -------- | -------- |
-| US-2.2.1                       | [1231274]() & [1230444]() |  |  |
-| US-2.2.2                       | [1231274]()              |  |  |
-| US-2.2.3                       | [1230444]()              |  |  |
-| US-2.2.4                       | [All Members]()          |  |  |
-| US-2.2.5                       | [1211225]()              |  |  |
-| US-2.2.6                       | [1211225]()              |  |  |
-| US-2.2.7                       | [All Members]()          |  |  |
-| US-2.2.8                       | [All Members]()          |  |  |
-| US-2.2.9                       | [All Members]()          |  |  |
-| US-2.2.10                      | [All Members]()          |  |  |
-| US-2.2.11                      | [1230564]()              |  |  |
-| US-2.2.12                      | [1230839]()              |  |  |
-| US-2.2.13                      | [1230839]() &  1230564]() |  |  |
+| Task - US'S Back-end Module(s) | Sprint A                   | Sprint B | Sprint C |
+|--------------------------------|----------------------------| -------- | -------- |
+| US-2.2.1                       | [1231274]() & [1230444]()  |  |  |
+| US-2.2.2                       | [1231274]()                |  |  |
+| US-2.2.3                       | [1230444]()                |  |  |
+| US-2.2.4                       | [All Members]()            |  |  |
+| US-2.2.5                       | [1211225]()                |  |  |
+| US-2.2.6                       | [1211225]()                |  |  |
+| US-2.2.7                       | [All Members]()            |  |  |
+| US-2.2.8                       | [All Members]()            |  |  |
+| US-2.2.9                       | [All Members]()            |  |  |
+| US-2.2.10                      | [All Members]()            |  |  |
+| US-2.2.11                      | [1230564]()                |  |  |
+| US-2.2.12                      | [1230839]()                |  |  |
+| US-2.2.13                      | [1230839]() &  [1230564]() |  |  |
 
 
 | Task - US'S Project Client Analysis | Sprint A                                     | Sprint B | Sprint C |
