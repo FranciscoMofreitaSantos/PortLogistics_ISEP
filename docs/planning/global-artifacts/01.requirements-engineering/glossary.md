@@ -3,36 +3,37 @@
 **Terms, Expressions and Acronyms (TEA) must be organized alphabetically.**
 
 
-| **_TEA_** (EN)                                    | **_Description_** (EN)                                                                                                                                                    |                                       
-|:--------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Port**| Arganized into distinct areas to facilitate the arrival, (un)loading, storage, and departure of vessels efficiently|
-| **Port Authority**| Insitution in charge of the port
-| **Shipping agent**| organizations that represent vessel owners or operators in port operations.
-| **logistics operator**| Staff member responsible for allocating pysical resources during vessel visits.
-| **vessel**| maritime ships responsible for carrying cargo between ports
-| **vessel type**| parameters that define a ship's necessities, such as size or carrying capacity
-| **port operations**| Operations that occur in the port such as loading and unloading of cargo
-| **visits**| A ship's stay at port, the dock where it will stay and the operations it will perform
-| **cargo**| Goods transported by vessels
-| **cargo manifest**| structured information about the containers involved including their number, contents, and positions on the vessel
-| **crew**| A vessel's personell.
-| **crew manifest**| A crew's informationm. For most visits, this information is limited to the captain’s name and the total
-number of crew members on board. However, when the vessel carries dangerous cargo, the notification must explicitly identify the designated crew safety officers
-| **dock**| Facility where vessels berth for loading and unloading operations
-| **crane**| Instrument used to transport cargo in and out of a vessel. These can be fixed ship-to-shore (sts) cranes or mobile yard gantry cranes.
-| **truck**| Vehicle used to transport containers between docks yeards and warehouses
-| **warehouse**| Facility for cargo that requires additional handling or inspection
-| **container**| Structure that holds a specific type of cargo, is transported by vessels and stored in warehouses
-| **physical resources**| Resources such as vehicles and infrastrure vital to port operations
-| **human resources**| Staff in charge of operating the physical resources
-| **yard**| Facility for temporary storae of containers
-| **Operational Window**| Window of time during a day when a resource is available to be assigned a task, may change on a weekly basis
-| **Operational Capacity**| How much a pice of equipment like a crane or truck can do, mesuremnts vary dependent on type of equipment
-| **Current Availability Status**| Current situation of a resources depending on if it can be assigned a task.
-| **Operating Staff Requirements**| Requirements necessary to use a resource, like specialized personell or certifications.
-| **Setup Time**| Time needed for a resource to become operational
-| **Vessel Visit notification**|
-| **Vessel identifier**| Unique identifier compliant with the ISO 6346:2022 standard composed of an owner code (three letters), an equipment category identifier (one letter, such as “U” for freight containers), a six-digit serial number, and a single check digit for validation
-| **Unloading Manifest**| lists of containers to be offloaded from the vessel upon arrival
-| **Loading Manifest**| lists of containers to be loaded onto the vessel for departure
-
+| **_TEA_** (EN)                   | **_Description_** (EN)                                                                                                                                                                                                    |                                       
+|:---------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Administrator**                | System user responsible for managing accounts, permissions, and system configurations, ensuring operational data integrity.                                                                                               |
+| **Berth**                        | The designated position along a dock where a vessel is moored for operations.                                                                                                                                             |
+| **Cargo**                        | Goods transported by vessels.                                                                                                                                                                                             |
+| **Cargo Manifest**               | Structure that holds a specific type of cargo, transported by vessels and stored in warehouses.                                                                                                                           |
+| **Container**                    | Structure that holds a specific type of cargo, is transported by vessels, and stored in warehouses.                                                                                                                       |
+| **Crane**                        | Instrument used to transport cargo in and out of a vessel. These can be fixed ship-to-shore (STS) cranes or mobile yard gantry cranes.                                                                                    |
+| **Crew**                         | A vessel's personnel.                                                                                                                                                                                                     |
+| **Crew Manifest**                | Information about the crew. For most visits, this is limited to the captain’s name and the total number of crew members. When carrying dangerous cargo, the designated safety officers must be explicitly identified.     |
+| **Current Availability Status**  | Current situation of a resource depending on whether it can be assigned a task.                                                                                                                                           |
+| **Dock**                         | Facility where vessels berth for loading and unloading operations.                                                                                                                                                        |
+| **Dock Assignment**              | Port Authority allocates docks based on vessel type, capacity, and pending visits.                                                                                                                                        |
+| **Human resources**              | Staff in charge of operating the physical resources.                                                                                                                                                                      |
+| **Loading Manifest**             | List of containers to be loaded onto the vessel for departure.                                                                                                                                                            |
+| **Logistics Operator**           | Staff member responsible for allocating physical resources during vessel visits.                                                                                                                                          |
+| **Operating Staff Requirements** | Requirements necessary to use a resource, such as specialized personnel or certifications.                                                                                                                                |
+| **Operational Capacity**         | How much a piece of equipment (like a crane or truck) can handle; measurements vary depending on the type of equipment.                                                                                                   |
+| **Operational Window**           | Window of time during a day when a resource is available to be assigned a task; may change on a weekly basis.                                                                                                             |
+| **Physical Resources**           | Resources such as vehicles and infrastructure vital to port operations.                                                                                                                                                   |
+| **Port**                         | Organized into distinct areas to facilitate the efficient arrival, (un)loading, storage, and departure of vessels.                                                                                                        |
+| **Port Authority**               | Institution in charge of the port.                                                                                                                                                                                        |
+| **Port Operations**              | Operations that occur in the port, such as loading and unloading of cargo.                                                                                                                                                |
+| **Setup Time**                   | Time needed for a resource to become operational.                                                                                                                                                                         |
+| **Shipping Agent**               | Organization that represents vessel owners or operators in port operations.                                                                                                                                               |
+| **Truck**                        | Vehicle used to transport containers between docks, yards, and warehouses.                                                                                                                                                |
+| **Unloading Manifest**           | List of containers to be offloaded from the vessel upon arrival.                                                                                                                                                          |
+| **Vessel**                       | Maritime ship responsible for carrying cargo between ports.                                                                                                                                                               |
+| **Vessel Identifier**            | Unique identifier compliant with ISO 6346:2022, composed of: owner code (three letters), equipment category identifier (one letter, e.g., “U” for freight containers), six-digit serial number, and a single check digit. |
+| **Vessel Type**                  | Parameters that define a ship's necessities, such as size or carrying capacity.                                                                                                                                           |
+| **Vessel Visit Notification**    | Formal communication sent to notify a port about an upcoming vessel visit and its requirements.                                                                                                                           |
+| **Visits**                       | A ship's stay at port, including the dock where it will berth and the operations it will perform.                                                                                                                         |
+| **Warehouse**                    | Facility for cargo that requires additional handling or inspection.                                                                                                                                                       |
+| **Yard**                         | Facility for temporary storage of containers.                                                                                                                                                                             |
