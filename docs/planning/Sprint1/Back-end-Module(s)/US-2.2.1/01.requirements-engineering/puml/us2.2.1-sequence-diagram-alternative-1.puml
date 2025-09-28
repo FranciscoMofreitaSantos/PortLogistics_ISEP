@@ -1,0 +1,36 @@
+@startuml
+actor "Port Authority Officer" as Officer
+boundary "UI / API" as UI
+control "VesselTypeAppService" as App
+entity "VesselTypeRepository" as Repo
+collections "Audit Log" as Audit
+
+== Create ==
+Officer -> UI : Submit CreateVesselType(name, desc, capacityTEU, maxRows, maxBays, maxTiers)
+UI -> App : CreateVesselType(cmd)
+App -> Repo : isNameAvailable(name)?
+Repo --> App : true/false
+App -> App : validate >0 and constraints >0
+App -> Repo : save(VesselType)
+Repo --> App : VesselType(id,…)
+App -> Audit : log(CREATE, officerId, vesselTypeId, timestamp, outcome=SUCCESS)
+App --> UI : success(VesselTypeDTO)
+
+== Update ==
+Officer -> UI : Submit UpdateVesselType(id, fields…)
+UI -> App : UpdateVesselType(cmd)
+App -> Repo : findById(id)
+Repo --> App : VesselType
+App -> App : validate; enforce unique name if changed
+App -> Repo : save(updated)
+Repo --> App : VesselType
+App -> Audit : log(UPDATE, officerId, vesselTypeId, timestamp, outcome=SUCCESS)
+App --> UI : success(VesselTypeDTO)
+
+== Search ==
+Officer -> UI : searchBy(name?, description?)
+UI -> App : search(query)
+App -> Repo : searchByNameOrDescription(query)
+Repo --> App : List<VesselType>
+App --> UI : PagedResult
+@enduml
