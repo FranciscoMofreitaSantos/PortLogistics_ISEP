@@ -31,11 +31,29 @@
 **From forum**
 
 > **Q:** Can two vessel types share the same name if they differ in constraints?
+> 
 > **A:** No. Enforce **unique name** for clarity in searches and references.
+
 > **Q:** What unit should “capacity” use?
+> 
 > **A:** **TEU** (Twenty-foot Equivalent Unit).
+
 > **Q:** Are maxRows/Bays/Tiers mandatory?
+> 
 > **A:** Yes; they express the physical stowage grid (Bay × Row × Tier) used by planners.
+
+> **Q:** Which are the max dimensions and cargo disposition for each type?
+> 
+> **A:** Such dimensions are defined by the user, i.e., the Port Authority Officer.Some examples of vessel types are mentioned of the system description document.
+Moreover, it states that "The type of vessel determines the maximum number of rows, bays, and tiers, and therefore its maximum TEU capacity.".
+
+> **Q:** The vessel type defines the dimensions, capacity and cargo disposition of all vessels of that type or is some variation possible within the same type?
+> 
+> **A:** For simplicity, you should consider that no variation is possible.
+
+> **Q:** Qual é a diferença entre “cargo capacity” e “volume of containers”?
+>
+> **A:** Ambas as expressões referem-se ao número máximo de contentores (e.g.: 18000) na unidade de medida adotada (TEU).
 
 ---
 
@@ -81,8 +99,6 @@
 ---
 
 ### 1.6. System Sequence Diagram (SSD)
-
-You can render this with PlantUML.
 
 ![SSD](./puml/us2.2.1-sequence-diagram-alternative-1.svg)
 
