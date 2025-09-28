@@ -12,16 +12,18 @@ title Customer Use Case Diagram
 left to right direction
 
 rectangle "System Actors                       " as actors {
-    actor "Customer" as CST
+    actor "Shipping Agent Representative" as SAR
 }
 
+
 rectangle "Customer App"  as usecases{
-    usecase "Consult my shows agenda" as cmsa
-    usecase "Approve/Reject proposal" as arp
-    usecase "Analyse proposal" as appsl
-    CST --> cmsa
-    CST --> arp
-    CST --> appsl
+    usecase "Creat/Submit Vessel Visit Notifications" as CSVVN
+    usecase "Change/Complete Vessel Visit Notifications" as CCVVN
+    usecase "View Status of Vessel Visit Notifications" as VSoVVN
+
+    SAR ---> CSVVN
+    SAR ---> CCVVN
+    SAR ----> VSoVVN
 
 }
 

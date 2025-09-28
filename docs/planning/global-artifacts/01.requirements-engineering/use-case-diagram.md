@@ -1,10 +1,10 @@
 # Main Use Case Diagram (UCD)
 
-![Use Case Diagram](./img/Customer-use-case-diagram-Customer_Use_Case_Diagram.png)
+![Use Case Diagram](./img/Main-use-case-diagram.svg)
 
 # Customer Use Case Diagram (UCD)
 
-![Main Use Case Diagram](./img/Main-use-case-diagram-Main_Use_Case_Diagram.png)
+![Main Use Case Diagram](./img/Customer-use-case-diagram.svg)
 
 # Use Cases / User Stories
 
