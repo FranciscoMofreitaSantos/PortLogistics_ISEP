@@ -1,6 +1,4 @@
-using System;
-
-namespace SEM5_PI_WEBAPI.Shared
+namespace SEM5_PI_WEBAPI.Domain.Shared
 {
     public class BusinessRuleValidationException : Exception
     {

@@ -1,6 +1,4 @@
-using SEM5_PI_WEBAPI.Shared;
-
-namespace SEM5_PI_WEBAPI.Shared
+namespace SEM5_PI_WEBAPI.Domain.Shared
 {
     /// <summary>
     /// Base class for entities.

@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace SEM5_PI_WEBAPI.Shared
+namespace SEM5_PI_WEBAPI.Domain.Shared
 {
     public interface IRepository<TEntity, TEntityId>
     {
