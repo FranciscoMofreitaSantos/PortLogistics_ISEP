@@ -1,7 +1,4 @@
-Here is the requested text in English, with an explanation:
-
-
-# US2.2.11 – 
+# US2.2.11 – Register and manage operating staff members
 
 ## 3. Design – User Story Realization
 
