@@ -1,48 +1,48 @@
 @startuml
-skinparam monochrome true
-skinparam packageStyle rectangle
-skinparam shadowing false
+actor "Logistics Operator" as Operator
+boundary "UI / API" as UI
+control "PhysicalResourceAppService" as App
+entity "PhysicalResourceRepository" as Repo
+collections "Audit Log" as Audit
 
-autonumber
+== Create ==
+Operator -> UI : Submit CreatePhysicalResource(alphaCode, description, type, operationalCapacity, setupTime, status, schedule, qualifications)
+UI -> App : CreatePhysicalResource(cmd)
+App -> Repo : isAlphaCodeAvailable(alphaCode)?
+Repo --> App : true/false
+App -> App : validate alphaCode unique, operationalCapacity > 0, setupTime >= 0, status in {ACTIVE, INACTIVE, UNDER_MAINTENANCE}
+App -> Repo : save(PhysicalResource(id, alphaCode, description, type, operationalCapacity, setupTime, status, schedule, qualifications))
+Repo --> App : PhysicalResource(id, ...)
+App -> Audit : log(CREATE, operatorId, id, timestamp, outcome=SUCCESS)
+App --> UI : success(PhysicalResourceDTO)
 
-'hide footbox
-participant ":{NameOfUC}Controller" as CTRL
-participant "ApplicationSession" as APPSESSIONC
-participant "appSession\n:ApplicationSession" as APPSESSIONI
-participant "currentSession\n:UserSession" as CURSESSION
+== Update ==
+Operator -> UI : Submit UpdatePhysicalResource(id, fields...)
+UI -> App : UpdatePhysicalResource(cmd)
+App -> Repo : findById(id)
+Repo --> App : PhysicalResource
+App -> App : validate; enforce unique alphaCode if changed, operationalCapacity > 0, valid status
+App -> Repo : save(updatedPhysicalResource)
+Repo --> App : PhysicalResource
+App -> Audit : log(UPDATE, operatorId, id, timestamp, outcome=SUCCESS)
+App --> UI : success(PhysicalResourceDTO)
 
-activate CTRL
-[o-> CTRL : create()
-    CTRL -> APPSESSIONC : getinstance()
+== Deactivate ==
+Operator -> UI : Submit DeactivatePhysicalResource(id)
+UI -> App : DeactivatePhysicalResource(cmd)
+App -> Repo : findById(id)
+Repo --> App : PhysicalResource
+App -> App : set status=INACTIVE, validate deactivation
+App -> Repo : save(updatedPhysicalResource)
+Repo --> App : PhysicalResource
+App -> Audit : log(DEACTIVATE, operatorId, id, timestamp, outcome=SUCCESS)
+App --> UI : success(PhysicalResourceDTO)
 
-    activate APPSESSIONC
-        APPSESSIONC --> CTRL : appSession
-    deactivate APPSESSIONC
-
-    CTRL -> APPSESSIONI : getCurrentSession()
-    activate APPSESSIONI
-        APPSESSIONI --> CTRL : currentSession
-    deactivate APPSESSIONI
-
-    CTRL -> CURSESSION : isLoggedInWithRole(USER_ROLE)
-    activate CURSESSION
-        CURSESSION --> CTRL : answer
-    deactivate CURSESSION
-
-    alt answer = true
-        CTRL -> CTRL : doesOtherThing()
-        activate CTRL
-            [o<-- CTRL : ok
-        deactivate CTRL
-        autonumber stop
-        CTRL -[#white]> CURSESSION
-        autonumber resume
-    else
-        |||
-        [o<-- CTRL : illegalStateException("Not Authorized")
-        |||
-    end alt
-
-deactivate CTRL
+== Search ==
+Operator -> UI : searchBy(alphaCode?, description?, type?, status?)
+UI -> App : search(query)
+App -> Repo : searchByAlphaCodeDescriptionTypeOrStatus(query)
+Repo --> App : List<PhysicalResource>
+App --> UI : PagedResult
 
 @enduml
