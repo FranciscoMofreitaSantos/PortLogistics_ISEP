@@ -9,41 +9,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7e245589-3e0b-4589-828c-7331c6f89b35" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/DddSample1DbContext.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/SchemaNames.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/Shared/BaseRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/Shared/EntityIdValueConverter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/Shared/StronglyEntityIdValueConverterSelector.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/UnitOfWork.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualification/Qualification.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/Email.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/PhoneNumber.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/StaffMember.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/StaffMemberStatus.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.LEI-SEM5-PI-2025-26-3DJ-03/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LEI-SEM5-PI-2025-26-3DJ-03/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselType/CreatingVesselTypeDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselsTypes/CreatingVesselTypeDto.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselType/IVesselTypeRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselsTypes/IVesselTypeRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselType/VesselType.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselsTypes/VesselType.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselType/VesselTypeDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselsTypes/VesselTypeDto.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselType/VesselTypeID.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselsTypes/VesselTypeId.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselType/VesselTypeService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/VesselsTypes/VesselTypeService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/VesselType/VesselTypeEntityTypeConfiguration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/VesselsTypes/VesselTypeEntityTypeConfiguration.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/VesselType/VesselTypeRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/VesselsTypes/VesselTypeRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Shared/BusinessRuleValidationException.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Shared/BusinessRuleValidationException.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Shared/Entity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Shared/Entity.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Shared/EntityId.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Shared/EntityId.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Shared/IAggregateRoot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Shared/IAggregateRoot.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Shared/IRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Shared/IRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Shared/IUnitOfWork.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Shared/IUnitOfWork.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Shared/IValueObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Shared/IValueObject.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.sourcelink.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/ref/SEM5-PI-WEBAPI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/ref/SEM5-PI-WEBAPI.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/refint/SEM5-PI-WEBAPI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/refint/SEM5-PI-WEBAPI.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmrazor.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmrazor.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rpswa.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rpswa.dswa.cache.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.GeneratedMSBuildEditorConfig.editorconfig" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.GeneratedMSBuildEditorConfig.editorconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.assets.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.dgspec.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.g.targets" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.assets.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.packagespec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/rider.project.model.nuget.info" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/rider.project.restore.info" afterDir="false" />
     </list>
@@ -54,6 +37,28 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "FranciscoMofreitaSantos"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "git@github.com:Departamento-de-Engenharia-Informatica/LEI-SEM5-PI-2025-26-3DJ-03.git",
+    "accountId": "b42fcd1b-01f9-46f2-af94-4b57ae7ab9d2"
+  }
+}]]></component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualification/Qualification.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/Email.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/PhoneNumber.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/StaffMember.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/StaffMemberStatus.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -77,6 +82,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.sourceCode.C#",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
@@ -124,6 +130,7 @@
       <updated>1759096499319</updated>
       <workItem from="1759096500948" duration="7000" />
       <workItem from="1759168919029" duration="1229000" />
+      <workItem from="1759242771048" duration="2031000" />
     </task>
     <servers />
   </component>

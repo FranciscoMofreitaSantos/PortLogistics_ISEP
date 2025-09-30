@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj": {}
+    "/Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj": {}
   },
   "projects": {
-    "/Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj": {
+    "/Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj",
+        "projectUniqueName": "/Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj",
         "projectName": "SEM5-PI-WEBAPI",
-        "projectPath": "/Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj",
-        "packagesPath": "/Users/jorgerodriguez/.nuget/packages/",
-        "outputPath": "/Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/obj/",
+        "projectPath": "/Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj",
+        "packagesPath": "/Users/franciscosantos/.nuget/packages/",
+        "outputPath": "/Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/jorgerodriguez/.nuget/NuGet/NuGet.Config"
+          "/Users/franciscosantos/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -48,7 +48,15 @@
               "target": "Package",
               "version": "[9.0.9, )"
             },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.9, )"
+            },
             "Microsoft.EntityFrameworkCore.InMemory": {
+              "target": "Package",
+              "version": "[9.0.9, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[9.0.9, )"
             },
