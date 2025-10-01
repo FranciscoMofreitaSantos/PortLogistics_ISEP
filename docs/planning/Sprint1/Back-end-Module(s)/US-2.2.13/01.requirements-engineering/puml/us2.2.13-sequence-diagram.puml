@@ -1,48 +1,34 @@
 @startuml
-skinparam monochrome true
-skinparam packageStyle rectangle
-skinparam shadowing false
+actor "Logistic Operator" as Operator
+participant "Qualification Management System" as System
 
-autonumber
+Operator -> System: Request to create new Qualification\n(provides Code, Name)
+activate System
 
-'hide footbox
-participant ":{NameOfUC}Controller" as CTRL
-participant "ApplicationSession" as APPSESSIONC
-participant "appSession\n:ApplicationSession" as APPSESSIONI
-participant "currentSession\n:UserSession" as CURSESSION
+System -> System: Validate provided Code and Name
+alt Code is unique and data valid
+    System -> System: Save new Qualification to database
+    System --> Operator: Success confirmation
+else Validation fails
+    System --> Operator: Error message (duplicate code or invalid data)
+end
 
-activate CTRL
-[o-> CTRL : create()
-    CTRL -> APPSESSIONC : getinstance()
+Operator -> System: Request to update existing Qualification\n(provides Code, Name)
+activate System
 
-    activate APPSESSIONC
-        APPSESSIONC --> CTRL : appSession
-    deactivate APPSESSIONC
+System -> System: Validate updated data and existence
+alt Data valid and Qualification exists
+    System -> System: Update Qualification in database
+    System --> Operator: Success confirmation
+else Validation fails or not exists
+    System --> Operator: Error message (not found or invalid input)
+end
 
-    CTRL -> APPSESSIONI : getCurrentSession()
-    activate APPSESSIONI
-        APPSESSIONI --> CTRL : currentSession
-    deactivate APPSESSIONI
+Operator -> System: Request list of Qualifications (with filters)
+activate System
 
-    CTRL -> CURSESSION : isLoggedInWithRole(USER_ROLE)
-    activate CURSESSION
-        CURSESSION --> CTRL : answer
-    deactivate CURSESSION
+System -> System: Query database with filters
+System --> Operator: List of Qualifications (filtered by Code/Name)
 
-    alt answer = true
-        CTRL -> CTRL : doesOtherThing()
-        activate CTRL
-            [o<-- CTRL : ok
-        deactivate CTRL
-        autonumber stop
-        CTRL -[#white]> CURSESSION
-        autonumber resume
-    else
-        |||
-        [o<-- CTRL : illegalStateException("Not Authorized")
-        |||
-    end alt
-
-deactivate CTRL
-
+deactivate System
 @enduml
