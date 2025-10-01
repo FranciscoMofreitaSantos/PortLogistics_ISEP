@@ -1,6 +1,6 @@
-@SEM5_PI_WEBAPI_HostAddress = http://localhost:5008
+@portURL = http://localhost:5008
 
-GET {{SEM5_PI_WEBAPI_HostAddress}}/weatherforecast/
+GET {{portURL}}/api/qualifications
 Accept: application/json
 
 ###
