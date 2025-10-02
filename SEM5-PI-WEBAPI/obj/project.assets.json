@@ -5702,19 +5702,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/franciscosantos/.nuget/packages/": {}
+    "C:\\Users\\Manoel\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj",
+      "projectUniqueName": "C:\\Users\\Manoel\\Documents\\ISEP\\3ANO\\LAPR5\\SEM5-PI-WEBAPI\\SEM5-PI-WEBAPI.csproj",
       "projectName": "SEM5-PI-WEBAPI",
-      "projectPath": "/Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj",
-      "packagesPath": "/Users/franciscosantos/.nuget/packages/",
-      "outputPath": "/Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/obj/",
+      "projectPath": "C:\\Users\\Manoel\\Documents\\ISEP\\3ANO\\LAPR5\\SEM5-PI-WEBAPI\\SEM5-PI-WEBAPI.csproj",
+      "packagesPath": "C:\\Users\\Manoel\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Manoel\\Documents\\ISEP\\3ANO\\LAPR5\\SEM5-PI-WEBAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/franciscosantos/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\Manoel\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -5736,9 +5736,9 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "direct"
+        "auditMode": "all"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net9.0": {
@@ -5804,7 +5804,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Users\\Manoel\\.dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
