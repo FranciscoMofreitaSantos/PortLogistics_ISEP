@@ -3,12 +3,12 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
     public class VesselTypeDto
     {
         public Guid Id { get; set; }
-        private string Name { get; set; }
-        private string Description { get; set; }
-        private int MaxBays { get; set; }
-        private int MaxRows { get; set; }
-        private int MaxTiers { get; set; }
-        private float Capacity { get; set; }    // In TEU Units
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int MaxBays { get; set; }
+        public int MaxRows { get; set; }
+        public int MaxTiers { get; set; }
+        public float Capacity { get; set; }
 
         
         //========== Constructors 

@@ -4,99 +4,114 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
 {
     public class VesselType : Entity<VesselTypeId>, IAggregateRoot
     {
-        public const string DEFAULT_DESCRIPTION = "No description";
+        private const string DefaultDescription = "No description";
+        private const int MaxDescriptionLength = 200;
+        private const int MinDescriptionLength = 0;
+        private const int MaxNameLength = 50;
+        private const int MinBays = 1;
+        private const int MinRows = 1;
+        private const int MinTiers = 1;
+        
         public string Name { get; private set; }
-        public string? Description { get; private set; }
+        public string Description { get; private set; }
         public int MaxBays { get; private set; }
         public int MaxRows { get; private set; }
         public int MaxTiers { get; private set; }
-        public float Capacity { get; private set; }    // In TEU Units
+        public float Capacity { get; private set; }
 
+        
         
         //========== Constructors 
         protected VesselType() { }
-        
-        public VesselType(string nameIn, int maxBaysIn, int maxRowsIn, int maxTiersIn, string? descriptionIn = DEFAULT_DESCRIPTION)
+
+        public VesselType(string nameIn, int maxBaysIn, int maxRowsIn, int maxTiersIn, string? descriptionIn = DefaultDescription)
         {
+            SetName(nameIn);
+            SetDescription(descriptionIn ?? DefaultDescription);
+            SetDimensions(maxBaysIn, maxRowsIn, maxTiersIn);
+
             this.Id = new VesselTypeId(Guid.NewGuid());
-            this.Name = nameIn;
-            this.Description = descriptionIn;
-            this.MaxBays = maxBaysIn;
-            this.MaxRows = maxRowsIn;
-            this.MaxTiers = maxTiersIn;
-            this.Capacity = calculateMaxCapacity();
         }
 
-
-        //========== Updates 
-        private bool UpdateName(string updatedName)
-        {
-            if (string.IsNullOrWhiteSpace(updatedName))
-                throw new BusinessRuleValidationException("Name cannot be empty.");
-            
-            this.Name = updatedName;
-            return true;
-        }
-
-        private bool UpdateDescription(string? updatedDescription)
-        {
-            if (updatedDescription == null)
-                throw new BusinessRuleValidationException("Description cannot be null.");
-            
-            this.Description = updatedDescription;
-            return true;
-        }
-
-        private bool UpdateMaxBays(int updatedMaxBays)
-        {
-            if (updatedMaxBays <= 0) {
-                throw new BusinessRuleValidationException("Max 'Bays' cannot be negative or 0.");
-            }
-            this.MaxBays = updatedMaxBays;
-            return true;
-        }
-
-        private bool UpdateMaxRows(int updatedMaxRows)
-        {
-            if (updatedMaxRows <= 0) {
-                throw new BusinessRuleValidationException("Max 'Rows' cannot be negative or 0.");
-            }
-            this.MaxRows = updatedMaxRows;
-            return true;
-        }
-
-        private bool UpdateMaxTiers(int updatedMaxTiers)
-        {
-            if (updatedMaxTiers <= 0) {
-                throw new BusinessRuleValidationException("Max 'Tiers' cannot be negative or 0.");
-            }
-            this.MaxTiers = updatedMaxTiers;
-            return true;
-        }
-
-        private bool UpdateCapacity(float updatedCapacity)
-        {
-            float maxCapacity = calculateMaxCapacity();
-            
-            if (updatedCapacity <= 0 || maxCapacity > updatedCapacity) {
-                throw new BusinessRuleValidationException($"Max 'Capacity' cannot be negative,zero or bigger than the Max 'Capacity' {maxCapacity}.");
-            }
-            
-            this.Capacity = updatedCapacity;
-            return true;
-        }
-
-        public override bool Equals(object? obj) => obj is VesselType otherVesselType && this.Id == otherVesselType.Id;
         
+        
+        
+        
+        
+        
+        //========== Update methods (public domain behaviors)
+        public void ChangeName(string updatedName) => SetName(updatedName);
+
+        public void ChangeDescription(string? updatedDescription) => SetDescription(updatedDescription ?? DefaultDescription);
+        
+        public void ChangeDimensions(int updatedMaxBays, int updatedMaxRows, int updatedMaxTiers) { SetDimensions(updatedMaxBays, updatedMaxRows, updatedMaxTiers); }
+        
+        public void ChangeMaxBays(int updatedMaxBays) => SetMaxBays(updatedMaxBays);
+        
+        public void ChangeMaxRows(int updatedMaxRows) => SetMaxRows(updatedMaxRows);
+        
+        public void ChangeMaxTiers(int updatedMaxTiers)=> SetMaxTiers(updatedMaxTiers);
+
+        
+        
+        
+        //========== Private Setters with validation
+        private void SetName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) throw new BusinessRuleValidationException("Name can't be empty.");
+            if (name.Length > MaxNameLength) throw new  BusinessRuleValidationException($"Name exceeds maximum length for a Vessel Type Name [MAX {MaxNameLength} characters].");
+            //if (!Regex.IsMatch(name, @"^[a-zA-Z0-9\s]+$")) throw new BusinessRuleValidationException("Name can only contain letters, numbers and spaces.");
+
+            
+            this.Name = name.Trim();
+        }
+
+        private void SetDescription(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description)) throw new BusinessRuleValidationException("Description can't be empty.");
+            if (description.Length > MaxDescriptionLength) throw new BusinessRuleValidationException($"Description exceeds maximum length for a Vessel Type Description [MAX {MaxDescriptionLength} characters].");
+            if (description.Length < MinDescriptionLength) throw new BusinessRuleValidationException($"Description requires a minimum length for a Vessel Type Description of [MIN {MinDescriptionLength} characters].");
+            
+            Description = description.Trim();
+        }
+
+        private void SetDimensions(int bays, int rows, int tiers)
+        {
+            SetMaxBays(bays);
+            SetMaxRows(rows);
+            SetMaxTiers(tiers);
+
+            Capacity = CalculateMaxCapacity();
+        }
+
+        private void SetMaxBays(int maxBays)
+        {
+            if (maxBays < MinBays) throw new BusinessRuleValidationException("Max 'Bays' must be greater than 0.");
+            this.MaxBays = maxBays;
+        }
+        
+        private void SetMaxRows(int maxRows)
+        {
+            if (maxRows < MinRows) throw new BusinessRuleValidationException("Max 'Rows' must be greater than 0.");
+            this.MaxRows = maxRows;
+        }
+
+        private void SetMaxTiers(int maxTiers)
+        {
+            if(maxTiers < MinTiers) throw new BusinessRuleValidationException("Max 'Tiers' must be greater than 0.");
+            this.MaxTiers = maxTiers;
+        }
+
+        //========== Equality overrides
+        public override bool Equals(object? obj) =>
+            obj is VesselType otherVesselType && this.Id.Equals(otherVesselType.Id);
+
         public override int GetHashCode() => Id.GetHashCode();
-        
+
         public override string ToString() =>
             $"VesselType [Name: {Name}, Description: {Description}, Bays: {MaxBays}, Rows: {MaxRows}, Tiers: {MaxTiers}, Capacity: {Capacity} TEU]";
-        
-        // ============= Extras
-        private float calculateMaxCapacity() {
-            return this.MaxBays * this.MaxRows * this.MaxTiers ;
-        }
+
+        //========== Helpers
+        private float CalculateMaxCapacity() => MaxBays * MaxRows * MaxTiers;
     }
 }
-

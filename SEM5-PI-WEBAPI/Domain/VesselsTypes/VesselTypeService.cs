@@ -28,6 +28,7 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
         public async Task<VesselTypeDto> GetByIdAsync(VesselTypeId id)
         {
             var vesselTypeInDb = await this._vesselTypeRepository.GetByIdAsync(id);
+            if (vesselTypeInDb == null) throw new BusinessRuleValidationException($"No Vessel Type Found with ID : {id.Value}");
 
             return VesselTypeFactory.CreateDtoVesselType(vesselTypeInDb);
         }
