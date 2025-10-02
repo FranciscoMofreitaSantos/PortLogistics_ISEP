@@ -1,3 +1,7 @@
-﻿SEM5-PI-WEBAPI\.idea
-SEM5-PI-WEBAPI\obj
+﻿# VS Code / JetBrains
+*.idea/
+*.vscode/
 
+# Build
+bin/
+obj/
