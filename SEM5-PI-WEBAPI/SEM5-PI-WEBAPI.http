@@ -4,3 +4,10 @@ GET {{portURL}}/api/qualifications
 Accept: application/json
 
 ###
+POST {{portURL}}/api/qualifications
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Master Engineer"
+}

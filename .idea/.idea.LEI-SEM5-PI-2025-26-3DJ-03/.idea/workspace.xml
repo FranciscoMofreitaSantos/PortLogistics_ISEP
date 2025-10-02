@@ -9,63 +9,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7e245589-3e0b-4589-828c-7331c6f89b35" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Controllers/QualificationsController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/CreatingQualificationDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/IQualificationRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/Qualifications/QualificationEntityTypeConfiguration.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/Qualifications/QualificationRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Startup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.LEI-SEM5-PI-2025-26-3DJ-03/.idea/material_theme_project_new.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LEI-SEM5-PI-2025-26-3DJ-03/.idea/material_theme_project_new.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.LEI-SEM5-PI-2025-26-3DJ-03/.idea/dataSources/be2fe41b-e095-4dfc-b0d6-ced88081e566.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LEI-SEM5-PI-2025-26-3DJ-03/.idea/dataSources/be2fe41b-e095-4dfc-b0d6-ced88081e566.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.LEI-SEM5-PI-2025-26-3DJ-03/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LEI-SEM5-PI-2025-26-3DJ-03/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LEI-SEM5-PI-2025-26-3DJ-03.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/LEI-SEM5-PI-2025-26-3DJ-03.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/Email.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/Email.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/PhoneNumber.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/PhoneNumber.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/Qualification.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/Qualification.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/QualificationId.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationId.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/StaffMember.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/StaffMember.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/StaffMemberId.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/StaffMemberId.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMember/StaffMemberStatus.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/StaffMemberStatus.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/DddSample1DbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/DddSample1DbContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Controllers/QualificationsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Controllers/QualificationsController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/CreatingQualificationDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/CreatingQualificationDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/Qualification.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/Qualification.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.http" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.http" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/appsettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.deps.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.deps.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/SEM5-PI-WEBAPI.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/identifier.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/identifier.sqlite" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.GeneratedMSBuildEditorConfig.editorconfig" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.GeneratedMSBuildEditorConfig.editorconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.assets.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.AssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.csproj.FileListAbsolute.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.genruntimeconfig.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.genruntimeconfig.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.sourcelink.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/ref/SEM5-PI-WEBAPI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/ref/SEM5-PI-WEBAPI.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/refint/SEM5-PI-WEBAPI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/refint/SEM5-PI-WEBAPI.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmrazor.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmrazor.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rpswa.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rpswa.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.dgspec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.g.props" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/SEM5-PI-WEBAPI.csproj.nuget.g.targets" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.assets.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.nuget.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/project.packagespec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/rider.project.model.nuget.info" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/rider.project.restore.info" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/planning/domain-model/vpp/Port_DM.vpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/planning/domain-model/vpp/Port_DM.vpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DpaMonitoringSettings">
+    <option name="firstShow" value="false" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -83,6 +53,8 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Controllers/QualificationsController.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Controllers/QualificationsController.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Controllers/QualificationsController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/BusinessShared/Schedule.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/BusinessShared/ShiftType.cs" root0="FORCE_HIGHLIGHTING" />
@@ -92,13 +64,16 @@
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationDto.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationId.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/Qualifications/QualificationService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/Email.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/PhoneNumber.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/StaffMember.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/StaffMemberId.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Domain/StaffMembers/StaffMemberStatus.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Infraestructure/Qualifications/QualificationEntityTypeConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/Qualifications/QualificationEntityTypeConfiguration.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Infraestructure/Qualifications/QualificationRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Program.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/Startup.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/bin/Debug/net9.0/appsettings.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/bin/Debug/net9.0/appsettings.json" root0="FORCE_HIGHLIGHTING" />
@@ -106,6 +81,11 @@
     <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/bin/Debug/net9.0/appsettings.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/bin/Debug/net9.0/appsettings.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/bin/Debug/net9.0/appsettings.json" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfo.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/obj/Debug/net9.0/SEM5-PI-WEBAPI.AssemblyInfo.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/3f44c5b9eb6851301091fc65ce6dd6671e1a75f8a7f12837bc921ecf12ab/Exception.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/5b89f76afc0d554d89281e5e28190c85dfa4c1cb2ffa499fc452654142743c9/JsonConstructorAttribute.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a57f2326e1637161a74aeadb83d8b887739f8337a2a261efe868f1338bb9c/ModelBuilder.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -122,31 +102,53 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.SEM5-PI-WEBAPI: http.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "RiderNuGetOptionsPageId",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.SEM5-PI-WEBAPI: http.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.SEM5-PI-WEBAPI | #1.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.SEM5-PI-WEBAPI | #2.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;RiderNuGetOptionsPageId&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "sqlite"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;sqlite&quot;
     ]
   }
-}]]></component>
+}</component>
+  <component name="RunDashboard">
+    <option name="configurationStatuses">
+      <map>
+        <entry key="HttpClient.HttpRequestRunConfigurationType">
+          <value>
+            <map>
+              <entry key="SEM5-PI-WEBAPI | #1" value="STOPPED" />
+              <entry key="SEM5-PI-WEBAPI | #2" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="RunManager" selected=".NET Launch Settings Profile.SEM5-PI-WEBAPI: http">
+    <configuration name="SEM5-PI-WEBAPI | #1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.http" executionIdentifier="#1" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="SEM5-PI-WEBAPI | #2" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.http" executionIdentifier="#2" index="2" runType="Run single request">
+      <method v="2" />
+    </configuration>
     <configuration name="SEM5-PI-WEBAPI: http" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/SEM5-PI-WEBAPI/SEM5-PI-WEBAPI.csproj" />
       <option name="LAUNCH_PROFILE_TFM" value="net9.0" />
@@ -179,6 +181,12 @@
         <option name="Build" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="HTTP Request.SEM5-PI-WEBAPI | #1" />
+        <item itemvalue="HTTP Request.SEM5-PI-WEBAPI | #2" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

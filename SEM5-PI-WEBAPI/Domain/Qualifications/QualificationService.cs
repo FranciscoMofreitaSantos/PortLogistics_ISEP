@@ -23,6 +23,16 @@ public class QualificationService
         return listDto;
     }
 
+    public async Task<QualificationDto> GetByIdAsync(QualificationId id)
+    {
+        var q = await this._repo.GetByIdAsync(id);
+
+        if (q == null)
+            return null;
+
+        return new QualificationDto(q.Id.AsGuid(), q.Name, q.Code);
+    }
+
     public async Task<string> GenerateNextQualificationCodeAsync()
     {
         var allCodes = await _repo.GetAllAsync();
@@ -35,11 +45,20 @@ public class QualificationService
         string nextCode = $"Q-{(maxNumber + 1).ToString("D3")}";
         return nextCode;
     }
-    
-    public async Task<Qualification> CreateQualificationAsync(string name)
+
+    public async Task<Qualification> AddAsync(CreatingQualificationDto dto)
     {
-        var code = await GenerateNextQualificationCodeAsync();
-        var qualification = new Qualification(name);
+        string code;
+        if (dto.Code == null)
+        {
+            code = await GenerateNextQualificationCodeAsync();
+        }
+        else
+        {
+            code = dto.Code;
+        }
+
+        var qualification = new Qualification(dto.Name);
         qualification.SetCode(code);
         await _repo.AddAsync(qualification);
         await _unitOfWork.CommitAsync();

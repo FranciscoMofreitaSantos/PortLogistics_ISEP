@@ -4,13 +4,15 @@ namespace SEM5_PI_WEBAPI.Domain.Qualifications;
 
 public class Qualification : Entity<QualificationId>, IAggregateRoot
 {
-    public string? Code { get; set; }
+    public string Code { get; set; }
     public string Name { get; private set; }
 
 
     public Qualification(string name)
     {
         Name = name;
+        Code = "";
+        Id = new QualificationId(Guid.NewGuid());
     }
 
     public void ChangeName(string newName)
