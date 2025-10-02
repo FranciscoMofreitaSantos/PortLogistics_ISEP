@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.Qualifications;
@@ -42,26 +44,57 @@ public class QualificationService
             .DefaultIfEmpty(0)
             .Max();
 
-        string nextCode = $"Q-{(maxNumber + 1).ToString("D3")}";
+        string nextCode = $"QFL-{(maxNumber + 1).ToString("D3")}";
         return nextCode;
     }
 
-    public async Task<Qualification> AddAsync(CreatingQualificationDto dto)
+    public async Task<QualificationDto> AddAsync(CreatingQualificationDto dto)
     {
-        string code;
-        if (dto.Code == null)
-        {
-            code = await GenerateNextQualificationCodeAsync();
-        }
-        else
-        {
-            code = dto.Code;
-        }
+        await EnsureNotRepeatedAsync(dto);
+
+        string code = await GetCodeAsync(dto);
 
         var qualification = new Qualification(dto.Name);
         qualification.SetCode(code);
+
         await _repo.AddAsync(qualification);
         await _unitOfWork.CommitAsync();
-        return qualification;
+
+        return new QualificationDto(qualification.Id.AsGuid(), qualification.Name, qualification.Code);
+    }
+
+
+    private async Task EnsureNotRepeatedAsync(CreatingQualificationDto dto)
+    {
+        var allQualifications = await _repo.GetAllAsync();
+
+        bool repeatedCode = !string.IsNullOrEmpty(dto.Code) && allQualifications.Any(q => q.Code == dto.Code);
+        bool repeatedName = allQualifications.Any(q => q.Name.Trim().Equals(dto.Name.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (repeatedName)
+            throw new BusinessRuleValidationException("Repeated Qualification name!");
+        if (repeatedCode)
+            throw new BusinessRuleValidationException("Repeated Qualification code!");
+    }
+
+    private async Task<string> GetCodeAsync(CreatingQualificationDto dto)
+    {
+        if (!string.IsNullOrEmpty(dto.Code))
+        {
+            return FormatCode(dto.Code);
+        }
+
+        return await GenerateNextQualificationCodeAsync();
+    }
+
+    private string FormatCode(string code)
+    {
+        var parts = code.Split('-');
+        if (parts.Length == 2 && int.TryParse(parts[1], out int number))
+        {
+            return $"{parts[0]}-{number:D3}";
+        }
+
+        return code;
     }
 }

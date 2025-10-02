@@ -9,5 +9,6 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "name": "Master Engineer"
+  "name": "Truck Driver",
+  "code": "TRD-11"
 }

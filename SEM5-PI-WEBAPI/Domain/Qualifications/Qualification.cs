@@ -1,10 +1,13 @@
+using System.ComponentModel.DataAnnotations;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.Qualifications;
 
 public class Qualification : Entity<QualificationId>, IAggregateRoot
-{
+{   
+    [MaxLength(15)]
     public string Code { get; set; }
+    [MaxLength(150)]
     public string Name { get; private set; }
 
 
@@ -24,8 +27,9 @@ public class Qualification : Entity<QualificationId>, IAggregateRoot
     
     public void SetCode(string code)
     {
-        if (!System.Text.RegularExpressions.Regex.IsMatch(code, @"^Q-\d{3}$"))
-            throw new ArgumentException("Invalid Qualification code format. Expected format: Q-000.");
+        if (!System.Text.RegularExpressions.Regex.IsMatch(code, @"^[A-Z]{3}-\d{3}$"))
+            throw new BusinessRuleValidationException("Invalid Qualification code format. Expected format: XXX-000 (3 letters followed by a hyphen and 3 digits).");
+    
         Code = code;
     }
 
