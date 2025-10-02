@@ -16,3 +16,22 @@ Accept: application/json
 ###
 GET {{portURL}}/api/VesselType
 Accept: application/json
+
+###
+GET {{portURL}}/api/StaffMembers
+Accept: application/json
+
+###
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": "d1234567-89ab-cdef-0123-456789abcdef",
+  "shortName": "Paulo Mendes",
+  "mecanographicNumber": "125001",
+  "email": { "address": "mendy@gmail.com" },
+  "phone": { "number": "+351912345678" },
+  "schedule": { "shift": "Morning", "days": 31 },
+  "isActive": true
+}
