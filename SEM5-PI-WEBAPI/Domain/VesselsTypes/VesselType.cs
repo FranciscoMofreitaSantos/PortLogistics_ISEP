@@ -6,14 +6,14 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
     {
         private const string DefaultDescription = "No description";
         private const int MaxDescriptionLength = 200;
-        private const int MinDescriptionLength = 0;
+        private const int MinDescriptionLength = 10;
         private const int MaxNameLength = 50;
         private const int MinBays = 1;
         private const int MinRows = 1;
         private const int MinTiers = 1;
         
         public string Name { get; private set; }
-        public string Description { get; private set; }
+        public string Description { get; private set; } = DefaultDescription;
         public int MaxBays { get; private set; }
         public int MaxRows { get; private set; }
         public int MaxTiers { get; private set; }
@@ -68,11 +68,11 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
 
         private void SetDescription(string description)
         {
-            if (string.IsNullOrWhiteSpace(description)) throw new BusinessRuleValidationException("Description can't be empty.");
+            
             if (description.Length > MaxDescriptionLength) throw new BusinessRuleValidationException($"Description exceeds maximum length for a Vessel Type Description [MAX {MaxDescriptionLength} characters].");
             if (description.Length < MinDescriptionLength) throw new BusinessRuleValidationException($"Description requires a minimum length for a Vessel Type Description of [MIN {MinDescriptionLength} characters].");
             
-            Description = description.Trim();
+           this.Description = description.Trim();
         }
 
         private void SetDimensions(int bays, int rows, int tiers)
@@ -86,19 +86,19 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
 
         private void SetMaxBays(int maxBays)
         {
-            if (maxBays < MinBays) throw new BusinessRuleValidationException("Max 'Bays' must be greater than 0.");
+            if (maxBays < MinBays) throw new BusinessRuleValidationException($"Max 'Bays' must be greater than {MinBays}.");
             this.MaxBays = maxBays;
         }
         
         private void SetMaxRows(int maxRows)
         {
-            if (maxRows < MinRows) throw new BusinessRuleValidationException("Max 'Rows' must be greater than 0.");
+            if (maxRows < MinRows) throw new BusinessRuleValidationException($"Max 'Rows' must be greater than {MinRows}.");
             this.MaxRows = maxRows;
         }
 
         private void SetMaxTiers(int maxTiers)
         {
-            if(maxTiers < MinTiers) throw new BusinessRuleValidationException("Max 'Tiers' must be greater than 0.");
+            if(maxTiers < MinTiers) throw new BusinessRuleValidationException($"Max 'Tiers' must be greater than {MinTiers}.");
             this.MaxTiers = maxTiers;
         }
 

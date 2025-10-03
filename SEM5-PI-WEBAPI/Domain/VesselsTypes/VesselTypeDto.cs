@@ -13,9 +13,9 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
         
         //========== Constructors 
         
-        public VesselTypeDto(Guid IdIn,string nameIn, string descriptionIn, int maxBaysIn,int maxRowsIn ,int maxTiersIn, float capacityIn)
+        public VesselTypeDto(Guid idIn,string nameIn, string descriptionIn, int maxBaysIn,int maxRowsIn ,int maxTiersIn, float capacityIn)
         {
-            this.Id = IdIn;
+            this.Id = idIn;
             this.Name = nameIn;
             this.Description = descriptionIn;
             this.MaxBays = maxBaysIn;
