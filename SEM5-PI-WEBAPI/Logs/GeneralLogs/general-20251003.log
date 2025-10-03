@@ -1,0 +1,24 @@
+[15:19:33 INF]  - Starting web host
+[15:19:33 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[15:19:33 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[15:19:33 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[15:19:33 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[15:20:20 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/VesselType - null null
+[15:20:20 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[15:20:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[15:20:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/VesselType
+[15:20:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[15:20:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[15:20:20 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselTypeController.GetAll (SEM5-PI-WEBAPI)'
+[15:20:20 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "VesselType"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeDto]]] GetAll() on controller SEM5_PI_WEBAPI.Controllers.VesselTypeController (SEM5-PI-WEBAPI).
+[15:20:20 INF] SEM5_PI_WEBAPI.Controllers.VesselTypeController                        - API Request: Get All Vessels Types on DataBase
+[15:20:21 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Capacity", "v"."Description", "v"."MaxBays", "v"."MaxRows", "v"."MaxTiers", "v"."Name"
+FROM "VesselType" AS "v"
+[15:20:21 WRN] SEM5_PI_WEBAPI.Controllers.VesselTypeController                        - API Response (200): A total of 1 were found -> [{"Id":"c7798221-c758-47fd-a343-21d49b78c806","Name":"Panamax","Description":"Medium size vessel","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"}]
+[15:20:21 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeDto, SEM5-PI-WEBAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:20:21 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselTypeController.GetAll (SEM5-PI-WEBAPI) in 882.9725ms
+[15:20:21 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselTypeController.GetAll (SEM5-PI-WEBAPI)'
+[15:20:21 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/VesselType with 200 in 906.942 ms
+[15:20:21 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/VesselType - 200 157 application/json; charset=utf-8 942.0321ms
+[15:21:04 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...

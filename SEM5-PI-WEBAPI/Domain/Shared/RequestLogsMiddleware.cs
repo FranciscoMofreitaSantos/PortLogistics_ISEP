@@ -13,19 +13,23 @@ namespace SEM5_PI_WEBAPI.Domain.Shared
         
         public async Task InvokeAsync(HttpContext context)
         {
-            _logger.LogInformation("===============================================");
-            _logger.LogInformation("New HTTP Request {Method} {Path} from {Ip}",
+            _logger.LogInformation("┌───────────────────────────────────────────────");
+            _logger.LogInformation("│ HTTP {Method} {Path}", context.Request.Method, context.Request.Path);
+            _logger.LogInformation("│ From IP: {Ip}", context.Connection.RemoteIpAddress?.ToString());
+            _logger.LogInformation("└───────────────────────────────────────────────");
+
+            var start = DateTime.UtcNow;
+
+            await _next(context);
+
+            var elapsedMs = (DateTime.UtcNow - start).TotalMilliseconds;
+            _logger.LogInformation("──────│ ✔ COMPLETED {Method} {Path} with {StatusCode} in {Elapsed} ms",
                 context.Request.Method,
                 context.Request.Path,
-                context.Connection.RemoteIpAddress?.ToString());
-
-            await _next(context); 
-
-            _logger.LogInformation("End of Request {Method} {Path}", 
-                context.Request.Method,
-                context.Request.Path);
-            _logger.LogInformation("===============================================");
+                context.Response.StatusCode,
+                elapsedMs);
         }
+
     }
 }
 
