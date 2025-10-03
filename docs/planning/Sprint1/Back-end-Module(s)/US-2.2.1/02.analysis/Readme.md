@@ -16,7 +16,6 @@
 * For simplification, deletion is **not addressed in this sprint**; in the future, it may be implemented as **soft-delete** or `status`.
 * Associations with the **audit log** are handled as a **cross-cutting concern**.
 
----
 
 
 

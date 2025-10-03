@@ -101,12 +101,3 @@ Moreover, it states that "The type of vessel determines the maximum number of ro
 ### 1.6. System Sequence Diagram (SSD)
 
 ![SSD](./puml/us2.2.1-sequence-diagram-alternative-1.svg)
-
----
-
-### 1.7. Other Relevant Remarks
-
-* **Internationalization:** Names are short; descriptions may require i18n later.
-* **Concurrency:** Use optimistic locking on updates to avoid lost updates.
-* **Deletion policy (out of scope Sprint 1):** If implemented later, **prevent delete** when referenced by any Vessel; prefer **soft-delete** or **status=inactive**.
-* **Testing:** Unit tests for **invariants**; repository tests for **uniqueness**; service tests for **flows**; contract tests for **search**.
