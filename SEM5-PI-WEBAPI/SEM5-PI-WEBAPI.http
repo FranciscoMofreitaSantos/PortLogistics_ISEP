@@ -55,6 +55,14 @@ Accept: application/json
 }
 
 
+
+###
+GET {{portURL}}/api/Vessel
+Accept: application/json
+
+
+
+
 ###
 GET {{portURL}}/api/StaffMembers
 Accept: application/json

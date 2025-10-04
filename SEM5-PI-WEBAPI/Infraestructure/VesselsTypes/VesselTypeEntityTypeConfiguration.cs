@@ -8,12 +8,27 @@ namespace SEM5_PI_WEBAPI.Infraestructure.VesselsTypes
     {
         public void Configure(EntityTypeBuilder<VesselType> builder)
         {
-            // cf. https://www.entityframeworktutorial.net/efcore/fluent-api-in-entity-framework-core.aspx
-            
-            //builder.ToTable("Categories", SchemaNames.DDDSample1);
             builder.HasKey(b => b.Id);
-            //builder.Property<bool>("_active").HasColumnName("Active");
+
+            builder.Property(b => b.Name)
+                .IsRequired();
+
+            builder.Property(b => b.Description)
+                .HasDefaultValue("No description");
+
+            builder.Property(b => b.MaxBays)
+                .IsRequired();
+
+            builder.Property(b => b.MaxRows)
+                .IsRequired();
+
+            builder.Property(b => b.MaxTiers)
+                .IsRequired();
+
+            builder.Property(b => b.Capacity)
+                .IsRequired();
+
+            builder.HasIndex(b => b.Name).IsUnique();
         }
     }
 }
-

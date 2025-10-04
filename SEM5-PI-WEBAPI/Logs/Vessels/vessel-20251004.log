@@ -1,0 +1,16 @@
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:44:15 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Get All Vessels on DataBase
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessels.
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:51:03 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Get All Vessels on DataBase
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessels.
+[17:51:04 WRN] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: No Vessels were found in database.
+[17:51:04 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Returning [0] Vessels DTOs.
+[17:51:04 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Response (400): No Vessels found on DataBase
+[17:51:04 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 1308.719 ms

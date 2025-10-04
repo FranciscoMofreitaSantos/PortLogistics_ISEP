@@ -1,0 +1,51 @@
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessel Types.
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessel Types.
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessel Types.
+[17:37:35 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Found [3] Vessel Types in database.
+[17:37:35 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Returning [3] Vessel Types DTOs.
+[17:37:35 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 774.308 ms
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessel Types.
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Found [3] Vessel Types in database.
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Returning [3] Vessel Types DTOs.
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 16.441 ms
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /ipa/Vessel
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessel Types.
+[17:39:06 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Found [3] Vessel Types in database.
+[17:39:06 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Returning [3] Vessel Types DTOs.
+[17:39:06 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /ipa/Vessel with 200 in 1441.375 ms
+[17:40:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:40:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /ipa/Vessel
+[17:40:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:40:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessels.
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Request to fetch all Vessels.
+[17:51:04 WRN] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: No Vessels were found in database.
+[17:51:04 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService    - Business Domain: Returning [0] Vessels DTOs.
+[17:51:04 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 1308.719 ms

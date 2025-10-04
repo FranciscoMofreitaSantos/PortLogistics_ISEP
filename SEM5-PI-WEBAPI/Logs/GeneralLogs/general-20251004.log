@@ -1,0 +1,398 @@
+[17:28:18 INF]  - Starting web host
+[17:28:18 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[17:28:18 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[17:28:18 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[17:28:18 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[17:29:12 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/Vessel - null null
+[17:29:12 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/Vessel
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[17:29:12 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:29:12 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[17:29:12 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[17:29:12 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Request to fetch all Vessel Types.
+[17:29:13 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 508.1801ms
+[17:29:13 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:29:13 ERR] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware      - An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The entity type 'ImoNumber' requires a primary key to be defined. If you intended to use a keyless entity type, call 'HasNoKey' in 'OnModelCreating'. For more information on keyless entity types, see https://go.microsoft.com/fwlink/?linkid=2141943.
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelValidator.ValidateNonNullPrimaryKeys(IModel model, IDiagnosticsLogger`1 logger)
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelValidator.Validate(IModel model, IDiagnosticsLogger`1 logger)
+   at Microsoft.EntityFrameworkCore.Infrastructure.RelationalModelValidator.Validate(IModel model, IDiagnosticsLogger`1 logger)
+   at Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal.SqliteModelValidator.Validate(IModel model, IDiagnosticsLogger`1 logger)
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelRuntimeInitializer.Initialize(IModel model, Boolean designTime, IDiagnosticsLogger`1 validationLogger)
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelSource.CreateModel(DbContext context, ModelCreationDependencies modelCreationDependencies, Boolean designTime)
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelSource.GetModel(DbContext context, ModelCreationDependencies modelCreationDependencies, Boolean designTime)
+   at Microsoft.EntityFrameworkCore.Internal.DbContextServices.CreateModel(Boolean designTime)
+   at Microsoft.EntityFrameworkCore.Internal.DbContextServices.get_Model()
+   at Microsoft.EntityFrameworkCore.Infrastructure.EntityFrameworkServicesBuilder.<>c.<TryAddCoreServices>b__8_4(IServiceProvider p)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.<>c__DisplayClass2_0.<RealizeService>b__0(ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at Microsoft.EntityFrameworkCore.DbContext.get_DbContextDependencies()
+   at Microsoft.EntityFrameworkCore.DbContext.get_ContextServices()
+   at Microsoft.EntityFrameworkCore.DbContext.get_Model()
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.get_EntityType()
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.CheckState()
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.get_EntityQueryable()
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.System.Collections.Generic.IAsyncEnumerable<TEntity>.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at SEM5_PI_WEBAPI.Infraestructure.Shared.BaseRepository`2.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Infraestructure/Shared/BaseRepository.cs:line 20
+   at SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/VesselsTypes/VesselTypeService.cs:line 22
+   at SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Controllers/VesselController.cs:line 27
+   at lambda_method4(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware.InvokeAsync(HttpContext context) in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/Shared/RequestLogsMiddleware.cs:line 23
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+[17:29:13 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 500 null text/plain; charset=utf-8 584.7359ms
+[17:29:19 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/Vessel - null null
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/Vessel
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[17:29:19 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:29:19 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[17:29:19 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[17:29:19 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Request to fetch all Vessel Types.
+[17:29:19 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 28.9643ms
+[17:29:19 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:29:19 ERR] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware      - An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The entity type 'ImoNumber' requires a primary key to be defined. If you intended to use a keyless entity type, call 'HasNoKey' in 'OnModelCreating'. For more information on keyless entity types, see https://go.microsoft.com/fwlink/?linkid=2141943.
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelValidator.ValidateNonNullPrimaryKeys(IModel model, IDiagnosticsLogger`1 logger)
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelValidator.Validate(IModel model, IDiagnosticsLogger`1 logger)
+   at Microsoft.EntityFrameworkCore.Infrastructure.RelationalModelValidator.Validate(IModel model, IDiagnosticsLogger`1 logger)
+   at Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal.SqliteModelValidator.Validate(IModel model, IDiagnosticsLogger`1 logger)
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelRuntimeInitializer.Initialize(IModel model, Boolean designTime, IDiagnosticsLogger`1 validationLogger)
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelSource.CreateModel(DbContext context, ModelCreationDependencies modelCreationDependencies, Boolean designTime)
+   at Microsoft.EntityFrameworkCore.Infrastructure.ModelSource.GetModel(DbContext context, ModelCreationDependencies modelCreationDependencies, Boolean designTime)
+   at Microsoft.EntityFrameworkCore.Internal.DbContextServices.CreateModel(Boolean designTime)
+   at Microsoft.EntityFrameworkCore.Internal.DbContextServices.get_Model()
+   at Microsoft.EntityFrameworkCore.Infrastructure.EntityFrameworkServicesBuilder.<>c.<TryAddCoreServices>b__8_4(IServiceProvider p)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitFactory(FactoryCallSite factoryCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.<>c__DisplayClass2_0.<RealizeService>b__0(ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at Microsoft.EntityFrameworkCore.DbContext.get_DbContextDependencies()
+   at Microsoft.EntityFrameworkCore.DbContext.get_ContextServices()
+   at Microsoft.EntityFrameworkCore.DbContext.get_Model()
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.get_EntityType()
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.CheckState()
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.get_EntityQueryable()
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.System.Collections.Generic.IAsyncEnumerable<TEntity>.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at SEM5_PI_WEBAPI.Infraestructure.Shared.BaseRepository`2.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Infraestructure/Shared/BaseRepository.cs:line 20
+   at SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/VesselsTypes/VesselTypeService.cs:line 22
+   at SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Controllers/VesselController.cs:line 27
+   at lambda_method4(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware.InvokeAsync(HttpContext context) in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/Shared/RequestLogsMiddleware.cs:line 23
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+[17:29:19 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 500 null text/plain; charset=utf-8 35.2647ms
+[17:37:07 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[17:37:14 INF]  - Starting web host
+[17:37:14 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[17:37:14 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[17:37:14 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[17:37:14 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[17:37:34 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/Vessel - null null
+[17:37:34 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/Vessel
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[17:37:34 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:37:34 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[17:37:34 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[17:37:34 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Request to fetch all Vessel Types.
+[17:37:35 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Capacity", "v"."Description", "v"."MaxBays", "v"."MaxRows", "v"."MaxTiers", "v"."Name"
+FROM "VesselType" AS "v"
+[17:37:35 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Found [3] Vessel Types in database.
+[17:37:35 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Returning [3] Vessel Types DTOs.
+[17:37:35 WRN] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Response (200): A total of 3 were found -> [{"Id":"c7798221-c758-47fd-a343-21d49b78c806","Name":"Panamax","Description":"Medium size vessel","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"},{"Id":"6ef8bcdf-0e7b-46e2-af0a-c03804c8731f","Name":"Panamaxx","Description":"Medium size vessel","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"},{"Id":"9b8058aa-72b0-4e99-b4fc-0972aa48bb4a","Name":"Panamaxx3","Description":"No description","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"}]
+[17:37:35 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeDto, SEM5-PI-WEBAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[17:37:35 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 756.7491ms
+[17:37:35 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:37:35 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 774.308 ms
+[17:37:35 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 200 468 application/json; charset=utf-8 803.5993ms
+[17:37:51 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/Vessel - null null
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/Vessel
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[17:37:51 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:37:51 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[17:37:51 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Request to fetch all Vessel Types.
+[17:37:51 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Capacity", "v"."Description", "v"."MaxBays", "v"."MaxRows", "v"."MaxTiers", "v"."Name"
+FROM "VesselType" AS "v"
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Found [3] Vessel Types in database.
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Returning [3] Vessel Types DTOs.
+[17:37:51 WRN] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Response (200): A total of 3 were found -> [{"Id":"c7798221-c758-47fd-a343-21d49b78c806","Name":"Panamax","Description":"Medium size vessel","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"},{"Id":"6ef8bcdf-0e7b-46e2-af0a-c03804c8731f","Name":"Panamaxx","Description":"Medium size vessel","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"},{"Id":"9b8058aa-72b0-4e99-b4fc-0972aa48bb4a","Name":"Panamaxx3","Description":"No description","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"}]
+[17:37:51 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeDto, SEM5-PI-WEBAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[17:37:51 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 15.6331ms
+[17:37:51 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:37:51 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 16.441 ms
+[17:37:51 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 200 468 application/json; charset=utf-8 19.1277ms
+[17:38:06 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[17:39:02 INF]  - Starting web host
+[17:39:03 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[17:39:03 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[17:39:03 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[17:39:03 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[17:39:05 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/ipa/Vessel - null null
+[17:39:05 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /ipa/Vessel
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[17:39:05 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:39:05 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[17:39:05 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[17:39:05 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[17:39:05 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Request to fetch all Vessel Types.
+[17:39:06 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Capacity", "v"."Description", "v"."MaxBays", "v"."MaxRows", "v"."MaxTiers", "v"."Name"
+FROM "VesselType" AS "v"
+[17:39:06 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Found [3] Vessel Types in database.
+[17:39:06 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Returning [3] Vessel Types DTOs.
+[17:39:06 WRN] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Response (200): A total of 3 were found -> [{"Id":"c7798221-c758-47fd-a343-21d49b78c806","Name":"Panamax","Description":"Medium size vessel","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"},{"Id":"6ef8bcdf-0e7b-46e2-af0a-c03804c8731f","Name":"Panamaxx","Description":"Medium size vessel","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"},{"Id":"9b8058aa-72b0-4e99-b4fc-0972aa48bb4a","Name":"Panamaxx3","Description":"No description","MaxBays":20,"MaxRows":15,"MaxTiers":10,"Capacity":3000,"$type":"VesselTypeDto"}]
+[17:39:06 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 1221.2373ms.
+[17:39:06 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeDto, SEM5-PI-WEBAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[17:39:06 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 1421.7959ms
+[17:39:06 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:39:06 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /ipa/Vessel with 200 in 1441.375 ms
+[17:39:06 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/ipa/Vessel - 200 468 application/json; charset=utf-8 1475.4505ms
+[17:40:02 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[17:40:07 INF]  - Starting web host
+[17:40:07 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[17:40:07 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[17:40:07 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[17:40:07 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[17:40:19 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/ipa/Vessel - null null
+[17:40:19 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[17:40:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[17:40:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /ipa/Vessel
+[17:40:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[17:40:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[17:40:19 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:40:19 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[17:40:19 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 1.2444ms
+[17:40:19 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:40:19 ERR] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware      - An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: Unable to resolve service for type 'SEM5_PI_WEBAPI.Domain.Vessels.VesselService' while attempting to activate 'SEM5_PI_WEBAPI.Controllers.VesselController'.
+   at Microsoft.Extensions.DependencyInjection.ActivatorUtilities.ThrowHelperUnableToResolveService(Type type, Type requiredBy)
+   at lambda_method8(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware.InvokeAsync(HttpContext context) in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/Shared/RequestLogsMiddleware.cs:line 23
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+[17:40:19 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/ipa/Vessel - 500 null text/plain; charset=utf-8 75.9803ms
+[17:40:40 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[17:43:52 INF]  - Starting web host
+[17:43:52 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[17:43:52 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[17:43:52 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[17:43:52 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[17:44:15 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/Vessel - null null
+[17:44:15 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/Vessel
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[17:44:15 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:44:15 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[17:44:15 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[17:44:15 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[17:44:15 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Request to fetch all Vessels.
+[17:44:16 ERR] Microsoft.EntityFrameworkCore.Database.Command                         - Failed executing DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Name", "v"."Owner", "v"."VesselTypeId", "v"."ImoNumber_Value"
+FROM "Vessel" AS "v"
+[17:44:16 ERR] Microsoft.EntityFrameworkCore.Query                                    - An exception occurred while iterating over the results of a query for context type 'SEM5_PI_WEBAPI.Infraestructure.DddSample1DbContext'.
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Vessel'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Vessel'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+[17:44:16 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 1482.6256ms
+[17:44:16 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:44:16 ERR] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware      - An unhandled exception has occurred while executing the request.
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Vessel'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at SEM5_PI_WEBAPI.Infraestructure.Shared.BaseRepository`2.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Infraestructure/Shared/BaseRepository.cs:line 20
+   at SEM5_PI_WEBAPI.Domain.Vessels.VesselService.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/Vessels/VesselService.cs:line 23
+   at SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync() in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Controllers/VesselController.cs:line 27
+   at lambda_method4(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Logged|12_1(ControllerActionInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware.InvokeAsync(HttpContext context) in /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/Shared/RequestLogsMiddleware.cs:line 23
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+[17:44:16 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 500 null text/plain; charset=utf-8 1560.3639ms
+[17:45:10 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[17:45:13 INF]  - Starting web host
+[17:45:13 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[17:45:13 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[17:45:13 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[17:45:13 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[17:45:50 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[17:50:28 INF]  - Starting web host
+[17:50:28 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[17:50:28 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[17:50:28 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[17:50:28 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[17:51:03 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/Vessel - null null
+[17:51:03 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/Vessel
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[17:51:03 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:51:03 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[17:51:03 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[17:51:03 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[17:51:03 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Request to fetch all Vessels.
+[17:51:04 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Name", "v"."Owner", "v"."VesselTypeId", "v"."ImoNumber_Value"
+FROM "Vessel" AS "v"
+[17:51:04 WRN] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: No Vessels were found in database.
+[17:51:04 INF] SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselTypeService                   - Business Domain: Returning [0] Vessels DTOs.
+[17:51:04 WRN] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Response (400): No Vessels found on DataBase
+[17:51:04 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 1101.3658ms.
+[17:51:04 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto, SEM5-PI-WEBAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[17:51:04 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 1287.8894ms
+[17:51:04 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[17:51:04 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 1308.719 ms
+[17:51:04 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 200 2 application/json; charset=utf-8 1343.5607ms
+[18:15:47 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
