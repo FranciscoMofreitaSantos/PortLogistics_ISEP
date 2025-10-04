@@ -5,16 +5,16 @@ namespace SEM5_PI_WEBAPI.Domain.Vessels;
 
 public class CreatingVesselDto
 {
-    public string ImoNumber {get; private set;}
-    public string Name {get; private set;}
-    public string Owner {get; private set;}
-    public VesselTypeId VesselTypeId {get; private set;}
+    public string ImoNumber {get; set;}
+    public string Name {get; set;}
+    public string Owner {get; set;}
+    public VesselTypeId VesselTypeId {get;set;}
 
-    public CreatingVesselDto(string imoNumber, string name, string owner, VesselTypeId vesselTypeId)
+    public CreatingVesselDto(string imoNumber, string name, string owner, string vesselTypeId)
     {
         this.ImoNumber = imoNumber;
         this.Name = name;
         this.Owner = owner;
-        this.VesselTypeId = vesselTypeId;
+        this.VesselTypeId = new VesselTypeId(new Guid(vesselTypeId));
     }
 }

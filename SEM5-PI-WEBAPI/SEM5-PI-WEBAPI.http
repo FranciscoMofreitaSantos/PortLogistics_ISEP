@@ -60,6 +60,45 @@ Accept: application/json
 GET {{portURL}}/api/Vessel
 Accept: application/json
 
+###
+GET {{portURL}}/api/Vessel/id/cbfa5eb4-7d11-4032-baeb-c2bdaa888ce6
+Accept: application/json
+
+###
+POST {{portURL}}/api/Vessel
+Content-Type: application/json
+Accept: application/json
+
+{
+  "imoNumber": "IMO 9319466",
+  "name": "Ever Given",
+  "owner": "Evergreen Marine",
+  "vesselTypeId": "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
+}
+
+###
+POST {{portURL}}/api/Vessel
+Content-Type: application/json
+Accept: application/json
+
+{
+  "imoNumber": "9399014",
+  "name": "MSC Gülsün",
+  "owner": "Mediterranean Shipping Company",
+  "vesselTypeId": "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
+}
+
+###
+POST {{portURL}}/api/Vessel
+Content-Type: application/json
+Accept: application/json
+
+{
+  "imoNumber": "IMO 9706901",
+  "name": "OOCL Hong Kong",
+  "owner": "OOCL",
+  "vesselTypeId": "c7798221-c758-47fd-a343-21d49b78c806"
+}
 
 
 

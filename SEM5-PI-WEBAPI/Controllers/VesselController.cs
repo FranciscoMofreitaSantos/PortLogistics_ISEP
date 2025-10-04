@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.Vessels;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 
@@ -32,5 +33,44 @@ public class VesselController : ControllerBase
             _logger.LogWarning("API Response (400): No Vessels found on DataBase"); 
             
         return Ok(listVesselDtos);
+    }
+
+    
+    [HttpGet("id/{id:guid}")]
+    public async Task<ActionResult<VesselTypeDto>> GetById(Guid id)
+    {
+        _logger.LogInformation("API Request: Fetching Vessel with ID = {Id}", id);
+            
+        try
+        {
+            var vesselDto = await _service.GetByIdAsync(new VesselId(id));
+            _logger.LogWarning("API Response (200): Vessel with ID = {Id} -> FOUND", id);
+            return Ok(vesselDto);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            _logger.LogWarning("API Error (404): Vessel with ID = {Id} -> NOT FOUND", id);
+            return NotFound(ex.Message);
+        }
+    }
+    
+    [HttpPost]
+    public async Task<ActionResult<VesselDto>> CreateAsync(CreatingVesselDto creatingVesselDto)
+    {
+        try
+        {
+            _logger.LogInformation("API Request: Add Vessel with body = {@Dto}", creatingVesselDto);
+
+            var vesselDto = await _service.CreateAsync(creatingVesselDto);
+            _logger.LogInformation("API Response (201): Vessel created with IMO Number [{IMO}] and System ID [{ID}].", vesselDto.ImoNumber,vesselDto.Id);
+
+            return CreatedAtAction(nameof(GetById), new { id = vesselDto.Id }, vesselDto);
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Error (404): {Message}", e.Message);
+            return BadRequest(e.Message);
+        }
+        
     }
 }
