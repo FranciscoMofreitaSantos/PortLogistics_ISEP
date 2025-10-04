@@ -1,0 +1,84 @@
+@startuml
+actor "Port Authority Officer" as Officer
+boundary "API (DockController)" as Controller
+control "DockService" as Service
+entity "DockRepository" as Repo
+entity "UnitOfWork" as UoW
+control "DockFactory" as Factory
+collections "Audit/Logs (ILogger/Serilog)" as Log
+
+== Register ==
+Officer -> Controller : POST /api/Dock (RegisterDockDto)
+activate Controller
+Controller -> Service : AddAsync(dto)
+activate Service
+Service -> Service : validate constraints (location/type/capacity/occupancy)
+Service -> Factory : CreateBasicDock(dto)
+activate Factory
+Factory --> Service : Dock(entity)
+deactivate Factory
+Service -> Repo : AddAsync(entity)
+activate Repo
+Repo --> Service : entity persisted
+deactivate Repo
+Service -> UoW : CommitAsync()
+activate UoW
+UoW --> Service : transaction committed
+deactivate UoW
+Service -> Factory : CreateDtoDock(entity)
+activate Factory
+Factory --> Service : DockDto
+deactivate Factory
+Service -> Log : log(CREATE, officerId, dockId, outcome=SUCCESS)
+Service --> Controller : DockDto
+deactivate Service
+Controller --> Officer : 201 Created (DockDto)
+deactivate Controller
+
+== Update ==
+Officer -> Controller : PUT /api/Dock/{id} (fields…)
+activate Controller
+Controller -> Service : UpdateAsync(id, dto)
+activate Service
+Service -> Repo : GetByIdAsync(id)
+activate Repo
+Repo --> Service : Dock
+deactivate Repo
+Service -> Service : validate changes (location/type/capacity/occupancy)
+Service -> Repo : Save(updated entity)
+activate Repo
+Repo --> Service : entity updated
+deactivate Repo
+Service -> UoW : CommitAsync()
+activate UoW
+UoW --> Service : transaction committed
+deactivate UoW
+Service -> Factory : CreateDtoDock(updated)
+activate Factory
+Factory --> Service : DockDto
+deactivate Factory
+Service -> Log : log(UPDATE, officerId, dockId, outcome=SUCCESS)
+Service --> Controller : DockDto
+deactivate Service
+Controller --> Officer : 200 OK (DockDto)
+deactivate Controller
+
+== Filter/Search ==
+Officer -> Controller : GET /api/Dock/filter?location=...&vesselTypeId=...&type=...
+activate Controller
+Controller -> Service : FilterAsync(location, vesselTypeId, type)
+activate Service
+Service -> Repo : FilterAsync(location, vesselTypeId, type)
+activate Repo
+Repo --> Service : List<Dock>
+deactivate Repo
+Service -> Factory : CreateDtoDock(list)
+activate Factory
+Factory --> Service : List<DockDto>
+deactivate Factory
+Service -> Log : log(SEARCH, officerId, criteria, outcome=SUCCESS)
+Service --> Controller : List<DockDto>
+deactivate Service
+Controller --> Officer : 200 OK (list)
+deactivate Controller
+@enduml

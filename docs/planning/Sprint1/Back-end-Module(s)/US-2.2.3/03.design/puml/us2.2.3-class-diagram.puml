@@ -1,0 +1,118 @@
+@startuml
+
+package "Domain" {
+  class Dock {
+    - string Location
+    - float TeuCapacity
+    - int CurrentOccupancy
+    - string Type
+    + ChangeLocation(string)
+    + ChangeCapacity(float)
+    + ChangeOccupancy(int)
+    + ChangeType(string)
+  }
+
+  class DockId {
+    - Guid Value
+    + AsGuid() : Guid
+  }
+
+  ' from your model (for association only)
+  class VesselType {
+    - string Name
+  }
+
+}
+
+package "DTOs" {
+  class RegisterDockDto {
+    + string Location
+    + float TeuCapacity
+    + int CurrentOccupancy
+    + string Type
+    + List<Guid> AllowedVesselTypeIds
+  }
+
+  class DockDto {
+    + Guid Id
+    + string Location
+    + float TeuCapacity
+    + int CurrentOccupancy
+    + string Type
+    + List<Guid> AllowedVesselTypeIds
+  }
+}
+
+package "Application" {
+  class DockService {
+    + GetAllAsync() : List<DockDto>
+    + GetByIdAsync(DockId) : DockDto
+    + FilterAsync(string? location, Guid? vesselTypeId, string? type) : List<DockDto>
+    + AddAsync(RegisterDockDto) : DockDto
+    + UpdateAsync(Guid, RegisterDockDto) : DockDto
+  }
+
+  class DockFactory {
+    + CreateBasicDock(RegisterDockDto) : Dock
+    + CreateDtoDock(Dock) : DockDto
+  }
+}
+
+package "Infrastructure" {
+  interface IDockRepository {
+    + GetAllAsync() : List<Dock>
+    + GetByIdAsync(DockId) : Dock
+    + FilterAsync(string? location, Guid? vesselTypeId, string? type) : List<Dock>
+    + AddAsync(Dock)
+  }
+
+  class DockRepository implements IDockRepository {
+  }
+
+  interface IUnitOfWork {
+    + CommitAsync()
+  }
+
+  class UnitOfWork implements IUnitOfWork {
+  }
+}
+
+package "Presentation" {
+  class DockController {
+    + GetAll() : List<DockDto>
+    + GetById(Guid) : DockDto
+    + Filter(string? location, Guid? vesselTypeId, string? type) : List<DockDto>
+    + Create(RegisterDockDto) : DockDto
+    + Update(Guid, RegisterDockDto) : DockDto
+  }
+}
+
+package "Cross-cutting" {
+  interface ILogger<T> {
+    + LogInformation(string, params)
+    + LogWarning(string, params)
+    + LogError(string, params)
+  }
+}
+
+' ---------------- Relations -----------------
+Dock "1" *-- "1" DockId
+Dock "1" o-- "*" VesselType : allowed vessel types
+
+DockService --> IDockRepository
+DockService --> IUnitOfWork
+DockService --> DockFactory
+DockService --> ILogger
+DockService --> RegisterDockDto
+
+DockRepository --> Dock
+
+DockFactory --> Dock
+DockFactory --> DockDto
+DockFactory --> RegisterDockDto
+
+DockController --> DockService
+DockController --> ILogger
+DockController --> RegisterDockDto
+
+@enduml
