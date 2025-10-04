@@ -1,0 +1,118 @@
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/Ever%20Given
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:13 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Fetching Vessel with Name = Ever Given
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to fetch Vessel with Name = Ever Given
+[00:00:13 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Error (404): No Vessel/s were Found with Name : Ever Given
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/Ever%20Given with 404 in 6.133 ms
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:20 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Add Vessel with body = {"ImoNumber":"IMO 9319466","Name":"Ever Given","Owner":"Evergreen Marine","VesselTypeId":{"Value":"b928c0c9-90c8-4e41-9a6d-59ec1ffef048","$type":"VesselTypeId"},"$type":"CreatingVesselDto"}
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to add new Vessel with IMO Number = IMO 9319466
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Vessel Created Successfully with IMO Number [IMO 9319466] and System ID [SEM5_PI_WEBAPI.Domain.Vessels.VesselId].
+[00:00:20 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Response (201): Vessel created with IMO Number [IMO 9319466] and System ID ["650114d6-3832-403e-aeed-fc8515e1ba13"].
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 201 in 12.875 ms
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/Ever%20Given
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:22 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Fetching Vessel with Name = Ever Given
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to fetch Vessel with Name = Ever Given
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Vessel with Name = Ever Given found successfully.
+[00:00:22 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Response (200): Vessel with IMO Number = Ever Given -> FOUND
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/Ever%20Given with 200 in 3.536 ms
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/imo/imo%209706906
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:27 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Fetching Vessel with IMO Number = imo 9706906
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to fetch Vessel with IMO Number = 9706906
+[00:00:27 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Error (404): No Vessel Found with IMO Number : 9706906
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/imo/imo%209706906 with 404 in 3.36 ms
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:43 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Add Vessel with body = {"ImoNumber":"IMO 9706901","Name":"MSC Gulsun","Owner":"OOCL","VesselTypeId":{"Value":"c7798221-c758-47fd-a343-21d49b78c806","$type":"VesselTypeId"},"$type":"CreatingVesselDto"}
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to add new Vessel with IMO Number = IMO 9706901
+[00:00:43 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Error (404): Invalid IMO Number: Check Digit doesn't match -> Maybe [6].
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 400 in 2.226 ms
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:49 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Add Vessel with body = {"ImoNumber":"IMO 9706906","Name":"MSC Gulsun","Owner":"OOCL","VesselTypeId":{"Value":"c7798221-c758-47fd-a343-21d49b78c806","$type":"VesselTypeId"},"$type":"CreatingVesselDto"}
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to add new Vessel with IMO Number = IMO 9706906
+[00:00:49 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Error (404): Vessel Type with ID 'c7798221-c758-47fd-a343-21d49b78c806' doesn't exists on DB.
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 400 in 4.55 ms
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:01:03 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Add Vessel with body = {"ImoNumber":"IMO 9706906","Name":"MSC Gulsun","Owner":"OOCL","VesselTypeId":{"Value":"b928c0c9-90c8-4e41-9a6d-59ec1ffef048","$type":"VesselTypeId"},"$type":"CreatingVesselDto"}
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to add new Vessel with IMO Number = IMO 9706906
+[00:01:03 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Error (404): Owner Name must be greater than or equal to 5 caracters.
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 400 in 7.225 ms
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:01:15 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Add Vessel with body = {"ImoNumber":"IMO 9706906","Name":"MSC Gulsun","Owner":"OOCLL","VesselTypeId":{"Value":"b928c0c9-90c8-4e41-9a6d-59ec1ffef048","$type":"VesselTypeId"},"$type":"CreatingVesselDto"}
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to add new Vessel with IMO Number = IMO 9706906
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Vessel Created Successfully with IMO Number [IMO 9706906] and System ID [SEM5_PI_WEBAPI.Domain.Vessels.VesselId].
+[00:01:15 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Response (201): Vessel created with IMO Number [IMO 9706906] and System ID ["09cf3849-03e7-4de3-8ef9-95353640a4bf"].
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 201 in 5.812 ms
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/MSC%20Gulsun
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:01:44 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Fetching Vessel with Name = MSC Gulsun
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to fetch Vessel with Name = MSC Gulsun
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Vessel with Name = MSC Gulsun found successfully.
+[00:01:44 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Response (200): Vessel with IMO Number = MSC Gulsun -> FOUND
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/MSC%20Gulsun with 200 in 3.404 ms
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:02:17 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Get All Vessels on DataBase
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to fetch all Vessels.
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Found [3] Vessel in database.
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Returning [3] Vessels DTOs.
+[00:02:17 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Response (200): A total of 3 were found -> [{"Id":"020044c7-27f3-4cd9-9e96-7043bbe415b7","ImoNumber":{"Value":"9399014","$type":"ImoNumber"},"Name":"MSC Gulsun","Owner":"Mediterranean Shipping Company","VesselTypeId":{"Value":"b928c0c9-90c8-4e41-9a6d-59ec1ffef048","$type":"VesselTypeId"},"$type":"VesselDto"},{"Id":"650114d6-3832-403e-aeed-fc8515e1ba13","ImoNumber":{"Value":"9319466","$type":"ImoNumber"},"Name":"Ever Given","Owner":"Evergreen Marine","VesselTypeId":{"Value":"b928c0c9-90c8-4e41-9a6d-59ec1ffef048","$type":"VesselTypeId"},"$type":"VesselDto"},{"Id":"09cf3849-03e7-4de3-8ef9-95353640a4bf","ImoNumber":{"Value":"9706906","$type":"ImoNumber"},"Name":"MSC Gulsun","Owner":"OOCLL","VesselTypeId":{"Value":"b928c0c9-90c8-4e41-9a6d-59ec1ffef048","$type":"VesselTypeId"},"$type":"VesselDto"}]
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 4.576 ms
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/ with 404 in 0.117 ms
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/ with 404 in 0.123 ms
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/ with 404 in 0.052 ms
+[00:19:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:19:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/owner/Evergreen%20Marine
+[00:19:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:19:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:19:20 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Fetching Vessel with Owner = Evergreen Marine
+[00:19:20 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to fetch Vessel with Owner = Evergreen Marine
+[00:19:21 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Vessel with Owner = Evergreen Marine found successfully.
+[00:19:21 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Response (200): Vessel with Owner = Evergreen Marine -> FOUND
+[00:19:21 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/owner/Evergreen%20Marine with 200 in 1627.703 ms
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/owner/Evergreen%20Marinee
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:19:26 INF] SEM5_PI_WEBAPI.Controllers.VesselController             - API Request: Fetching Vessel with Owner = Evergreen Marinee
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService             - Business Domain: Request to fetch Vessel with Owner = Evergreen Marinee
+[00:19:26 WRN] SEM5_PI_WEBAPI.Controllers.VesselController             - API Error (404): No Vessel/s were Found with Owner : Evergreen Marinee
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/owner/Evergreen%20Marinee with 404 in 21.368 ms

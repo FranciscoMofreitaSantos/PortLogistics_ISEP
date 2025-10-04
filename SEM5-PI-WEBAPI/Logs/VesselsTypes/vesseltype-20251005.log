@@ -1,0 +1,75 @@
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/Ever%20Given
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:13 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/Ever%20Given with 404 in 6.133 ms
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 201 in 12.875 ms
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/Ever%20Given
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/Ever%20Given with 200 in 3.536 ms
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/imo/imo%209706906
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:27 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/imo/imo%209706906 with 404 in 3.36 ms
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:43 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 400 in 2.226 ms
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:00:49 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 400 in 4.55 ms
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:01:03 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 400 in 7.225 ms
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP POST /api/Vessel
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:01:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED POST /api/Vessel with 201 in 5.812 ms
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/MSC%20Gulsun
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:01:44 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/MSC%20Gulsun with 200 in 3.404 ms
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:02:17 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 4.576 ms
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:03:41 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/ with 404 in 0.117 ms
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:03:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/ with 404 in 0.123 ms
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/name/
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:04:59 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/name/ with 404 in 0.052 ms
+[00:19:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:19:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/owner/Evergreen%20Marine
+[00:19:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:19:19 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:19:21 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/owner/Evergreen%20Marine with 200 in 1627.703 ms
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ┌───────────────────────────────────────────────
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ HTTP GET /api/Vessel/owner/Evergreen%20Marinee
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - │ From IP: 127.0.0.1
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - └───────────────────────────────────────────────
+[00:19:26 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware      - ──────│ ✔ COMPLETED GET /api/Vessel/owner/Evergreen%20Marinee with 404 in 21.368 ms

@@ -1,4 +1,5 @@
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 
 namespace SEM5_PI_WEBAPI.Domain.Vessels;
@@ -8,9 +9,9 @@ public class VesselService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IVesselRepository _vesselRepository;
     private readonly IVesselTypeRepository _vesselTypeRepository;
-    private readonly ILogger<VesselTypeService> _logger;
+    private readonly ILogger<VesselService> _logger;
 
-    public VesselService(IUnitOfWork unitOfWork, IVesselRepository vesselRepository,IVesselTypeRepository vesselTypeRepository, ILogger<VesselTypeService> logger)
+    public VesselService(IUnitOfWork unitOfWork, IVesselRepository vesselRepository,IVesselTypeRepository vesselTypeRepository, ILogger<VesselService> logger)
     {
         _unitOfWork = unitOfWork;
         _vesselRepository = vesselRepository;
@@ -46,13 +47,14 @@ public class VesselService
         
         _logger.LogInformation("Business Domain: Request to add new Vessel with IMO Number = {IMO}", creatingVesselDto.ImoNumber);
 
-        var imoexist = (await GetAllAsync()).Any(q=> string.Equals(q.ImoNumber.ToString(), creatingVesselDto.ImoNumber.ToString(),StringComparison.CurrentCultureIgnoreCase));
+        var imo = new ImoNumber(creatingVesselDto.ImoNumber);
+        var imoexist = await _vesselRepository.GetByImoNumberAsync(imo);
         
-        if (imoexist) throw new BusinessRuleValidationException($"Vessel with IMO Number '{creatingVesselDto.ImoNumber}' already exists on DB.");
+        if (imoexist != null) throw new BusinessRuleValidationException($"Vessel with IMO Number '{creatingVesselDto.ImoNumber}' already exists on DB.");
     
-        var typeExist = (await _vesselTypeRepository.GetByIdAsync(creatingVesselDto.VesselTypeId)) == null;
+        var typeDontExist = (await _vesselTypeRepository.GetByIdAsync(creatingVesselDto.VesselTypeId)) == null;
 
-        if (typeExist)
+        if (typeDontExist)
             throw new BusinessRuleValidationException(
                 $"Vessel Type with ID '{creatingVesselDto.VesselTypeId.Value}' doesn't exists on DB.");
         
@@ -70,7 +72,7 @@ public class VesselService
     {
         _logger.LogInformation("Business Domain: Request to fetch Vessel with ID = {Id}", vesselId.Value);
 
-        Vessel vesselInDb = await _vesselRepository.GetByIdAsync(vesselId);
+        var vesselInDb = await _vesselRepository.GetByIdAsync(vesselId);
 
         if (vesselInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Found with ID : {vesselId.Value}");
@@ -78,5 +80,54 @@ public class VesselService
         _logger.LogInformation("Business Domain: Vessel with ID = {Id} found successfully.", vesselId.Value);
     
         return VesselFactory.CreateVesselDto(vesselInDb);
+    }
+
+
+    public async Task<VesselDto> GetByImoNumberAsync(string imoNumberString)
+    {
+        ImoNumber imoNumber = new ImoNumber(imoNumberString);
+        
+        _logger.LogInformation("Business Domain: Request to fetch Vessel with IMO Number = {IMO}", imoNumber.Value);
+
+        var vesselOnDb = await _vesselRepository.GetByImoNumberAsync(imoNumber);
+
+        if (vesselOnDb == null)
+            throw new BusinessRuleValidationException($"No Vessel Found with IMO Number : {imoNumber.Value}");
+        
+        _logger.LogInformation("Business Domain: Vessel with IMO Number = {IMO} found successfully.", imoNumber.Value);
+
+        return VesselFactory.CreateVesselDto(vesselOnDb);
+    }
+    
+    public async Task<List<VesselDto>> GetByNameAsync(string name)
+    {
+        _logger.LogInformation("Business Domain: Request to fetch Vessel with Name = {IMO}", name);
+
+        var vesselListOnDb = await _vesselRepository.GetByNameAsync(name);
+
+        if (vesselListOnDb.Count == 0)
+            throw new BusinessRuleValidationException($"No Vessel/s were Found with Name : {name}");
+        
+        _logger.LogInformation("Business Domain: Vessel with Name = {NAME} found successfully.", name);
+
+        var vesselListDto = vesselListOnDb.Select(VesselFactory.CreateVesselDto).ToList();
+        
+        return vesselListDto;
+    }
+    
+    public async Task<List<VesselDto>> GetByOwnerAsync(string ownerName)
+    {
+        _logger.LogInformation("Business Domain: Request to fetch Vessel with Owner = {Owner}", ownerName);
+
+        var vesselListOnDb = await _vesselRepository.GetByOwnerAsync(ownerName);
+
+        if (vesselListOnDb.Count == 0)
+            throw new BusinessRuleValidationException($"No Vessel/s were Found with Owner : {ownerName}");
+        
+        _logger.LogInformation("Business Domain: Vessel with Owner = {Owner} found successfully.", ownerName);
+
+        var vesselListDto = vesselListOnDb.Select(VesselFactory.CreateVesselDto).ToList();
+        
+        return vesselListDto;
     }
 }

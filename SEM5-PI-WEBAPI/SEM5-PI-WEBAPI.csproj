@@ -32,6 +32,7 @@
     <Folder Include="Logs\" />
     <Folder Include="Logs\GeneralLogs\" />
     <Folder Include="Logs\VesselsTypes\" />
+    <Folder Include="Logs\Vessels\" />
   </ItemGroup>
 
 </Project>
