@@ -212,8 +212,9 @@ namespace SEM5_PI_WEBAPI.Migrations
                             b1.Property<string>("VesselId")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<int>("Value")
-                                .HasColumnType("INTEGER")
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
                                 .HasColumnName("ImoNumber");
 
                             b1.HasKey("VesselId");

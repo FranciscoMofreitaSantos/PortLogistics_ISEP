@@ -1412,3 +1412,9 @@ FROM "Vessel" AS "v"
 [19:48:15 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 15.326 ms
 [19:48:15 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 200 395 application/json; charset=utf-8 16.1679ms
 [19:48:28 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[22:15:00 INF]  - Starting web host
+[22:15:00 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[22:15:00 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[22:15:00 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[22:15:00 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[22:15:04 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...

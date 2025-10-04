@@ -10,8 +10,8 @@ using SEM5_PI_WEBAPI.Infraestructure;
 namespace SEM5_PI_WEBAPI.Migrations
 {
     [DbContext(typeof(DddSample1DbContext))]
-    [Migration("20251004164945_AddVesselTable")]
-    partial class AddVesselTable
+    [Migration("20251004211411_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,8 @@ namespace SEM5_PI_WEBAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("VesselTypeId");
+
                     b.ToTable("Vessel");
                 });
 
@@ -99,7 +101,9 @@ namespace SEM5_PI_WEBAPI.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("No description");
 
                     b.Property<int>("MaxBays")
                         .HasColumnType("INTEGER");
@@ -115,6 +119,9 @@ namespace SEM5_PI_WEBAPI.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("VesselType");
                 });
@@ -197,13 +204,21 @@ namespace SEM5_PI_WEBAPI.Migrations
 
             modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.Vessels.Vessel", b =>
                 {
+                    b.HasOne("SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselType", null)
+                        .WithMany()
+                        .HasForeignKey("VesselTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.OwnsOne("SEM5_PI_WEBAPI.Domain.ValueObjects.ImoNumber", "ImoNumber", b1 =>
                         {
                             b1.Property<string>("VesselId")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<int>("Value")
-                                .HasColumnType("INTEGER");
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("ImoNumber");
 
                             b1.HasKey("VesselId");
 
