@@ -137,7 +137,7 @@ public class VesselService
 
         var vesselListOnDb = await _vesselRepository.GetFilterAsync(name,imoNumber,ownerName,query);
 
-        if (vesselListOnDb.Count > 0) throw new BusinessRuleValidationException($"No Vessel/s Type/s Found with filters -> Name = {name}, IMO Number = {imo}, Owner Name = {ownerName},Query = {query}");
+        if (vesselListOnDb.Count == 0) throw new BusinessRuleValidationException($"No Vessel/s Type/s Found with filters -> Name = {name}, IMO Number = {imo}, Owner Name = {ownerName},Query = {query}");
         
         _logger.LogInformation("Business Domain: Where found [{Count}] Vessel/s Type/s with filters",vesselListOnDb.Count);
 

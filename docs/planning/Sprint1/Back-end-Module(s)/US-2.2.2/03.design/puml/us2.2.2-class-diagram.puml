@@ -1,0 +1,130 @@
+@startuml
+
+package "Domain" {
+  class Vessel {
+    - ImoNumber ImoNumber
+    - string Name
+    - string Owner
+    - VesselTypeId VesselTypeId
+    + UpdateName(string)
+    + UpdateOwner(string)
+    + ToString() : string
+  }
+
+  class VesselId {
+    - Guid Value
+    + AsGuid() : Guid
+  }
+
+  class ImoNumber {
+    - int Value
+    + ToString() : string
+  }
+
+  class VesselTypeId {
+    - Guid Value
+    + AsGuid() : Guid
+  }
+
+  class BusinessRuleValidationException
+}
+
+package "DTOs" {
+  class CreatingVesselDto {
+    + string ImoNumber
+    + string Name
+    + string Owner
+    + VesselTypeId VesselTypeId
+  }
+
+  class UpdatingVesselDto {
+    + string? Name
+    + string? Owner
+  }
+
+  class VesselDto {
+    + Guid Id
+    + ImoNumber ImoNumber
+    + string Name
+    + string Owner
+    + VesselTypeId VesselTypeId
+  }
+}
+
+package "Application" {
+  class VesselService {
+    + GetAllAsync() : List<VesselDto>
+    + GetByIdAsync(VesselId) : VesselDto
+    + GetByImoNumberAsync(string) : VesselDto
+    + GetByNameAsync(string) : List<VesselDto>
+    + GetByOwnerAsync(string) : List<VesselDto>
+    + GetFilterAsync(string?, string?, string?, string?) : List<VesselDto>
+    + CreateAsync(CreatingVesselDto) : VesselDto
+    + PatchByImoAsync(string, UpdatingVesselDto) : VesselDto
+  }
+
+  class VesselFactory {
+    + CreateVessel(CreatingVesselDto) : Vessel
+    + CreateVesselDto(Vessel) : VesselDto
+  }
+}
+
+package "Infrastructure" {
+  interface IVesselRepository {
+    + GetAllAsync() : List<Vessel>
+    + GetByIdAsync(VesselId) : Vessel
+    + GetByImoNumberAsync(ImoNumber) : Vessel?
+    + GetByNameAsync(string) : List<Vessel>
+    + GetByOwnerAsync(string) : List<Vessel>
+    + GetFilterAsync(string?, ImoNumber?, string?, string?) : List<Vessel>
+    + AddAsync(Vessel)
+  }
+
+  class VesselRepository implements IVesselRepository {
+  }
+
+  interface IUnitOfWork {
+    + CommitAsync()
+  }
+
+  class UnitOfWork implements IUnitOfWork {
+  }
+}
+
+package "Presentation" {
+  class VesselController {
+    + GetAll() : List<VesselDto>
+    + GetById(Guid) : VesselDto
+    + GetByImo(string) : VesselDto
+    + GetByName(string) : List<VesselDto>
+    + GetByOwner(string) : List<VesselDto>
+    + GetByFilter(string?, string?, string?, string?) : List<VesselDto>
+    + Create(CreatingVesselDto) : VesselDto
+    + PatchByImo(string, UpdatingVesselDto) : VesselDto
+  }
+}
+
+package "Cross-cutting" {
+  interface ILogger<T> {
+    + LogInformation(string, params)
+    + LogWarning(string, params)
+    + LogError(string, params)
+  }
+}
+
+' ---------------- Relations -----------------
+Vessel "1" *-- "1" VesselId
+Vessel "1" *-- "1" ImoNumber
+Vessel "1" --> VesselTypeId
+
+VesselService --> IVesselRepository
+VesselService --> IUnitOfWork
+VesselService --> VesselFactory
+VesselService --> ILogger
+VesselRepository --> Vessel
+VesselFactory --> Vessel
+VesselFactory --> VesselDto
+VesselController --> VesselService
+VesselController --> ILogger
+
+@enduml

@@ -141,7 +141,7 @@ public class VesselController : ControllerBase
     }
 
     [HttpGet("filter")]
-    public async Task<ActionResult<List<VesselDto>>> GetByFilterAsync(string? name, string imo, string ownerName,string query)
+    public async Task<ActionResult<List<VesselDto>>> GetByFilterAsync(string? name, string? imo, string? ownerName,string? query)
     {
         _logger.LogInformation("API Request: Filtering Vessel/s Type/s with filters.");
 

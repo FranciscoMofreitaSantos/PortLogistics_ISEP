@@ -703,3 +703,125 @@ FROM "Vessel" AS "v"
 [12:06:56 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 6.887 ms
 [12:06:56 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 200 199 application/json; charset=utf-8 8.1402ms
 [12:07:04 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[12:32:53 INF]  - Starting web host
+[12:32:53 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[12:32:53 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[12:32:53 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[12:32:53 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/jorgerodriguez/Desktop/Universidade/3_ano/1_Semestre/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[12:33:12 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/Vessel - null null
+[12:33:12 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[12:33:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[12:33:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/Vessel
+[12:33:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[12:33:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[12:33:12 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[12:33:12 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[12:33:12 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[12:33:12 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[12:33:12 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService                            - Business Domain: Request to fetch all Vessels.
+[12:33:14 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Name", "v"."Owner", "v"."VesselTypeId", "v"."ImoNumber"
+FROM "Vessel" AS "v"
+[12:33:14 WRN] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Response (404): No Vessels found on DataBase
+[12:33:14 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.NotFoundObjectResult in 1416.5503ms.
+[12:33:14 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing NotFoundObjectResult, writing value of type 'System.String'.
+[12:33:14 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 1636.6974ms
+[12:33:14 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[12:33:14 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/Vessel with 404 in 1658.899 ms
+[12:33:14 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 404 32 application/json; charset=utf-8 1707.0962ms
+[12:33:25 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 PATCH http://localhost:5008/api/vessel/imo/IMO 9319466 - application/json 67
+[12:33:25 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[12:33:25 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP PATCH /api/vessel/imo/IMO%209319466
+[12:33:25 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[12:33:25 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[12:33:25 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI)'
+[12:33:25 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "PatchByImo", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]] PatchByImoAsync(System.String, SEM5_PI_WEBAPI.Domain.Vessels.UpdatingVesselDto) on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[12:33:25 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[12:33:25 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Partial update for Vessel with IMO = IMO 9319466
+[12:33:25 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (4ms) [Parameters=[@__imoNumber_Value_0='?' (Size = 7)], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Name", "v"."Owner", "v"."VesselTypeId", "v"."ImoNumber"
+FROM "Vessel" AS "v"
+WHERE "v"."ImoNumber" = @__imoNumber_Value_0
+LIMIT 1
+[12:33:25 WRN] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Error (400): No Vessel found with IMO IMO 9319466.
+[12:33:25 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.BadRequestObjectResult in 83.1656ms.
+[12:33:25 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing BadRequestObjectResult, writing value of type 'System.String'.
+[12:33:25 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI) in 138.1881ms
+[12:33:25 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI)'
+[12:33:25 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED PATCH /api/vessel/imo/IMO%209319466 with 400 in 147.319 ms
+[12:33:25 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 PATCH http://localhost:5008/api/vessel/imo/IMO 9319466 - 400 null text/plain; charset=utf-8 151.609ms
+[12:33:30 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 POST http://localhost:5008/api/Vessel - application/json 145
+[12:33:30 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[12:33:30 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP POST /api/Vessel
+[12:33:30 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[12:33:30 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[12:33:30 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.CreateAsync (SEM5-PI-WEBAPI)'
+[12:33:30 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "Create", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]] CreateAsync(SEM5_PI_WEBAPI.Domain.Vessels.CreatingVesselDto) on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[12:33:30 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.VesselController.CreateAsync (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[12:33:30 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Add Vessel with body = {"ImoNumber":"IMO 9319466","Name":"Ever Given","Owner":"Evergreen Marine","VesselTypeId":{"Value":"b928c0c9-90c8-4e41-9a6d-59ec1ffef048","$type":"VesselTypeId"},"$type":"CreatingVesselDto"}
+[12:33:30 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService                            - Business Domain: Request to add new Vessel with IMO Number = IMO 9319466
+[12:33:30 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (0ms) [Parameters=[@__imoNumber_Value_0='?' (Size = 7)], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Name", "v"."Owner", "v"."VesselTypeId", "v"."ImoNumber"
+FROM "Vessel" AS "v"
+WHERE "v"."ImoNumber" = @__imoNumber_Value_0
+LIMIT 1
+[12:33:30 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (1ms) [Parameters=[@__id_0='?' (Size = 36)], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Capacity", "v"."Description", "v"."MaxBays", "v"."MaxRows", "v"."MaxTiers", "v"."Name"
+FROM "VesselType" AS "v"
+WHERE @__id_0 = "v"."Id"
+LIMIT 1
+[12:33:30 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (2ms) [Parameters=[@p0='?' (Size = 36), @p1='?' (Size = 10), @p2='?' (Size = 16), @p3='?' (Size = 36), @p4='?' (Size = 7)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Vessel" ("Id", "Name", "Owner", "VesselTypeId", "ImoNumber")
+VALUES (@p0, @p1, @p2, @p3, @p4);
+[12:33:30 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService                            - Business Domain: Vessel Created Successfully with IMO Number [IMO 9319466] and System ID [SEM5_PI_WEBAPI.Domain.Vessels.VesselId].
+[12:33:30 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Response (201): Vessel created with IMO Number [IMO 9319466] and System ID ["9a152d96-18d1-4a79-a589-ca6746b08a35"].
+[12:33:30 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.VesselController.CreateAsync (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.CreatedAtActionResult in 312.8417ms.
+[12:33:30 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing CreatedAtActionResult, writing value of type 'SEM5_PI_WEBAPI.Domain.Vessels.VesselDto'.
+[12:33:30 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.CreateAsync (SEM5-PI-WEBAPI) in 361.0937ms
+[12:33:30 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.CreateAsync (SEM5-PI-WEBAPI)'
+[12:33:30 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED POST /api/Vessel with 201 in 364.844 ms
+[12:33:30 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 POST http://localhost:5008/api/Vessel - 201 188 application/json; charset=utf-8 365.6252ms
+[12:33:36 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 PATCH http://localhost:5008/api/vessel/imo/IMO 9319466 - application/json 57
+[12:33:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[12:33:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP PATCH /api/vessel/imo/IMO%209319466
+[12:33:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[12:33:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[12:33:36 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI)'
+[12:33:36 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "PatchByImo", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]] PatchByImoAsync(System.String, SEM5_PI_WEBAPI.Domain.Vessels.UpdatingVesselDto) on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[12:33:36 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[12:33:36 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Partial update for Vessel with IMO = IMO 9319466
+[12:33:36 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (0ms) [Parameters=[@__imoNumber_Value_0='?' (Size = 7)], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Name", "v"."Owner", "v"."VesselTypeId", "v"."ImoNumber"
+FROM "Vessel" AS "v"
+WHERE "v"."ImoNumber" = @__imoNumber_Value_0
+LIMIT 1
+[12:33:36 WRN] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Error (400): Name length must be greater than or equal to 5 characters.
+[12:33:36 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.BadRequestObjectResult in 7.3116ms.
+[12:33:36 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing BadRequestObjectResult, writing value of type 'System.String'.
+[12:33:36 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI) in 8.5683ms
+[12:33:36 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.PatchByImoAsync (SEM5-PI-WEBAPI)'
+[12:33:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED PATCH /api/vessel/imo/IMO%209319466 with 400 in 9.147 ms
+[12:33:36 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 PATCH http://localhost:5008/api/vessel/imo/IMO 9319466 - 400 null text/plain; charset=utf-8 11.698ms
+[12:33:45 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/Vessel - null null
+[12:33:45 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[12:33:45 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/Vessel
+[12:33:45 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[12:33:45 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[12:33:45 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[12:33:45 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "Vessel"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto]]] GetAllAsync() on controller SEM5_PI_WEBAPI.Controllers.VesselController (SEM5-PI-WEBAPI).
+[12:33:45 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[12:33:45 INF] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Request: Get All Vessels on DataBase
+[12:33:45 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService                            - Business Domain: Request to fetch all Vessels.
+[12:33:45 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "v"."Id", "v"."Name", "v"."Owner", "v"."VesselTypeId", "v"."ImoNumber"
+FROM "Vessel" AS "v"
+[12:33:45 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService                            - Business Domain: Found [1] Vessel in database.
+[12:33:45 INF] SEM5_PI_WEBAPI.Domain.Vessels.VesselService                            - Business Domain: Returning [1] Vessels DTOs.
+[12:33:45 WRN] SEM5_PI_WEBAPI.Controllers.VesselController                            - API Response (200): A total of 1 were found -> [{"Id":"9a152d96-18d1-4a79-a589-ca6746b08a35","ImoNumber":{"Value":"9319466","$type":"ImoNumber"},"Name":"Ever Given","Owner":"Evergreen Marine","VesselTypeId":{"Value":"b928c0c9-90c8-4e41-9a6d-59ec1ffef048","$type":"VesselTypeId"},"$type":"VesselDto"}]
+[12:33:45 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 3.933ms.
+[12:33:45 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[SEM5_PI_WEBAPI.Domain.Vessels.VesselDto, SEM5-PI-WEBAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[12:33:45 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI) in 11.2537ms
+[12:33:45 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.VesselController.GetAllAsync (SEM5-PI-WEBAPI)'
+[12:33:45 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/Vessel with 200 in 11.851 ms
+[12:33:45 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/Vessel - 200 190 application/json; charset=utf-8 13.3936ms
+[12:33:49 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...

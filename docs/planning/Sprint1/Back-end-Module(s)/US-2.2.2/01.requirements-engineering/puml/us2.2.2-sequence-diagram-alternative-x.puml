@@ -1,48 +1,25 @@
 @startuml
-skinparam monochrome true
-skinparam packageStyle rectangle
-skinparam shadowing false
+actor "Port Authority Officer" as Officer
+boundary "System" as System
 
-autonumber
+== Create ==
+Officer -> System : Submit CreateVessel(imoNumber, name, owner, vesselTypeId)
+System --> Officer : success(VesselDTO)
 
-'hide footbox
-participant ":{NameOfUC}Controller" as CTRL
-participant "ApplicationSession" as APPSESSIONC
-participant "appSession\n:ApplicationSession" as APPSESSIONI
-participant "currentSession\n:UserSession" as CURSESSION
+== Update ==
+Officer -> System : Submit UpdateVessel(imoNumber, {name?, owner?})
+System --> Officer : success(VesselDTO)
 
-activate CTRL
-[o-> CTRL : create()
-    CTRL -> APPSESSIONC : getinstance()
+== Search ==
+Officer -> System : SearchVesselByImo(imoNumber)
+System --> Officer : VesselDTO
 
-    activate APPSESSIONC
-        APPSESSIONC --> CTRL : appSession
-    deactivate APPSESSIONC
+Officer -> System : SearchVesselByName(name)
+System --> Officer : List<VesselDTO>
 
-    CTRL -> APPSESSIONI : getCurrentSession()
-    activate APPSESSIONI
-        APPSESSIONI --> CTRL : currentSession
-    deactivate APPSESSIONI
+Officer -> System : SearchVesselByOwner(owner)
+System --> Officer : List<VesselDTO>
 
-    CTRL -> CURSESSION : isLoggedInWithRole(USER_ROLE)
-    activate CURSESSION
-        CURSESSION --> CTRL : answer
-    deactivate CURSESSION
-
-    alt answer = true
-        CTRL -> CTRL : doesOtherThing()
-        activate CTRL
-            [o<-- CTRL : ok
-        deactivate CTRL
-        autonumber stop
-        CTRL -[#white]> CURSESSION
-        autonumber resume
-    else
-        |||
-        [o<-- CTRL : illegalStateException("Not Authorized")
-        |||
-    end alt
-
-deactivate CTRL
-
+Officer -> System : SearchVesselFilter(name?, imo?, owner?, query?)
+System --> Officer : List<VesselDTO>
 @enduml

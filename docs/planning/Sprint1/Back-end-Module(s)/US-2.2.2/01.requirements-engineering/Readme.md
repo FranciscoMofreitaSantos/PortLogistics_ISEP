@@ -68,3 +68,4 @@ As a **Port Authority Officer**, I want to **register and update vessel records*
 ---
 
 ### 1.6. System Sequence Diagram (SSD)
+![SSD](./puml/us2.2.2-sequence-diagram-alternative-x.png)
