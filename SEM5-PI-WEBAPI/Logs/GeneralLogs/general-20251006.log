@@ -1713,6 +1713,36 @@ ORDER BY "s1"."Id", "s2"."QualificationsId", "s2"."StaffMemberId"
 [16:35:00 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/StaffMembers/name/Paulo%20Mendes%20Updated with 200 in 54.141 ms
 [16:35:00 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/StaffMembers/name/Paulo Mendes Updated - 200 302 application/json; charset=utf-8 62.2361ms
 [16:35:06 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[16:45:08 INF]  - Starting web host
+[16:45:08 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[16:45:08 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[16:45:08 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[16:45:08 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[16:45:22 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 POST http://localhost:5008/api/StaffMembers - application/json 254
+[16:45:22 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[16:45:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[16:45:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP POST /api/StaffMembers
+[16:45:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[16:45:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[16:45:22 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.StaffMembersController.Create (SEM5-PI-WEBAPI)'
+[16:45:22 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "Create", controller = "StaffMembers"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SEM5_PI_WEBAPI.Domain.StaffMembers.StaffMemberDto]] Create(SEM5_PI_WEBAPI.Domain.StaffMembers.DTOs.CreatingStaffMemberDto) on controller SEM5_PI_WEBAPI.Controllers.StaffMembersController (SEM5-PI-WEBAPI).
+[16:45:23 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.StaffMembersController.Create (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[16:45:23 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "s"."Id", "s"."IsActive", "s"."MecanographicNumber", "s"."ShortName", "s"."Email", "s"."Phone", "s"."Days", "s"."Shift", "s1"."QualificationsId", "s1"."StaffMemberId", "s1"."Id", "s1"."Code", "s1"."Name"
+FROM "StaffMember" AS "s"
+LEFT JOIN (
+    SELECT "s0"."QualificationsId", "s0"."StaffMemberId", "q"."Id", "q"."Code", "q"."Name"
+    FROM "StaffMemberQualifications" AS "s0"
+    INNER JOIN "Qualifications" AS "q" ON "s0"."QualificationsId" = "q"."Id"
+) AS "s1" ON "s"."Id" = "s1"."StaffMemberId"
+ORDER BY "s"."Id", "s1"."QualificationsId", "s1"."StaffMemberId"
+[16:45:24 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.StaffMembersController.Create (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.BadRequestObjectResult in 1145.7886ms.
+[16:45:24 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing BadRequestObjectResult, writing value of type '<>f__AnonymousType1`1[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+[16:45:24 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.StaffMembersController.Create (SEM5-PI-WEBAPI) in 1365.154ms
+[16:45:24 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.StaffMembersController.Create (SEM5-PI-WEBAPI)'
+[16:45:24 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED POST /api/StaffMembers with 400 in 1393.448 ms
+[16:45:24 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 POST http://localhost:5008/api/StaffMembers - 400 52 application/json; charset=utf-8 1438.0157ms
+[16:45:35 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
 [18:39:25 INF]  - Starting web host
 [18:39:25 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
 [18:39:25 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.

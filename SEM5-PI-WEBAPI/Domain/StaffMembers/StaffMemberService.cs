@@ -1,10 +1,6 @@
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StaffMembers.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SEM5_PI_WEBAPI.Domain.StaffMembers;
 
@@ -62,7 +58,7 @@ public class StaffMemberService
 
     public async Task<StaffMemberDto> AddAsync(CreatingStaffMemberDto dto)
     {
-        await EnsureNotRepeatedAsync(dto.Email, dto.Phone, null);
+        await EnsureNotRepeatedAsync(dto.Email, dto.Phone);
 
         var qualificationIds = dto.QualificationIds ?? new List<Guid>();
         var list = qualificationIds.Select(q => new QualificationId(q)).ToList();
@@ -89,9 +85,15 @@ public class StaffMemberService
     public async Task<StaffMemberDto?> UpdateAsync(StaffMemberId id, UpdateStaffMemberDto updateDto)
     {
         var staff = await _repo.GetByIdAsync(id);
-        if (staff == null) return null;
+        if (staff == null)
+            return null;
         
-        await EnsureNotRepeatedAsync(updateDto.Email ?? staff.Email, updateDto.Phone ?? staff.Phone, id);
+        if (updateDto.Email != null || updateDto.Phone != null)
+        {
+            var emailToCheck = updateDto.Email ?? staff.Email;
+            var phoneToCheck = updateDto.Phone ?? staff.Phone;
+            await EnsureNotRepeatedAsync(emailToCheck, phoneToCheck);
+        }
 
         if (updateDto.ShortName != null)
             staff.UpdateShortName(updateDto.ShortName);
@@ -126,7 +128,8 @@ public class StaffMemberService
     public async Task<StaffMemberDto?> ToggleAsync(StaffMemberId id)
     {
         var staff = await _repo.GetByIdAsync(id);
-        if (staff == null) return null;
+        if (staff == null)
+            return null;
 
         staff.ToggleStatus();
         await _unitOfWork.CommitAsync();
@@ -134,28 +137,21 @@ public class StaffMemberService
         return MapToDto(staff);
     }
 
-    private async Task EnsureNotRepeatedAsync(Email email, PhoneNumber phone, StaffMemberId? currentId)
+    private async Task EnsureNotRepeatedAsync(Email email, PhoneNumber phone)
     {
         var allStaff = await _repo.GetAllAsync();
 
         bool repeatedEmail = allStaff.Any(s =>
-            s.Email.Address.Equals(email.Address, StringComparison.OrdinalIgnoreCase) &&
-            (currentId == null || s.Id != currentId));
+            s.Email.Address.Equals(email.Address, StringComparison.OrdinalIgnoreCase));
 
         bool repeatedPhone = allStaff.Any(s =>
-            s.Phone.Number.Equals(phone.Number, StringComparison.OrdinalIgnoreCase) &&
-            (currentId == null || s.Id != currentId));
-
-        bool repeatedMec = allStaff.Any(s =>
-            s.MecanographicNumber.Equals(s.MecanographicNumber, StringComparison.OrdinalIgnoreCase) &&
-            (currentId == null || s.Id != currentId));
+            s.Phone.Number.Equals(phone.Number, StringComparison.OrdinalIgnoreCase));
 
         if (repeatedEmail)
             throw new BusinessRuleValidationException("Repeated Email for StaffMember!");
+
         if (repeatedPhone)
             throw new BusinessRuleValidationException("Repeated Phone Number for StaffMember!");
-        if (repeatedMec)
-            throw new BusinessRuleValidationException("Repeated Mecanographic Number for StaffMember!");
     }
 
 
@@ -167,7 +163,7 @@ public class StaffMemberService
             var q = await _repoQualifications.GetByIdAsync(id);
             if (q == null)
                 throw new BusinessRuleValidationException(
-                    $"Invalid Qualification Id: {id?.AsGuid().ToString() ?? "null"}");
+                    $"Invalid Qualification Id: {id.AsGuid().ToString()}");
             qualifications.Add(q);
         }
 
@@ -193,7 +189,7 @@ public class StaffMemberService
             staff.Phone,
             staff.Schedule,
             staff.IsActive,
-            staff.Qualifications?.Select(q => q.Id.AsGuid()).ToList() ?? new List<Guid>()
+            staff.Qualifications.Select(q => q.Id.AsGuid()).ToList()
         );
     }
 }
