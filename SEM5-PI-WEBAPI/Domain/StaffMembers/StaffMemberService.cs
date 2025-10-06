@@ -35,25 +35,25 @@ public class StaffMemberService
         var staff = await _repo.GetByIdAsync(id);
         return staff == null ? null : MapToDto(staff);
     }
-    
+
     public async Task<StaffMemberDto> GetByMecNumberAsync(string mec)
     {
         var staff = await _repo.GetByMecNumberAsync(mec);
         return staff == null ? null : MapToDto(staff);
     }
-    
+
     public async Task<StaffMemberDto> GetByNameAsync(string name)
     {
         var staff = await _repo.GetByNameAsync(name);
         return staff == null ? null : MapToDto(staff);
     }
-    
+
     public async Task<List<StaffMemberDto>> GetByStatusAsync(bool status)
     {
         var staff = await _repo.GetByStatusAsync(status);
         return staff.ConvertAll(MapToDto);
     }
-    
+
     public async Task<List<StaffMemberDto>> GetByQualificationsAsync(List<QualificationId> ids)
     {
         var staff = await _repo.GetByQualificationsAsync(ids);
@@ -62,8 +62,10 @@ public class StaffMemberService
 
     public async Task<StaffMemberDto> AddAsync(CreatingStaffMemberDto dto)
     {
+        await EnsureNotRepeatedAsync(dto.Email, dto.Phone, null);
+
         var qualificationIds = dto.QualificationIds ?? new List<Guid>();
-        List<QualificationId> list = qualificationIds.Select(q => new QualificationId(q)).ToList();
+        var list = qualificationIds.Select(q => new QualificationId(q)).ToList();
         var qualifications = await LoadQualificationsAsync(list);
 
         var mecanographicNumber = await GenerateMecanographicNumberAsync();
@@ -88,6 +90,8 @@ public class StaffMemberService
     {
         var staff = await _repo.GetByIdAsync(id);
         if (staff == null) return null;
+        
+        await EnsureNotRepeatedAsync(updateDto.Email ?? staff.Email, updateDto.Phone ?? staff.Phone, id);
 
         if (updateDto.ShortName != null)
             staff.UpdateShortName(updateDto.ShortName);
@@ -106,7 +110,9 @@ public class StaffMemberService
 
         if (updateDto.QualificationIds != null)
         {
-            var qualifications = await LoadQualificationsAsync(updateDto.QualificationIds.Select(q => new QualificationId(q)).ToList());
+            var qualifications = await LoadQualificationsAsync(
+                updateDto.QualificationIds.Select(q => new QualificationId(q)).ToList()
+            );
             staff.Qualifications.Clear();
             foreach (var q in qualifications)
                 staff.AddQualification(q);
@@ -127,7 +133,31 @@ public class StaffMemberService
 
         return MapToDto(staff);
     }
-    
+
+    private async Task EnsureNotRepeatedAsync(Email email, PhoneNumber phone, StaffMemberId? currentId)
+    {
+        var allStaff = await _repo.GetAllAsync();
+
+        bool repeatedEmail = allStaff.Any(s =>
+            s.Email.Address.Equals(email.Address, StringComparison.OrdinalIgnoreCase) &&
+            (currentId == null || s.Id != currentId));
+
+        bool repeatedPhone = allStaff.Any(s =>
+            s.Phone.Number.Equals(phone.Number, StringComparison.OrdinalIgnoreCase) &&
+            (currentId == null || s.Id != currentId));
+
+        bool repeatedMec = allStaff.Any(s =>
+            s.MecanographicNumber.Equals(s.MecanographicNumber, StringComparison.OrdinalIgnoreCase) &&
+            (currentId == null || s.Id != currentId));
+
+        if (repeatedEmail)
+            throw new BusinessRuleValidationException("Repeated Email for StaffMember!");
+        if (repeatedPhone)
+            throw new BusinessRuleValidationException("Repeated Phone Number for StaffMember!");
+        if (repeatedMec)
+            throw new BusinessRuleValidationException("Repeated Mecanographic Number for StaffMember!");
+    }
+
 
     private async Task<List<Qualification>> LoadQualificationsAsync(List<QualificationId> ids)
     {
@@ -136,9 +166,11 @@ public class StaffMemberService
         {
             var q = await _repoQualifications.GetByIdAsync(id);
             if (q == null)
-                throw new BusinessRuleValidationException($"Invalid Qualification Id: {id?.AsGuid().ToString() ?? "null"}");
+                throw new BusinessRuleValidationException(
+                    $"Invalid Qualification Id: {id?.AsGuid().ToString() ?? "null"}");
             qualifications.Add(q);
         }
+
         return qualifications;
     }
 
