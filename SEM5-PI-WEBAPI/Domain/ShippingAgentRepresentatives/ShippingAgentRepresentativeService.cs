@@ -32,11 +32,31 @@ public class ShippingAgentRepresentativeService
 
         return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality,q.Email,q.PhoneNumber);
     }
+    
+    public async Task<ShippingAgentRepresentativeDto> GetByNameAsync(string Name)
+    {
+        var q = await this._repo.GetByNameAsync(Name);
+
+        if (q == null)
+            return null;
+
+        return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality,q.Email,q.PhoneNumber);   
+    }
+
+    public async Task<ShippingAgentRepresentativeDto> GetByEmailAsync(string Email)
+    {
+        var q = await this._repo.GetByEmailAsync(Email);
+
+        if (q == null)
+            return null;
+
+        return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality,q.Email,q.PhoneNumber);   
+    }
 
     public async Task<ShippingAgentRepresentative> AddAsync(CreatingShippingAgentRepresentativeDto dto)
     {
 
-        var shippingAgentRepresentative = new ShippingAgentRepresentative(dto.Name, dto.CitizenId, dto.Nationality,dto.Email,dto.PhoneNumber);
+        var shippingAgentRepresentative = new ShippingAgentRepresentative(dto.Name, dto.CitizenId, dto.Nationality, dto.Email, dto.PhoneNumber);
         await _repo.AddAsync(shippingAgentRepresentative);
         await _unitOfWork.CommitAsync();
         return shippingAgentRepresentative;

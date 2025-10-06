@@ -1,4 +1,5 @@
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 
@@ -32,11 +33,41 @@ public class ShippingAgentOrganizationService
 
         return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName,q.AltName,q.Address,q.Taxnumber);
     }
+    
+    public async Task<ShippingAgentOrganizationDto> GetByLegalNameAsync(string legalname)
+    {
+        var q = await this._repo.GetByLegalNameAsync(legalname);
+
+        if (q == null)
+            return null;
+
+        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName, q.AltName, q.Address, q.Taxnumber);
+    }
+    
+    public async Task<ShippingAgentOrganizationDto> GetByCodeAsync(string code)
+    {
+        var q = await this._repo.GetByCodeAsync(code);
+
+        if (q == null)
+            return null;
+
+        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName, q.AltName, q.Address, q.Taxnumber);
+    }
+
+    public async Task<ShippingAgentOrganizationDto> GetByTaxNumberAsync(TaxNumber taxnumber)
+    {
+        var q = await this._repo.GetByTaxNumberAsync(taxnumber);
+
+        if (q == null)
+            return null;
+
+        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName, q.AltName, q.Address, q.Taxnumber);
+    }
 
     public async Task<ShippingAgentOrganization> AddAsync(CreatingShippingAgentOrganizationDto dto)
     {
 
-        var shippingAgentOrganization = new ShippingAgentOrganization(dto.Code, dto.LegalName, dto.AltName,dto.Address,dto.Taxnumber);
+        var shippingAgentOrganization = new ShippingAgentOrganization(dto.Code, dto.LegalName, dto.AltName, dto.Address, dto.Taxnumber);
         await _repo.AddAsync(shippingAgentOrganization);
         await _unitOfWork.CommitAsync();
         return shippingAgentOrganization;
