@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SEM5_PI_WEBAPI.Domain.CargoManifests;
 using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Domain.Dock;
@@ -35,6 +36,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure
         public DbSet<EntityContainer> Container {get; set;}
         public DbSet<StorageArea> StorageArea {get; set;}
         public DbSet<Dock> Dock {get; set;}
+        public DbSet<CargoManifest> CargoManifest {get; set;}
         
 
         public DddSample1DbContext(DbContextOptions options) : base(options)
