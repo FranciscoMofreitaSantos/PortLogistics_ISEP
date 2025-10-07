@@ -6,11 +6,11 @@ namespace SEM5_PI_WEBAPI.Domain.Containers;
 
 public enum ContainerType
 {
-    Dry,        
+    General,        
     Reefer,     
-    Tank,       
-    OpenTop,    
-    FlatRack  
+    Electronic,       
+    Hazmat,    
+    Oversized  
 }
 public enum ContainerStatus
 {

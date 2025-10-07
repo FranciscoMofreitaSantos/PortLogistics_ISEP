@@ -159,7 +159,7 @@ Accept: application/json
 {
   "isoCode": "MSCU1234567",
   "description": "Standard dry container with electronics",
-  "type": "Dry",
+  "type": "General",
   "weightKg": 12000
 }
 
@@ -171,7 +171,7 @@ Accept: application/json
 {
   "isoCode": "OOLU7654321",
   "description": "Reefer container for perishable goods",
-  "type": "Reefer",
+  "type": "General",
   "weightKg": 8500
 }
 
@@ -183,7 +183,7 @@ Accept: application/json
 {
   "isoCode": "HLCU9988776",
   "description": "Tank container carrying chemicals",
-  "type": "Tank",
+  "type": "General",
   "weightKg": 14500
 }
 
