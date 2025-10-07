@@ -20,8 +20,7 @@ public class QualificationsController : ControllerBase
     {
         return Ok(await _service.GetAllAsync());
     }
-
-    // GET: api/Products/5
+    
     [HttpGet("{id}")]
     public async Task<ActionResult<QualificationDto>> GetGetById(Guid id)
     {
@@ -47,6 +46,25 @@ public class QualificationsController : ControllerBase
         catch (BusinessRuleValidationException ex)
         {
             return BadRequest(new { Message = ex.Message });
+        }
+    }
+    
+    [HttpPatch("{id}")]
+    public async Task<ActionResult<QualificationDto>> Update(Guid id, CreatingQualificationDto dto)
+    {
+        try
+        {
+            var qualy = await _service.UpdateAsync(new QualificationId(id), dto);
+                
+            if (qualy == null)
+            {
+                return NotFound();
+            }
+            return Ok(qualy);
+        }
+        catch(BusinessRuleValidationException ex)
+        {
+            return BadRequest(new {Message = ex.Message});
         }
     }
 }

@@ -18,14 +18,14 @@ public class Qualification : Entity<QualificationId>, IAggregateRoot
         Id = new QualificationId(Guid.NewGuid());
     }
 
-    public void ChangeName(string newName)
+    public void UpdateName(string newName)
     {
         if (string.IsNullOrWhiteSpace(newName))
             throw new BusinessRuleValidationException("Name cannot be empty!");
         Name = newName;
     }
     
-    public void SetCode(string code)
+    public void UpdateCode(string code)
     {
         if (!System.Text.RegularExpressions.Regex.IsMatch(code, @"^[A-Z]{3}-\d{3}$"))
             throw new BusinessRuleValidationException("Invalid Qualification code format. Expected format: XXX-000 (3 letters followed by a hyphen and 3 digits).");

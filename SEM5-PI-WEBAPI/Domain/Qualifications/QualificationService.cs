@@ -41,12 +41,10 @@ public class QualificationService
     {
         var allCodes = await _repo.GetAllAsync();
 
-        var maxNumber = allCodes.Where(q => !string.IsNullOrEmpty(q.Code) && q.Code.StartsWith("Q-"))
-            .Select(q => int.Parse(q.Code.Substring(2)))
-            .DefaultIfEmpty(0)
-            .Max();
+        var maxNumber = allCodes.Where(q => !string.IsNullOrEmpty(q.Code))
+            .Select(q => int.Parse(q.Code.Substring(4))).Count();
 
-        string nextCode = $"QFL-{(maxNumber + 1).ToString("D3")}";
+        string nextCode = $"QLF-{(maxNumber + 1).ToString("D3")}";
         return nextCode;
     }
 
@@ -57,7 +55,7 @@ public class QualificationService
         string code = await GetCodeAsync(dto);
 
         var qualification = new Qualification(dto.Name);
-        qualification.SetCode(code);
+        qualification.UpdateCode(code);
 
         await _repo.AddAsync(qualification);
         await _unitOfWork.CommitAsync();
@@ -87,6 +85,23 @@ public class QualificationService
         }
 
         return await GenerateNextQualificationCodeAsync();
+    }
+
+    public async Task<QualificationDto?> UpdateAsync(QualificationId id, CreatingQualificationDto dto)
+    {
+        var qualification = await _repo.GetByIdAsync(id);
+        if (qualification == null) return null;
+        
+        if(dto.Code != null) {qualification.UpdateCode(FormatCode(dto.Code));}
+        if (dto.Name != null) {qualification.UpdateName(dto.Name);}
+        
+        await _unitOfWork.CommitAsync();
+        return MapToDto(qualification);
+    }
+
+    private static QualificationDto MapToDto(Qualification qualification)
+    {
+        return new QualificationDto(qualification.Id.AsGuid(), qualification.Name, qualification.Code);
     }
 
     private string FormatCode(string code)
