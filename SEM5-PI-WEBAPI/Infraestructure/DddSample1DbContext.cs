@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Domain.Containers;
+using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
@@ -12,6 +13,7 @@ using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Infraestructure.Containers;
+using SEM5_PI_WEBAPI.Infraestructure.Docks;
 using SEM5_PI_WEBAPI.Infraestructure.Qualifications;
 using SEM5_PI_WEBAPI.Infraestructure.StaffMembers;
 using SEM5_PI_WEBAPI.Infraestructure.StorageAreas;
@@ -32,6 +34,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure
         public DbSet<ShippingAgentRepresentative> ShippingAgentRepresentative { get; set; }
         public DbSet<EntityContainer> Container {get; set;}
         public DbSet<StorageArea> StorageArea {get; set;}
+        public DbSet<Dock> Dock {get; set;}
         
 
         public DddSample1DbContext(DbContextOptions options) : base(options)
@@ -49,6 +52,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure
             modelBuilder.ApplyConfiguration(new ShippingAgentRepresentativeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ContainerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StorageAreaEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DockEntityTypeConfiguration());
         }
     }
 }

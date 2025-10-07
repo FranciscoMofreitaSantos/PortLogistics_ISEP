@@ -246,3 +246,7 @@ Accept: application/json
 ###
 PATCH {{portURL}}/api/StaffMembers/a0f285f4-b361-4ca5-a31f-1bfc0ad34f54/toggle
 Accept: application/json
+
+###
+GET {{portURL}}/api/Dock
+Accept: application/json

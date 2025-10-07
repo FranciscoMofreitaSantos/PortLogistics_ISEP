@@ -1,0 +1,109 @@
+﻿using System.ComponentModel.DataAnnotations;
+using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
+using SEM5_PI_WEBAPI.Domain.VesselsTypes;
+
+namespace SEM5_PI_WEBAPI.Domain.Dock;
+
+public class Dock : Entity<DockId>, IAggregateRoot
+{
+    public DockCode Code { get; private set; }
+    [MaxLength(50)]
+    public string Location { get; private set; }
+    public double LengthM { get; private set; }
+    public double DepthM  { get; private set; }
+    public double MaxDraftM { get; private set; }
+
+    private readonly HashSet<VesselTypeId> _allowedVesselTypeIds = new(); 
+    public IReadOnlyCollection<VesselTypeId> AllowedVesselTypeIds => _allowedVesselTypeIds;
+
+    protected Dock() { }
+
+    public Dock(
+        DockCode code,
+        string location,
+        double lengthM,
+        double depthM,
+        double maxDraftM,
+        IEnumerable<VesselTypeId> allowedVesselTypes)
+    {
+        SetCode(code);
+        SetLocation(location);
+        SetLength(lengthM);
+        SetDepth(depthM);
+        SetMaxDraft(maxDraftM);
+        AddAllowedVesselTypes(allowedVesselTypes);
+        Id = new DockId(Guid.NewGuid());
+    }
+
+    public void SetCode(DockCode code) =>
+        Code = code ?? throw new BusinessRuleValidationException("Dock code cannot be null.");
+
+    public void SetLocation(string location)
+    {
+        if (string.IsNullOrWhiteSpace(location))
+            throw new BusinessRuleValidationException("Location is required.");
+        Location = location.Trim();
+    }
+
+    public void SetLength(double lengthM)
+    {
+        if (lengthM <= 0) throw new BusinessRuleValidationException("Length must be > 0.");
+        LengthM = Math.Round(lengthM, 2);
+    }
+
+    public void SetDepth(double depthM)
+    {
+        if (depthM <= 0) throw new BusinessRuleValidationException("Depth must be > 0.");
+        DepthM = Math.Round(depthM, 2);
+    }
+
+    public void SetMaxDraft(double maxDraftM)
+    {
+        if (maxDraftM <= 0) throw new BusinessRuleValidationException("Max draft must be > 0.");
+        MaxDraftM = Math.Round(maxDraftM, 2);
+    }
+
+    public void AllowVesselType(VesselTypeId vesselTypeId)
+    {
+        if (vesselTypeId.Value.Equals(Guid.Empty))
+            throw new BusinessRuleValidationException("VesselTypeId cannot be empty.");
+        _allowedVesselTypeIds.Add(vesselTypeId);
+    }
+
+    public void DisallowVesselType(VesselTypeId vesselTypeId)
+    {
+        if (_allowedVesselTypeIds.Count <= 1 && _allowedVesselTypeIds.Contains(vesselTypeId))
+            throw new BusinessRuleValidationException("A dock must allow at least one vessel type.");
+        _allowedVesselTypeIds.Remove(vesselTypeId);
+    }
+
+    public void ReplaceAllowedVesselTypes(IEnumerable<VesselTypeId> vesselTypeIds)
+    {
+        AddAllowedVesselTypes(vesselTypeIds, replace: true);
+    }
+
+    private void AddAllowedVesselTypes(IEnumerable<VesselTypeId> items, bool replace = false)
+    {
+        if (items is null) throw new BusinessRuleValidationException("Allowed vessel types are required.");
+
+        if (replace) _allowedVesselTypeIds.Clear();
+
+        int added = 0;
+        foreach (var vt in items)
+        {
+            if (vt is null || vt.Value.Equals(Guid.Empty))
+                throw new BusinessRuleValidationException("Invalid VesselTypeId.");
+            if (_allowedVesselTypeIds.Add(vt)) added++;
+        }
+
+        if (_allowedVesselTypeIds.Count == 0 && added == 0)
+            throw new BusinessRuleValidationException("A dock must allow at least one vessel type.");
+    }
+    
+    public void EnsureHasAllowedVesselTypes()
+    {
+        if (_allowedVesselTypeIds.Count == 0)
+            throw new BusinessRuleValidationException("At least one allowed vessel type is required for a dock.");
+    }
+}

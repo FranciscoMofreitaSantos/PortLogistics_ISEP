@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SEM5_PI_WEBAPI.Domain.Containers;
+using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.StaffMembers;
@@ -11,6 +12,7 @@ using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Domain.StorageAreas;
 using SEM5_PI_WEBAPI.Infraestructure;
 using SEM5_PI_WEBAPI.Infraestructure.Containers;
+using SEM5_PI_WEBAPI.Infraestructure.Docks;
 using SEM5_PI_WEBAPI.Infraestructure.Qualifications;
 using SEM5_PI_WEBAPI.Infraestructure.Shared;
 using SEM5_PI_WEBAPI.Infraestructure.StaffMembers;
@@ -94,6 +96,9 @@ namespace SEM5_PI_WEBAPI
             
             services.AddTransient<IStorageAreaRepository, StorageAreaRepository>();
             services.AddTransient<StorageAreaService>();
+
+            services.AddTransient<IDockRepository, DockRepository>();
+            services.AddTransient<DockService>();
         }
     }
 }
