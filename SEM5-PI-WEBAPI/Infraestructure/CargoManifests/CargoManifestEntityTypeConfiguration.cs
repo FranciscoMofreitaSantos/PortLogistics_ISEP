@@ -25,14 +25,14 @@ namespace SEM5_PI_WEBAPI.Infraestructure.CargoManifests
 
             builder.Property(c => c.SubmittedBy)
                 .IsRequired();
-            
-            builder.HasMany(typeof(CargoManifestEntry), "_containerEntries")
+
+            builder.HasMany(c => c.ContainerEntries)
                 .WithOne()
                 .HasForeignKey("CargoManifestId")
                 .IsRequired();
-            
-            builder.Metadata.FindNavigation(nameof(CargoManifest.ContainerEntries))
-                .SetPropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.Navigation(c => c.ContainerEntries)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }
