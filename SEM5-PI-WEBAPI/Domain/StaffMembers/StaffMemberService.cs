@@ -56,6 +56,12 @@ public class StaffMemberService
         return staff.ConvertAll(MapToDto);
     }
 
+    public async Task<List<StaffMemberDto>> GetByExactQualificationsAsync(List<QualificationId> ids)
+    {
+        var staff = await _repo.GetByExactQualificationsAsync(ids);
+        return staff.ConvertAll(MapToDto);
+    }
+
     public async Task<StaffMemberDto> AddAsync(CreatingStaffMemberDto dto)
     {
         await EnsureNotRepeatedAsync(dto.Email, dto.Phone, null);
@@ -191,7 +197,8 @@ public class StaffMemberService
             staff.Phone,
             staff.Schedule,
             staff.IsActive,
-            staff.Qualifications.Select(q => q.Id.AsGuid()).ToList()
-        );
+            staff.Qualifications != null
+                ? staff.Qualifications.Select(q => q.Id.AsGuid()).ToList()
+                : new List<Guid>());
     }
 }

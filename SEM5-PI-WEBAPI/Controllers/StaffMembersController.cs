@@ -35,19 +35,32 @@ public class StaffMembersController : ControllerBase
 
         return staff;
     }
-    
+
     [HttpGet("by-qualifications")]
-    public async Task<ActionResult<List<StaffMemberDto>>> GetByQualifications(List<Guid> ids)
+    public async Task<ActionResult<List<StaffMemberDto>>> GetByQualifications([FromQuery] List<Guid> ids)
     {
         if (ids == null || !ids.Any())
             return BadRequest("At least one qualification id must be provided.");
-        
+
         var qualificationIds = ids.Select(guid => new QualificationId(guid)).ToList();
         var staffList = await _service.GetByQualificationsAsync(qualificationIds);
 
         return Ok(staffList);
     }
-    
+
+
+    [HttpGet("by-exact-qualifications")]
+    public async Task<ActionResult<List<StaffMemberDto>>> GetByAllQualifications([FromQuery] List<Guid> ids)
+    {
+        if (ids == null || !ids.Any())
+            return BadRequest("At least one qualification id must be provided.");
+
+        var qualificationIds = ids.Select(guid => new QualificationId(guid)).ToList();
+        var staffList = await _service.GetByExactQualificationsAsync(qualificationIds);
+
+        return Ok(staffList);
+    }
+
     [HttpGet("mec/{mec}")]
     public async Task<ActionResult<StaffMemberDto>> GetByMecanographicNumber(string mec)
     {
@@ -56,7 +69,7 @@ public class StaffMembersController : ControllerBase
             return NotFound();
         return Ok(staff);
     }
-    
+
     [HttpGet("name/{name}")]
     public async Task<ActionResult<StaffMemberDto>> GetByName(string name)
     {
@@ -65,7 +78,7 @@ public class StaffMembersController : ControllerBase
             return NotFound();
         return Ok(staff);
     }
-    
+
     [HttpGet("status/{status}")]
     public async Task<ActionResult<IEnumerable<StaffMemberDto>>> GetByStatus(bool status)
     {
@@ -87,7 +100,7 @@ public class StaffMembersController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
-    
+
     [HttpPatch("{id}")]
     public async Task<ActionResult<StaffMemberDto>> Update(Guid id, UpdateStaffMemberDto dto)
     {
@@ -96,7 +109,7 @@ public class StaffMembersController : ControllerBase
             return NotFound();
         return Ok(updatedStaff);
     }
-    
+
     [HttpPatch("{id}/toggle")]
     public async Task<ActionResult<StaffMemberDto>> ToggleStatus(Guid id)
     {
@@ -105,6 +118,4 @@ public class StaffMembersController : ControllerBase
             return NotFound();
         return Ok(updatedStaff);
     }
-    
-    
 }

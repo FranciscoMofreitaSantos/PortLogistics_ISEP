@@ -57,4 +57,15 @@ public class StaffMemberRepository : BaseRepository<StaffMember, StaffMemberId>,
             .Where(s => s.Qualifications.Any(q => ids.Contains(q.Id)))
             .ToListAsync();
     }
+
+    public async Task<List<StaffMember>> GetByExactQualificationsAsync(List<QualificationId> ids)
+    {
+        return await _staffMembers
+            .Include(s => s.Qualifications)
+            .Where(s =>
+                s.Qualifications.Count == ids.Count &&
+                ids.All(qualId => s.Qualifications.Any(q => q.Id == qualId))
+            )
+            .ToListAsync();
+    }
 }
