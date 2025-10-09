@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using SEM5_PI_WEBAPI.Domain.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.CargoManifests;
+using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Infraestructure.Shared;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.CargoManifests;
@@ -7,6 +9,8 @@ namespace SEM5_PI_WEBAPI.Infraestructure.CargoManifests;
 public class CargoManifestRepository : BaseRepository<CargoManifest, CargoManifestId>, ICargoManifestRepository
 {
     private readonly DbSet<CargoManifest> _cargoManifests;
+    private readonly DbSet<CargoManifestEntry> _cargoManifestEntries;
+    private readonly DbSet<EntityContainer> _containers;
 
     public CargoManifestRepository(DddSample1DbContext context) : base(context.CargoManifest)
     {
@@ -22,5 +26,13 @@ public class CargoManifestRepository : BaseRepository<CargoManifest, CargoManife
     {
         return await _cargoManifests
             .FirstOrDefaultAsync(cm => cm.Code == code);
+    }
+
+    public async Task<List<CargoManifest>> GetAllAsync()
+    {
+        return await _cargoManifests
+            .Include(cm => cm.ContainerEntries)        
+            .ThenInclude(e => e.Container)           
+            .ToListAsync();
     }
 }
