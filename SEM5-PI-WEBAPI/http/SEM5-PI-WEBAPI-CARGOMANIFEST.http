@@ -6,11 +6,11 @@ GET {{baseURL}}
 Accept: application/json
 
 ###
-GET {{baseURL}}/
+GET {{baseURL}}/e0d04123-7b7f-43fe-a4c8-039721554371
 Accept: application/json
 
 ###
-GET {{baseURL}}/code/CODE123
+GET {{baseURL}}/code/CGM-0004
 Accept: application/json
 
 ###

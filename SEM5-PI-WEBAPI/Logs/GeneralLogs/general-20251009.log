@@ -290,3 +290,134 @@ ORDER BY "c"."Id", "s"."Id"
 [19:47:39 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/CargoManifest with 200 in 1386.636 ms
 [19:47:39 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/CargoManifest - 200 4068 application/json; charset=utf-8 1435.8256ms
 [19:47:50 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[19:49:18 INF]  - Starting web host
+[19:49:18 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[19:49:18 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[19:49:18 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[19:49:18 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[19:49:20 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/CargoManifest - null null
+[19:49:20 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[19:49:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[19:49:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/CargoManifest
+[19:49:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[19:49:20 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[19:49:20 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetAll (SEM5-PI-WEBAPI)'
+[19:49:20 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetAll", controller = "CargoManifest"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.IEnumerable`1[SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestDto]]] GetAll() on controller SEM5_PI_WEBAPI.Controllers.CargoManifestController (SEM5-PI-WEBAPI).
+[19:49:20 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetAll (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[19:49:22 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "c"."Id", "c"."Code", "c"."CreatedAt", "c"."SubmittedBy", "c"."Type", "s"."Id", "s"."Bay", "s"."CargoManifestId", "s"."ContainerId", "s"."Row", "s"."StorageAreaId", "s"."Tier", "s"."Id0", "s"."Description", "s"."Status", "s"."Type", "s"."WeightKg", "s"."IsoCode"
+FROM "CargoManifests" AS "c"
+LEFT JOIN (
+    SELECT "c0"."Id", "c0"."Bay", "c0"."CargoManifestId", "c0"."ContainerId", "c0"."Row", "c0"."StorageAreaId", "c0"."Tier", "c1"."Id" AS "Id0", "c1"."Description", "c1"."Status", "c1"."Type", "c1"."WeightKg", "c1"."IsoCode"
+    FROM "CargoManifestEntries" AS "c0"
+    INNER JOIN "Containers" AS "c1" ON "c0"."ContainerId" = "c1"."Id"
+) AS "s" ON "c"."Id" = "s"."CargoManifestId"
+ORDER BY "c"."Id", "s"."Id"
+[19:49:22 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetAll (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 1202.75ms.
+[19:49:22 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing ObjectResult, writing value of type 'System.Collections.Generic.List`1[[SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestDto, SEM5-PI-WEBAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[19:49:22 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetAll (SEM5-PI-WEBAPI) in 1400.9563ms
+[19:49:22 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetAll (SEM5-PI-WEBAPI)'
+[19:49:22 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/CargoManifest with 200 in 1427.063 ms
+[19:49:22 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/CargoManifest - 200 4068 application/json; charset=utf-8 1517.1877ms
+[19:49:36 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/CargoManifest/e0d04123-7b7f-43fe-a4c8-039721554371 - null null
+[19:49:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[19:49:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/CargoManifest/e0d04123-7b7f-43fe-a4c8-039721554371
+[19:49:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[19:49:36 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[19:49:36 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI)'
+[19:49:36 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetById", controller = "CargoManifest"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestDto]] GetById(System.Guid) on controller SEM5_PI_WEBAPI.Controllers.CargoManifestController (SEM5-PI-WEBAPI).
+[19:49:36 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[19:49:36 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (4ms) [Parameters=[@__id_0='?' (Size = 36)], CommandType='"Text"', CommandTimeout='30']
+SELECT "c"."Id", "c"."Code", "c"."CreatedAt", "c"."SubmittedBy", "c"."Type"
+FROM "CargoManifests" AS "c"
+WHERE @__id_0 = "c"."Id"
+LIMIT 1
+[19:49:36 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI) in 99.551ms
+[19:49:36 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI)'
+[19:49:36 ERR] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware      - An unhandled exception has occurred while executing the request.
+System.ArgumentNullException: Value cannot be null. (Parameter 'source')
+   at System.Linq.ThrowHelper.ThrowArgumentNullException(ExceptionArgument argument)
+   at System.Linq.Enumerable.Select[TSource,TResult](IEnumerable`1 source, Func`2 selector)
+   at SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestService.MapToDto(CargoManifest cargo) in /Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/CargoManifests/CargoManifestService.cs:line 79
+   at SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestService.GetByIdAsync(CargoManifestId id) in /Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/CargoManifests/CargoManifestService.cs:line 37
+   at SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById(Guid id) in /Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Controllers/CargoManifestController.cs:line 27
+   at lambda_method256(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Logged|12_1(ControllerActionInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware.InvokeAsync(HttpContext context) in /Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI/Domain/Shared/RequestLogsMiddleware.cs:line 23
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+[19:49:36 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/CargoManifest/e0d04123-7b7f-43fe-a4c8-039721554371 - 500 null text/plain; charset=utf-8 163.7646ms
+[19:49:43 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...
+[19:53:48 INF]  - Starting web host
+[19:53:48 INF] Microsoft.Hosting.Lifetime                                             - Now listening on: http://localhost:5008
+[19:53:48 INF] Microsoft.Hosting.Lifetime                                             - Application started. Press Ctrl+C to shut down.
+[19:53:48 INF] Microsoft.Hosting.Lifetime                                             - Hosting environment: Development
+[19:53:48 INF] Microsoft.Hosting.Lifetime                                             - Content root path: /Users/franciscosantos/Desktop/LEI-SEM5-PI-2025-26-3DJ-03/SEM5-PI-WEBAPI
+[19:53:53 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/CargoManifest/e0d04123-7b7f-43fe-a4c8-039721554371 - null null
+[19:53:53 WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware            - Failed to determine the https port for redirect.
+[19:53:53 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[19:53:53 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/CargoManifest/e0d04123-7b7f-43fe-a4c8-039721554371
+[19:53:53 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[19:53:53 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[19:53:53 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI)'
+[19:53:53 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetById", controller = "CargoManifest"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestDto]] GetById(System.Guid) on controller SEM5_PI_WEBAPI.Controllers.CargoManifestController (SEM5-PI-WEBAPI).
+[19:53:53 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[19:53:55 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (18ms) [Parameters=[@__id_0='?' (Size = 36)], CommandType='"Text"', CommandTimeout='30']
+SELECT "c2"."Id", "c2"."Code", "c2"."CreatedAt", "c2"."SubmittedBy", "c2"."Type", "s"."Id", "s"."Bay", "s"."CargoManifestId", "s"."ContainerId", "s"."Row", "s"."StorageAreaId", "s"."Tier", "s"."Id0", "s"."Description", "s"."Status", "s"."Type", "s"."WeightKg", "s"."IsoCode"
+FROM (
+    SELECT "c"."Id", "c"."Code", "c"."CreatedAt", "c"."SubmittedBy", "c"."Type"
+    FROM "CargoManifests" AS "c"
+    WHERE "c"."Id" = @__id_0
+    LIMIT 1
+) AS "c2"
+LEFT JOIN (
+    SELECT "c0"."Id", "c0"."Bay", "c0"."CargoManifestId", "c0"."ContainerId", "c0"."Row", "c0"."StorageAreaId", "c0"."Tier", "c1"."Id" AS "Id0", "c1"."Description", "c1"."Status", "c1"."Type", "c1"."WeightKg", "c1"."IsoCode"
+    FROM "CargoManifestEntries" AS "c0"
+    INNER JOIN "Containers" AS "c1" ON "c0"."ContainerId" = "c1"."Id"
+) AS "s" ON "c2"."Id" = "s"."CargoManifestId"
+ORDER BY "c2"."Id", "s"."Id"
+[19:53:55 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 1243.09ms.
+[19:53:55 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing ObjectResult, writing value of type 'SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestDto'.
+[19:53:55 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI) in 1435.2171ms
+[19:53:55 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetById (SEM5-PI-WEBAPI)'
+[19:53:55 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/CargoManifest/e0d04123-7b7f-43fe-a4c8-039721554371 with 200 in 1458.825 ms
+[19:53:55 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/CargoManifest/e0d04123-7b7f-43fe-a4c8-039721554371 - 200 452 application/json; charset=utf-8 1540.2382ms
+[19:54:12 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request starting HTTP/1.1 GET http://localhost:5008/api/CargoManifest/code/CGM-0004 - null null
+[19:54:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ┌───────────────────────────────────────────────
+[19:54:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ HTTP GET /api/CargoManifest/code/CGM-0004
+[19:54:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - │ From IP: 127.0.0.1
+[19:54:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - └───────────────────────────────────────────────
+[19:54:12 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executing endpoint 'SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetByCode (SEM5-PI-WEBAPI)'
+[19:54:12 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Route matched with {action = "GetByCode", controller = "CargoManifest"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestDto]] GetByCode(System.String) on controller SEM5_PI_WEBAPI.Controllers.CargoManifestController (SEM5-PI-WEBAPI).
+[19:54:12 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executing action method SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetByCode (SEM5-PI-WEBAPI) - Validation state: "Valid"
+[19:54:12 INF] Microsoft.EntityFrameworkCore.Database.Command                         - Executed DbCommand (0ms) [Parameters=[@__code_0='?' (Size = 8)], CommandType='"Text"', CommandTimeout='30']
+SELECT "c2"."Id", "c2"."Code", "c2"."CreatedAt", "c2"."SubmittedBy", "c2"."Type", "s"."Id", "s"."Bay", "s"."CargoManifestId", "s"."ContainerId", "s"."Row", "s"."StorageAreaId", "s"."Tier", "s"."Id0", "s"."Description", "s"."Status", "s"."Type", "s"."WeightKg", "s"."IsoCode"
+FROM (
+    SELECT "c"."Id", "c"."Code", "c"."CreatedAt", "c"."SubmittedBy", "c"."Type"
+    FROM "CargoManifests" AS "c"
+    WHERE "c"."Code" = @__code_0
+    LIMIT 1
+) AS "c2"
+LEFT JOIN (
+    SELECT "c0"."Id", "c0"."Bay", "c0"."CargoManifestId", "c0"."ContainerId", "c0"."Row", "c0"."StorageAreaId", "c0"."Tier", "c1"."Id" AS "Id0", "c1"."Description", "c1"."Status", "c1"."Type", "c1"."WeightKg", "c1"."IsoCode"
+    FROM "CargoManifestEntries" AS "c0"
+    INNER JOIN "Containers" AS "c1" ON "c0"."ContainerId" = "c1"."Id"
+) AS "s" ON "c2"."Id" = "s"."CargoManifestId"
+ORDER BY "c2"."Id", "s"."Id"
+[19:54:12 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action method SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetByCode (SEM5-PI-WEBAPI), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 43.8706ms.
+[19:54:12 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor           - Executing ObjectResult, writing value of type 'SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestDto'.
+[19:54:12 INF] Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker        - Executed action SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetByCode (SEM5-PI-WEBAPI) in 60.5088ms
+[19:54:12 INF] Microsoft.AspNetCore.Routing.EndpointMiddleware                        - Executed endpoint 'SEM5_PI_WEBAPI.Controllers.CargoManifestController.GetByCode (SEM5-PI-WEBAPI)'
+[19:54:12 INF] SEM5_PI_WEBAPI.Domain.Shared.RequestLogsMiddleware                     - ──────│ ✔ COMPLETED GET /api/CargoManifest/code/CGM-0004 with 200 in 68.767 ms
+[19:54:12 INF] Microsoft.AspNetCore.Hosting.Diagnostics                               - Request finished HTTP/1.1 GET http://localhost:5008/api/CargoManifest/code/CGM-0004 - 200 1352 application/json; charset=utf-8 80.8121ms
+[19:54:19 INF] Microsoft.Hosting.Lifetime                                             - Application is shutting down...

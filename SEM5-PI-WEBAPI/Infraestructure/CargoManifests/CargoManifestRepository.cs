@@ -22,17 +22,30 @@ public class CargoManifestRepository : BaseRepository<CargoManifest, CargoManife
         return await _cargoManifests.CountAsync();
     }
 
-    public async Task<CargoManifest> GetByCodeAsync(string code)
-    {
-        return await _cargoManifests
-            .FirstOrDefaultAsync(cm => cm.Code == code);
-    }
 
     public async Task<List<CargoManifest>> GetAllAsync()
     {
         return await _cargoManifests
-            .Include(cm => cm.ContainerEntries)        
-            .ThenInclude(e => e.Container)           
+            .Include(cm => cm.ContainerEntries)
+            .ThenInclude(e => e.Container)
             .ToListAsync();
+    }
+
+    public async Task<CargoManifest> GetByIdAsync(CargoManifestId id)
+    {
+        return await _cargoManifests
+            .Where(cm => cm.Id.Equals(id))
+            .Include(cm => cm.ContainerEntries)
+            .ThenInclude(e => e.Container)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<CargoManifest> GetByCodeAsync(string code)
+    {
+        return await _cargoManifests
+            .Where(cm => cm.Code.Equals(code))
+            .Include(cm => cm.ContainerEntries)
+            .ThenInclude(e => e.Container)
+            .FirstOrDefaultAsync();
     }
 }
