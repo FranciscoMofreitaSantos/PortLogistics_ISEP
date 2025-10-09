@@ -1,0 +1,60 @@
+@portURL = http://localhost:5008
+
+### --- STAFF MEMBERS ---
+
+###
+GET {{portURL}}/api/StaffMembers
+Accept: application/json
+
+###
+GET {{portURL}}/api/StaffMembers/by-qualifications?ids=0d868c4e-2c92-4d4d-9cab-70c549e839d0
+Accept: application/json
+
+###
+GET {{portURL}}/api/StaffMembers/by-exact-qualifications?ids=0d868c4e-2c92-4d4d-9cab-70c549e839d0&ids=d3419e74-9413-460e-916f-c420876c5dc6
+Accept: application/json
+
+
+
+###
+GET {{portURL}}/api/StaffMembers/6d5045ef-e932-425f-91cb-becd305312af
+Accept: application/json
+
+###
+GET {{portURL}}/api/StaffMembers/mec/1250001
+Accept: application/json
+
+###
+GET {{portURL}}/api/StaffMembers/name/Paulo Mendes
+Accept: application/json
+
+###
+GET {{portURL}}/api/StaffMembers/status/true
+Accept: application/json
+
+###
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Paulo Mendes",
+  "email": { "address": "mendy@gmail.com" },
+  "phone": { "number": "+351912345678" },
+  "schedule": { "shift": "Morning", "days": 31 },
+  "isActive": true,
+  "qualificationIds": ["d3419e74-9413-460e-916f-c420876c5dc6", "0d868c4e-2c92-4d4d-9cab-70c549e839d0"]
+}
+
+###
+PATCH {{portURL}}/api/StaffMembers/6d5045ef-e932-425f-91cb-becd305312af
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": { "address": "mendy-updated@gmail.com" }
+}
+
+###
+PATCH {{portURL}}/api/StaffMembers/6d5045ef-e932-425f-91cb-becd305312af/toggle
+Accept: application/json

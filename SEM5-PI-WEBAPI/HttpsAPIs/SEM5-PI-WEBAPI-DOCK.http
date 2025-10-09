@@ -1,0 +1,7 @@
+@portURL = http://localhost:5008
+
+### --- DOCK ---
+
+###
+GET {{portURL}}/api/Dock
+Accept: application/json
