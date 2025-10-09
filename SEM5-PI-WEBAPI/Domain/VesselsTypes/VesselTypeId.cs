@@ -1,32 +1,28 @@
-using System.Text.Json.Serialization;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
-namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
+namespace SEM5_PI_WEBAPI.Domain.VesselsTypes;
+
+public class VesselTypeId : EntityId
 {
-    public class VesselTypeId : EntityId
+    public VesselTypeId(Guid value) : base(value)
     {
-        [JsonConstructor]
-        public VesselTypeId(Guid value) : base(value)
-        {
-        }
-
-        public VesselTypeId(String value) : base(value)
-        {
-        }
-        
-        override
-            protected  Object createFromString(String text){
-            return new Guid(text);
-        }
-        
-        override
-            public String AsString(){
-            Guid obj = (Guid) base.ObjValue;
-            return obj.ToString();
-        }
-        public Guid AsGuid(){
-            return (Guid) base.ObjValue;
-        }
+        if (value == Guid.Empty)
+            throw new BusinessRuleValidationException("VesselTypeId cannot be empty.");
     }
-}
 
+    public VesselTypeId(string value) : base(value)
+    {
+        if (Guid.Parse(value) == Guid.Empty)
+            throw new BusinessRuleValidationException("VesselTypeId cannot be empty.");
+    }
+
+    protected override object createFromString(string text) => new Guid(text);
+
+    public override string AsString()
+    {
+        Guid obj = (Guid)ObjValue;
+        return obj.ToString();
+    }
+
+    public Guid AsGuid() => (Guid)ObjValue;
+}

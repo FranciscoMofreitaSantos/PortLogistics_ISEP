@@ -30,6 +30,10 @@ package "Physical Resources Aggregate" {
     class EquipmentType <<ValueObject>>
 }
 
+package "Application Services" {
+    interface IStorageAreaService
+}
+
 ' ---- Composition inside StorageArea ----
 StorageArea "1" --- "1" StorageAreaName : has >
 StorageArea "1" --- "1" StorageAreaType : has >
@@ -48,5 +52,10 @@ Dock "1" --- "1" DockCode : has >
 ' ---- Relationships between Aggregates ----
 StorageArea "1" --- "0..*" Container : stores >
 StorageArea "1" --- "0..*" PhysicalResource : uses >
+
+' ---- Service usage ----
+IStorageAreaService ..> StorageArea : manages >
+IStorageAreaService ..> Dock : references >
+IStorageAreaService ..> Container : references >
 
 @enduml

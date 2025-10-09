@@ -23,8 +23,7 @@ public class Vessel : Entity<VesselId>, IAggregateRoot
         SetImoNumber(imoNumber);
         SetName(name);
         SetOwner(owner);
-        
-        this.VesselTypeId = type;
+        SetVesselTypeId(type);
         this.Id = new VesselId(Guid.NewGuid());
     }
 
@@ -64,9 +63,9 @@ public class Vessel : Entity<VesselId>, IAggregateRoot
     
     
     public override bool Equals(object? obj) =>
-        obj is Vessel otherVessel && this.Id.Equals(otherVessel.Id) && this.ImoNumber.Equals(otherVessel.ImoNumber);
+        obj is Vessel otherVessel && this.ImoNumber.Value.Equals(otherVessel.ImoNumber.Value);
 
-    public override int GetHashCode() => Id.GetHashCode();
+    public override int GetHashCode() => ImoNumber.GetHashCode();
 
     public override string ToString() => $"Vessel [Name: {Name}, Owner Name: {Owner}, IMO Number: {ImoNumber}, Vessel Type ID: {VesselTypeId}]";
 
