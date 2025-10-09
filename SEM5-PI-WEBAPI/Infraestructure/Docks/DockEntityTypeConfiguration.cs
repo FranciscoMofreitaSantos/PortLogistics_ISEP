@@ -38,12 +38,6 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                     .IsRequired();
 
                 a.HasKey("DockId", "Value");
-
-                // (Opcional) criar FK real para a tabela VesselType
-                // a.HasOne<SEM5_PI_WEBAPI.Domain.VesselsTypes.VesselType>()
-                //  .WithMany()
-                //  .HasForeignKey("VesselTypeId")
-                //  .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Navigation(d => d.AllowedVesselTypeIds)

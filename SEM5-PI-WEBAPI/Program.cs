@@ -102,6 +102,21 @@ namespace SEM5_PI_WEBAPI
                         outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext,-55} - {Message:lj}{NewLine}{Exception}")
                 )
                 
+                
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByIncludingOnly(e=>
+                        e.Properties.ContainsKey("SourceContext") &&(
+                            e.Properties["SourceContext"].ToString().Contains("SEM5_PI_WEBAPI.Domain.Dock")
+                            ||
+                            e.Properties["SourceContext"].ToString().Contains("RequestLogsMiddleware")
+                            ||
+                            e.Properties["SourceContext"].ToString().Contains("SEM5_PI_WEBAPI.Controllers.DockController")
+                        )
+                    )
+                    .WriteTo.File("Logs/Dock/dock-.log",
+                        rollingInterval: RollingInterval.Day,
+                        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext,-55} - {Message:lj}{NewLine}{Exception}")
+                )
                 .CreateLogger();
 
 
