@@ -94,7 +94,7 @@ namespace SEM5_PI_WEBAPI
 
 
             services.AddTransient<IStorageAreaRepository, StorageAreaRepository>();
-            services.AddTransient<StorageAreaService>();
+            services.AddScoped<IStorageAreaService, StorageAreaService>();
 
             services.AddTransient<IDockRepository, DockRepository>();
             services.AddTransient<DockService>();

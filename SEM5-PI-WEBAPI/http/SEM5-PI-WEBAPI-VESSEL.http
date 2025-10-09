@@ -1,38 +1,58 @@
 @portURL = http://localhost:5008
 
-### --- VESSEL ---
+# --- VESSEL ---
 
 ###
-GET {{portURL}}/api/Vessel
+# 1. GET all vessels (list, possibly empty)
+GET {{portURL}}/api/vessel
 Accept: application/json
 
 ###
-GET {{portURL}}/api/Vessel/id/cbfa5eb4-7d11-4032-baeb-c2bdaa888ce6
+# 2. GET by Id - valid (replace GUID with an existing vessel)
+GET {{portURL}}/api/vessel/id/cbfa5eb4-7d11-4032-baeb-c2bdaa888ce6
 Accept: application/json
 
 ###
-GET {{portURL}}/api/Vessel/imo/imo 9706906
+# 3. GET by Id - not found
+GET {{portURL}}/api/vessel/id/00000000-0000-0000-0000-000000000000
 Accept: application/json
 
 ###
-GET {{portURL}}/api/Vessel/name/Ever Given
+# 4. GET by IMO - valid
+GET {{portURL}}/api/vessel/imo/IMO 9706906
 Accept: application/json
 
 ###
-GET {{portURL}}/api/Vessel/owner/Evergreen Marinee
+# 5. GET by IMO - invalid (wrong format)
+GET {{portURL}}/api/vessel/imo/9706906XYZ
 Accept: application/json
 
 ###
-PATCH http://localhost:5008/api/vessel/imo/IMO 9319466
-Content-Type: application/json
-
-{
-  "owner": "Evergreen Marine Ltdddd",
-  "name" : "Jo"
-}
+# 6. GET by Name - valid
+GET {{portURL}}/api/vessel/name/Ever Given
+Accept: application/json
 
 ###
-POST {{portURL}}/api/Vessel
+# 7. GET by Name - not found
+GET {{portURL}}/api/vessel/name/NonExistentVessel
+Accept: application/json
+
+###
+# 8. GET by Owner - valid
+GET {{portURL}}/api/vessel/owner/Evergreen Marine
+Accept: application/json
+
+###
+# 9. GET by Owner - not found
+GET {{portURL}}/api/vessel/owner/UnknownOwnerCo
+Accept: application/json
+
+
+# --- POST (Create) ---
+
+###
+# 10. POST Create - valid vessel
+POST {{portURL}}/api/vessel
 Content-Type: application/json
 Accept: application/json
 
@@ -44,19 +64,21 @@ Accept: application/json
 }
 
 ###
-POST {{portURL}}/api/Vessel
+# 11. POST Create - valid vessel (MSC)
+POST {{portURL}}/api/vessel
 Content-Type: application/json
 Accept: application/json
 
 {
-  "imoNumber": "9399014",
-  "name": "MSC Gulsun",
+  "imoNumber": "IMO 9399014",
+  "name": "MSC Gülsün",
   "owner": "Mediterranean Shipping Company",
   "vesselTypeId": "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
 }
 
 ###
-POST {{portURL}}/api/Vessel
+# 12. POST Create - valid vessel (OOCL)
+POST {{portURL}}/api/vessel
 Content-Type: application/json
 Accept: application/json
 
@@ -65,4 +87,73 @@ Accept: application/json
   "name": "OOCL Hong Kong",
   "owner": "OOCL",
   "vesselTypeId": "c7798221-c758-47fd-a343-21d49b78c806"
+}
+
+
+###
+# 13. POST Create - duplicate IMO (should fail)
+POST {{portURL}}/api/vessel
+Content-Type: application/json
+Accept: application/json
+
+{
+  "imoNumber": "IMO 9319466", 
+  "name": "Duplicate Ever Given",
+  "owner": "Evergreen Marine",
+  "vesselTypeId": "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
+}
+
+###
+# 14. POST Create - missing required field (name)
+POST {{portURL}}/api/vessel
+Content-Type: application/json
+Accept: application/json
+
+{
+  "imoNumber": "IMO 9999999",
+  "owner": "NoName Shipping",
+  "vesselTypeId": "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
+}
+
+###
+# 15. POST Create - invalid IMO format
+POST {{portURL}}/api/vessel
+Content-Type: application/json
+Accept: application/json
+
+{
+  "imoNumber": "12345", 
+  "name": "Invalid IMO",
+  "owner": "Bad Company",
+  "vesselTypeId": "c7798221-c758-47fd-a343-21d49b78c806"
+}
+
+
+# --- PATCH (Update) ---
+###
+# 16. PATCH existing vessel by IMO - valid
+PATCH {{portURL}}/api/vessel/imo/IMO 9319466
+Content-Type: application/json
+
+{
+  "owner": "Evergreen Marine Ltd",
+  "name": "Ever Given Updated"
+}
+###
+# 17. PATCH non-existing vessel (should fail)
+PATCH {{portURL}}/api/vessel/imo/IMO 0000000
+Content-Type: application/json
+
+{
+  "owner": "NonExistent Owner",
+  "name": "Ghost Vessel"
+}
+###
+# 18. PATCH with invalid data (too short name)
+PATCH {{portURL}}/api/vessel/imo/IMO 9319466
+Content-Type: application/json
+
+{
+  "owner": "Evergreen Marine Ltd",
+  "name": "X"
 }

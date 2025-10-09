@@ -1,36 +1,67 @@
 @portURL = http://localhost:5008
 
-### --- VESSEL TYPE ---
+# --- VESSEL TYPE ---
 
 ###
+# 1. GET all vessel types
 GET {{portURL}}/api/VesselType
 Accept: application/json
 
 ###
+# 2. GET by Id - válido (GUID existente)
 GET {{portURL}}/api/VesselType/id/b928c0c9-90c8-4e41-9a6d-59ec1ffef048
 Accept: application/json
 
 ###
+# 3. GET by Id - inválido / inexistente
+GET {{portURL}}/api/VesselType/id/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+# 4. GET by Name - válido
 GET {{portURL}}/api/VesselType/name/Panamax
 Accept: application/json
 
 ###
+# 5. GET by Name - inexistente
+GET {{portURL}}/api/VesselType/name/UltraLargeNonExisting
+Accept: application/json
+
+###
+# 6. GET by Description - válido
 GET {{portURL}}/api/VesselType/description/size vessel
 Accept: application/json
 
 ###
+# 7. GET by Description - inexistente
+GET {{portURL}}/api/VesselType/description/xyzNotFound
+Accept: application/json
+
+###
+# 8. GET filter by name (partial match)
 GET {{portURL}}/api/vesseltype/filter?name=pan
 Accept: application/json
 
 ###
+# 9. GET filter by description (partial match)
 GET {{portURL}}/api/vesseltype/filter?description=medium
 Accept: application/json
 
 ###
+# 10. GET filter by query (general search)
 GET {{portURL}}/api/vesseltype/filter?query=feed
 Accept: application/json
 
 ###
+# 11. GET filter sem resultados
+GET {{portURL}}/api/vesseltype/filter?name=NotExistingType
+Accept: application/json
+
+
+# --- POST (Create) ---
+
+###
+# 12. POST Create - válido
 POST {{portURL}}/api/VesselType
 Content-Type: application/json
 Accept: application/json
@@ -41,4 +72,56 @@ Accept: application/json
   "maxBays": 20,
   "maxRows": 15,
   "maxTiers": 10
+}
+
+###
+# 13. POST Create - outro válido
+POST {{portURL}}/api/VesselType
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Post-Panamax",
+  "description": "Wider than Panamax, requires larger locks",
+  "maxBays": 25,
+  "maxRows": 18,
+  "maxTiers": 12
+}
+
+###
+# 14. POST Create - duplicado (mesmo nome)
+POST {{portURL}}/api/VesselType
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Panamax",
+  "description": "Duplicate attempt",
+  "maxBays": 15,
+  "maxRows": 10,
+  "maxTiers": 8
+}
+
+###
+# 15. POST Create - faltam campos obrigatórios
+POST {{portURL}}/api/VesselType
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Invalid - missing name"
+}
+
+###
+# 16. POST Create - valores inválidos (negativos)
+POST {{portURL}}/api/VesselType
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "InvalidType",
+  "description": "Negative capacity test",
+  "maxBays": -5,
+  "maxRows": 0,
+  "maxTiers": -1
 }

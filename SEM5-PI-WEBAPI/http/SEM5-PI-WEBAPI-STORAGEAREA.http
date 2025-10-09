@@ -1,42 +1,146 @@
 @portURL = http://localhost:5008
 
-### --- STORAGE AREAS ---
+# --- STORAGE AREAS ---
 
 ###
-GET http://localhost:5008/api/storageareas
+# 1. GET all (should return list, even empty)
+GET {{portURL}}/api/storageareas
 Accept: application/json
 
 ###
-GET http://localhost:5008/api/storageareas/id/GUID_AQUI
+# 2. GET by Id - Valid (Replace GUID after creating one)
+GET {{portURL}}/api/storageareas/id/27ac8087-e4a4-48c7-9bd8-017cf9c1223c
 Accept: application/json
 
 ###
-GET http://localhost:5008/api/storageareas/name/Yard%20A
+# 3. GET by Id - Invalid (non-existing GUID)
+GET {{portURL}}/api/storageareas/id/00000000-0000-0000-0000-000000000000
 Accept: application/json
 
 ###
-GET http://localhost:5008/api/storageareas/distances?name=Yard%20A
+# 4. GET by Name - Valid
+GET {{portURL}}/api/storageareas/name/Yard A
 Accept: application/json
 
 ###
-GET http://localhost:5008/api/storageareas/distances?id=GUID_AQUI
+# 5. GET by Name - Invalid (not found)
+GET {{portURL}}/api/storageareas/name/UnknownYard
 Accept: application/json
 
+###
+# 6. GET Distances by Name - Valid
+GET {{portURL}}/api/storageareas/distances?name=Yard A
+Accept: application/json
 
 ###
-POST http://localhost:5008/api/storageareas
+# 7. GET Distances by Id - Valid (replace Id)
+GET {{portURL}}/api/storageareas/distances?id=27ac8087-e4a4-48c7-9bd8-017cf9c1223c
+Accept: application/json
+
+###
+# 8. GET Distances - Invalid (no match)
+GET {{portURL}}/api/storageareas/distances?name=UnknownYard
+Accept: application/json
+
+###
+# 9. POST Create - Valid
+POST {{portURL}}/api/storageareas
 Content-Type: application/json
 Accept: application/json
 
 {
-  "name": "Yard A",
-  "description": "Main yard near Dock 1",
+  "name": "Yard B",
+  "description": "Secondary yard near Dock 2",
   "type": "Yard",
-  "maxBays": 5,
-  "maxRows": 4,
-  "maxTiers": 3,
+  "maxBays": 3,
+  "maxRows": 2,
+  "maxTiers": 2,
   "distancesToDocks": [
-    { "dockCode": "DK-0001", "distance": 0.5 },
-    { "dockCode": "DK-0002", "distance": 1.2 }
+    { "dockCode": "DK-0003", "distance": 0.7 }
   ]
+}
+
+###
+# 10. POST Create - Invalid (Name too short)
+POST {{portURL}}/api/storageareas
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "YA", 
+  "description": "Invalid yard",
+  "type": "Yard",
+  "maxBays": 2,
+  "maxRows": 2,
+  "maxTiers": 2,
+  "distancesToDocks": []
+}
+
+###
+# 11. POST Create - Invalid (Description too long)
+POST {{portURL}}/api/storageareas
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Yard C",
+  "description": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "type": "Yard",
+  "maxBays": 2,
+  "maxRows": 2,
+  "maxTiers": 2,
+  "distancesToDocks": []
+}
+
+###
+# 12. POST Create - Invalid (Duplicate Dock Code in same request)
+POST {{portURL}}/api/storageareas
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Yard D",
+  "description": "Duplicate docks test",
+  "type": "Yard",
+  "maxBays": 2,
+  "maxRows": 2,
+  "maxTiers": 2,
+  "distancesToDocks": [
+    { "dockCode": "DK-0005", "distance": 1.1 },
+    { "dockCode": "DK-0005", "distance": 2.2 }
+  ]
+}
+
+###
+# 13. POST Create - Invalid (Negative distance)
+POST {{portURL}}/api/storageareas
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Yard E",
+  "description": "Negative distance test",
+  "type": "Yard",
+  "maxBays": 2,
+  "maxRows": 2,
+  "maxTiers": 2,
+  "distancesToDocks": [
+    { "dockCode": "DK-0006", "distance": -1.0 }
+  ]
+}
+
+###
+# 14. POST Create - Invalid (Invalid type)
+POST {{portURL}}/api/storageareas
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Yard F",
+  "description": "Wrong type test",
+  "type": "InvalidType", 
+  "maxBays": 2,
+  "maxRows": 2,
+  "maxTiers": 2,
+  "distancesToDocks": []
 }

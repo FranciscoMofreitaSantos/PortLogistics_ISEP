@@ -21,16 +21,20 @@ namespace SEM5_PI_WEBAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<VesselTypeDto>>> GetAll()
         {
-            _logger.LogInformation("API Request: Get All Vessels Types on DataBase");
-            
-            var listVesselTypeDtos = await _service.GetAllAsync();
-            
-            if (listVesselTypeDtos.Count > 0) 
+            try
+            {
+                _logger.LogInformation("API Request: Get All Vessels Types on DataBase");
+                var listVesselTypeDtos = await _service.GetAllAsync();
                 _logger.LogWarning("API Response (200): A total of {count} were found -> {@VesselTypes}", listVesselTypeDtos.Count, listVesselTypeDtos);
-            else 
-                _logger.LogWarning("API Response (400): No Vessels found on DataBase"); 
-            
-            return Ok(listVesselTypeDtos);
+
+                return Ok(listVesselTypeDtos);
+
+            }
+            catch (BusinessRuleValidationException e)
+            {
+                _logger.LogWarning("API Response (404): No Vessels Types found on DataBase");
+                return NotFound(e.Message);
+            }
         }
 
         [HttpGet("id/{id:guid}")]
