@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using SEM5_PI_WEBAPI.Domain.CargoManifestEntries;
-using SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.CargoManifests

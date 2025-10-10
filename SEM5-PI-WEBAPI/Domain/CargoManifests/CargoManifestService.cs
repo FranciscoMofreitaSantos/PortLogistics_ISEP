@@ -13,20 +13,24 @@ public class CargoManifestService
     private readonly ICargoManifestRepository _repo;
     private readonly IContainerRepository _repoContainer;
     private readonly ICargoManifestEntryRepository _repoCargoManifestEntry;
+    private readonly IStorageAreaRepository _repoStorageArea;
 
     public CargoManifestService(IUnitOfWork unitOfWork, ICargoManifestRepository repo,
-        IContainerRepository repoContainer, ICargoManifestEntryRepository repoCargoManifestEntry)
+        IContainerRepository repoContainer, ICargoManifestEntryRepository repoCargoManifestEntry,
+        IStorageAreaRepository repoStorageArea)
     {
         _unitOfWork = unitOfWork;
         _repo = repo;
         _repoCargoManifestEntry = repoCargoManifestEntry;
         _repoContainer = repoContainer;
+        _repoStorageArea = repoStorageArea;
     }
 
     public async Task<List<CargoManifestDto>> GetAllAsync()
     {
         var manifests = await _repo.GetAllAsync();
-        return manifests.Select(MapToDto).ToList();
+        var dtoTasks = manifests.Select(manifest => MapToDtoAsync(manifest));
+        return (await Task.WhenAll(dtoTasks)).ToList();
     }
 
     public async Task<CargoManifestDto> GetByIdAsync(CargoManifestId id)
@@ -34,7 +38,7 @@ public class CargoManifestService
         var manifest = await _repo.GetByIdAsync(id);
         if (manifest == null)
             throw new BusinessRuleValidationException("CargoManifest not found.");
-        return MapToDto(manifest);
+        return await MapToDtoAsync(manifest);
     }
 
     public async Task<CargoManifestDto> GetByCodeAsync(string code)
@@ -42,7 +46,7 @@ public class CargoManifestService
         var manifest = await _repo.GetByCodeAsync(code);
         if (manifest == null)
             throw new BusinessRuleValidationException("CargoManifest not found.");
-        return MapToDto(manifest);
+        return await MapToDtoAsync(manifest);
     }
 
     public async Task<CargoManifestDto> AddAsync(CreatingCargoManifestDto dto)
@@ -53,54 +57,62 @@ public class CargoManifestService
         foreach (var entryDto in dto.Entries)
         {
             var container = await _repoContainer.GetByIsoNumberAsync(new Iso6346Code(entryDto.Container.IsoCode))
-                            ?? new EntityContainer(entryDto.Container.IsoCode, entryDto.Container.Description,
-                                entryDto.Container.Type, entryDto.Container.WeightKg);
+                            ?? new EntityContainer(
+                                entryDto.Container.IsoCode,
+                                entryDto.Container.Description,
+                                entryDto.Container.Type,
+                                entryDto.Container.WeightKg
+                            );
 
             if (container.Id == null)
                 await _repoContainer.AddAsync(container);
 
             var entry = new CargoManifestEntry(container, new StorageAreaId(entryDto.StorageAreaId), entryDto.Bay,
-                entryDto.Row,
-                entryDto.Tier);
+                entryDto.Row, entryDto.Tier);
             entries.Add(entry);
         }
 
-        var cargoManifest =
-            new CargoManifest(entries, genCode, dto.Type, DateTime.UtcNow, dto.CreatedBy);
+        var cargoManifest = new CargoManifest(entries, genCode, dto.Type, DateTime.UtcNow, dto.CreatedBy);
 
         await _repo.AddAsync(cargoManifest);
         await _unitOfWork.CommitAsync();
-        return MapToDto(cargoManifest);
+        return await MapToDtoAsync(cargoManifest);
     }
 
 
-    private static CargoManifestDto MapToDto(CargoManifest cargo)
+    private async Task<CargoManifestDto> MapToDtoAsync(CargoManifest cargo)
     {
+        var entryDtos = new List<CargoManifestEntryDto>();
+        foreach (var entry in cargo.ContainerEntries)
+        {
+            var storageArea = await _repoStorageArea.GetByIdAsync(entry.StorageAreaId);
+            entryDtos.Add(new CargoManifestEntryDto(
+                entry.Id.AsGuid(),
+                entry.Bay,
+                entry.Row,
+                entry.Tier,
+                storageArea.Name,
+                new ContainerDto(
+                    entry.Container.Id.AsGuid(),
+                    entry.Container.ISOId,
+                    entry.Container.Description,
+                    entry.Container.Type,
+                    entry.Container.Status,
+                    entry.Container.WeightKg
+                )
+            ));
+        }
+
         return new CargoManifestDto(
             cargo.Id.AsGuid(),
             cargo.Code,
             cargo.Type,
             cargo.CreatedAt,
             cargo.SubmittedBy,
-            cargo.ContainerEntries.Select(entry =>
-                new CargoManifestEntryDto(
-                    entry.Id.AsGuid(),
-                    entry.Bay,
-                    entry.Row,
-                    entry.Tier,
-                    entry.StorageAreaId.AsGuid(),
-                    new ContainerDto(
-                        entry.Container.Id.AsGuid(),
-                        entry.Container.ISOId,
-                        entry.Container.Description,
-                        entry.Container.Type,
-                        entry.Container.Status,
-                        entry.Container.WeightKg
-                    )
-                )
-            ).ToList()
+            entryDtos
         );
     }
+
 
     private async Task<string> GenerateNextCargoManifestCodeAsync()
     {
