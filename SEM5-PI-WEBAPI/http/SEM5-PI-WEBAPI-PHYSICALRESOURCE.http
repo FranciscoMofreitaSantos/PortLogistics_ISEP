@@ -1,0 +1,35 @@
+﻿@portURL = http://localhost:5008
+
+### 🟢 Get all resources
+GET {{portURL}}/api/PhysicalResource
+Accept: application/json
+
+
+### 🟢 Create new resource
+POST {{portURL}}/api/PhysicalResource
+Content-Type: application/json
+Accept: application/json
+
+{
+  "code": "CRN001",
+  "description": "Dock Crane A",
+  "operationalCapacity": 25.5,
+  "setupTime": 10,
+  "physicalResourceType": "Other",
+  "status": "Available",
+  "qualificationID": "8236cc32-ae96-4e87-b5ab-d1d90fe1c087"
+}
+
+
+### 🟡 Update resource (example)
+PUT {{portURL}}/api/PhysicalResource/{{resourceId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Updated Dock Crane A",
+  "operationalCapacity": 28.0,
+  "setupTime": 15,
+  "status": "UnderMaintenance"
+}
+
