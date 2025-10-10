@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using SEM5_PI_WEBAPI.Domain.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.CargoManifests;
 using SEM5_PI_WEBAPI.Domain.Containers;
+using SEM5_PI_WEBAPI.Domain.CrewManifests;
+using SEM5_PI_WEBAPI.Domain.CrewMembers;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
@@ -14,6 +16,8 @@ using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Infraestructure.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Infraestructure.CargoManifests;
 using SEM5_PI_WEBAPI.Infraestructure.Containers;
+using SEM5_PI_WEBAPI.Infraestructure.CrewManifests;
+using SEM5_PI_WEBAPI.Infraestructure.CrewMembers;
 using SEM5_PI_WEBAPI.Infraestructure.Docks;
 using SEM5_PI_WEBAPI.Infraestructure.PhysicalResources;
 using SEM5_PI_WEBAPI.Infraestructure.Qualifications;
@@ -40,6 +44,8 @@ namespace SEM5_PI_WEBAPI.Infraestructure
         public DbSet<CargoManifest> CargoManifest { get; set; }
         public DbSet<CargoManifestEntry> CargoManifestEntry { get; set; }
         public DbSet<EntityPhysicalResource> PhysicalResources { get; set; }
+        public DbSet<CrewManifest> CrewManifests { get; set; }
+        public DbSet<CrewMember> CrewMembers { get; set; }
 
 
         public DddSample1DbContext(DbContextOptions options) : base(options)
@@ -60,6 +66,8 @@ namespace SEM5_PI_WEBAPI.Infraestructure
             modelBuilder.ApplyConfiguration(new CargoManifestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CargoManifestEntryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PhysicalResourceEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CrewManifestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CrewMemberEntityTypeConfiguration());
         }
     }
 }
