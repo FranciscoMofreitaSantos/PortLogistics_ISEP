@@ -141,6 +141,43 @@ namespace SEM5_PI_WEBAPI.Migrations
                     b.ToTable("Dock");
                 });
 
+            modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.PhysicalResources.EntityPhysicalResource", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("OperationalCapacity")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("QualificationID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("SetupTime")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PhysicalResources");
+                });
+
             modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.Qualifications.Qualification", b =>
                 {
                     b.Property<string>("Id")

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
@@ -41,5 +42,11 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Shared
         {
             this._objs.Remove(obj);
         }
+        
+        public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _objs.AnyAsync(predicate);
+        }
+
     }
 }
