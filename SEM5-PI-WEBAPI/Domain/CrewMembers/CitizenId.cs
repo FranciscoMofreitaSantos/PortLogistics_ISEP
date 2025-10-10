@@ -1,10 +1,9 @@
-using System;
 using System.Text.RegularExpressions;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.CrewMembers;
 
-public class CitizenId
+public class CitizenId : IValueObject
 {
     private static readonly Regex PassportPattern = new(@"^[A-Za-z0-9]{6,9}$");
 
