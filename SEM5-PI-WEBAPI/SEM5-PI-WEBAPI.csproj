@@ -29,6 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Domain\PhysicalResources\DTOs\" />
+    <Folder Include="Infraestructure\PhysicalResources\" />
     <Folder Include="Logs\" />
     <Folder Include="Logs\Containers\" />
     <Folder Include="Logs\GeneralLogs\" />
@@ -42,6 +44,14 @@
     <None Remove="HttpsAPIs\SEM5-PI-WEBAPI-QUALIFICATION.http" />
     <None Remove="HttpsAPIs\SEM5-PI-WEBAPI-STORAGEAREA.http" />
     <None Remove="HttpsAPIs\SEM5-PI-WEBAPI-VESSEL.http" />
+    <None Remove="Scripts\DataBase-Script-Windows.sh" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Infraestructure\PhysicalResources\PhysicalResourceEntityTypeConfiguration.cs" />
+    <Compile Remove="Domain\PhysicalResources\PhysicalResource.cs" />
+    <Compile Remove="Migrations\20251008211528_Initial.cs" />
+    <Compile Remove="Migrations\20251008211528_Initial.Designer.cs" />
   </ItemGroup>
 
 </Project>

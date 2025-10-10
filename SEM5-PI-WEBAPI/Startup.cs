@@ -4,6 +4,7 @@ using SEM5_PI_WEBAPI.Domain.CargoManifests;
 using SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Domain.Dock;
+using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.StaffMembers;
@@ -17,6 +18,7 @@ using SEM5_PI_WEBAPI.Infraestructure.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Infraestructure.CargoManifests;
 using SEM5_PI_WEBAPI.Infraestructure.Containers;
 using SEM5_PI_WEBAPI.Infraestructure.Docks;
+using SEM5_PI_WEBAPI.Infraestructure.PhysicalResources;
 using SEM5_PI_WEBAPI.Infraestructure.Qualifications;
 using SEM5_PI_WEBAPI.Infraestructure.Shared;
 using SEM5_PI_WEBAPI.Infraestructure.StaffMembers;
@@ -103,6 +105,9 @@ namespace SEM5_PI_WEBAPI
             services.AddTransient<IContainerRepository, ContainerRepository>();
             services.AddTransient<ICargoManifestEntryRepository, CargoManifestEntryRepository>();
             services.AddTransient<CargoManifestService>();
+            
+            services.AddTransient<IPhysicalResourceRepository, PhysicalResourceRepository>();
+            services.AddTransient<PhysicalResourceService>();
         }
     }
 }
