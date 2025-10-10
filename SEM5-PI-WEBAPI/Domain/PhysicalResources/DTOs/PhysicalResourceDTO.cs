@@ -1,12 +1,13 @@
 ﻿using SEM5_PI_WEBAPI.Domain.BusinessShared;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Domain.PhysicalResources.DTOs;
 
 public class PhysicalResourceDTO
 {
     public Guid Id { get; set; }
-    public string Code { get; set; }
+    public PhysicalResourceCode Code { get; set; }
     public string Description { get; set; }
     public double OperationalCapacity { get; set; }
     public double SetupTime { get; set; }
@@ -17,7 +18,7 @@ public class PhysicalResourceDTO
     
     public PhysicalResourceDTO(
         Guid id,
-        string code,
+        PhysicalResourceCode code,
         string description,
         double operationalCapacity,
         double setupTime,

@@ -9,4 +9,5 @@ public interface IStorageAreaService
     Task<StorageAreaDto> GetByNameAsync(string name);
     Task<List<StorageAreaDockDistanceDto>> GetDistancesToDockAsync(string? name, StorageAreaId? id);
     Task<StorageAreaDto> CreateAsync(CreatingStorageAreaDto dto);
+    Task<List<string>> GetPhysicalResourcesAsync(string? name, StorageAreaId? id);
 }

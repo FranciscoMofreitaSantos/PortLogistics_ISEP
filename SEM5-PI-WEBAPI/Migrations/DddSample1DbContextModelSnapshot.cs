@@ -146,11 +146,6 @@ namespace SEM5_PI_WEBAPI.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -485,6 +480,30 @@ namespace SEM5_PI_WEBAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.PhysicalResources.EntityPhysicalResource", b =>
+                {
+                    b.OwnsOne("SEM5_PI_WEBAPI.Domain.ValueObjects.PhysicalResourceCode", "Code", b1 =>
+                        {
+                            b1.Property<string>("EntityPhysicalResourceId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Code");
+
+                            b1.HasKey("EntityPhysicalResourceId");
+
+                            b1.ToTable("PhysicalResources");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EntityPhysicalResourceId");
+                        });
+
+                    b.Navigation("Code")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations.ShippingAgentOrganization", b =>
                 {
                     b.OwnsOne("SEM5_PI_WEBAPI.Domain.ValueObjects.TaxNumber", "Taxnumber", b1 =>
@@ -584,6 +603,31 @@ namespace SEM5_PI_WEBAPI.Migrations
 
             modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.StorageAreas.StorageArea", b =>
                 {
+                    b.OwnsMany("SEM5_PI_WEBAPI.Domain.ValueObjects.PhysicalResourceCode", "PhysicalResources", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("StorageAreaId")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("PhysicalResourceCode");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("StorageAreaId");
+
+                            b1.ToTable("StorageAreas_PhysicalResources");
+
+                            b1.WithOwner()
+                                .HasForeignKey("StorageAreaId");
+                        });
+
                     b.OwnsMany("SEM5_PI_WEBAPI.Domain.ValueObjects.StorageAreaDockDistance", "DistancesToDocks", b1 =>
                         {
                             b1.Property<Guid>("Id")
@@ -630,6 +674,8 @@ namespace SEM5_PI_WEBAPI.Migrations
                         });
 
                     b.Navigation("DistancesToDocks");
+
+                    b.Navigation("PhysicalResources");
                 });
 
             modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.Vessels.Vessel", b =>

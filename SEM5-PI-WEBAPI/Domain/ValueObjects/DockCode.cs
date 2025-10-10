@@ -9,6 +9,8 @@ public class DockCode : IValueObject
 
     private static readonly Regex Pattern = new(@"^DK-\d{4}$", RegexOptions.Compiled);
 
+    public DockCode(){}
+    
     public DockCode(string value)
     {
         if (string.IsNullOrWhiteSpace(value))

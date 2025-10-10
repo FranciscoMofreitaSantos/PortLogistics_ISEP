@@ -1,3 +1,4 @@
+using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
@@ -26,6 +27,8 @@ public class StorageArea : Entity<StorageAreaId>, IAggregateRoot
     public int MaxCapacityTeu => MaxBays * MaxRows * MaxTiers;
     public int CurrentCapacityTeu { get; private set; }
 
+    public List<PhysicalResourceCode> PhysicalResources { get; private set; }
+
     private readonly List<StorageAreaDockDistance> _distancesToDocks = new();
     public IReadOnlyCollection<StorageAreaDockDistance> DistancesToDocks => _distancesToDocks.AsReadOnly();
 
@@ -34,22 +37,27 @@ public class StorageArea : Entity<StorageAreaId>, IAggregateRoot
     protected StorageArea() { }
 
     public StorageArea(string name, string? description, StorageAreaType type,
-        int maxBays, int maxRows, int maxTiers, IEnumerable<StorageAreaDockDistance> distancesToDocks)
+        int maxBays, int maxRows, int maxTiers, IEnumerable<StorageAreaDockDistance> distancesToDocks, List<PhysicalResourceCode> physicalResources)
     {
         SetName(name);
         SetDescription(description);
+        SetType(type);
 
-        Type = type;
         MaxBays = maxBays;
         MaxRows = maxRows;
         MaxTiers = maxTiers;
 
         _distancesToDocks.AddRange(distancesToDocks);
+        PhysicalResources = physicalResources?.ToList() ?? new List<PhysicalResourceCode>();
         CurrentCapacityTeu = 0;
 
         _grid = new Iso6346Code[MaxBays, MaxRows, MaxTiers];
         this.Id = new StorageAreaId(Guid.NewGuid());
     }
+    
+    public void ChangeDescription(string description) => SetDescription(description);
+    public void AddPhysicalResources(IEnumerable<PhysicalResourceCode> physicalResources) => AggPhysicalResources(physicalResources);
+    public void RemovePhysicalResources(IEnumerable<PhysicalResourceCode> physicalResources) => RmvPhysicalResources(physicalResources);
     
 
     public void PlaceContainer(Iso6346Code containerIso, int bay, int row, int tier)
@@ -106,8 +114,7 @@ public class StorageArea : Entity<StorageAreaId>, IAggregateRoot
         }
 
         if (description.Length > MaxDescriptionLength)
-            throw new BusinessRuleValidationException(
-                $"Description can't be longer than [{MaxDescriptionLength}] characters.");
+            throw new BusinessRuleValidationException($"Description can't be longer than [{MaxDescriptionLength}] characters.");
 
         Description = description;
     }
@@ -119,6 +126,31 @@ public class StorageArea : Entity<StorageAreaId>, IAggregateRoot
         Name = name;
     }
 
+    private void AggPhysicalResources(IEnumerable<PhysicalResourceCode> physicalResources)
+    {
+        foreach (var resource in physicalResources)
+        {
+            if (!this.PhysicalResources.Any(p => p.Value == resource.Value))
+                this.PhysicalResources.Add(resource);
+        }
+    }
+
+
+    private void RmvPhysicalResources(IEnumerable<PhysicalResourceCode> physicalResources)
+    {
+        var valuesToRemove = physicalResources.Select(p => p.Value).ToHashSet();
+        this.PhysicalResources.RemoveAll(p => valuesToRemove.Contains(p.Value));
+    }
+
+    private void SetType(StorageAreaType type)
+    {
+        if(type != StorageAreaType.Yard && type != StorageAreaType.Warehouse)
+            throw new BusinessRuleValidationException($"Invalid storage area type -> {type} make sure you are using a storage area type [Yard, Warehouse].");
+        
+        this.Type = type;
+    }
+    
+    
     public override string ToString() =>
         $"StorageArea [Name={Name}, Type={Type}, Capacity={CurrentCapacityTeu}/{MaxCapacityTeu} TEUs]";
 }

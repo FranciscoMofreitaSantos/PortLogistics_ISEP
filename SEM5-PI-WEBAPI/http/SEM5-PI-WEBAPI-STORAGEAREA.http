@@ -19,7 +19,7 @@ Accept: application/json
 
 ###
 # 4. GET by Name - Valid
-GET {{portURL}}/api/storageareas/name/Yard A
+GET {{portURL}}/api/storageareas/name/Ware house do romeu
 Accept: application/json
 
 ###
@@ -29,12 +29,12 @@ Accept: application/json
 
 ###
 # 6. GET Distances by Name - Valid
-GET {{portURL}}/api/storageareas/distances?name=Yard A
+GET {{portURL}}/api/storageareas/distances?name=Ware house do romeu
 Accept: application/json
 
 ###
 # 7. GET Distances by Id - Valid (replace Id)
-GET {{portURL}}/api/storageareas/distances?id=27ac8087-e4a4-48c7-9bd8-017cf9c1223c
+GET {{portURL}}/api/storageareas/distances?id=f2311cf1-5779-4e61-b466-5661c0ab4f68
 Accept: application/json
 
 ###
@@ -56,8 +56,9 @@ Accept: application/json
   "maxRows": 2,
   "maxTiers": 2,
   "distancesToDocks": [
-    { "dockCode": "DK-0003", "distance": 0.7 }
-  ]
+    { "dockCode": "DK-0003", "distanceKm": 0.7 }
+  ],
+  "physicalResources": [ "DC-0001", "YC-0002" ]
 }
 
 ###
@@ -67,13 +68,14 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "name": "YA", 
+  "name": "Ware house do romeu",
   "description": "Invalid yard",
   "type": "Yard",
   "maxBays": 2,
   "maxRows": 2,
   "maxTiers": 2,
-  "distancesToDocks": []
+  "distancesToDocks": [],
+  "physicalResources": []
 }
 
 ###
@@ -89,10 +91,11 @@ Accept: application/json
   "maxBays": 2,
   "maxRows": 2,
   "maxTiers": 2,
-  "distancesToDocks": []
+  "distancesToDocks": [],
+  "physicalResources": []
 }
 
-###
+### ------
 # 12. POST Create - Invalid (Duplicate Dock Code in same request)
 POST {{portURL}}/api/storageareas
 Content-Type: application/json
@@ -106,9 +109,10 @@ Accept: application/json
   "maxRows": 2,
   "maxTiers": 2,
   "distancesToDocks": [
-    { "dockCode": "DK-0005", "distance": 1.1 },
-    { "dockCode": "DK-0005", "distance": 2.2 }
-  ]
+    { "dockCode": "DK-0005", "distanceKm": 0.0 },
+    { "dockCode": "DK-0001", "distanceKm": 2.2 }
+  ],
+  "physicalResources": []
 }
 
 ###
@@ -125,22 +129,22 @@ Accept: application/json
   "maxRows": 2,
   "maxTiers": 2,
   "distancesToDocks": [
-    { "dockCode": "DK-0006", "distance": -1.0 }
-  ]
+    { "dockCode": "DK-0006", "distanceKm": -1.0 }
+  ],
+  "physicalResources": []
 }
 
 ###
-# 14. POST Create - Invalid (Invalid type)
-POST {{portURL}}/api/storageareas
-Content-Type: application/json
+# 15. GET Physical Resources by Name - Valid
+GET {{portURL}}/api/storageareas/physicalresources?name=Ware house do romeu
 Accept: application/json
 
-{
-  "name": "Yard F",
-  "description": "Wrong type test",
-  "type": "InvalidType", 
-  "maxBays": 2,
-  "maxRows": 2,
-  "maxTiers": 2,
-  "distancesToDocks": []
-}
+###
+# 16. GET Physical Resources by Id - Valid
+GET {{portURL}}/api/storageareas/physicalresources?id=05ddc905-bf4a-43f3-a201-8aa5c2f43199
+Accept: application/json
+
+###
+# 17. GET Physical Resources - Invalid
+GET {{portURL}}/api/storageareas/physicalresources?name=UnknownYard
+Accept: application/json

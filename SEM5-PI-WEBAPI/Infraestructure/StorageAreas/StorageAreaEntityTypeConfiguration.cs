@@ -43,6 +43,18 @@ public class StorageAreaEntityTypeConfiguration : IEntityTypeConfiguration<Stora
                 .HasColumnName("Distance")
                 .IsRequired();
         });
+        
+        builder.OwnsMany(sa => sa.PhysicalResources, nav =>
+        {
+            nav.WithOwner().HasForeignKey("StorageAreaId");
+            nav.Property<Guid>("Id");
+            nav.HasKey("Id");
+
+            nav.Property(p => p.Value)
+                .HasColumnName("PhysicalResourceCode")
+                .IsRequired();
+        });
+
 
         builder.Ignore(b => b.MaxCapacityTeu);
         builder.Ignore("_grid");

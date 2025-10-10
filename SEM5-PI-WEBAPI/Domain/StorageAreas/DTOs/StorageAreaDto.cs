@@ -1,3 +1,5 @@
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
+
 namespace SEM5_PI_WEBAPI.Domain.StorageAreas.DTOs;
 
 public class StorageAreaDto
@@ -13,12 +15,14 @@ public class StorageAreaDto
     public int MaxCapacityTeu { get; private set; }
     public int CurrentCapacityTeu { get; private set; }
 
+    public List<String?> PhysicalResources { get; private set; }
+
     public List<StorageAreaDockDistanceDto> DistancesToDocks { get; private set; }
 
     public StorageAreaDto(Guid id, string name, string description,
         StorageAreaType type, int maxBays, int maxRows, int maxTiers,
         int maxCapacityTeu, int currentCapacityTeu,
-        List<StorageAreaDockDistanceDto> distancesToDocks)
+        List<StorageAreaDockDistanceDto> distancesToDocks, List<String?> physicalResources)
     {
         Id = id;
         Name = name;
@@ -30,5 +34,6 @@ public class StorageAreaDto
         MaxCapacityTeu = maxCapacityTeu;
         CurrentCapacityTeu = currentCapacityTeu;
         DistancesToDocks = distancesToDocks;
+        PhysicalResources = physicalResources;
     }
 }

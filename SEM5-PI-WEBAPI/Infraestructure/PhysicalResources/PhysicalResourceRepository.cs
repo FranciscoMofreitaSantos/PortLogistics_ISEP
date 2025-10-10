@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Infraestructure.Shared;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.PhysicalResources
@@ -35,6 +36,11 @@ namespace SEM5_PI_WEBAPI.Infraestructure.PhysicalResources
             return await _context
                 .Where(r => r.Type == type)
                 .ToListAsync();
+        }
+
+        public async Task<EntityPhysicalResource?> GetByCodeAsync(PhysicalResourceCode code)
+        {
+            return await _context.FirstOrDefaultAsync(r => r.Code.Value == code.Value);
         }
 
         public async Task<bool> ExistsAsync(PhysicalResourceId id)

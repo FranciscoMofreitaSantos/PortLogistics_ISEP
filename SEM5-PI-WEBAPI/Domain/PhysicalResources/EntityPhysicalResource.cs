@@ -2,6 +2,7 @@
 using SEM5_PI_WEBAPI.Domain.BusinessShared;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Domain.PhysicalResources;
 
@@ -14,7 +15,7 @@ public enum PhysicalResourceStatus
 
 public class EntityPhysicalResource : Entity<PhysicalResourceId>
 {
-    [MaxLength(10)] public string Code { get; set; }
+    [MaxLength(10)] public PhysicalResourceCode Code { get; set; }
 
     [MaxLength(80)] public string Description { get; set; }
 
@@ -33,7 +34,7 @@ public class EntityPhysicalResource : Entity<PhysicalResourceId>
     {
     }
 
-    public EntityPhysicalResource(string code, string description, double operationalCapacity,
+    public EntityPhysicalResource(PhysicalResourceCode code, string description, double operationalCapacity,
         double setupTime, PhysicalResourceType type, PhysicalResourceStatus status, QualificationId? qualificationID)
     {
         Id = new PhysicalResourceId(Guid.NewGuid());

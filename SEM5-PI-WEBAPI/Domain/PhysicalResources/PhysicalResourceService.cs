@@ -1,6 +1,7 @@
 ﻿using SEM5_PI_WEBAPI.Domain.PhysicalResources.DTOs;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Domain.PhysicalResources;
 
@@ -42,8 +43,10 @@ public class PhysicalResourceService
             await CheckQualificationIdAsync(new QualificationId(dto.QualificationID.Value));
         }
 
+        var prCode = new PhysicalResourceCode(dto.Code);
+        
         var physicalResource = new EntityPhysicalResource(
-            dto.Code,
+            prCode,
             dto.Description,
             dto.OperationalCapacity,
             dto.SetupTime,

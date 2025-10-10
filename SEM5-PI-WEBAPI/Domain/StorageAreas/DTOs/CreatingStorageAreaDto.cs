@@ -11,10 +11,12 @@ public class CreatingStorageAreaDto
     public int MaxRows { get; set; }
     public int MaxTiers { get; set; }
 
+    public List<string> PhysicalResources { get; private set; }
+
     public List<StorageAreaDockDistanceDto> DistancesToDocks { get; set; } = new();
 
     public CreatingStorageAreaDto(string name, string? description, StorageAreaType type,
-        int maxBays, int maxRows, int maxTiers, List<StorageAreaDockDistanceDto> distancesToDocks)
+        int maxBays, int maxRows, int maxTiers, List<StorageAreaDockDistanceDto> distancesToDocks,List<string> physicalResources)
     {
         Name = name;
         Description = description;
@@ -23,5 +25,6 @@ public class CreatingStorageAreaDto
         MaxRows = maxRows;
         MaxTiers = maxTiers;
         DistancesToDocks = distancesToDocks ?? new List<StorageAreaDockDistanceDto>();
+        PhysicalResources = physicalResources?? new List<string>();
     }
 }

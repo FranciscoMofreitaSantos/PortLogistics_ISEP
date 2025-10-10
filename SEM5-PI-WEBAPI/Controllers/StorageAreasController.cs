@@ -96,6 +96,31 @@ public class StorageAreasController : ControllerBase
         }
     }
 
+    [HttpGet("physicalresources")]
+    public async Task<ActionResult<List<string>>> GetPhysicalResources([FromQuery] string? name, [FromQuery] Guid? id)
+    {
+        _logger.LogInformation("API Request: Get physical resources for Storage Area by {Criteria}",
+            name != null ? $"Name = {name}" : $"Id = {id}");
+
+        try
+        {
+            var physicalResources =
+                await _service.GetPhysicalResourcesAsync(name, id == null ? null : new StorageAreaId(id.Value));
+
+            _logger.LogInformation("API Response (200): Found {Count} physical resources for Storage Area",
+                physicalResources.Count);
+            return Ok(physicalResources);
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Response (404): Physical resources not found. {Message}", e.Message);
+            return NotFound(e.Message);
+        }
+    }
+
+
+
+
     [HttpPost]
     public async Task<ActionResult<StorageAreaDto>> CreateAsync(CreatingStorageAreaDto dto)
     {

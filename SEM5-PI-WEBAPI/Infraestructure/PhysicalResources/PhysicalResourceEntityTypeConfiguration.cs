@@ -10,10 +10,13 @@ namespace SEM5_PI_WEBAPI.Infraestructure.PhysicalResources
         public void Configure(EntityTypeBuilder<EntityPhysicalResource> builder)
         {
             builder.HasKey(r => r.Id);
-
-            builder.Property(r => r.Code)
-                .HasMaxLength(10)
-                .IsRequired();
+            
+            builder.OwnsOne(v => v.Code, code =>
+            {
+                code.Property(p => p.Value)
+                    .HasColumnName("Code")
+                    .IsRequired();
+            });
 
             builder.Property(r => r.Description)
                 .HasMaxLength(80)

@@ -1,3 +1,4 @@
+using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StorageAreas.DTOs;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
@@ -9,12 +10,14 @@ public class StorageAreaService: IStorageAreaService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<StorageAreaService> _logger;
     private readonly IStorageAreaRepository _storageAreaRepository;
+    private readonly IPhysicalResourceRepository _physicalResourceRepository;
 
-    public StorageAreaService(IUnitOfWork unitOfWork, ILogger<StorageAreaService> logger, IStorageAreaRepository storageAreaRepository)
+    public StorageAreaService(IUnitOfWork unitOfWork, ILogger<StorageAreaService> logger, IStorageAreaRepository storageAreaRepository, IPhysicalResourceRepository physicalResourceRepository)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _storageAreaRepository = storageAreaRepository;
+        _physicalResourceRepository = physicalResourceRepository;
     }
 
     public async Task<List<StorageAreaDto>> GetAllAsync()
@@ -84,29 +87,51 @@ public class StorageAreaService: IStorageAreaService
         return distances;
     }
 
+    public async Task<List<string>> GetPhysicalResourcesAsync(string? name, StorageAreaId? id)
+    {
+        _logger.LogInformation("Domain: Fetching physical resources for Storage Area ({Criteria})", name != null ? $"Name = {name}" : $"Id = {id?.Value}");
+
+        StorageArea? storageArea = null;
+
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            storageArea = await _storageAreaRepository.GetByNameAsync(name);
+        }
+        else if (id != null)
+        {
+            storageArea = await _storageAreaRepository.GetByIdAsync(id);
+        }
+        
+        if (storageArea == null)
+            throw new BusinessRuleValidationException("Storage Area not found.");
+
+        var pr = storageArea.PhysicalResources
+            .Select(d => d.Value)
+            .ToList();
+
+        _logger.LogInformation("Domain: Returning {Count} physical resources for Storage Area", pr.Count);
+        return pr;
+    }
+
 
     public async Task<StorageAreaDto> CreateAsync(CreatingStorageAreaDto dto)
     {
         _logger.LogInformation("Domain: Creating new Storage Area with Name = {Name}", dto.Name);
 
-        var existing = await _storageAreaRepository.GetByNameAsync(dto.Name);
-
-        if (existing != null)
+        var existingSa = await _storageAreaRepository.GetByNameAsync(dto.Name);
+        if (existingSa != null)
             throw new BusinessRuleValidationException($"Storage Area with name '{dto.Name}' already exists.");
 
-        var listStorageAreaDockDistances = dto.DistancesToDocks
-            .Select(d => new StorageAreaDockDistance(new DockCode(d.DockCode), d.DistanceKm))
-            .ToList();
+        foreach (string pr in dto.PhysicalResources)
+        {
+            var exist = await _physicalResourceRepository.GetByCodeAsync(new PhysicalResourceCode(pr));
+            if (exist == null)
+                throw new BusinessRuleValidationException(
+                    $"Physical Resource with code '{pr}' does not exist in the database."
+                );
+        }
 
-        var storageAreaNew = new StorageArea(
-            dto.Name,
-            dto.Description,
-            dto.Type,
-            dto.MaxBays,
-            dto.MaxRows,
-            dto.MaxTiers,
-            listStorageAreaDockDistances
-        );
+        var storageAreaNew = StorageAreaFactory.CreateStorageArea(dto);
 
         await _storageAreaRepository.AddAsync(storageAreaNew);
         await _unitOfWork.CommitAsync();
@@ -115,5 +140,8 @@ public class StorageAreaService: IStorageAreaService
 
         return StorageAreaFactory.CreateStorageAreaDto(storageAreaNew);
     }
+
+
+
 
 }
