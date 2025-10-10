@@ -117,6 +117,53 @@ namespace SEM5_PI_WEBAPI.Migrations
                     b.ToTable("Containers", (string)null);
                 });
 
+            modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.CrewManifests.CrewManifest", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CaptainName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TotalCrew")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CrewManifests", (string)null);
+                });
+
+            modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.CrewMembers.CrewMember", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CitizenId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CrewManifestId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Nationality")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CrewManifestId");
+
+                    b.ToTable("CrewMembers", (string)null);
+                });
+
             modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.Dock.Dock", b =>
                 {
                     b.Property<string>("Id")
@@ -434,6 +481,15 @@ namespace SEM5_PI_WEBAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.CrewMembers.CrewMember", b =>
+                {
+                    b.HasOne("SEM5_PI_WEBAPI.Domain.CrewManifests.CrewManifest", null)
+                        .WithMany("CrewMembers")
+                        .HasForeignKey("CrewManifestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.Dock.Dock", b =>
                 {
                     b.OwnsOne("SEM5_PI_WEBAPI.Domain.ValueObjects.DockCode", "Code", b1 =>
@@ -711,6 +767,11 @@ namespace SEM5_PI_WEBAPI.Migrations
             modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifest", b =>
                 {
                     b.Navigation("ContainerEntries");
+                });
+
+            modelBuilder.Entity("SEM5_PI_WEBAPI.Domain.CrewManifests.CrewManifest", b =>
+                {
+                    b.Navigation("CrewMembers");
                 });
 #pragma warning restore 612, 618
         }

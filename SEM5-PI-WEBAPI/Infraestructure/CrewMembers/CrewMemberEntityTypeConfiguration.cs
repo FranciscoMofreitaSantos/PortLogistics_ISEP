@@ -22,6 +22,9 @@ public class CrewMemberEntityTypeConfiguration : IEntityTypeConfiguration<CrewMe
             .IsRequired();
 
         builder.Property(c => c.CitizenId)
+            .HasConversion(
+                id => id.PassportNumber,      
+                str => new CitizenId(str)) 
             .IsRequired();
     }
 }
