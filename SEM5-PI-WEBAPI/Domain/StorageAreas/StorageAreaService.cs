@@ -25,9 +25,7 @@ public class StorageAreaService: IStorageAreaService
         _logger.LogInformation("Domain: Fetching all storage areas");
 
         var listStorageAreasInDb = await _storageAreaRepository.GetAllAsync();
-
-        if (listStorageAreasInDb.Count == 0)
-            throw new BusinessRuleValidationException("No storage areas found in database.");
+        
 
         var listStorageAreasDto = listStorageAreasInDb
             .Select(StorageAreaFactory.CreateStorageAreaDto)
@@ -119,6 +117,7 @@ public class StorageAreaService: IStorageAreaService
         _logger.LogInformation("Domain: Creating new Storage Area with Name = {Name}", dto.Name);
 
         var existingSa = await _storageAreaRepository.GetByNameAsync(dto.Name);
+        
         if (existingSa != null)
             throw new BusinessRuleValidationException($"Storage Area with name '{dto.Name}' already exists.");
 

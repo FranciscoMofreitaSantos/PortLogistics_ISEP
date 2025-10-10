@@ -3,97 +3,100 @@ actor "Port Authority Officer" as Officer
 boundary "API Controller" as Controller
 control "StorageAreaService" as Service
 entity "StorageAreaRepository" as Repo
+entity "PhysicalResourceRepository" as PRRepo
 control "StorageAreaFactory" as Factory
-collections "Audit Log" as Audit
+database "Audit Log" as Audit
+
+title Sequence Diagram – US2.2.4 Register, Update & Query Storage Areas
 
 == Create Storage Area ==
 Officer -> Controller : POST /api/storageareas {dto}
-activate Controller
 Controller -> Service : CreateAsync(dto)
-activate Service
-
 Service -> Repo : GetByNameAsync(dto.Name)
-activate Repo
-Repo --> Service : StorageArea? (null if not exists)
-deactivate Repo
+Repo --> Service : null
+
+loop Validate Physical Resources
+    Service -> PRRepo : GetByCodeAsync(code)
+    PRRepo --> Service : PhysicalResource or null
+    Service -> Service : throw BusinessRuleValidationException() if null
+end
 
 Service -> Factory : CreateStorageArea(dto)
-activate Factory
 Factory --> Service : StorageArea
-deactivate Factory
 
 Service -> Repo : AddAsync(storageArea)
-activate Repo
-Repo --> Service : (ack)
-deactivate Repo
+Repo --> Service : ok
+Service -> Repo : CommitAsync()
+Repo --> Service : ok
 
-Service -> Audit : log(CREATE, officerId, storageArea.Name, timestamp, SUCCESS)
-deactivate Service
+Service -> Audit : log(CREATE, officerId, storageArea.Name, timestamp)
 Service --> Controller : StorageAreaDto
-deactivate Controller
 Controller --> Officer : 201 Created (StorageAreaDto)
+
+== Error: Duplicate Name ==
+Officer -> Controller : POST /api/storageareas (duplicate name)
+Controller -> Service : CreateAsync(dto)
+Service -> Repo : GetByNameAsync(dto.Name)
+Repo --> Service : StorageArea (exists)
+Service -> Service : throw BusinessRuleValidationException("already exists")
+Controller --> Officer : 409 Conflict (BusinessRuleValidationException)
 
 == Update Storage Area ==
 Officer -> Controller : PATCH /api/storageareas/{id} {dto}
-activate Controller
 Controller -> Service : UpdateAsync(id, dto)
-activate Service
-
 Service -> Repo : GetByIdAsync(id)
-activate Repo
 Repo --> Service : StorageArea or null
-deactivate Repo
 
-Service -> Service : Apply updates (name?, type?, capacity?, docks?, distances?)
-
-Service -> Repo : CommitAsync()
-activate Repo
-Repo --> Service : (ack)
-deactivate Repo
-
-Service -> Audit : log(UPDATE, officerId, storageArea.Id, timestamp, SUCCESS)
-deactivate Service
-Service --> Controller : StorageAreaDto
-deactivate Controller
-Controller --> Officer : 200 OK (StorageAreaDto)
+alt not found
+    Service -> Service : throw BusinessRuleValidationException("not found")
+    Controller --> Officer : 404 Not Found
+else found
+    Service -> Service : Apply updates (description?, type?, docks?, resources?)
+    Service -> Repo : CommitAsync()
+    Repo --> Service : ok
+    Service -> Audit : log(UPDATE, officerId, id, timestamp)
+    Service --> Controller : Updated StorageAreaDto
+    Controller --> Officer : 200 OK (StorageAreaDto)
+end
 
 == Get All Storage Areas ==
 Officer -> Controller : GET /api/storageareas
-activate Controller
 Controller -> Service : GetAllAsync()
-activate Service
-
 Service -> Repo : GetAllAsync()
-activate Repo
 Repo --> Service : List<StorageArea>
-deactivate Repo
-
 Service -> Factory : CreateStorageAreaDto(area*)
-activate Factory
-Factory --> Service : StorageAreaDto*
-deactivate Factory
-
-deactivate Service
+Factory --> Service : List<StorageAreaDto>
 Service --> Controller : List<StorageAreaDto>
-deactivate Controller
 Controller --> Officer : 200 OK (StorageAreaDto*)
 
 == Get Distances to Docks ==
 Officer -> Controller : GET /api/storageareas/distances?name=x&id=y
-activate Controller
 Controller -> Service : GetDistancesToDockAsync(name?, id?)
-activate Service
-
 Service -> Repo : GetByNameAsync(name) OR GetByIdAsync(id)
-activate Repo
-Repo --> Service : StorageArea
-deactivate Repo
+Repo --> Service : StorageArea or null
 
-Service -> Service : Extract Distances (DockCode, Distance)
+alt found
+    Service -> Service : Extract Distances (DockCode, DistanceKm)
+    Service --> Controller : List<StorageAreaDockDistanceDto>
+    Controller --> Officer : 200 OK (StorageAreaDockDistanceDto*)
+else not found
+    Service -> Service : throw BusinessRuleValidationException("not found")
+    Controller --> Officer : 404 Not Found
+end
 
-deactivate Service
-Service --> Controller : List<StorageAreaDockDistanceDto>
-deactivate Controller
-Controller --> Officer : 200 OK (StorageAreaDockDistanceDto*)
+== Get Physical Resources ==
+Officer -> Controller : GET /api/storageareas/physicalresources?name=x&id=y
+Controller -> Service : GetPhysicalResourcesAsync(name?, id?)
+Service -> Repo : GetByNameAsync(name) OR GetByIdAsync(id)
+Repo --> Service : StorageArea or null
+
+alt found
+    Service -> Service : Extract PhysicalResources (List<string>)
+    Service --> Controller : List<string>
+    Controller --> Officer : 200 OK (PhysicalResourceCode*)
+else not found
+    Service -> Service : throw BusinessRuleValidationException("not found")
+    Controller --> Officer : 404 Not Found
+end
 
 @enduml

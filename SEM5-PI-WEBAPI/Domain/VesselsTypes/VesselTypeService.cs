@@ -21,8 +21,6 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
             
             var listVesselsTypesInDb = await _vesselTypeRepository.GetAllAsync();
             
-            if (listVesselsTypesInDb.Count == 0) throw new BusinessRuleValidationException("No Vessel/s Types where found on DB.");
-            
             _logger.LogInformation("Business Domain: Found [{Count}] Vessel Types in database.", listVesselsTypesInDb.Count);
 
             var listVesselsTypesDto = listVesselsTypesInDb

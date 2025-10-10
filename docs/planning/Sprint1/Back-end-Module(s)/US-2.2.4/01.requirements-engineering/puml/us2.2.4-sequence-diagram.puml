@@ -1,32 +1,45 @@
 @startuml
 actor "Port Authority Officer" as Officer
-boundary "System" as System
+boundary "StorageArea Management API" as System
 
 == Register Storage Area ==
-Officer -> System : POST /api/storageareas\n(CreatingStorageAreaDto: name, type, bays, rows, tiers, distances)
-System --> Officer : 201 Created\n(StorageAreaDto with Id, capacity, occupancy, docks, distances)
-
-== Update Storage Area ==
-Officer -> System : PUT/PATCH /api/storageareas/{id}\n(UpdateStorageAreaDto: description?, type?, capacity?, distances?)
-System --> Officer : 200 OK\n(Updated StorageAreaDto)
+Officer -> System : POST /api/storageareas\nBody: CreatingStorageAreaDto\n(name, description, type, maxBays, maxRows, maxTiers,\ndistancesToDocks[], physicalResources[])
+System --> Officer : 201 Created\nBody: StorageAreaDto\n(Id, name, type, capacity, currentCapacity, distances, resources)
 
 == Query Storage Areas ==
-Officer -> System : GET /api/storageareas/{id}
-System --> Officer : 200 OK\n(StorageAreaDto)
+Officer -> System : GET /api/storageareas
+System --> Officer : 200 OK\nList<StorageAreaDto>
 
-Officer -> System : GET /api/storageareas?name={name}
-System --> Officer : 200 OK\n(StorageAreaDto)
+Officer -> System : GET /api/storageareas/id/{id}
+System --> Officer : 200 OK\nStorageAreaDto\nOR 404 Not Found
+
+Officer -> System : GET /api/storageareas/name/{name}
+System --> Officer : 200 OK\nStorageAreaDto\nOR 404 Not Found
 
 Officer -> System : GET /api/storageareas/distances?name={name}|id={id}
-System --> Officer : 200 OK\n(List<StorageAreaDockDistanceDto>)
+System --> Officer : 200 OK\nList<StorageAreaDockDistanceDto>\nOR 404 Not Found
 
-== Validation Rules ==
-Officer -> System : Register/Update with occupancy > maxCapacity
-System --> Officer : 400 Bad Request\n(BusinessRuleValidationException)
+Officer -> System : GET /api/storageareas/physicalresources?name={name}|id={id}
+System --> Officer : 200 OK\nList<string>\nOR 404 Not Found
 
-Officer -> System : Register with duplicated Name
-System --> Officer : 409 Conflict\n(BusinessRuleValidationException)
+== Update Storage Area ==
+Officer -> System : PUT /api/storageareas/{id}\nBody: UpdateStorageAreaDto\n(description?, type?, physicalResources?, distances?)
+System --> Officer : 200 OK\nUpdated StorageAreaDto\nOR 404 Not Found
 
-Officer -> System : Reference non-existing Dock
-System --> Officer : 400 Bad Request\n(BusinessRuleValidationException)
+== Validation and Business Rules ==
+Officer -> System : POST with duplicated Name
+System --> Officer : 409 Conflict\nBusinessRuleValidationException("Storage Area already exists")
+
+Officer -> System : POST with invalid Type\n(e.g. "InvalidType")
+System --> Officer : 400 Bad Request\nEnumConversionError
+
+Officer -> System : POST with invalid distances\n(e.g. negative or duplicated DockCodes)
+System --> Officer : 400 Bad Request\nBusinessRuleValidationException("Invalid Dock distances")
+
+Officer -> System : POST referencing non-existing PhysicalResource
+System --> Officer : 400 Bad Request\nBusinessRuleValidationException("Physical Resource not found")
+
+Officer -> System : POST with occupancy > maxCapacity
+System --> Officer : 400 Bad Request\nBusinessRuleValidationException("Storage Area is full")
+
 @enduml

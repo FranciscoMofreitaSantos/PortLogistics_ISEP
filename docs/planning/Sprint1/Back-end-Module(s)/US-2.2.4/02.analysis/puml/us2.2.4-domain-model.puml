@@ -8,54 +8,77 @@ hide methods
 
 title Domain Model (Excerpt) - US2.2.4 Register & Update Storage Areas
 
+' =====================
+' == AGGREGATES ==
+' =====================
+
 package "Storage Area Management Aggregate" {
-    class StorageArea <<AggregateRoot>>
-    class StorageAreaName <<ValueObject>>
+    class StorageArea <<AggregateRoot>> {
+        - Name : string
+        - Description : string
+        - Type : StorageAreaType
+        - MaxBays : int
+        - MaxRows : int
+        - MaxTiers : int
+        - MaxCapacityTeu : int
+        - CurrentCapacityTeu : int
+    }
+
     class StorageAreaType <<ValueObject>>
-    class StorageAreaDockDistance <<ValueObject>>
+    class StorageAreaDockDistance <<ValueObject>> {
+        - Dock : DockCode
+        - DistanceKm : float
+    }
 }
 
 package "Dock Registry Aggregate" {
-    class Dock <<AggregateRoot>>
+    class Dock <<AggregateRoot>> {
+        - Location : string
+    }
     class DockCode <<ValueObject>>
 }
 
 package "Container Management Aggregate" {
-    class Container <<AggregateRoot>>
+    class Container <<AggregateRoot>> {
+        - ISOId : Iso6346Code
+        - Status : ContainerStatus
+    }
     class Iso6346Code <<ValueObject>>
 }
 
 package "Physical Resources Aggregate" {
-    class PhysicalResource <<AggregateRoot>>
-    class EquipmentType <<ValueObject>>
+    class PhysicalResource <<AggregateRoot>> {
+    }
+    class PhysicalResourceCode <<ValueObject>>
 }
 
-package "Application Services" {
+package "Application Layer" {
     interface IStorageAreaService
 }
 
+' =====================
+' == RELATIONSHIPS ==
+' =====================
+
 ' ---- Composition inside StorageArea ----
-StorageArea "1" --- "1" StorageAreaName : has >
-StorageArea "1" --- "1" StorageAreaType : has >
-StorageArea "1" --- "0..*" StorageAreaDockDistance : has >
+StorageArea "1" *-- "0..*" StorageAreaDockDistance : defines >
+StorageArea "1" *-- "0..*" PhysicalResourceCode : uses >
 
-' ---- Composition inside Container ----
-Container "1" --- "1" Iso6346Code : has >
+' ---- DockDistance to Dock ----
+StorageAreaDockDistance "*" --> "1" DockCode : refers >
+Dock "1" *-- "1" DockCode : has >
 
-' ---- Composition inside PhysicalResource ----
-PhysicalResource "1" --- "1" EquipmentType : has >
+' ---- StorageArea stores containers ----
+StorageArea "1" --> "0..*" Container : stores >
 
-' ---- Cross-aggregate references ----
-StorageAreaDockDistance "*" --- "1" DockCode : refers >
-Dock "1" --- "1" DockCode : has >
+' ---- Container has ISO code ----
+Container "1" *-- "1" Iso6346Code : identified by >
 
-' ---- Relationships between Aggregates ----
-StorageArea "1" --- "0..*" Container : stores >
-StorageArea "1" --- "0..*" PhysicalResource : uses >
 
-' ---- Service usage ----
+' ---- Application Service references aggregates ----
 IStorageAreaService ..> StorageArea : manages >
-IStorageAreaService ..> Dock : references >
+IStorageAreaService ..> Dock : validates >
+IStorageAreaService ..> PhysicalResource : validates >
 IStorageAreaService ..> Container : references >
 
 @enduml

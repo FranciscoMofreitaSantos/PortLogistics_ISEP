@@ -57,6 +57,8 @@ The following diagrams illustrate the same interactions, split for readability.
 
 ![Sequence Diagram - Partial - Update Storage Area](./puml/us2.2.4-sd-GetDistances.svg)
 
+**Get Physical Resources**
+![Sequence Diagram - Partial - Physical Resources](./puml/us2.2.4-get-physical-resources.svg)
 ---
 
 ## 3.3. Class Diagram (CD)

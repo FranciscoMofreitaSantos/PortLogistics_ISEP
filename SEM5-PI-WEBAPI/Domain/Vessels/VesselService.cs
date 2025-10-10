@@ -24,8 +24,6 @@ public class VesselService
         _logger.LogInformation("Business Domain: Request to fetch all Vessels.");
             
         var listVesselsInDb = await _vesselRepository.GetAllAsync();
-            
-        if (listVesselsInDb.Count == 0) throw new BusinessRuleValidationException("No Vessel/s where found on DB.");
         
         _logger.LogInformation("Business Domain: Found [{Count}] Vessel in database.", listVesselsInDb.Count);
 

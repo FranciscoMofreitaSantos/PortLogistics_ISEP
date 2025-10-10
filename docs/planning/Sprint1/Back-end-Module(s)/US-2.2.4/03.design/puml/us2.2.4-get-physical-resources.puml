@@ -1,0 +1,29 @@
+@startuml
+actor "Port Authority Officer" as Officer
+boundary "API Controller" as Controller
+control "StorageAreaService" as Service
+entity "StorageAreaRepository" as Repo
+
+title System Sequence Diagram – Get Physical Resources (US2.2.4)
+
+Officer -> Controller : GET /api/storageareas/physicalresources?name={name}|id={id}
+Controller -> Service : GetPhysicalResourcesAsync(name?, id?)
+
+alt by Name
+    Service -> Repo : GetByNameAsync(name)
+    Repo --> Service : StorageArea or null
+else by Id
+    Service -> Repo : GetByIdAsync(id)
+    Repo --> Service : StorageArea or null
+end
+
+alt StorageArea found
+    Service -> Service : Extract PhysicalResources (List<string>)
+    Service --> Controller : List<string>
+    Controller --> Officer : 200 OK (PhysicalResourceCode*)
+else not found
+    Service -> Service : throw BusinessRuleValidationException("Storage Area not found")
+    Controller --> Officer : 404 Not Found
+end
+
+@enduml
