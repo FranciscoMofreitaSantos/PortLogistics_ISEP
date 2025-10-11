@@ -1,0 +1,16 @@
+@startuml
+actor "Shipping Agent Representative" as Agent
+boundary "VVN Management API" as System
+
+== Update VVN Fields ==
+Agent -> System : PUT /api/vvn/{id}\nBody: UpdateVesselVisitNotificationDto\n(ETA, ETD, Volume, Docks, Documents, etc.)
+System --> Agent : 200 OK\nBody: VesselVisitNotificationDto (updated)\nOR 400 Bad Request
+
+== Withdraw VVN ==
+Agent -> System : PUT /api/vvn/{id}/withdraw
+System --> Agent : 200 OK\nStatus: Withdrawn
+
+== Submit for Approval ==
+Agent -> System : PUT /api/vvn/{id}/submit
+System --> Agent : 200 OK\nStatus: Submitted
+@enduml
