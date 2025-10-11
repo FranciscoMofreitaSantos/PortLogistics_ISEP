@@ -4,24 +4,60 @@ namespace SEM5_PI_WEBAPI.Domain.Tasks;
 
 public class Task : Entity<TaskId>
 {
-    public TaskCode Code { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
-    public string? Description { get; set; }
-    public TaskType Type { get; set; }
-    public TaskStatus Status { get; set; }
+    public TaskCode Code { get; private set; }
+    public DateTime? StartTime { get; private set; }
+    public DateTime? EndTime { get; private set; }
+    public string? Description { get; private set; }
+    public TaskType Type { get; private set; }
+    public TaskStatus Status { get; private set; }
 
-    public Task(TaskCode code, DateTime startTime, DateTime endTime, string? description, TaskType type)
+    public Task(TaskCode code, string? description, TaskType type)
     {
-        if (startTime >= endTime)
-            throw new BusinessRuleValidationException("StartTime must be before EndTime.");
         if (description != null && description.Length > 255)
             throw new BusinessRuleValidationException("Description length must be at most 255 characters.");
+
         Code = code;
-        StartTime = startTime;
-        EndTime = endTime;
         Description = description;
         Type = type;
         Status = TaskStatus.Pending;
+    }
+
+    public Task(TaskCode code, DateTime startTime, string? description, TaskType type)
+    {
+        if (description != null && description.Length > 255)
+            throw new BusinessRuleValidationException("Description length must be at most 255 characters.");
+
+        Code = code;
+        StartTime = startTime;
+        Description = description;
+        Type = type;
+        Status = TaskStatus.InProgress;
+    }
+
+    public void SetEndTime(DateTime endTime)
+    {
+        if (StartTime != null && endTime <= StartTime)
+            throw new BusinessRuleValidationException("EndTime must be after StartTime.");
+
+        EndTime = endTime;
+        Status = TaskStatus.Completed;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Task other)
+            return false;
+
+        return Code.Equals(other.Code);
+    }
+
+    public override int GetHashCode()
+    {
+        return Code.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return $"{Code} [{Status}] ({StartTime?.ToString() ?? "N/A"} - {EndTime?.ToString() ?? "N/A"})";
     }
 }
