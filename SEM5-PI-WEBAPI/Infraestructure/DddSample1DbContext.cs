@@ -27,6 +27,8 @@ using SEM5_PI_WEBAPI.Infraestructure.Vessels;
 using SEM5_PI_WEBAPI.Infraestructure.VesselsTypes;
 using SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives;
+using SEM5_PI_WEBAPI.Infraestructure.Tasks;
+using Task = SEM5_PI_WEBAPI.Domain.Tasks.Task;
 
 namespace SEM5_PI_WEBAPI.Infraestructure
 {
@@ -46,6 +48,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure
         public DbSet<EntityPhysicalResource> PhysicalResources { get; set; }
         public DbSet<CrewManifest> CrewManifests { get; set; }
         public DbSet<CrewMember> CrewMembers { get; set; }
+        public DbSet<Task> Tasks { get; set; }
 
 
         public DddSample1DbContext(DbContextOptions options) : base(options)
@@ -68,6 +71,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure
             modelBuilder.ApplyConfiguration(new PhysicalResourceEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CrewManifestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CrewMemberEntityTypeConfiguration());
+            //modelBuilder.ApplyConfiguration(new TaskEntityTypeConfiguration());
         }
     }
 }
