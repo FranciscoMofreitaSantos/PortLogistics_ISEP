@@ -8,6 +8,6 @@ public interface IPhysicalResourceRepository : IRepository<EntityPhysicalResourc
     Task<bool> ExistsAsync(PhysicalResourceId id);
     Task<List<EntityPhysicalResource>> GetByStatusAsync(PhysicalResourceStatus status);
     Task<List<EntityPhysicalResource>> GetByTypeAsync(PhysicalResourceType type);
-    
+    Task<int> CountByTypeAsync(PhysicalResourceType type);
     Task<EntityPhysicalResource?> GetByCodeAsync(PhysicalResourceCode code);
 }

@@ -11,13 +11,12 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "code": "CRN001",
   "description": "Dock Crane A",
   "operationalCapacity": 25.5,
   "setupTime": 10,
-  "physicalResourceType": "Other",
+  "physicalResourceType": "Truck",
   "status": "Available",
-  "qualificationID": "8236cc32-ae96-4e87-b5ab-d1d90fe1c087"
+  "qualificationID": "9c5e3d5a-dd32-4f8b-afc0-9cad22ea21eb"
 }
 
 

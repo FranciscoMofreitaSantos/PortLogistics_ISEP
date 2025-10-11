@@ -15,9 +15,12 @@ namespace SEM5_PI_WEBAPI.Infraestructure.PhysicalResources
             {
                 code.Property(p => p.Value)
                     .HasColumnName("Code")
-                    .IsRequired();
+                    .IsRequired()
+                    .ValueGeneratedNever();
+                
+                code.HasIndex(p => p.Value).IsUnique();
             });
-
+            
             builder.Property(r => r.Description)
                 .HasMaxLength(80)
                 .IsRequired();

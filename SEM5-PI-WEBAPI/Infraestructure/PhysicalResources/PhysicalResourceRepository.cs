@@ -47,5 +47,10 @@ namespace SEM5_PI_WEBAPI.Infraestructure.PhysicalResources
         {
             return await _context.AnyAsync(r => r.Id == id);
         }
+
+        public async Task<int> CountByTypeAsync(PhysicalResourceType type)
+        {
+            return await _context.CountAsync(r => r.Type == type);
+        }
     }
 }

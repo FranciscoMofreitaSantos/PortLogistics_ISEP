@@ -37,16 +37,15 @@ public class PhysicalResourceService
 
     public async Task<PhysicalResourceDTO> AddAsync(CreatingPhysicalResourceDTO dto)
     {
-        
         if (dto.QualificationID is not null)
         {
             await CheckQualificationIdAsync(new QualificationId(dto.QualificationID.Value));
         }
 
-        var prCode = new PhysicalResourceCode(dto.Code);
-        
+        var code = await GenerateCodeAsync(dto.PhysicalResourceType);
+
         var physicalResource = new EntityPhysicalResource(
-            prCode,
+            code,
             dto.Description,
             dto.OperationalCapacity,
             dto.SetupTime,
@@ -97,5 +96,19 @@ public class PhysicalResourceService
             entityPhysicalResource.Type,
             entityPhysicalResource.Status,
             entityPhysicalResource.QualificationID?.AsGuid());
+    }
+
+    private async Task<PhysicalResourceCode> GenerateCodeAsync(PhysicalResourceType type)
+    {
+
+        int count = await _repo.CountByTypeAsync(type);
+
+        string prefix = type.ToString().Length > 5
+            ? type.ToString().Substring(0, 5).ToUpper()
+            : type.ToString().ToUpper();
+
+        string generatedCode = $"{prefix}-{(count + 1).ToString("D4")}";
+        
+        return new PhysicalResourceCode(generatedCode);
     }
 }

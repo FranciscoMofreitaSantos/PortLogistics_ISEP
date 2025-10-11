@@ -1,3 +1,4 @@
+using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StorageAreas.DTOs;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;

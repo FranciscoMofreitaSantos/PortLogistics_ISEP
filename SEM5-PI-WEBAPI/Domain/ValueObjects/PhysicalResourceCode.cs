@@ -2,31 +2,27 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
-namespace SEM5_PI_WEBAPI.Domain.ValueObjects;
-
-
-
-[Owned]
-public class PhysicalResourceCode : IValueObject
+namespace SEM5_PI_WEBAPI.Domain.PhysicalResources
 {
-    public string Value { get; set; }
-    private static readonly Regex Pattern = new(@"^(DC|YC|MC|T|F|CS|C|TB|O)-\d{4}$", RegexOptions.Compiled);
-
-
-    public PhysicalResourceCode()
-    { }
-
-    public PhysicalResourceCode(string value)
+    [Owned]
+    public class PhysicalResourceCode : IValueObject
     {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new BusinessRuleValidationException("PR code cannot be empty.");
-        if (!Pattern.IsMatch(value))
-            throw new BusinessRuleValidationException("Invalid PR code. Expected format: [DC|YC|MC|T|F|CS|C|TB|O]-0000.");
+        public string Value { get; private set; }
 
-        Value = value;
+        protected PhysicalResourceCode() { } 
+
+        public PhysicalResourceCode(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new BusinessRuleValidationException("Code cannot be empty.");
+
+            if (!Regex.IsMatch(value, @"^[A-Z]{3,6}-\d{4}$"))
+                throw new BusinessRuleValidationException("Invalid code format. Expected: PREFIX-0001.");
+
+
+            Value = value;
+        }
+
+        public override string ToString() => Value;
     }
-    
-    
-    public override string ToString() => Value;
-
 }
