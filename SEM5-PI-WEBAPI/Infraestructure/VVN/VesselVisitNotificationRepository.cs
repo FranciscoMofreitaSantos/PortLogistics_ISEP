@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VVN;
 using SEM5_PI_WEBAPI.Infraestructure.Shared;
 
@@ -11,4 +12,10 @@ public class VesselVisitNotificationRepository : BaseRepository<VesselVisitNotif
     {
         _context = context;
     }
+
+    public async Task<VesselVisitNotification?> GetByCodeAsync(VvnCode code)
+    {
+        return await _context.VesselVisitNotification.FirstOrDefaultAsync(v => v.Code.Code == code.Code);
+    }
+
 }

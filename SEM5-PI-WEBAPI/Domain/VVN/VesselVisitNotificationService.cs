@@ -107,7 +107,7 @@ public class VesselVisitNotificationService
         await _repo.AddAsync(newVesselVisitNotification);
         await _unitOfWork.CommitAsync();
 
-        _logger.LogInformation("VVN successfully created with ID = {Id}", newVesselVisitNotification.Id.Value);
+        _logger.LogInformation("Business Domain: VVN successfully created with ID = {Id}", newVesselVisitNotification.Id.Value);
 
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(newVesselVisitNotification);
     }
@@ -120,11 +120,83 @@ public class VesselVisitNotificationService
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
 
-        _logger.LogInformation("VVN with ID = {Id} found successfully.", id.Value);
+        _logger.LogInformation("Business Domain: VVN with ID = {Id} found successfully.", id.Value);
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
 
-
+    public async Task<VesselVisitNotificationDto> WithdrawByIdAsync(VesselVisitNotificationId id)
+    {
+        _logger.LogInformation("Business Domain: Withdrawing VVN with ID = {Id}", id.Value);
+        
+        var vvnInDb = await _repo.GetByIdAsync(id);
+        
+        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
+        
+        vvnInDb.Withdraw();
+        
+        await _unitOfWork.CommitAsync();
+        
+        _logger.LogInformation("VVN with ID = {Id} withdrew successfully.", id.Value);
+        
+        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+    }
+    
+    public async Task<VesselVisitNotificationDto> WithdrawByCodeAsync(VvnCode code)
+    {
+        _logger.LogInformation("Business Domain: Withdrawing VVN with ID = {code}", code.Code);
+        
+        var vvnInDb = await _repo.GetByCodeAsync(code);
+        
+        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code.Code}");
+        
+        vvnInDb.Withdraw();
+        
+        await _unitOfWork.CommitAsync();
+        
+        _logger.LogInformation("VVN with Code = {code} withdrew successfully.", code.Code);
+        
+        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+    }
+    
+    public async Task<VesselVisitNotificationDto>SubmitByCodeAsync(VvnCode code)
+    {
+        _logger.LogInformation("Business Domain: Submitting VVN with ID = {code}", code.Code);
+        
+        var vvnInDb = await _repo.GetByCodeAsync(code);
+        
+        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code.Code}");
+        
+        vvnInDb.Submit();
+        
+        await _unitOfWork.CommitAsync();
+        
+        _logger.LogInformation("VVN with Code = {code} submitted successfully.", code.Code);
+        
+        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+    }
+    
+    public async Task<VesselVisitNotificationDto>SubmitByIdAsync(VesselVisitNotificationId id)
+    {
+        _logger.LogInformation("Business Domain: Submitting VVN with ID = {Id}", id.Value);
+        
+        var vvnInDb = await _repo.GetByIdAsync(id);
+        
+        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
+        
+        vvnInDb.Submit();
+        
+        await _unitOfWork.CommitAsync();
+        
+        _logger.LogInformation("VVN with ID = {Id} submitted successfully.", id.Value);
+        
+        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+    }
+    
+    
+    
+    
+    
+    //========================================
     private async Task<ImoNumber> CheckForVesselInDb(string dtoVesselImo)
     {
         if (string.IsNullOrWhiteSpace(dtoVesselImo)) throw new BusinessRuleValidationException("Vessel IMO cannot be null or empty.");

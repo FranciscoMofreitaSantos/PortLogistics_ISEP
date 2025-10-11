@@ -165,35 +165,35 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         public void Submit()
         {
             if (Status != VvnStatus.InProgress)
-                throw new BusinessRuleValidationException("Only In-progress VVNs can be submitted.");
+                throw new BusinessRuleValidationException($"Only In-progress VVNs can be submitted... Current Status: {Status}");
             Status = VvnStatus.Submitted;
         }
 
         public void MarkPending()
         {
             if (Status != VvnStatus.Submitted)
-                throw new BusinessRuleValidationException("Only Submitted VVNs can be marked pending.");
+                throw new BusinessRuleValidationException($"Only Submitted VVNs can be marked pending... Current Status: {Status}");
             Status = VvnStatus.PendingInformation;
         }
 
         public void Withdraw()
         {
             if (Status != VvnStatus.InProgress && Status != VvnStatus.PendingInformation)
-                throw new BusinessRuleValidationException("Only In-progress/Pending VVNs can be withdrawn.");
+                throw new BusinessRuleValidationException($"Only In-progress/Pending VVNs can be withdrawn... Current Status: {Status}");
             Status = VvnStatus.Withdrawn;
         }
 
         public void Resume()
         {
             if (Status != VvnStatus.Withdrawn)
-                throw new BusinessRuleValidationException("Only withdrawn VVNs can be resumed.");
+                throw new BusinessRuleValidationException($"Only withdrawn VVNs can be resumed... Current Status: {Status}");
             Status = VvnStatus.InProgress;
         }
 
         public void Accept()
         {
             if (Status != VvnStatus.Submitted)
-                throw new BusinessRuleValidationException("Only Submitted VVNs can be accepted.");
+                throw new BusinessRuleValidationException($"Only Submitted VVNs can be accepted... Current Status: {Status}");
             Status = VvnStatus.Accepted;
             AcceptenceDate = new ClockTime(DateTime.Now);
         }
