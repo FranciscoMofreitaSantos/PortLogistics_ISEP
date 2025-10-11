@@ -1,13 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.VVN;
-using Task = SEM5_PI_WEBAPI.Domain.Tasks.Task;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.Tasks;
 
-public class TaskEntityTypeConfiguration : IEntityTypeConfiguration<Task>
+public class TaskEntityTypeConfiguration : IEntityTypeConfiguration<EntityTask>
 {
-    public void Configure(EntityTypeBuilder<Task> builder)
+    public void Configure(EntityTypeBuilder<EntityTask> builder)
     {
         builder.HasKey(t => t.Id);
 

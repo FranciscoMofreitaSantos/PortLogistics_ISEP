@@ -1,17 +1,14 @@
-using System.ComponentModel;
+using SEM5_PI_WEBAPI.Domain.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.CargoManifests;
+using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.CrewMembers;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
-using SEM5_PI_WEBAPI.Domain.CargoManifestEntries;
-using SEM5_PI_WEBAPI.Domain.Containers;
-using SEM5_PI_WEBAPI.Domain.Tasks;
-using Task = SEM5_PI_WEBAPI.Domain.Tasks.Task;
-
 
 namespace SEM5_PI_WEBAPI.Domain.VVN;
 
@@ -29,11 +26,13 @@ public static class VesselVisitNotificationFactory
         CargoManifest? unloadingCargoManifest,
         ImoNumber vesselImo)
     {
-        if (!DateTime.TryParseExact(estimatedTimeArrivalDto, "yyyy-MM-ddTHH:mm:ss", null, System.Globalization.DateTimeStyles.None, out var eta))
-            throw new BusinessRuleValidationException("Invalid EstimatedTimeArrival format. Expected format: yyyy-MM-ddTHH:mm:ss");
+        if (!DateTime.TryParse(estimatedTimeArrivalDto, null,
+                System.Globalization.DateTimeStyles.RoundtripKind, out var eta))
+            throw new BusinessRuleValidationException("Invalid EstimatedTimeArrival format. Use ISO 8601.");
 
-        if (!DateTime.TryParseExact(estimatedTimeDepartureDto, "yyyy-MM-ddTHH:mm:ss", null, System.Globalization.DateTimeStyles.None, out var etd))
-            throw new BusinessRuleValidationException("Invalid EstimatedTimeDeparture format. Expected format: yyyy-MM-ddTHH:mm:ss");
+        if (!DateTime.TryParse(estimatedTimeDepartureDto, null,
+                System.Globalization.DateTimeStyles.RoundtripKind, out var etd))
+            throw new BusinessRuleValidationException("Invalid EstimatedTimeDeparture format. Use ISO 8601.");
 
         var estimatedTimeArrival = new ClockTime(eta);
         var estimatedTimeDeparture = new ClockTime(etd);
@@ -56,21 +55,20 @@ public static class VesselVisitNotificationFactory
 
     public static VesselVisitNotificationDto CreateVesselVisitNotificationDto(VesselVisitNotification notification)
     {
-        
-        CrewManifestDto crewManifestDto = CreateCrewManifestDto(notification.CrewManifest);
-        CargoManifestDto loadingCargoManifestDto = CreateCargoManifestDto(notification.LoadingCargoManifest);
-        CargoManifestDto unloadingCargoManifestDto = CreateCargoManifestDto(notification.UnloadingCargoManifest);
-        List<TaskDto> taskListDto = CreateTaskListDto(notification.Tasks);
-        List<DockDto> dockListDto = notification.ListDocks.Select(d => DockFactory.RegisterDockDto(d)).ToList();
-            
+        var crewManifestDto = CreateCrewManifestDto(notification.CrewManifest);
+        var loadingCargoManifestDto = CreateCargoManifestDto(notification.LoadingCargoManifest);
+        var unloadingCargoManifestDto = CreateCargoManifestDto(notification.UnloadingCargoManifest);
+        var taskListDto = CreateTaskListDto(notification.Tasks);
+        var dockListDto = notification.ListDocks?.Select(DockFactory.RegisterDockDto).ToList() ?? new List<DockDto>();
+
         return new VesselVisitNotificationDto(
             notification.Id.Value,
             notification.Code.Code,
-            notification.EstimatedTimeArrival,
-            notification.EstimatedTimeDeparture,
-            notification.ActualTimeArrival,
-            notification.ActualTimeDeparture,
-            notification.AcceptenceDate,
+            notification.EstimatedTimeArrival?.Value ?? DateTime.MinValue,
+            notification.EstimatedTimeDeparture?.Value ?? DateTime.MinValue,
+            notification.ActualTimeArrival?.Value,
+            notification.ActualTimeDeparture?.Value,
+            notification.AcceptenceDate?.Value,
             notification.Volume,
             notification.Documents ?? new PdfDocumentCollection(),
             notification.Status,
@@ -83,38 +81,84 @@ public static class VesselVisitNotificationFactory
         );
     }
 
-    private static List<TaskDto> CreateTaskListDto(IReadOnlyCollection<Task> notificationTasks)
+
+    private static List<TaskDto> CreateTaskListDto(IReadOnlyCollection<EntityTask>? notificationTasks)
     {
-        return new List<TaskDto>(notificationTasks.Select(t => CreateTaskDto(t)).ToList());
+        if (notificationTasks == null || notificationTasks.Count == 0)
+            return new List<TaskDto>();
+
+        return notificationTasks.Select(CreateTaskDto).ToList();
     }
 
-    private static TaskDto CreateTaskDto(Task task)
+    private static TaskDto CreateTaskDto(EntityTask entityTask)
     {
-        return new TaskDto(task.Id.AsGuid(),task.Code.ToString(),task.StartTime,task.EndTime,task.Description,task.Type,task.Status);
-    }
-    private static CargoManifestDto CreateCargoManifestDto(CargoManifest? cargoManifest)
-    {
-        List<CargoManifestEntryDto> cargoManifestEntrysDto = CreateCargoManifestEntrysDto(cargoManifest.ContainerEntries);
-        return new CargoManifestDto(cargoManifest.Id.AsGuid(),cargoManifest.Code,cargoManifest.Type,
-            cargoManifest.CreatedAt,cargoManifest.SubmittedBy,cargoManifestEntrysDto);
+        return new TaskDto(
+            entityTask.Id.AsGuid(),
+            entityTask.Code.ToString(),
+            entityTask.StartTime,
+            entityTask.EndTime,
+            entityTask.Description,
+            entityTask.Type,
+            entityTask.Status
+        );
     }
 
-    private static List<CargoManifestEntryDto> CreateCargoManifestEntrysDto(List<CargoManifestEntry> containerEntries)
+    private static CargoManifestDto? CreateCargoManifestDto(CargoManifest? cargoManifest)
     {
-        return new List<CargoManifestEntryDto>(containerEntries.Select(c => new CargoManifestEntryDto(
-            c.Id.AsGuid(),c.Bay,c.Row,c.Tier,c.StorageAreaId.Value,
-            ContainerFactory.CreateContainerDto(c.Container))).ToList());
+        if (cargoManifest == null)
+            return null;
+
+        var cargoManifestEntrysDto = CreateCargoManifestEntrysDto(cargoManifest.ContainerEntries);
+        return new CargoManifestDto(
+            cargoManifest.Id.AsGuid(),
+            cargoManifest.Code,
+            cargoManifest.Type,
+            cargoManifest.CreatedAt,
+            cargoManifest.SubmittedBy,
+            cargoManifestEntrysDto
+        );
     }
-    
-    private static CrewManifestDto CreateCrewManifestDto(CrewManifest crewManifest)
-    {       
-        List<CrewMemberDto> crewMembersDto = CreateCrewMemberDto(crewManifest.CrewMembers);
-        return new CrewManifestDto(crewManifest.Id.AsGuid(),crewManifest.TotalCrew,crewManifest.CaptainName,crewMembersDto);
+
+    private static List<CargoManifestEntryDto> CreateCargoManifestEntrysDto(List<CargoManifestEntry>? containerEntries)
+    {
+        if (containerEntries == null || containerEntries.Count == 0)
+            return new List<CargoManifestEntryDto>();
+
+        return containerEntries.Select(c => new CargoManifestEntryDto(
+            c.Id.AsGuid(),
+            c.Bay,
+            c.Row,
+            c.Tier,
+            c.StorageAreaId.Value,
+            ContainerFactory.CreateContainerDto(c.Container)
+        )).ToList();
     }
+
+    private static CrewManifestDto? CreateCrewManifestDto(CrewManifest? crewManifest)
+    {
+        if (crewManifest == null)
+            return null;
+
+        var crewMembersDto = CreateCrewMemberDto(crewManifest.CrewMembers);
+        return new CrewManifestDto(
+            crewManifest.Id.AsGuid(),
+            crewManifest.TotalCrew,
+            crewManifest.CaptainName,
+            crewMembersDto
+        );
+    }
+
     private static List<CrewMemberDto> CreateCrewMemberDto(List<CrewMember>? crewMembers)
     {
-        return new List<CrewMemberDto>(crewMembers.Select(c => new CrewMemberDto(c.Id.AsGuid(),c.Name,c.Role,c.Nationality,c.CitizenId.PassportNumber)).ToList());
+        if (crewMembers == null || crewMembers.Count == 0)
+            return new List<CrewMemberDto>();
+
+        return crewMembers.Select(c => new CrewMemberDto(
+            c.Id.AsGuid(),
+            c.Name,
+            c.Role,
+            c.Nationality,
+            c.CitizenId.PassportNumber
+        )).ToList();
     }
-    
-    
 }

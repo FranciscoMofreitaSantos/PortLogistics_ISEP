@@ -2,7 +2,7 @@ using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.Tasks;
 
-public class Task : Entity<TaskId>
+public class EntityTask : Entity<TaskId>
 {
     public TaskCode Code { get; private set; }
     public DateTime? StartTime { get; private set; }
@@ -11,10 +11,10 @@ public class Task : Entity<TaskId>
     public TaskType Type { get; private set; }
     public TaskStatus Status { get; private set; }
 
-    protected Task() {
+    protected EntityTask() {
     }
 
-    public Task(TaskCode code, string? description, TaskType type)
+    public EntityTask(TaskCode code, string? description, TaskType type)
     {
         if (description != null && description.Length > 255)
             throw new BusinessRuleValidationException("Description length must be at most 255 characters.");
@@ -25,7 +25,7 @@ public class Task : Entity<TaskId>
         Status = TaskStatus.Pending;
     }
 
-    public Task(TaskCode code, DateTime startTime, string? description, TaskType type)
+    public EntityTask(TaskCode code, DateTime startTime, string? description, TaskType type)
     {
         if (description != null && description.Length > 255)
             throw new BusinessRuleValidationException("Description length must be at most 255 characters.");
@@ -48,7 +48,7 @@ public class Task : Entity<TaskId>
 
     public override bool Equals(object? obj)
     {
-        if (obj is not Task other)
+        if (obj is not EntityTask other)
             return false;
 
         return Code.Equals(other.Code);

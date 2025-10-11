@@ -2,10 +2,7 @@ using SEM5_PI_WEBAPI.Domain.CargoManifests;
 using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Tasks;
-using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
-using Task = SEM5_PI_WEBAPI.Domain.Tasks.Task;
-
 
 namespace SEM5_PI_WEBAPI.Domain.VVN.DTOs;
 
@@ -14,11 +11,11 @@ public class VesselVisitNotificationDto
     public string Id { get; private set; }
     public string Code { get; private set; }
 
-    public ClockTime EstimatedTimeArrival { get; private set; }
-    public ClockTime EstimatedTimeDeparture { get; private set; }
-    public ClockTime? ActualTimeArrival { get; private set; }
-    public ClockTime? ActualTimeDeparture { get; private set; }
-    public ClockTime? AcceptenceDate { get; private set; }
+    public DateTime EstimatedTimeArrival { get; private set; }
+    public DateTime EstimatedTimeDeparture { get; private set; }
+    public DateTime? ActualTimeArrival { get; private set; }
+    public DateTime? ActualTimeDeparture { get; private set; }
+    public DateTime? AcceptenceDate { get; private set; }
 
     public int Volume { get; private set; }
     public PdfDocumentCollection Documents { get; private set; }
@@ -35,11 +32,11 @@ public class VesselVisitNotificationDto
     public VesselVisitNotificationDto(
         string id,
         string code,
-        ClockTime estimatedTimeArrival,
-        ClockTime estimatedTimeDeparture,
-        ClockTime? actualTimeArrival,
-        ClockTime? actualTimeDeparture,
-        ClockTime? acceptenceDate,
+        DateTime estimatedTimeArrival,
+        DateTime estimatedTimeDeparture,
+        DateTime? actualTimeArrival,
+        DateTime? actualTimeDeparture,
+        DateTime? acceptenceDate,
         int volume,
         PdfDocumentCollection documents,
         VvnStatus status,
@@ -60,11 +57,11 @@ public class VesselVisitNotificationDto
         Volume = volume;
         Documents = documents;
         Status = status;
-        ListDocks = docks.ToList();
+        ListDocks = docks?.ToList() ?? new List<DockDto>();
         CrewManifest = crewManifest;
         LoadingCargoManifest = loadingCargoManifest;
         UnloadingCargoManifest = unloadingCargoManifest;
         VesselImo = imo;
-        Tasks = tasks.ToList();
+        Tasks = tasks?.ToList() ?? new List<TaskDto>();
     }
 }

@@ -3,8 +3,8 @@ using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.Dock;
+using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
-using Task = SEM5_PI_WEBAPI.Domain.Tasks.Task;
 
 
 namespace SEM5_PI_WEBAPI.Domain.VVN
@@ -38,7 +38,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         public CargoManifest? UnloadingCargoManifest { get; private set; }
         public ImoNumber VesselImo { get; set; }
 
-        public IReadOnlyCollection<Task> Tasks { get; set; }
+        public IReadOnlyCollection<EntityTask> Tasks { get; set; }
 
 
         public VesselVisitNotification()
@@ -154,9 +154,9 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             this.VesselImo = vesselImo;
         }
 
-        public void SetTasks(IEnumerable<Task> tasks)
+        public void SetTasks(IEnumerable<EntityTask> tasks)
         {
-            Tasks = tasks?.ToList() ?? new List<Task>();
+            Tasks = tasks?.ToList() ?? new List<EntityTask>();
         }
         // ==============    
 
