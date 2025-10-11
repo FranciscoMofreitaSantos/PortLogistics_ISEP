@@ -1,0 +1,60 @@
+@startuml
+actor "Shipping Agent Representative" as Agent
+actor "Port Authority Officer" as Officer
+boundary "Vessel Visit Notification Management API" as System
+
+== Register Vessel Visit Notification ==
+Agent -> System : POST /api/vesselvisitnotifications\nBody: CreatingVvnDto\n(vesselImo, eta, etd, volume, documents?,\ncrewManifest?, loadingCargoManifest?, unloadingCargoManifest?, docks[])
+System --> Agent : 201 Created\nBody: VesselVisitNotificationDto\n(id, code, vesselImo, eta, etd, volume, status = "InProgress")
+
+== Update VVN (while In Progress or Pending) ==
+Agent -> System : PUT /api/vesselvisitnotifications/{id}\nBody: UpdateVvnDto\n(eta?, etd?, volume?, manifests?, docks?, documents?)
+System --> Agent : 200 OK\nUpdated VesselVisitNotificationDto\nOR 404 Not Found
+
+== Submit Vessel Visit Notification ==
+Agent -> System : PATCH /api/vesselvisitnotifications/{id}/submit
+System --> Agent : 200 OK\nStatus changed to "Submitted"\nVVN becomes read-only
+
+== Mark Pending Information (requested by Port Authority) ==
+Officer -> System : PATCH /api/vesselvisitnotifications/{id}/pending
+System --> Officer : 200 OK\nStatus changed to "PendingInformation"\nVVN editable again
+
+== Withdraw VVN ==
+Agent -> System : PATCH /api/vesselvisitnotifications/{id}/withdraw
+System --> Agent : 200 OK\nStatus changed to "Withdrawn"
+
+== Resume Withdrawn VVN ==
+Agent -> System : PATCH /api/vesselvisitnotifications/{id}/resume
+System --> Agent : 200 OK\nStatus changed to "InProgress"
+
+== Accept Submitted VVN ==
+Officer -> System : PATCH /api/vesselvisitnotifications/{id}/accept
+System --> Officer : 200 OK\nStatus changed to "Accepted"\nAcceptanceDate set
+
+== Query VVNs ==
+Agent -> System : GET /api/vesselvisitnotifications
+System --> Agent : 200 OK\nList<VesselVisitNotificationDto>
+
+Agent -> System : GET /api/vesselvisitnotifications/id/{id}
+System --> Agent : 200 OK\nVesselVisitNotificationDto\nOR 404 Not Found
+
+Agent -> System : GET /api/vesselvisitnotifications/code/{code}
+System --> Agent : 200 OK\nVesselVisitNotificationDto\nOR 404 Not Found
+
+== Validation and Business Rules ==
+Agent -> System : POST with duplicated VVN Code
+System --> Agent : 409 Conflict\nBusinessRuleValidationException("VVN code already exists")
+
+Agent -> System : POST with invalid IMO number
+System --> Agent : 400 Bad Request\nBusinessRuleValidationException("Invalid vessel IMO number")
+
+Agent -> System : POST with invalid container identifiers
+System --> Agent : 400 Bad Request\nBusinessRuleValidationException("Invalid ISO 6346 container codes")
+
+Agent -> System : PATCH /accept when not submitted
+System --> Agent : 400 Bad Request\nBusinessRuleValidationException("Only submitted VVNs can be accepted")
+
+Agent -> System : PATCH /submit when not InProgress or Pending
+System --> Agent : 400 Bad Request\nBusinessRuleValidationException("Invalid state transition")
+
+@enduml
