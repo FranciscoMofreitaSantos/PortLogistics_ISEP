@@ -36,7 +36,6 @@
     <Folder Include="Logs\StorageArea\" />
     <Folder Include="Logs\VesselsTypes\" />
     <Folder Include="Logs\Vessels\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

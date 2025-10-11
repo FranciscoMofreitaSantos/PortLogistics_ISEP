@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.VVN.Docs;
 
+[NotMapped]
 public class PdfDocumentCollection
 {
     private readonly List<PdfDocument> _pdfs = new();
