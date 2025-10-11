@@ -42,7 +42,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure
         public DbSet<ShippingAgentRepresentative> ShippingAgentRepresentative { get; set; }
         public DbSet<EntityContainer> Container { get; set; }
         public DbSet<StorageArea> StorageArea { get; set; }
-        public DbSet<Dock> Dock { get; set; }
+        public DbSet<EntityDock> Dock { get; set; }
         public DbSet<CargoManifest> CargoManifest { get; set; }
         public DbSet<CargoManifestEntry> CargoManifestEntry { get; set; }
         public DbSet<EntityPhysicalResource> PhysicalResources { get; set; }

@@ -5,7 +5,7 @@ using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 
 namespace SEM5_PI_WEBAPI.Domain.Dock;
 
-public class Dock : Entity<DockId>, IAggregateRoot
+public class EntityDock : Entity<DockId>, IAggregateRoot
 {
     public DockCode Code { get; private set; }
     [MaxLength(50)]
@@ -17,9 +17,9 @@ public class Dock : Entity<DockId>, IAggregateRoot
     private readonly HashSet<VesselTypeId> _allowedVesselTypeIds = new(); 
     public IReadOnlyCollection<VesselTypeId> AllowedVesselTypeIds => _allowedVesselTypeIds;
 
-    protected Dock() { }
+    protected EntityDock() { }
 
-    public Dock(
+    public EntityDock(
         DockCode code,
         string location,
         double lengthM,

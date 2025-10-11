@@ -6,7 +6,7 @@ using SEM5_PI_WEBAPI.Infraestructure.Shared;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.Docks
 {
-    public class DockRepository : BaseRepository<Dock, DockId>, IDockRepository
+    public class DockRepository : BaseRepository<EntityDock, DockId>, IDockRepository
     {
         private readonly DddSample1DbContext _context;
 
@@ -15,22 +15,22 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
             _context = context;
         }
 
-        public async Task<Dock?> GetByCodeAsync(DockCode code)
+        public async Task<EntityDock?> GetByCodeAsync(DockCode code)
         {
             return await _context.Dock
                 .FirstOrDefaultAsync(d => d.Code.Value == code.Value);
         }
 
-        public async Task<List<Dock>> GetByVesselTypeAsync(VesselTypeId vesselTypeId)
+        public async Task<List<EntityDock>> GetByVesselTypeAsync(VesselTypeId vesselTypeId)
         {
             return await _context.Dock
                 .Where(d => d.AllowedVesselTypeIds.Any(vt => vt.Value == vesselTypeId.Value))
                 .ToListAsync();
         }
 
-        public async Task<List<Dock>> GetByLocationAsync(string location)
+        public async Task<List<EntityDock>> GetByLocationAsync(string location)
         {
-            if (string.IsNullOrWhiteSpace(location)) return new List<Dock>();
+            if (string.IsNullOrWhiteSpace(location)) return new List<EntityDock>();
             var norm = location.Trim().ToLower();
 
             return await _context.Dock
@@ -38,7 +38,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                 .ToListAsync();
         }
 
-        public async Task<List<Dock>> GetFilterAsync(
+        public async Task<List<EntityDock>> GetFilterAsync(
             DockCode? code,
             VesselTypeId? vesselTypeId,
             string? location,

@@ -4,9 +4,9 @@ using SEM5_PI_WEBAPI.Domain.Dock;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.Docks
 {
-    public class DockEntityTypeConfiguration : IEntityTypeConfiguration<Dock>
+    public class DockEntityTypeConfiguration : IEntityTypeConfiguration<EntityDock>
     {
-        public void Configure(EntityTypeBuilder<Dock> builder)
+        public void Configure(EntityTypeBuilder<EntityDock> builder)
         {
             builder.HasKey(d => d.Id);
 

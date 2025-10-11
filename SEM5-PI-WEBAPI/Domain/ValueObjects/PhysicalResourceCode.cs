@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
-namespace SEM5_PI_WEBAPI.Domain.PhysicalResources
+namespace SEM5_PI_WEBAPI.Domain.ValueObjects
 {
     [Owned]
     public class PhysicalResourceCode : IValueObject

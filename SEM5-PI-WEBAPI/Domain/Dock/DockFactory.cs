@@ -5,13 +5,13 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
 {
     public static class DockFactory
     {
-        public static Dock RegisterDock(RegisterDockDto dto)
+        public static EntityDock RegisterDock(RegisterDockDto dto)
         {
             var vtIds = dto.AllowedVesselTypeIds
                 .Select(id => new VesselTypeId(new Guid(id)))
                 .ToList();
 
-            return new Dock(
+            return new EntityDock(
                 new DockCode(dto.Code),
                 dto.Location,
                 dto.LengthM,
@@ -21,7 +21,7 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
             );
         }
 
-        public static DockDto RegisterDockDto(Dock instance)
+        public static DockDto RegisterDockDto(EntityDock instance)
         {
             return new DockDto(
                 instance.Id.AsGuid(),
