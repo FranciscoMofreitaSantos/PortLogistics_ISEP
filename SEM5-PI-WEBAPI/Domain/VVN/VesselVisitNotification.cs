@@ -154,7 +154,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             this.VesselImo = vesselImo;
         }
 
-        private void SetTasks(IEnumerable<Task> tasks)
+        public void SetTasks(IEnumerable<Task> tasks)
         {
             Tasks = tasks?.ToList() ?? new List<Task>();
         }

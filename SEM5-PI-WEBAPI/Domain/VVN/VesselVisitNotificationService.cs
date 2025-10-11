@@ -29,7 +29,7 @@ public class VesselVisitNotificationService
     private readonly IStaffMemberRepository _staffMemberRepository;
     private readonly ICrewMemberRepository _crewMemberRepository;
     private readonly IDockRepository _dockRepository;
-    private readonly IVesselRepository  _vesselRepository;
+    private readonly IVesselRepository _vesselRepository;
     private readonly IContainerRepository _containerRepository;
     private readonly IVesselVisitNotificationRepository _repo;
     private readonly ITaskRepository _taskRepository;
@@ -40,7 +40,8 @@ public class VesselVisitNotificationService
         ICrewManifestRepository crewManifestRepository, IStorageAreaRepository storageAreaRepository,
         IStaffMemberRepository staffMemberRepository, ICrewMemberRepository crewMemberRepository,
         IContainerRepository containerRepository, IVesselVisitNotificationRepository repo,
-        ITaskRepository taskRepository, IVesselRepository vesselRepository,IDockRepository dockRepository,ILogger<VesselVisitNotificationService> logger)
+        ITaskRepository taskRepository, IVesselRepository vesselRepository, IDockRepository dockRepository,
+        ILogger<VesselVisitNotificationService> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -58,9 +59,7 @@ public class VesselVisitNotificationService
         _dockRepository = dockRepository;
     }
 
-        
-            
-    
+
     public async Task<VesselVisitNotificationDto> AddAsync(CreatingVesselVisitNotificationDto dto)
     {
         _logger.LogInformation("Business Domain: Request to add new VVN.");
@@ -72,30 +71,50 @@ public class VesselVisitNotificationService
         var vesselImo = await CheckForVesselInDb(dto.VesselImo);
         var listDocks = await CreateListWithDocksIds(dto.ListDocks);
 
-        if (unloadingCargoManifest != null) {var unloadingTasks = await CreateTasksAsync(unloadingCargoManifest, "", "");}
-        if (loadingCargoManifest != null) {var loadingTasks = await CreateTasksAsync(loadingCargoManifest, "", "");}
-            
-        var newVesselVisitNotification = VesselVisitNotificationFactory.CreateVesselVisitNotification(vvnCode, dto.EstimatedTimeArrival,dto.EstimatedTimeDeparture,dto.Volume,null,listDocks,crewManifest,loadingCargoManifest,unloadingCargoManifest,vesselImo);
+        List<Task> tasks = new List<Task>();
+        var actualDock = await _dockRepository.GetByCodeAsync(listDocks[0].Code);
+        if (actualDock == null)
+            throw new BusinessRuleValidationException("Dock not found for the specified code.");
         
+        if(vesselImo == null)
+            throw new BusinessRuleValidationException("Imo not found for the specified code.");
+                
+        if (unloadingCargoManifest != null)
+        {
+            var unloadingTasks = await CreateTasksAsync(unloadingCargoManifest, actualDock.Code.ToString());
+            tasks.AddRange(unloadingTasks);
+        }
+
+        if (loadingCargoManifest != null)
+        {
+            var loadingTasks = await CreateTasksAsync(loadingCargoManifest, actualDock.Code.ToString());
+            tasks.AddRange(loadingTasks);
+        }
+
+        var newVesselVisitNotification = VesselVisitNotificationFactory.CreateVesselVisitNotification(vvnCode,
+            dto.EstimatedTimeArrival, dto.EstimatedTimeDeparture, dto.Volume, null, listDocks, crewManifest,
+            loadingCargoManifest, unloadingCargoManifest, vesselImo);
+        
+        newVesselVisitNotification.SetTasks(tasks);
+
         await _repo.AddAsync(newVesselVisitNotification);
         await _unitOfWork.CommitAsync();
-        
-        _logger.LogInformation("Business Domain: VVN created successfully with ID = {Id}", newVesselVisitNotification.Id.Value);
+
+        _logger.LogInformation("Business Domain: VVN created successfully with ID = {Id}",
+            newVesselVisitNotification.Id.Value);
 
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(newVesselVisitNotification);
     }
-    
 
-    
 
     public async Task<VesselVisitNotificationDto> GetByIdAsync(VesselVisitNotificationId id)
     {
         _logger.LogInformation("Business Domain: Request to fetch VVN with ID = {Id}", id.Value);
-        
+
         var vvnInDb = await _repo.GetByIdAsync(id);
 
         if (vvnInDb == null) throw new BusinessRuleValidationException("No VVN Found with ID : {id.Value}");
-        
+
         _logger.LogInformation("Business Domain: VVN with ID = {Id} found successfully.", id.Value);
 
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
@@ -108,13 +127,14 @@ public class VesselVisitNotificationService
     {
         var newImo = new ImoNumber(dtoVesselImo);
         var vessel = await _vesselRepository.GetByImoNumberAsync(newImo);
-        
+
         if (vessel == null)
-            throw new BusinessRuleValidationException($"Error Creating VVN : System couldn't found a Vessel with the given ImoNumber [{dtoVesselImo}].");
-        
+            throw new BusinessRuleValidationException(
+                $"Error Creating VVN : System couldn't found a Vessel with the given ImoNumber [{dtoVesselImo}].");
+
         return vessel.ImoNumber;
     }
-    
+
     private async Task<List<EntityDock>> CreateListWithDocksIds(List<string> dtoListDocks)
     {
         if (dtoListDocks == null || !dtoListDocks.Any())
@@ -130,15 +150,16 @@ public class VesselVisitNotificationService
         {
             var existingDock = allDocksInSys.FirstOrDefault(d => d.Code.Equals(dockCode));
             if (existingDock == null)
-                throw new BusinessRuleValidationException($"Error creating VVN: Dock with code [{dockCode}] not found in the system.");
+                throw new BusinessRuleValidationException(
+                    $"Error creating VVN: Dock with code [{dockCode}] not found in the system.");
 
             listEntityDock.Add(existingDock);
         }
 
         return listEntityDock;
     }
-    
-    private async Task<List<Task>> CreateTasksAsync(CargoManifest cargoManifest, string dock, string storage)
+
+    private async Task<List<Task>> CreateTasksAsync(CargoManifest cargoManifest, string dock)
     {
         var tasks = new List<Task>();
         var manifestType = cargoManifest.Type;
@@ -146,9 +167,15 @@ public class VesselVisitNotificationService
 
         foreach (var entry in cargoManifest.ContainerEntries)
         {
+            var storage = await _storageAreaRepository.GetByIdAsync(entry.StorageAreaId);
+            
             taskCount++;
-            var containerHandlingDesc = manifestType == CargoManifestType.Unloading ? $"{storage} - Container Handling" : $"{dock} - Container Handling";
-            var yardTransportDesc = manifestType == CargoManifestType.Unloading ? $"{storage} - Yard Transport" : $"{dock} - Yard Transport";
+            var containerHandlingDesc = manifestType == CargoManifestType.Unloading
+                ? $"{storage.Name} - Container Handling"
+                : $"{dock} - Container Handling";
+            var yardTransportDesc = manifestType == CargoManifestType.Unloading
+                ? $"{storage.Name} - Yard Transport"
+                : $"{dock} - Yard Transport";
 
             var containerHandlingTask = new Task(
                 await GenerateNextTaskCodeAsync(TaskType.ContainerHandling, taskCount),
@@ -164,7 +191,7 @@ public class VesselVisitNotificationService
 
             if (manifestType == CargoManifestType.Unloading)
             {
-                var storagePlacementDesc = $"{storage} - Storage Placement";
+                var storagePlacementDesc = $"{storage.Name} - Storage Placement";
                 var storagePlacementTask = new Task(
                     await GenerateNextTaskCodeAsync(TaskType.StoragePlacement, taskCount),
                     storagePlacementDesc,
@@ -175,7 +202,6 @@ public class VesselVisitNotificationService
 
         return tasks;
     }
-
 
 
     private async Task<CrewManifest> CreateCrewManifestAsync(CreatingCrewManifestDto? dto)
@@ -250,12 +276,12 @@ public class VesselVisitNotificationService
         int nextNumber = count + 1;
         return new TaskCode(taskType, nextNumber);
     }
-    
+
     private async Task<VvnCode> GenerateNextVvnCodeAsync()
     {
         var list = await _repo.GetAllAsync();
         var nextSequence = list.Count + 1;
 
-        return new VvnCode(DateTime.Now.Year.ToString(),nextSequence.ToString());
+        return new VvnCode(DateTime.Now.Year.ToString(), nextSequence.ToString());
     }
 }
