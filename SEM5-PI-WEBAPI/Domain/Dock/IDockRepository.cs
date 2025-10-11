@@ -7,10 +7,10 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
     public interface IDockRepository : IRepository<EntityDock, DockId>
     {
         Task<EntityDock?> GetByCodeAsync(DockCode code);
+        Task<EntityDock?> GetByPhysicalResourceCodeAsync(PhysicalResourceCode code);
         Task<List<EntityDock>> GetByVesselTypeAsync(VesselTypeId vesselTypeId);
         Task<List<EntityDock>> GetByLocationAsync(string location);
         Task<List<EntityDock>> GetFilterAsync(DockCode? code, VesselTypeId? vesselTypeId, string? location, string? query);
-        
         Task<List<DockCode>> GetAllDockCodesAsync();
     }
 }

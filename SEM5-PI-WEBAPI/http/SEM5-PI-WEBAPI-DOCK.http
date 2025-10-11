@@ -14,6 +14,14 @@ Accept: application/json
 GET {{portURL}}/api/Dock/code/DK-0001
 Accept: application/json
 
+### Get by PhysicalResourceCode
+GET {{portURL}}/api/Dock/physical-code/ABC-1234
+Accept: application/json
+
+### Get all Dock codes
+GET {{portURL}}/api/Dock/codes
+Accept: application/json
+
 ### Get by VesselType
 GET {{portURL}}/api/Dock/vesseltype/b928c0c9-90c8-4e41-9a6d-59ec1ffef048
 Accept: application/json
@@ -33,6 +41,7 @@ Accept: application/json
 
 {
   "code": "DK-0001",
+  "physicalResourceCodes": ["ABC-1234", "XYZ-5678"],
   "location": "Terminal Norte A-3",
   "lengthM": 350.0,
   "depthM": 15.5,
@@ -43,7 +52,7 @@ Accept: application/json
   ]
 }
 
-###
+### Patch
 PATCH {{portURL}}/api/Dock/code/DK-0001
 Content-Type: application/json
 Accept: application/json
@@ -51,6 +60,7 @@ Accept: application/json
 {
   "location": "Terminal Norte A-4",
   "depthM": 16.0,
+  "physicalResourceCodes": ["ABC-1234", "LMN-0001"],
   "allowedVesselTypeIds": [
     "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
   ]

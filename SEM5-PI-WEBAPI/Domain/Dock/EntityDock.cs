@@ -8,6 +8,8 @@ namespace SEM5_PI_WEBAPI.Domain.Dock;
 public class EntityDock : Entity<DockId>, IAggregateRoot
 {
     public DockCode Code { get; private set; }
+    private readonly HashSet<PhysicalResourceCode> _physicalResourceCodes = new();
+    public IReadOnlyCollection<PhysicalResourceCode> PhysicalResourceCodes => _physicalResourceCodes;
     [MaxLength(50)]
     public string Location { get; private set; }
     public double LengthM { get; private set; }
@@ -21,6 +23,7 @@ public class EntityDock : Entity<DockId>, IAggregateRoot
 
     public EntityDock(
         DockCode code,
+        IEnumerable<PhysicalResourceCode> physicalResourceCodes,
         string location,
         double lengthM,
         double depthM,
@@ -28,6 +31,7 @@ public class EntityDock : Entity<DockId>, IAggregateRoot
         IEnumerable<VesselTypeId> allowedVesselTypes)
     {
         SetCode(code);
+        AddPhysicalResourceCodes(physicalResourceCodes, replace: true);
         SetLocation(location);
         SetLength(lengthM);
         SetDepth(depthM);
@@ -64,6 +68,24 @@ public class EntityDock : Entity<DockId>, IAggregateRoot
         MaxDraftM = Math.Round(maxDraftM, 2);
     }
 
+    public void ReplacePhysicalResourceCodes(IEnumerable<PhysicalResourceCode> items)
+    {
+        AddPhysicalResourceCodes(items, replace: true);
+    }
+
+    private void AddPhysicalResourceCodes(IEnumerable<PhysicalResourceCode> items, bool replace = false)
+    {
+        if (items is null) throw new BusinessRuleValidationException("Physical resource codes are required.");
+        if (replace) _physicalResourceCodes.Clear();
+        foreach (var prc in items)
+        {
+            if (prc is null || string.IsNullOrWhiteSpace(prc.Value))
+                throw new BusinessRuleValidationException("Invalid Physical Resource Code.");
+            if (!_physicalResourceCodes.Any(x => x.Value == prc.Value))
+                _physicalResourceCodes.Add(prc);
+        }
+    }
+
     public void AllowVesselType(VesselTypeId vesselTypeId)
     {
         if (vesselTypeId.Value.Equals(Guid.Empty))
@@ -86,9 +108,7 @@ public class EntityDock : Entity<DockId>, IAggregateRoot
     private void AddAllowedVesselTypes(IEnumerable<VesselTypeId> items, bool replace = false)
     {
         if (items is null) throw new BusinessRuleValidationException("Allowed vessel types are required.");
-
         if (replace) _allowedVesselTypeIds.Clear();
-
         int added = 0;
         foreach (var vt in items)
         {
@@ -96,7 +116,6 @@ public class EntityDock : Entity<DockId>, IAggregateRoot
                 throw new BusinessRuleValidationException("Invalid VesselTypeId.");
             if (_allowedVesselTypeIds.Add(vt)) added++;
         }
-
         if (_allowedVesselTypeIds.Count == 0 && added == 0)
             throw new BusinessRuleValidationException("A dock must allow at least one vessel type.");
     }

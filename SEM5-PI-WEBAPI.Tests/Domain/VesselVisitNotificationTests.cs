@@ -258,7 +258,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         private static EntityDock BuildValidDock(string code, string name)
         {
             var vesselTypes = new List<VesselTypeId> { new VesselTypeId(Guid.NewGuid()) };
-            return new EntityDock(new DockCode(code), name, 12.0d, 350.0d, 50.0d, vesselTypes);
+            return new EntityDock(new DockCode(code), new List<PhysicalResourceCode>(), name, 12.0d, 350.0d, 50.0d, vesselTypes);
         }
     }
 }

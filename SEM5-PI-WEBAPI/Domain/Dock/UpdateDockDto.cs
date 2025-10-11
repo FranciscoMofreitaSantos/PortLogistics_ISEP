@@ -3,6 +3,7 @@
     public class UpdateDockDto
     {
         public string? Code { get; set; }
+        public List<string>? PhysicalResourceCodes { get; set; }
         public string? Location { get; set; }
         public double? LengthM { get; set; }
         public double? DepthM { get; set; }
@@ -13,6 +14,7 @@
 
         public UpdateDockDto(
             string? code,
+            List<string>? physicalResourceCodes,
             string? location,
             double? lengthM,
             double? depthM,
@@ -20,6 +22,7 @@
             List<string>? allowedVesselTypeIds)
         {
             Code = code;
+            PhysicalResourceCodes = physicalResourceCodes;
             Location = location;
             LengthM = lengthM;
             DepthM = depthM;

@@ -15,7 +15,6 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                 code.Property(p => p.Value)
                     .HasColumnName("Code")
                     .IsRequired();
-
                 code.HasIndex(p => p.Value).IsUnique();
             });
 
@@ -26,19 +25,30 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
             builder.Property(d => d.LengthM).IsRequired();
             builder.Property(d => d.DepthM).IsRequired();
             builder.Property(d => d.MaxDraftM).IsRequired();
-            
+
+            builder.OwnsMany(d => d.PhysicalResourceCodes, prc =>
+            {
+                prc.ToTable("DockPhysicalResourceCodes");
+                prc.WithOwner().HasForeignKey("DockId");
+                prc.Property(p => p.Value)
+                    .HasColumnName("PhysicalResourceCode")
+                    .IsRequired();
+                prc.HasKey("DockId", "Value");
+                prc.HasIndex(p => p.Value).IsUnique();
+            });
+
             builder.OwnsMany(d => d.AllowedVesselTypeIds, a =>
             {
                 a.ToTable("DockAllowedVesselTypes");
-
                 a.WithOwner().HasForeignKey("DockId");
-
                 a.Property(v => v.Value)
                     .HasColumnName("VesselTypeId")
                     .IsRequired();
-
                 a.HasKey("DockId", "Value");
             });
+
+            builder.Navigation(d => d.PhysicalResourceCodes)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             builder.Navigation(d => d.AllowedVesselTypeIds)
                 .UsePropertyAccessMode(PropertyAccessMode.Field);

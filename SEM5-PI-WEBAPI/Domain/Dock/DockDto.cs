@@ -7,6 +7,7 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
     {
         public Guid Id { get; set; }
         public DockCode Code { get; private set; }
+        public IReadOnlyCollection<PhysicalResourceCode> PhysicalResourceCodes { get; private set; }
         public string Location { get; private set; }
         public double LengthM { get; private set; }
         public double DepthM { get; private set; }
@@ -16,6 +17,7 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
         public DockDto(
             Guid id,
             DockCode code,
+            IEnumerable<PhysicalResourceCode> physicalResourceCodes,
             string location,
             double lengthM,
             double depthM,
@@ -24,6 +26,7 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
         {
             Id = id;
             Code = code;
+            PhysicalResourceCodes = physicalResourceCodes.ToList().AsReadOnly();
             Location = location;
             LengthM = lengthM;
             DepthM = depthM;

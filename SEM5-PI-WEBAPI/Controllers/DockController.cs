@@ -38,7 +38,6 @@ public class DockController : ControllerBase
     public async Task<ActionResult<DockDto>> GetById(Guid id)
     {
         _logger.LogInformation("API Request: Fetching Dock with ID = {Id}", id);
-
         try
         {
             var dto = await _service.GetByIdAsync(new DockId(id));
@@ -58,10 +57,8 @@ public class DockController : ControllerBase
         try
         {
             _logger.LogInformation("API Request: Add Dock with body = {@Dto}", dto);
-
             var created = await _service.CreateAsync(dto);
             _logger.LogInformation("API Response (201): Dock created with Code [{Code}] and System ID [{ID}].", created.Code, created.Id);
-
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (BusinessRuleValidationException e)
@@ -77,9 +74,7 @@ public class DockController : ControllerBase
         try
         {
             _logger.LogInformation("API Request: Fetching Dock with Code = {Code}", code);
-
             var dto = await _service.GetByCodeAsync(code);
-
             _logger.LogWarning("API Response (200): Dock with Code = {Code} -> FOUND", code);
             return Ok(dto);
         }
@@ -96,9 +91,7 @@ public class DockController : ControllerBase
         try
         {
             _logger.LogInformation("API Request: Fetching Docks with VesselType = {VT}", vesselTypeId);
-
             var list = await _service.GetByVesselTypeAsync(vesselTypeId);
-
             _logger.LogWarning("API Response (200): Docks with VesselType = {VT} -> FOUND ({Count})", vesselTypeId, list.Count);
             return Ok(list);
         }
@@ -117,11 +110,9 @@ public class DockController : ControllerBase
         [FromQuery] string? query)
     {
         _logger.LogInformation("API Request: Filtering Docks with provided filters.");
-
         try
         {
             var list = await _service.GetFilterAsync(code, vesselTypeId, location, query);
-
             _logger.LogInformation("API Response (200): Found {Count} Docks -> {@Docks}", list.Count, list);
             return Ok(list);
         }
@@ -150,13 +141,10 @@ public class DockController : ControllerBase
     public async Task<ActionResult<DockDto>> PatchByCodeAsync(string code, [FromBody] UpdateDockDto? dto)
     {
         if (dto == null) return BadRequest("No changes provided.");
-
         try
         {
             _logger.LogInformation("API Request: Partial update for Dock with Code = {Code}", code);
-
             var updated = await _service.PatchByCodeAsync(code, dto);
-
             _logger.LogInformation("API Response (200): Dock with Code = {Code} patched successfully", code);
             return Ok(updated);
         }
@@ -166,4 +154,26 @@ public class DockController : ControllerBase
             return BadRequest(e.Message);
         }
     }
+    
+    [HttpGet("physical-code/{code}")]
+    public async Task<ActionResult<DockDto>> GetByPhysicalResourceCode(string code)
+    {
+        try
+        {
+            var dto = await _service.GetByPhysicalResourceCodeAsync(code);
+            return Ok(dto);
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            return NotFound(e.Message);
+        }
+    }
+
+    [HttpGet("codes")]
+    public async Task<ActionResult<List<string>>> GetAllCodes()
+    {
+        var list = await _service.GetAllDockCodesAsync();
+        return Ok(list);
+    }
+
 }

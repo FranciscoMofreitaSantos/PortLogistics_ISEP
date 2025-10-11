@@ -21,6 +21,12 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                 .FirstOrDefaultAsync(d => d.Code.Value == code.Value);
         }
 
+        public async Task<EntityDock?> GetByPhysicalResourceCodeAsync(PhysicalResourceCode code)
+        {
+            return await _context.Dock
+                .FirstOrDefaultAsync(d => d.PhysicalResourceCodes.Any(p => p.Value == code.Value));
+        }
+
         public async Task<List<EntityDock>> GetByVesselTypeAsync(VesselTypeId vesselTypeId)
         {
             return await _context.Dock
@@ -63,7 +69,9 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                 var norm = query.Trim().ToLower();
                 q = q.Where(d =>
                     d.Code.Value.ToLower().Contains(norm) ||
-                    d.Location.ToLower().Contains(norm));
+                    d.Location.ToLower().Contains(norm) ||
+                    d.PhysicalResourceCodes.Any(p => p.Value.ToLower().Contains(norm))
+                );
             }
 
             return await q.ToListAsync();
@@ -73,7 +81,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
         {
             return await _context.Dock
                 .Select(d => d.Code)
-                .ToListAsync();         
+                .ToListAsync();
         }
     }
 }

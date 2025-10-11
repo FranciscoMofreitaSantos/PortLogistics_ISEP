@@ -27,7 +27,6 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
         {
             _logger.LogInformation("Fetch all docks");
             var docks = await _dockRepository.GetAllAsync();
-            if (docks.Count == 0) throw new BusinessRuleValidationException("No docks found.");
             return docks.Select(DockFactory.RegisterDockDto).ToList();
         }
 
@@ -40,11 +39,21 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
             if (existing is not null)
                 throw new BusinessRuleValidationException($"Dock with code '{code.Value}' already exists.");
 
+            if (dto.PhysicalResourceCodes != null)
+            {
+                foreach (var raw in dto.PhysicalResourceCodes)
+                {
+                    var prc = new PhysicalResourceCode(raw);
+                    var existingPrc = await _dockRepository.GetByPhysicalResourceCodeAsync(prc);
+                    if (existingPrc is not null)
+                        throw new BusinessRuleValidationException($"Dock with PhysicalResourceCode '{prc.Value}' already exists.");
+                }
+            }
+
             foreach (var raw in dto.AllowedVesselTypeIds)
             {
                 if (!Guid.TryParse(raw, out var g) || g == Guid.Empty)
                     throw new BusinessRuleValidationException("Invalid VesselTypeId.");
-
                 try
                 {
                     await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
@@ -79,13 +88,21 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
             return DockFactory.RegisterDockDto(dock);
         }
 
+        public async Task<DockDto> GetByPhysicalResourceCodeAsync(string codeString)
+        {
+            var prc = new PhysicalResourceCode(codeString);
+            _logger.LogInformation("Get dock by PhysicalResourceCode {Code}", prc.Value);
+            var dock = await _dockRepository.GetByPhysicalResourceCodeAsync(prc)
+                       ?? throw new BusinessRuleValidationException($"No dock found with PhysicalResourceCode {prc.Value}");
+            return DockFactory.RegisterDockDto(dock);
+        }
+
         public async Task<List<DockDto>> GetByVesselTypeAsync(string vesselTypeId)
         {
             if (!Guid.TryParse(vesselTypeId, out var g) || g == Guid.Empty)
                 throw new BusinessRuleValidationException("Invalid VesselTypeId.");
 
             var docks = await _dockRepository.GetByVesselTypeAsync(new VesselTypeId(g));
-            if (docks.Count == 0) throw new BusinessRuleValidationException("No docks found for that vessel type.");
             return docks.Select(DockFactory.RegisterDockDto).ToList();
         }
 
@@ -114,7 +131,6 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
                 query
             );
 
-            if (docks.Count == 0) throw new BusinessRuleValidationException("No docks match the provided filters.");
             return docks.Select(DockFactory.RegisterDockDto).ToList();
         }
 
@@ -126,9 +142,6 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
             _logger.LogInformation("Get docks by location: {Loc}", location);
 
             var docks = await _dockRepository.GetByLocationAsync(location);
-            if (docks.Count == 0)
-                throw new BusinessRuleValidationException("No docks found for the given location.");
-
             return docks.Select(DockFactory.RegisterDockDto).ToList();
         }
 
@@ -148,9 +161,22 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
                 dock.SetCode(newCode);
             }
 
+            if (dto.PhysicalResourceCodes is not null)
+            {
+                var prcs = new List<PhysicalResourceCode>();
+                foreach (var raw in dto.PhysicalResourceCodes)
+                {
+                    var newPrc = new PhysicalResourceCode(raw);
+                    var duplicatePrc = await _dockRepository.GetByPhysicalResourceCodeAsync(newPrc);
+                    if (duplicatePrc is not null && duplicatePrc.Id.AsGuid() != dock.Id.AsGuid())
+                        throw new BusinessRuleValidationException($"Dock with PhysicalResourceCode '{newPrc.Value}' already exists.");
+                    prcs.Add(newPrc);
+                }
+                dock.ReplacePhysicalResourceCodes(prcs);
+            }
+
             if (!string.IsNullOrWhiteSpace(dto.Location))
                 dock.SetLocation(dto.Location);
-
             if (dto.LengthM.HasValue)   dock.SetLength(dto.LengthM.Value);
             if (dto.DepthM.HasValue)    dock.SetDepth(dto.DepthM.Value);
             if (dto.MaxDraftM.HasValue) dock.SetMaxDraft(dto.MaxDraftM.Value);
@@ -162,7 +188,6 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
                 {
                     if (!Guid.TryParse(raw, out var g) || g == Guid.Empty)
                         throw new BusinessRuleValidationException("Invalid VesselTypeId in update.");
-
                     try
                     {
                         await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
@@ -171,17 +196,20 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
                     {
                         throw new BusinessRuleValidationException($"Vessel Type '{g}' doesn't exist.");
                     }
-
                     ids.Add(new VesselTypeId(g));
                 }
-
                 dock.ReplaceAllowedVesselTypes(ids);
             }
 
             dock.EnsureHasAllowedVesselTypes();
-
             await _unitOfWork.CommitAsync();
             return DockFactory.RegisterDockDto(dock);
+        }
+
+        public async Task<List<string>> GetAllDockCodesAsync()
+        {
+            var codes = await _dockRepository.GetAllDockCodesAsync();
+            return codes.Select(c => c.Value).ToList();
         }
     }
 }
