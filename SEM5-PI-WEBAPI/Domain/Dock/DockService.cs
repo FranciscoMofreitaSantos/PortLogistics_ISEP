@@ -50,18 +50,17 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
                 }
             }
 
+            if (dto.AllowedVesselTypeIds == null || !dto.AllowedVesselTypeIds.Any())
+                throw new BusinessRuleValidationException("At least one VesselTypeId is required.");
+
             foreach (var raw in dto.AllowedVesselTypeIds)
             {
                 if (!Guid.TryParse(raw, out var g) || g == Guid.Empty)
                     throw new BusinessRuleValidationException("Invalid VesselTypeId.");
-                try
-                {
-                    await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
-                }
-                catch
-                {
+
+                var vt = await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
+                if (vt == null)
                     throw new BusinessRuleValidationException($"VesselType '{g}' does not exist.");
-                }
             }
 
             var dock = DockFactory.RegisterDock(dto);
@@ -183,21 +182,23 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
 
             if (dto.AllowedVesselTypeIds is not null)
             {
+                if (!dto.AllowedVesselTypeIds.Any())
+                    throw new BusinessRuleValidationException("At least one VesselTypeId is required.");
+
                 var ids = new List<VesselTypeId>();
+
                 foreach (var raw in dto.AllowedVesselTypeIds)
                 {
                     if (!Guid.TryParse(raw, out var g) || g == Guid.Empty)
                         throw new BusinessRuleValidationException("Invalid VesselTypeId in update.");
-                    try
-                    {
-                        await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
-                    }
-                    catch
-                    {
+
+                    var vt = await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
+                    if (vt == null)
                         throw new BusinessRuleValidationException($"Vessel Type '{g}' doesn't exist.");
-                    }
+
                     ids.Add(new VesselTypeId(g));
                 }
+
                 dock.ReplaceAllowedVesselTypes(ids);
             }
 
