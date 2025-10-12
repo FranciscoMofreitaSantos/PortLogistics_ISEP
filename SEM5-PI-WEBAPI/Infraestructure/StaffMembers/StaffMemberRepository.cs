@@ -28,11 +28,11 @@ public class StaffMemberRepository : BaseRepository<StaffMember, StaffMemberId>,
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
-    public async Task<StaffMember?> GetByMecNumberAsync(string mec)
+    public async Task<StaffMember?> GetByMecNumberAsync(MecanographicNumber mec)
     {
         return await _staffMembers
             .Include(s => s.Qualifications)
-            .FirstOrDefaultAsync(s => s.MecanographicNumber == mec);
+            .FirstOrDefaultAsync(s => s.MecanographicNumber.Equals(mec));
     }
 
     public async Task<List<StaffMember>> GetByNameAsync(string name)

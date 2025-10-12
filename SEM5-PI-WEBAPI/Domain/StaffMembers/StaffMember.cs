@@ -7,10 +7,10 @@ namespace SEM5_PI_WEBAPI.Domain.StaffMembers;
 
 public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
 {
-    [MaxLength(20)] public string ShortName { get; private set; }
-
-    [MaxLength(7)] public string MecanographicNumber { get; private set; }
-
+    private readonly int _maxLengthShortName = 20;
+    
+    public string ShortName { get; private set; }
+    public MecanographicNumber MecanographicNumber { get; private set; }
     public Email Email { get; private set; }
     public PhoneNumber Phone { get; private set; }
     public Schedule Schedule { get; private set; }
@@ -21,9 +21,9 @@ public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
     {
     }
 
-    internal StaffMember(
+    public StaffMember(
         string shortName,
-        string mecanographicNumber,
+        MecanographicNumber mecanographicNumber,
         Email email,
         PhoneNumber phone,
         Schedule schedule,
@@ -42,8 +42,8 @@ public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
 
     public void UpdateShortName(string newShortName)
     {
-        if (string.IsNullOrWhiteSpace(newShortName))
-            throw new BusinessRuleValidationException("ShortName cannot be empty.");
+        if (string.IsNullOrWhiteSpace(newShortName) || newShortName.Length > _maxLengthShortName)
+            throw new BusinessRuleValidationException("ShortName cannot be empty and must have at most 20 characters.");
         ShortName = newShortName;
     }
 

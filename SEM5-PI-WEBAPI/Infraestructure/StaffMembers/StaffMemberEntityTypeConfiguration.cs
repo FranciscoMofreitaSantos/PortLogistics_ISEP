@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SEM5_PI_WEBAPI.Domain.StaffMembers;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.StaffMembers;
@@ -11,10 +12,17 @@ public class StaffMemberEntityTypeConfiguration : IEntityTypeConfiguration<Staff
         builder.HasKey(k => k.Id);
 
         builder.Property(s => s.ShortName)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(20); 
+        
+        var mecanographicNumberConverter = new ValueConverter<MecanographicNumber, string>(
+            v => v.ToString(),
+            v => new MecanographicNumber(v));
 
         builder.Property(s => s.MecanographicNumber)
-            .IsRequired();
+            .HasConversion(mecanographicNumberConverter)
+            .IsRequired()
+            .HasMaxLength(7); 
 
         builder.Property(s => s.IsActive)
             .IsRequired();

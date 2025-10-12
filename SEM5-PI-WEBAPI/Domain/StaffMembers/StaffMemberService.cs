@@ -32,8 +32,9 @@ public class StaffMemberService
         return staff == null ? null : MapToDto(staff);
     }
 
-    public async Task<StaffMemberDto> GetByMecNumberAsync(string mec)
+    public async Task<StaffMemberDto> GetByMecNumberAsync(string m)
     {
+        var mec = new MecanographicNumber(m);
         var staff = await _repo.GetByMecNumberAsync(mec);
         return staff == null ? null : MapToDto(staff);
     }
@@ -74,7 +75,7 @@ public class StaffMemberService
 
         var staffMember = new StaffMember(
             dto.ShortName,
-            mecanographicNumber,
+            new MecanographicNumber(mecanographicNumber),
             dto.Email,
             dto.Phone,
             dto.Schedule,
@@ -181,18 +182,25 @@ public class StaffMemberService
     private async Task<string> GenerateMecanographicNumberAsync()
     {
         var allStaff = await _repo.GetAllAsync();
-        var year = DateTime.UtcNow.Year.ToString().Substring(2);
-        var count = allStaff.Count(s => s.MecanographicNumber.Substring(1, 2) == year);
+        var currentYear = DateTime.UtcNow.Year % 100;
+        
+        var count = allStaff.Count(s =>
+        {
+            if (s.MecanographicNumber == null) return false;
+            return s.MecanographicNumber.Year == currentYear;
+        });
+
         var nextSeq = count + 1;
-        return $"1{year}{nextSeq:D4}";
+        return $"1{currentYear:D2}{nextSeq:D4}";
     }
+
 
     private static StaffMemberDto MapToDto(StaffMember staff)
     {
         return new StaffMemberDto(
             staff.Id.AsGuid(),
             staff.ShortName,
-            staff.MecanographicNumber,
+            staff.MecanographicNumber.Value,
             staff.Email,
             staff.Phone,
             staff.Schedule,

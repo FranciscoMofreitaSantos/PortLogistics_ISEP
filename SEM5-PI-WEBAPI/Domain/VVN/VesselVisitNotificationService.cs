@@ -57,7 +57,7 @@ public class VesselVisitNotificationService
         _repo = repo;
         _taskRepository = taskRepository;
     }
-    
+
 
     public async Task<VesselVisitNotificationDto> AddAsync(CreatingVesselVisitNotificationDto dto)
     {
@@ -78,7 +78,7 @@ public class VesselVisitNotificationService
         if (listDocks == null || !listDocks.Any())
             throw new BusinessRuleValidationException("At least one Dock must be specified for the VVN.");
 
-        
+
         var newVesselVisitNotification = VesselVisitNotificationFactory.CreateVesselVisitNotification(
             vvnCode,
             dto.EstimatedTimeArrival,
@@ -92,23 +92,12 @@ public class VesselVisitNotificationService
             vesselImo
         );
         
-        // Console.WriteLine($"=================================================================================================================================");
-        //
-        // var mani = await _cargoManifestRepository.GetByIdAsync(loadingCargoManifest.Id);
-        // Console.WriteLine($"============================ {mani.Code}");
-        //
-        // Console.WriteLine($"=================================================================================================================================");
-        //
-        // var crew = await _crewManifestRepository.GetByIdAsync(crewManifest.Id);
-        //
-        // Console.WriteLine($"============================ {crew.CaptainName}");
-        //
-        // Console.WriteLine($"=================================================================================================================================");
 
         await _repo.AddAsync(newVesselVisitNotification);
         await _unitOfWork.CommitAsync();
-        
-        _logger.LogInformation("Business Domain: VVN successfully created with ID = {Id}", newVesselVisitNotification.Id.Value);
+
+        _logger.LogInformation("Business Domain: VVN successfully created with ID = {Id}",
+            newVesselVisitNotification.Id.Value);
 
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(newVesselVisitNotification);
     }
@@ -124,18 +113,19 @@ public class VesselVisitNotificationService
         _logger.LogInformation("Business Domain: VVN with ID = {Id} found successfully.", id.Value);
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
-    
+
     public async Task<VesselVisitNotificationDto> AcceptVvnAsync(VvnCode code)
     {
         _logger.LogInformation("Business Domain: Accepting VVN with Code = {code}", code.ToString());
 
         VesselVisitNotificationId id = await GetIdByCodeAsync(code);
         var vvnInDb = await _repo.GetByIdAsync(id);
-        
-        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code}");
-        
+
+        if (vvnInDb == null)
+            throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code}");
+
         vvnInDb.Accept();
-        
+
         var tasks = new List<EntityTask>();
         var firstDock = vvnInDb.ListDocks.First();
         var actualDock = await _dockRepository.GetByCodeAsync(firstDock.Code)
@@ -152,27 +142,29 @@ public class VesselVisitNotificationService
             var loadingTasks = await CreateTasksAsync(vvnInDb.LoadingCargoManifest, actualDock.Code.ToString());
             tasks.AddRange(loadingTasks);
         }
-        
+
         vvnInDb.SetTasks(tasks);
-        
+
         await _unitOfWork.CommitAsync();
-        
+
         _logger.LogInformation("VVN with Code = {code} Accepted successfully.", code.ToString());
-        
+
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
-    
+
     public async Task<VesselVisitNotificationDto> MarkAsPendingInfoAsync(VvnCode code)
     {
         _logger.LogInformation("Business Domain: Marking VVN as Pending Information for code = {code}", code);
 
         VesselVisitNotificationId id = await GetIdByCodeAsync(code);
         var vvnInDb = await _repo.GetByIdAsync(id)
-                      ?? throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code}");
+                      ?? throw new BusinessRuleValidationException(
+                          $"No Vessel Visit Notification found with Code = {code}");
 
         if (vvnInDb.Status != VvnStatus.Submitted)
         {
-            throw new BusinessRuleValidationException("Provided VVN has not been submitted yet and cannot be marked as pending information.");
+            throw new BusinessRuleValidationException(
+                "Provided VVN has not been submitted yet and cannot be marked as pending information.");
         }
 
         vvnInDb.MarkPending();
@@ -183,146 +175,148 @@ public class VesselVisitNotificationService
 
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
- 
 
 
     public async Task<VesselVisitNotificationDto> WithdrawByIdAsync(VesselVisitNotificationId id)
     {
         _logger.LogInformation("Business Domain: Withdrawing VVN with ID = {Id}", id.Value);
-        
+
         var vvnInDb = await _repo.GetByIdAsync(id);
-        
-        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
-        
+
+        if (vvnInDb == null)
+            throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
+
         vvnInDb.Withdraw();
-        
+
         await _unitOfWork.CommitAsync();
-        
+
         _logger.LogInformation("VVN with ID = {Id} withdrew successfully.", id.Value);
-        
+
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
-    
+
     public async Task<VesselVisitNotificationDto> WithdrawByCodeAsync(VvnCode code)
     {
         _logger.LogInformation("Business Domain: Withdrawing VVN with ID = {code}", code.Code);
-        
+
         var vvnInDb = await _repo.GetByCodeAsync(code);
-        
-        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code.Code}");
-        
+
+        if (vvnInDb == null)
+            throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code.Code}");
+
         vvnInDb.Withdraw();
-        
+
         await _unitOfWork.CommitAsync();
-        
+
         _logger.LogInformation("VVN with Code = {code} withdrew successfully.", code.Code);
-        
+
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
-    
-    public async Task<VesselVisitNotificationDto>SubmitByCodeAsync(VvnCode code)
+
+    public async Task<VesselVisitNotificationDto> SubmitByCodeAsync(VvnCode code)
     {
         _logger.LogInformation("Business Domain: Submitting VVN with ID = {code}", code.Code);
-        
+
         var vvnInDb = await _repo.GetByCodeAsync(code);
-        
-        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code.Code}");
-        
+
+        if (vvnInDb == null)
+            throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code.Code}");
+
         vvnInDb.Submit();
-        
+
         await _unitOfWork.CommitAsync();
-        
+
         _logger.LogInformation("VVN with Code = {code} submitted successfully.", code.Code);
-        
+
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
-    
-    public async Task<VesselVisitNotificationDto>SubmitByIdAsync(VesselVisitNotificationId id)
+
+    public async Task<VesselVisitNotificationDto> SubmitByIdAsync(VesselVisitNotificationId id)
     {
         _logger.LogInformation("Business Domain: Submitting VVN with ID = {Id}", id.Value);
-        
+
         var vvnInDb = await _repo.GetByIdAsync(id);
-        
-        if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
-        
+
+        if (vvnInDb == null)
+            throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
+
         vvnInDb.Submit();
-        
+
         await _unitOfWork.CommitAsync();
-        
+
         _logger.LogInformation("VVN with ID = {Id} submitted successfully.", id.Value);
-        
+
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
-    
-    
-    public async Task<VesselVisitNotificationDto> UpdateAsync(VesselVisitNotificationId id, UpdateVesselVisitNotificationDto dto)
-{
-    _logger.LogInformation("Business Domain: Updating VVN with ID = {Id}", id.Value);
 
-    var vvnInDb = await _repo.GetByIdAsync(id);
 
-    if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
-
-    if (!vvnInDb.IsEditable) throw new BusinessRuleValidationException("Only VVNs with status 'InProgress' or 'PendingInformation' can be edited.");
-
-    if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeArrival)) vvnInDb.UpdateEstimatedTimeArrival(new ClockTime(DateTime.Parse(dto.EstimatedTimeArrival)));
-
-    if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeDeparture)) vvnInDb.UpdateEstimatedTimeDeparture(new ClockTime(DateTime.Parse(dto.EstimatedTimeDeparture)));
-
-    if (dto.Volume.HasValue) vvnInDb.UpdateVolume(dto.Volume.Value);
-
-    if (dto.Documents != null) vvnInDb.UpdateDocuments(dto.Documents);
-    
-    if (dto.ListDocksCodes != null && dto.ListDocksCodes.Any())
+    public async Task<VesselVisitNotificationDto> UpdateAsync(VesselVisitNotificationId id,
+        UpdateVesselVisitNotificationDto dto)
     {
-        var docks = await CreateListWithDocksIds(dto.ListDocksCodes);
-        vvnInDb.UpdateListDocks(docks);
+        _logger.LogInformation("Business Domain: Updating VVN with ID = {Id}", id.Value);
+
+        var vvnInDb = await _repo.GetByIdAsync(id);
+
+        if (vvnInDb == null)
+            throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
+
+        if (!vvnInDb.IsEditable)
+            throw new BusinessRuleValidationException(
+                "Only VVNs with status 'InProgress' or 'PendingInformation' can be edited.");
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeArrival))
+            vvnInDb.UpdateEstimatedTimeArrival(new ClockTime(DateTime.Parse(dto.EstimatedTimeArrival)));
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeDeparture))
+            vvnInDb.UpdateEstimatedTimeDeparture(new ClockTime(DateTime.Parse(dto.EstimatedTimeDeparture)));
+
+        if (dto.Volume.HasValue) vvnInDb.UpdateVolume(dto.Volume.Value);
+
+        if (dto.Documents != null) vvnInDb.UpdateDocuments(dto.Documents);
+
+        if (dto.ListDocksCodes != null && dto.ListDocksCodes.Any())
+        {
+            var docks = await CreateListWithDocksIds(dto.ListDocksCodes);
+            vvnInDb.UpdateListDocks(docks);
+        }
+
+        if (dto.CrewManifest != null)
+        {
+            var crewManifest = await CreateCrewManifestAsync(dto.CrewManifest);
+            vvnInDb.UpdateCrewManifest(crewManifest);
+        }
+
+        if (dto.LoadingCargoManifest != null)
+        {
+            var loadingManifest = await CreateCargoManifestAsync(dto.LoadingCargoManifest);
+            vvnInDb.UpdateLoadingCargoManifest(loadingManifest);
+        }
+
+        if (dto.UnloadingCargoManifest != null)
+        {
+            var unloadingManifest = await CreateCargoManifestAsync(dto.UnloadingCargoManifest);
+            vvnInDb.UpdateUploadingCargoManifest(unloadingManifest);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.ImoNumber))
+        {
+            var imoCode = new ImoNumber(dto.ImoNumber);
+            var foundVesselWithImo = await _vesselRepository.GetByImoNumberAsync(imoCode);
+
+            if (foundVesselWithImo == null)
+                throw new BusinessRuleValidationException($"No vessel with IMO Number {imoCode} was found.");
+
+            vvnInDb.UpdateImoNumber(foundVesselWithImo.ImoNumber);
+        }
+
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("VVN with ID = {Id} updated successfully.", id.Value);
+
+        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
     }
 
-    if (dto.CrewManifest != null)
-    {
-        var crewManifest = await CreateCrewManifestAsync(dto.CrewManifest);
-        vvnInDb.UpdateCrewManifest(crewManifest);
-    }
 
-    if (dto.LoadingCargoManifest != null)
-    {
-        var loadingManifest = await CreateCargoManifestAsync(dto.LoadingCargoManifest);
-        vvnInDb.UpdateLoadingCargoManifest(loadingManifest);
-    }
-
-    if (dto.UnloadingCargoManifest != null)
-    {
-        var unloadingManifest = await CreateCargoManifestAsync(dto.UnloadingCargoManifest);
-        vvnInDb.UpdateUploadingCargoManifest(unloadingManifest);
-    }
-
-    if (!string.IsNullOrWhiteSpace(dto.ImoNumber))
-    {
-        var imoCode = new ImoNumber(dto.ImoNumber);
-        var foundVesselWithImo = await _vesselRepository.GetByImoNumberAsync(imoCode);
-        
-        if (foundVesselWithImo == null) throw new BusinessRuleValidationException($"No vessel with IMO Number {imoCode} was found.");
-        
-        vvnInDb.UpdateImoNumber(foundVesselWithImo.ImoNumber);
-    }
-
-    await _unitOfWork.CommitAsync();
-
-    _logger.LogInformation("VVN with ID = {Id} updated successfully.", id.Value);
-
-    return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
-}
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
     //========================================
 
     private async Task<VesselVisitNotificationId> GetIdByCodeAsync(VvnCode code)
@@ -336,10 +330,11 @@ public class VesselVisitNotificationService
 
         return vvn.Id;
     }
-    
+
     private async Task<ImoNumber> CheckForVesselInDb(string dtoVesselImo)
     {
-        if (string.IsNullOrWhiteSpace(dtoVesselImo)) throw new BusinessRuleValidationException("Vessel IMO cannot be null or empty.");
+        if (string.IsNullOrWhiteSpace(dtoVesselImo))
+            throw new BusinessRuleValidationException("Vessel IMO cannot be null or empty.");
 
         var newImo = new ImoNumber(dtoVesselImo);
         var vessel = await _vesselRepository.GetByImoNumberAsync(newImo)
@@ -378,7 +373,8 @@ public class VesselVisitNotificationService
         foreach (var entry in cargoManifest.ContainerEntries)
         {
             var storage = await _storageAreaRepository.GetByIdAsync(entry.StorageAreaId)
-                          ?? throw new BusinessRuleValidationException($"Storage area {entry.StorageAreaId} not found.");
+                          ?? throw new BusinessRuleValidationException(
+                              $"Storage area {entry.StorageAreaId} not found.");
 
             taskCount++;
             string location = manifestType == CargoManifestType.Unloading ? storage.Name : dock;
@@ -455,7 +451,8 @@ public class VesselVisitNotificationService
         var storageArea = await _storageAreaRepository.GetByIdAsync(new StorageAreaId(entryDtoStorageAreaId));
 
         if (storageArea == null)
-            throw new BusinessRuleValidationException($"Storage Area with Id [{entryDtoStorageAreaId}] not found in the database.");
+            throw new BusinessRuleValidationException(
+                $"Storage Area with Id [{entryDtoStorageAreaId}] not found in the database.");
 
         return storageArea.Id;
     }
@@ -495,10 +492,9 @@ public class VesselVisitNotificationService
     {
         var list = await _repo.GetAllAsync();
         var nextSequence = list.Count + 1;
-        
+
         var formattedSequence = nextSequence.ToString("D6");
 
         return new VvnCode(DateTime.Now.Year.ToString(), formattedSequence);
     }
-
 }

@@ -1,8 +1,9 @@
 using System.Text.RegularExpressions;
+using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.StaffMembers;
 
-public class Email
+public class Email : IValueObject
 {
     private static readonly Regex EmailRegex = new Regex(
         @"^[^@\s]+@[^@\s]+\.[^@\s]+$",

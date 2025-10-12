@@ -1,9 +1,11 @@
+using SEM5_PI_WEBAPI.Domain.Shared;
+
 namespace SEM5_PI_WEBAPI.Domain.StaffMembers;
 
 using System;
 using System.Text.RegularExpressions;
 
-public class PhoneNumber
+public class PhoneNumber : IValueObject
 {
     private static readonly Regex PhoneRegex = new Regex(
         @"^\+?[1-9]\d{1,14}$", 
