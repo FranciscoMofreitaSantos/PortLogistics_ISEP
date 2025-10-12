@@ -15,22 +15,28 @@ public class ImoNumber : IValueObject
 
     public ImoNumber(string imoNumber)
     {
+        if (imoNumber is null)
+            throw new BusinessRuleValidationException("IMO Number can't be empty. Must follow format: IMO ####### or #######");
         string normalized = imoNumber.ToUpper().Trim();
         this.Value = ValidateFormatImoNumber(normalized);
     }
+
 
     private string ValidateFormatImoNumber(string imoNumber)
     {
         if (string.IsNullOrWhiteSpace(imoNumber))
             throw new BusinessRuleValidationException("IMO Number can't be empty. Must follow format: IMO ####### or #######");
 
-        if (imoNumber.StartsWith(ImoPrefix))
+        if (imoNumber.StartsWith(ImoPrefix, StringComparison.OrdinalIgnoreCase))
         {
-            string[] parts = imoNumber.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 2 && parts[0] == ImoPrefix)
-                return ValidateImoNumber(parts[1]);
-            else
+            if (!imoNumber.Contains(' '))
                 throw new BusinessRuleValidationException("IMO Number format is invalid. Use 'IMO #######'");
+
+            string[] parts = imoNumber.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 2 && parts[0].Equals(ImoPrefix, StringComparison.OrdinalIgnoreCase))
+                return ValidateImoNumber(parts[1]);
+
+            throw new BusinessRuleValidationException("IMO Number format is invalid. Use 'IMO #######'");
         }
 
         return ValidateImoNumber(imoNumber);

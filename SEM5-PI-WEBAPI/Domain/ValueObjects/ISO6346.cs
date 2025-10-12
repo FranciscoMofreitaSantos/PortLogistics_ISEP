@@ -26,32 +26,26 @@ public class Iso6346Code : IValueObject
         Value = normalized;
     }
 
+    
+    
     private bool ValidateCheckDigit(string code)
     {
-        // ISO 6346 check digit calculation
-        // Letters get values A=10, B=12, ... Z=38 (even numbers only, skipping multiples of 11)
-        // Each character * 2^position mod 11
-        // Check digit = result mod 11 (10 -> 0)
-
-        int[] letterMapping = new int[26] {
-            10,12,13,14,15,16,17,18,19,20,
-            21,23,24,25,26,27,28,29,30,31,
-            32,34,35,36,37,38
+        var letterMapping = new Dictionary<char, int>
+        {
+            {'A',10}, {'B',12}, {'C',13}, {'D',14}, {'E',15}, {'F',16}, {'G',17}, {'H',18}, {'I',19},
+            {'J',20}, {'K',21}, {'L',23}, {'M',24}, {'N',25}, {'O',26}, {'P',27}, {'Q',28}, {'R',29},
+            {'S',30}, {'T',31}, {'U',32}, {'V',34}, {'W',35}, {'X',36}, {'Y',37}, {'Z',38}
         };
 
         int sum = 0;
+        int factor = 1;
 
-        for (int i = 0; i < 10; i++) // first 10 chars
+        for (int i = 0; i < 10; i++)
         {
-            int value;
             char c = code[i];
-
-            if (char.IsLetter(c))
-                value = letterMapping[c - 'A'];
-            else
-                value = c - '0';
-
-            sum += value * (int)Math.Pow(2, i);
+            int value = char.IsLetter(c) ? letterMapping[c] : c - '0';
+            sum += value * factor;
+            factor *= 2;
         }
 
         int checkDigit = sum % 11;
@@ -59,6 +53,9 @@ public class Iso6346Code : IValueObject
 
         return checkDigit == (code[10] - '0');
     }
+
+
+
 
     public override string ToString() => Value;
 }
