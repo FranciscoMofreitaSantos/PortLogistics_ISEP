@@ -1,11 +1,81 @@
 ﻿@portURL = http://localhost:5008
 
-### 🟢 Get all resources
+# ==========================
+#  PHYSICAL RESOURCE
+# ==========================
+
+
+# --- GET (Read) ---
+
+### 1️⃣ GET all physical resources
 GET {{portURL}}/api/PhysicalResource
 Accept: application/json
 
 
-### 🟢 Create new resource
+### 2️⃣ GET by Id - valid
+GET {{portURL}}/api/PhysicalResource/get/6ad4cf47-a9f2-44da-90cc-e4852a4b07c1
+Accept: application/json
+
+
+### 3️⃣ GET by Id - not found
+GET {{portURL}}/api/PhysicalResource/get/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+
+### 4️⃣ GET by Code - valid
+GET {{portURL}}/api/PhysicalResource/get/code/TRUCK-0001
+Accept: application/json
+
+
+### 5️⃣ GET by Code - invalid (not found)
+GET {{portURL}}/api/PhysicalResource/get/code/INVAL-0000
+Accept: application/json
+
+
+### 6️⃣ GET by Description - valid
+GET {{portURL}}/api/PhysicalResource/get/description/Dock Crane A
+Accept: application/json
+
+
+### 7️⃣ GET by Description - not found
+GET {{portURL}}/api/PhysicalResource/get/description/NonExistentDescription
+Accept: application/json
+
+
+### 8️⃣ GET by Status - Available
+GET {{portURL}}/api/PhysicalResource/get/status/Available
+Accept: application/json
+
+
+### 9️⃣ GET by Status - UnderMaintenance
+GET {{portURL}}/api/PhysicalResource/get/status/UnderMaintenance
+Accept: application/json
+
+
+### 🔟 GET by Type - valid
+GET {{portURL}}/api/PhysicalResource/get/type/Truck
+Accept: application/json
+
+
+### 1️⃣1️⃣ GET by Type - not found
+GET {{portURL}}/api/PhysicalResource/get/type/InvalidType
+Accept: application/json
+
+
+### 1️⃣2️⃣ GET by Qualification - valid (NAO ESTÁ FUNCIONANDO)
+GET {{portURL}}/api/PhysicalResource/get/qualification/9c5e3d5a-dd32-4f8b-afc0-9cad22ea21eb
+Accept: application/json
+
+
+### 1️⃣3️⃣ GET by Qualification - not found
+GET {{portURL}}/api/PhysicalResource/get/qualification/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+
+
+# --- POST (Create) ---
+
+### 1️⃣4️⃣ POST Create - valid
 POST {{portURL}}/api/PhysicalResource
 Content-Type: application/json
 Accept: application/json
@@ -19,15 +89,101 @@ Accept: application/json
 }
 
 
-### 🟡 Update resource (example)
-PUT {{portURL}}/api/PhysicalResource/{{resourceId}}
+### 1️⃣5️⃣ POST Create - missing field (no description)
+POST {{portURL}}/api/PhysicalResource
 Content-Type: application/json
 Accept: application/json
 
 {
-  "description": "Updated Dock Crane A",
-  "operationalCapacity": 28.0,
-  "setupTime": 15,
-  "status": "UnderMaintenance"
+  "operationalCapacity": 30.0,
+  "setupTime": 8,
+  "physicalResourceType": "Forklift",
+  "qualificationID": "9c5e3d5a-dd32-4f8b-afc0-9cad22ea21eb"
 }
 
+
+### 1️⃣6️⃣ POST Create - invalid type (enum not found) (MELHORAR MENSAGEM DE ERRO)
+POST {{portURL}}/api/PhysicalResource
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Invalid Resource",
+  "operationalCapacity": 20,
+  "setupTime": 5,
+  "physicalResourceType": "INVALID_TYPE",
+  "qualificationID": "9c5e3d5a-dd32-4f8b-afc0-9cad22ea21eb"
+}
+
+
+
+### --- PATCH (Update) ---
+
+### 1️⃣7️⃣ PATCH Update - valid (change description)
+PATCH {{portURL}}/api/PhysicalResource/update/6ad4cf47-a9f2-44da-90cc-e4852a4b07c1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Updated Dock Crane B"
+}
+
+
+### 1️⃣8️⃣ PATCH Update - valid (change multiple fields)
+PATCH {{portURL}}/api/PhysicalResource/update/6ad4cf47-a9f2-44da-90cc-e4852a4b07c1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Updated Truck",
+  "operationalCapacity": 10.0,
+  "setupTime": 40,
+  "qualificationId": "9c5e3d5a-dd32-4f8b-afc0-9cad22ea21eb"
+}
+
+
+### 1️⃣9️⃣ PATCH Update - invalid field (should fail)
+PATCH {{portURL}}/api/PhysicalResource/update/6ad4cf47-a9f2-44da-90cc-e4852a4b07c1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "physicalResourceType": "Forklift"
+}
+
+
+### 2️⃣0️⃣ PATCH Update - non-existing Id
+PATCH {{portURL}}/api/PhysicalResource/update/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Ghost Resource"
+}
+
+
+
+### --- PATCH (Deactivate / Reactivate) ---
+
+### 2️⃣1️⃣ PATCH Deactivate - valid
+PATCH {{portURL}}/api/PhysicalResource/deactivate/6ad4cf47-a9f2-44da-90cc-e4852a4b07c1
+Accept: application/json
+Content-Type: application/json
+
+
+### 2️⃣2️⃣ PATCH Reactivate - valid
+PATCH {{portURL}}/api/PhysicalResource/reactivate/6ad4cf47-a9f2-44da-90cc-e4852a4b07c1
+Accept: application/json
+Content-Type: application/json
+
+
+### 2️⃣3️⃣ PATCH Deactivate - not found
+PATCH {{portURL}}/api/PhysicalResource/deactivate/00000000-0000-0000-0000-000000000000
+Accept: application/json
+Content-Type: application/json
+
+
+### 2️⃣4️⃣ PATCH Reactivate - not found
+PATCH {{portURL}}/api/PhysicalResource/reactivate/00000000-0000-0000-0000-000000000000
+Accept: application/json
+Content-Type: application/json
