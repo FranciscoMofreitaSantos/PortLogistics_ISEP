@@ -99,7 +99,7 @@ Accept: {{accept}}
 # 2️⃣ UPDATE an existing Vessel Visit Notification (editable state)
 
 ###
-PUT {{portURL}}/api/VesselVisitNotification/{{vvnId}}/update
+PUT {{portURL}}/api/VesselVisitNotification/b7d33c6d-9335-4ac7-8309-9afb528c3e89/update
 Content-Type: {{contentType}}
 Accept: {{accept}}
 
@@ -137,13 +137,46 @@ Accept: {{accept}}
   "unloadingCargoManifest": null
 }
 
+###
+PUT {{portURL}}/api/VesselVisitNotification/b7d33c6d-9335-4ac7-8309-9afb528c3e89/update
+Content-Type: {{contentType}}
+Accept: {{accept}}
+
+{
+  "estimatedTimeArrival": "2025-12-02T10:30:00",
+  "estimatedTimeDeparture": "2025-12-04T14:00:00",
+  "volume": 2300,
+  "vesselImo": "IMO 9876544",
+  "listDocks": ["DK-0001"],
+  "crewManifest": null,
+  "loadingCargoManifest": {
+    "type": "Loading",
+    "createdBy": "Agent02",
+    "entries": [
+      {
+        "bay": 2,
+        "row": 3,
+        "tier": 4,
+        "storageAreaId": "fbddd277-3240-4008-815f-bfb332140923",
+        "container": {
+          "isoCode": "MSCU6639870",
+          "description": "Perishable frozen food cargo",
+          "type": "Reefer",
+          "weightKg": 10800
+        }
+      }
+    ]
+  },
+  "unloadingCargoManifest": null
+}
+
 
 # ===================================================================
 # 3️⃣ SUBMIT Vessel Visit Notification for approval
 # ===================================================================
 
 ###
-PUT {{portURL}}/api/VesselVisitNotification/{{vvnId}}/submit
+PUT {{portURL}}/api/VesselVisitNotification/b66d20a8-8bbc-4f9d-8f8f-345165fd8bed/submit
 Content-Type: {{contentType}}
 Accept: {{accept}}
 
@@ -153,7 +186,7 @@ Accept: {{accept}}
 # ===================================================================
 
 ###
-PUT {{portURL}}/api/VesselVisitNotification/{{vvnId}}/withdraw
+PUT {{portURL}}/api/VesselVisitNotification/b8bbb8ac-0739-495c-8e6d-85039f2889eb/withdraw
 Content-Type: {{contentType}}
 Accept: {{accept}}
 
@@ -163,5 +196,5 @@ Accept: {{accept}}
 # ===================================================================
 
 ###
-GET {{portURL}}/api/VesselVisitNotification/id/{{vvnId}}
+GET {{portURL}}/api/VesselVisitNotification/id/b8bbb8ac-0739-495c-8e6d-85039f2889eb
 Accept: {{accept}}

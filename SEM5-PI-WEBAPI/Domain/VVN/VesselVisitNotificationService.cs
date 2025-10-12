@@ -106,7 +106,7 @@ public class VesselVisitNotificationService
     {
         _logger.LogInformation("Business Domain: Fetching VVN with ID = {Id}", id.Value);
 
-        var vvnInDb = await _repo.GetByIdAsync(id);
+        var vvnInDb = await _repo.GetCompleteByIdAsync(id);
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
 
@@ -119,7 +119,7 @@ public class VesselVisitNotificationService
         _logger.LogInformation("Business Domain: Accepting VVN with Code = {code}", code.ToString());
 
         VesselVisitNotificationId id = await GetIdByCodeAsync(code);
-        var vvnInDb = await _repo.GetByIdAsync(id);
+        var vvnInDb = await _repo.GetCompleteByIdAsync(id);
 
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code}");
@@ -181,7 +181,7 @@ public class VesselVisitNotificationService
     {
         _logger.LogInformation("Business Domain: Withdrawing VVN with ID = {Id}", id.Value);
 
-        var vvnInDb = await _repo.GetByIdAsync(id);
+        var vvnInDb = await _repo.GetCompleteByIdAsync(id);
 
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
@@ -199,7 +199,7 @@ public class VesselVisitNotificationService
     {
         _logger.LogInformation("Business Domain: Withdrawing VVN with ID = {code}", code.Code);
 
-        var vvnInDb = await _repo.GetByCodeAsync(code);
+        var vvnInDb = await _repo.GetCompleteByCodeAsync(code);
 
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code.Code}");
@@ -217,7 +217,7 @@ public class VesselVisitNotificationService
     {
         _logger.LogInformation("Business Domain: Submitting VVN with ID = {code}", code.Code);
 
-        var vvnInDb = await _repo.GetByCodeAsync(code);
+        var vvnInDb = await _repo.GetCompleteByCodeAsync(code);
 
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code.Code}");
@@ -235,7 +235,7 @@ public class VesselVisitNotificationService
     {
         _logger.LogInformation("Business Domain: Submitting VVN with ID = {Id}", id.Value);
 
-        var vvnInDb = await _repo.GetByIdAsync(id);
+        var vvnInDb = await _repo.GetCompleteByIdAsync(id);
 
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
