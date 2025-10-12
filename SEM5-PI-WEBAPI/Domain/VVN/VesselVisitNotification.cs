@@ -6,7 +6,6 @@ using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
 
-
 namespace SEM5_PI_WEBAPI.Domain.VVN
 {
     public enum VvnStatus
@@ -20,6 +19,8 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
     public class VesselVisitNotification : Entity<VesselVisitNotificationId>, IAggregateRoot
     {
+        private bool _isConstructing = false; // 👈 evita validações durante o construtor
+
         public VvnCode Code { get; private set; }
 
         public ClockTime EstimatedTimeArrival { get; private set; }
@@ -33,24 +34,37 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
         public VvnStatus Status { get; private set; }
         public IReadOnlyCollection<EntityDock> ListDocks { get; private set; }
-        public CrewManifest? CrewManifest { get; set; }
-        public CargoManifest? LoadingCargoManifest { get; set; }
+        public CrewManifest? CrewManifest { get; private set; }
+        public CargoManifest? LoadingCargoManifest { get; private set; }
         public CargoManifest? UnloadingCargoManifest { get; private set; }
-        public ImoNumber VesselImo { get; set; }
+        public ImoNumber VesselImo { get; private set; }
 
-        public IReadOnlyCollection<EntityTask> Tasks { get; set; }
+        public IReadOnlyCollection<EntityTask> Tasks { get; private set; }
 
+        protected VesselVisitNotification() { }
 
-        public VesselVisitNotification()
+        public VesselVisitNotification(
+            VvnCode code,
+            ClockTime estimatedTimeArrival,
+            ClockTime estimatedTimeDeparture,
+            int volume,
+            PdfDocumentCollection? documents,
+            IEnumerable<EntityDock>? docks,
+            CrewManifest? crewManifest,
+            CargoManifest? loadingCargoManifest,
+            CargoManifest? unloadingCargoManifest,
+            ImoNumber vesselImo)
         {
-        }
+            _isConstructing = true; 
 
-        public VesselVisitNotification(VvnCode code, ClockTime estimatedTimeArrival, ClockTime estimatedTimeDeparture,
-            int volume, PdfDocumentCollection? documents, IEnumerable<EntityDock> docks,
-            CrewManifest? crewManifest, CargoManifest? loadingCargoManifest,
-            CargoManifest? unloadingCargoManifest, ImoNumber vesselImo)
-        {
+            if (estimatedTimeArrival == null || estimatedTimeDeparture == null)
+                throw new BusinessRuleValidationException("ETA and ETD cannot be null.");
+
+            if (estimatedTimeArrival.Value >= estimatedTimeDeparture.Value)
+                throw new BusinessRuleValidationException("Estimated Time of Arrival must be before Estimated Time of Departure.");
+
             Id = new VesselVisitNotificationId(Guid.NewGuid());
+
             SetCode(code);
             SetEstimatedTimeArrival(estimatedTimeArrival);
             SetEstimatedTimeDeparture(estimatedTimeDeparture);
@@ -67,8 +81,11 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
             AcceptenceDate = null;
             Status = VvnStatus.InProgress;
-        }
+            Tasks = new List<EntityTask>();
 
+            _isConstructing = false;
+        }
+        
 
         public void UpdateEstimatedTimeArrival(ClockTime estimatedTimeArrival) => SetEstimatedTimeArrival(estimatedTimeArrival);
         public void UpdateEstimatedTimeDeparture(ClockTime estimatedTimeDeparture) => SetEstimatedTimeDeparture(estimatedTimeDeparture);
@@ -77,124 +94,158 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         public void UpdateListDocks(IEnumerable<EntityDock> docks) => SetListDocks(docks);
         public void UpdateCrewManifest(CrewManifest? crewManifest) => SetCrewManifest(crewManifest);
         public void UpdateLoadingCargoManifest(CargoManifest? cargoManifest) => SetLoadingCargoManifest(cargoManifest);
-        public void UpdateUploadingCargoManifest(CargoManifest? cargoManifest) => SetUnloadingCargoManifest(cargoManifest);
+        public void UpdateUnloadingCargoManifest(CargoManifest? cargoManifest) => SetUnloadingCargoManifest(cargoManifest);
         public void UpdateImoNumber(ImoNumber newImo) => SetVesselImo(newImo);
+        public void SetTasks(IEnumerable<EntityTask> tasks) => Tasks = tasks?.ToList() ?? new List<EntityTask>();
+        
 
-        // ==============    
-        private void SetCode(VvnCode code)
-        {
-            this.Code = code;
-        }
+        private void SetCode(VvnCode code) => Code = code;
 
         private void SetEstimatedTimeArrival(ClockTime estimatedTimeArrival)
         {
-            this.EstimatedTimeArrival = estimatedTimeArrival;
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update ETA when VVN is not editable.");
+
+            EstimatedTimeArrival = estimatedTimeArrival;
+            ValidateTimeConsistency();
         }
 
         private void SetEstimatedTimeDeparture(ClockTime estimatedTimeDeparture)
         {
-            this.EstimatedTimeDeparture = estimatedTimeDeparture;
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update ETD when VVN is not editable.");
+
+            EstimatedTimeDeparture = estimatedTimeDeparture;
+            ValidateTimeConsistency();
         }
 
         private void SetActualTimeDeparture(ClockTime? actualTimeDeparture)
         {
-            this.ActualTimeDeparture = actualTimeDeparture;
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update ATD when VVN is not editable.");
+
+            ActualTimeDeparture = actualTimeDeparture;
         }
 
         private void SetActualTimeArrival(ClockTime? actualTimeArrival)
         {
-            this.ActualTimeArrival = actualTimeArrival;
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update ATA when VVN is not editable.");
+
+            ActualTimeArrival = actualTimeArrival;
         }
 
         private void SetVolume(int volume)
         {
-            if (volume < 0) throw new BusinessRuleValidationException("Volume must be non-negative.");
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update volume when VVN is not editable.");
+
+            if (volume < 0)
+                throw new BusinessRuleValidationException("Volume must be non-negative.");
+
             Volume = volume;
         }
 
-
         private void SetDocuments(PdfDocumentCollection? documents)
         {
-            if (documents == null || documents.Pdfs.Count == 0)
-                Documents = new PdfDocumentCollection();
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update documents when VVN is not editable.");
 
-            else
-                Documents = documents;
+            Documents = documents == null || documents.Pdfs.Count == 0
+                ? new PdfDocumentCollection()
+                : documents;
         }
 
-
-        private void SetListDocks(IEnumerable<EntityDock> docks)
+        private void SetListDocks(IEnumerable<EntityDock>? docks)
         {
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update docks when VVN is not editable.");
+
             ListDocks = docks?.ToList() ?? new List<EntityDock>();
         }
 
         private void SetCrewManifest(CrewManifest? crewManifest)
         {
-            this.CrewManifest = crewManifest;
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update CrewManifest when VVN is not editable.");
+
+            CrewManifest = crewManifest;
         }
 
         private void SetLoadingCargoManifest(CargoManifest? cargoManifest)
         {
-            this.LoadingCargoManifest = cargoManifest;
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update Loading CargoManifest when VVN is not editable.");
+
+            LoadingCargoManifest = cargoManifest;
         }
 
         private void SetUnloadingCargoManifest(CargoManifest? cargoManifest)
         {
-            this.UnloadingCargoManifest = cargoManifest;
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update Unloading CargoManifest when VVN is not editable.");
+
+            UnloadingCargoManifest = cargoManifest;
         }
 
         private void SetVesselImo(ImoNumber vesselImo)
         {
-            this.VesselImo = vesselImo;
-        }
+            if (!_isConstructing && !IsEditable)
+                throw new BusinessRuleValidationException("Cannot update Vessel IMO when VVN is not editable.");
 
-        public void SetTasks(IEnumerable<EntityTask> tasks)
+            VesselImo = vesselImo;
+        }
+        
+        private void ValidateTimeConsistency()
         {
-            Tasks = tasks?.ToList() ?? new List<EntityTask>();
+            if (EstimatedTimeArrival != null && EstimatedTimeDeparture != null &&
+                EstimatedTimeArrival.Value >= EstimatedTimeDeparture.Value)
+            {
+                throw new BusinessRuleValidationException("ETA must always be before ETD.");
+            }
         }
-        // ==============    
 
-
-        // ==============    
         public void Submit()
         {
             if (Status != VvnStatus.InProgress)
-                throw new BusinessRuleValidationException($"Only In-progress VVNs can be submitted... Current Status: {Status}");
+                throw new BusinessRuleValidationException($"Only In-progress VVNs can be submitted. Current status: {Status}");
             Status = VvnStatus.Submitted;
         }
 
         public void MarkPending()
         {
             if (Status != VvnStatus.Submitted)
-                throw new BusinessRuleValidationException($"Only Submitted VVNs can be marked pending... Current Status: {Status}");
+                throw new BusinessRuleValidationException($"Only Submitted VVNs can be marked Pending. Current status: {Status}");
             Status = VvnStatus.PendingInformation;
         }
 
         public void Withdraw()
         {
             if (Status != VvnStatus.InProgress && Status != VvnStatus.PendingInformation)
-                throw new BusinessRuleValidationException($"Only In-progress/Pending VVNs can be withdrawn... Current Status: {Status}");
+                throw new BusinessRuleValidationException($"Only In-progress or Pending VVNs can be withdrawn. Current status: {Status}");
             Status = VvnStatus.Withdrawn;
         }
 
         public void Resume()
         {
             if (Status != VvnStatus.Withdrawn)
-                throw new BusinessRuleValidationException($"Only withdrawn VVNs can be resumed... Current Status: {Status}");
+                throw new BusinessRuleValidationException($"Only Withdrawn VVNs can be resumed. Current status: {Status}");
             Status = VvnStatus.InProgress;
         }
 
         public void Accept()
         {
             if (Status != VvnStatus.Submitted)
-                throw new BusinessRuleValidationException($"Only Submitted VVNs can be accepted... Current Status: {Status}");
+                throw new BusinessRuleValidationException($"Only Submitted VVNs can be accepted. Current status: {Status}");
             Status = VvnStatus.Accepted;
             AcceptenceDate = new ClockTime(DateTime.Now);
         }
 
         public bool IsEditable => Status == VvnStatus.InProgress || Status == VvnStatus.PendingInformation;
 
-        // ==============
+        // ============================
+        // Overrides
+        // ============================
 
         public override bool Equals(object? obj)
         {
@@ -205,10 +256,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
         public override int GetHashCode() => Code.GetHashCode();
 
-
-        public override string ToString()
-        {
-            return $"VVN {Code.Code} - Status: {Status} - Vessel IMO: {VesselImo}";
-        }
+        public override string ToString() =>
+            $"VVN {Code.Code} - Status: {Status} - Vessel IMO: {VesselImo}";
     }
 }

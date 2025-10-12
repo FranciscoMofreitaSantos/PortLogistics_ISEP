@@ -15,7 +15,7 @@ using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
 
 namespace SEM5_PI_WEBAPI.Domain.VVN;
 
-public class VesselVisitNotificationService
+public class VesselVisitNotificationService : IVesselVisitNotificationService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<VesselVisitNotificationService> _logger;
@@ -295,7 +295,7 @@ public class VesselVisitNotificationService
         if (dto.UnloadingCargoManifest != null)
         {
             var unloadingManifest = await CreateCargoManifestAsync(dto.UnloadingCargoManifest);
-            vvnInDb.UpdateUploadingCargoManifest(unloadingManifest);
+            vvnInDb.UpdateUnloadingCargoManifest(unloadingManifest);
         }
 
         if (!string.IsNullOrWhiteSpace(dto.ImoNumber))

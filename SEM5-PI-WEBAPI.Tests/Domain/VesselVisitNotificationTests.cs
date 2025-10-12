@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using SEM5_PI_WEBAPI.Domain.CargoManifests;
-using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Shared;
-using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Domain.VVN;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
-using Xunit;
 
 namespace SEM5_PI_WEBAPI.Tests.Domain
 {
@@ -19,64 +13,74 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         private ClockTime ValidETA => new(DateTime.Now.AddDays(1));
         private ClockTime ValidETD => new(DateTime.Now.AddDays(2));
         private ImoNumber ValidImo => new("IMO 1234567");
-
-        private List<EntityDock> ValidDocks => new() { BuildValidDock("DK-0001", "Dock 1") };
         private static PdfDocumentCollection EmptyDocuments => new();
+
+        private List<EntityDock> ValidDocks => new()
+        {
+            BuildValidDock("DK-0001", "North Terminal Dock")
+        };
         
 
         [Fact]
-        public void CreateVesselVisitNotification_WithValidData_ShouldSucceed()
+        public void CreateVesselVisitNotification_WithValidData_ShouldInitializeCorrectly()
         {
             var vvn = CreateValidVVN();
 
             Assert.Equal(VvnStatus.InProgress, vvn.Status);
+            Assert.True(vvn.IsEditable);
             Assert.Equal("2025-THPA-000001", vvn.Code.Code);
             Assert.Equal(1200, vvn.Volume);
-            Assert.NotNull(vvn.ListDocks);
-            Assert.True(vvn.IsEditable);
+            Assert.NotEmpty(vvn.ListDocks);
             Assert.Null(vvn.ActualTimeArrival);
-            Assert.Null(vvn.ActualTimeDeparture);
-            Assert.Null(vvn.AcceptenceDate);
         }
 
         [Fact]
-        public void CreateVesselVisitNotification_WithNullDocks_ShouldNotFail()
+        public void CreateVesselVisitNotification_WithInvalidVolume_ShouldThrowException()
         {
-            var vvn = new VesselVisitNotification(
-                ValidCode, ValidETA, ValidETD, 500,
-                EmptyDocuments, null, null, null, null, ValidImo
-            );
-
-            Assert.NotNull(vvn.ListDocks);
-            Assert.Empty(vvn.ListDocks);
+            Assert.Throws<BusinessRuleValidationException>(() =>
+                new VesselVisitNotification(ValidCode, ValidETA, ValidETD, -10,
+                    EmptyDocuments, ValidDocks, null, null, null, ValidImo));
         }
 
         [Fact]
-        public void CreateVesselVisitNotification_WithEmptyDocuments_ShouldDefaultToEmptyCollection()
+        public void CreateVesselVisitNotification_WithNullDocuments_ShouldInitializeEmptyCollection()
         {
             var vvn = new VesselVisitNotification(
-                ValidCode, ValidETA, ValidETD, 400,
-                null, ValidDocks, null, null, null, ValidImo
-            );
+                ValidCode, ValidETA, ValidETD, 800,
+                null, ValidDocks, null, null, null, ValidImo);
 
             Assert.NotNull(vvn.Documents);
             Assert.Empty(vvn.Documents.Pdfs);
         }
 
         [Fact]
-        public void CreateVesselVisitNotification_WithNegativeVolume_ShouldThrow()
+        public void CreateVesselVisitNotification_WithEmptyDockList_ShouldInitializeEmpty()
         {
-            Assert.Throws<BusinessRuleValidationException>(() =>
-                new VesselVisitNotification(
-                    ValidCode, ValidETA, ValidETD, -100,
-                    EmptyDocuments, ValidDocks, null, null, null, ValidImo
-                ));
+            var vvn = new VesselVisitNotification(
+                ValidCode, ValidETA, ValidETD, 800,
+                EmptyDocuments, new List<EntityDock>(), null, null, null, ValidImo);
+
+            Assert.NotNull(vvn.ListDocks);
+            Assert.Empty(vvn.ListDocks);
         }
 
         [Fact]
-        public void Submit_ShouldChangeStatusToSubmitted_WhenInProgress()
+        public void CreateVesselVisitNotification_WithInvalidTimeOrder_ShouldThrow()
+        {
+            var eta = new ClockTime(DateTime.Now.AddDays(3));
+            var etd = new ClockTime(DateTime.Now.AddDays(1));
+
+            Assert.Throws<BusinessRuleValidationException>(() =>
+                new VesselVisitNotification(
+                    ValidCode, eta, etd, 400,
+                    EmptyDocuments, ValidDocks, null, null, null, ValidImo));
+        }
+
+        [Fact]
+        public void Submit_ShouldChangeStatusToSubmitted_AndLockEdits()
         {
             var vvn = CreateValidVVN();
+
             vvn.Submit();
 
             Assert.Equal(VvnStatus.Submitted, vvn.Status);
@@ -84,28 +88,19 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         }
 
         [Fact]
-        public void Submit_ShouldThrow_WhenNotInProgress()
+        public void Submit_WhenAlreadySubmitted_ShouldThrowException()
         {
             var vvn = CreateValidVVN();
             vvn.Submit();
+
             Assert.Throws<BusinessRuleValidationException>(() => vvn.Submit());
         }
 
         [Fact]
-        public void MarkPending_ShouldChangeStatusToPendingInformation_WhenSubmitted()
+        public void Withdraw_ShouldSetStatusToWithdrawn_AndDisableEdits()
         {
             var vvn = CreateValidVVN();
-            vvn.Submit();
-            vvn.MarkPending();
 
-            Assert.Equal(VvnStatus.PendingInformation, vvn.Status);
-            Assert.True(vvn.IsEditable);
-        }
-
-        [Fact]
-        public void Withdraw_ShouldChangeStatusToWithdrawn_WhenInProgress()
-        {
-            var vvn = CreateValidVVN();
             vvn.Withdraw();
 
             Assert.Equal(VvnStatus.Withdrawn, vvn.Status);
@@ -113,7 +108,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         }
 
         [Fact]
-        public void Withdraw_ShouldThrow_WhenAlreadyAccepted()
+        public void Withdraw_WhenAccepted_ShouldThrowException()
         {
             var vvn = CreateValidVVN();
             vvn.Submit();
@@ -123,7 +118,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         }
 
         [Fact]
-        public void Resume_ShouldChangeStatusToInProgress_WhenWithdrawn()
+        public void Resume_ShouldReopenWithdrawnVVN()
         {
             var vvn = CreateValidVVN();
             vvn.Withdraw();
@@ -134,14 +129,14 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         }
 
         [Fact]
-        public void Resume_ShouldThrow_WhenNotWithdrawn()
+        public void Resume_WhenNotWithdrawn_ShouldThrow()
         {
             var vvn = CreateValidVVN();
             Assert.Throws<BusinessRuleValidationException>(() => vvn.Resume());
         }
 
         [Fact]
-        public void Accept_ShouldChangeStatusToAccepted_WhenSubmitted()
+        public void Accept_ShouldSetStatusToAccepted_AndRecordAcceptanceDate()
         {
             var vvn = CreateValidVVN();
             vvn.Submit();
@@ -150,38 +145,51 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             Assert.Equal(VvnStatus.Accepted, vvn.Status);
             Assert.NotNull(vvn.AcceptenceDate);
             Assert.False(vvn.IsEditable);
-            Assert.False(string.IsNullOrWhiteSpace(vvn.ToString()));
+            Assert.Contains("VVN", vvn.ToString());
         }
 
         [Fact]
-        public void Accept_ShouldThrow_WhenNotSubmitted()
+        public void Accept_WhenNotSubmitted_ShouldThrow()
         {
             var vvn = CreateValidVVN();
             Assert.Throws<BusinessRuleValidationException>(() => vvn.Accept());
         }
 
         [Fact]
-        public void FullLifecycle_ShouldTransitionThroughAllValidStates()
+        public void MarkPending_ShouldSetStatusToPending_AndKeepEditable()
+        {
+            var vvn = CreateValidVVN();
+            vvn.Submit();
+            vvn.MarkPending();
+
+            Assert.Equal(VvnStatus.PendingInformation, vvn.Status);
+            Assert.True(vvn.IsEditable);
+        }
+
+        [Fact]
+        public void MarkPending_WhenInProgress_ShouldThrow()
+        {
+            var vvn = CreateValidVVN();
+            Assert.Throws<BusinessRuleValidationException>(() => vvn.MarkPending());
+        }
+
+        [Fact]
+        public void FullLifecycle_ShouldFollowValidTransitions()
         {
             var vvn = CreateValidVVN();
 
-            // InProgress → Submitted
             vvn.Submit();
             Assert.Equal(VvnStatus.Submitted, vvn.Status);
 
-            // Submitted → Pending
             vvn.MarkPending();
             Assert.Equal(VvnStatus.PendingInformation, vvn.Status);
 
-            // Pending → Withdrawn
             vvn.Withdraw();
             Assert.Equal(VvnStatus.Withdrawn, vvn.Status);
 
-            // Withdrawn → Resume → InProgress
             vvn.Resume();
             Assert.Equal(VvnStatus.InProgress, vvn.Status);
 
-            // InProgress → Submit → Accept
             vvn.Submit();
             vvn.Accept();
             Assert.Equal(VvnStatus.Accepted, vvn.Status);
@@ -189,16 +197,15 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         
 
         [Fact]
-        public void UpdateMethods_ShouldModifyFieldsCorrectly()
+        public void UpdateMethods_ShouldModifyValues_WhenEditable()
         {
             var vvn = CreateValidVVN();
-
             var newETA = new ClockTime(DateTime.Now.AddDays(5));
             var newETD = new ClockTime(DateTime.Now.AddDays(6));
             var newDocks = new List<EntityDock> { BuildValidDock("DK-0002", "Dock 2") };
 
-            vvn.UpdateEstimatedTimeArrival(newETA);
             vvn.UpdateEstimatedTimeDeparture(newETD);
+            vvn.UpdateEstimatedTimeArrival(newETA);
             vvn.UpdateVolume(999);
             vvn.UpdateListDocks(newDocks);
 
@@ -208,39 +215,60 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             Assert.Equal("DK-0002", vvn.ListDocks.First().Code.Value);
         }
 
+
+        [Fact]
+        public void UpdateMethods_ShouldThrow_WhenNotEditable()
+        {
+            var vvn = CreateValidVVN();
+            vvn.Submit();
+
+            Assert.Throws<BusinessRuleValidationException>(() => vvn.UpdateVolume(200));
+            Assert.Throws<BusinessRuleValidationException>(() => vvn.UpdateEstimatedTimeArrival(new ClockTime(DateTime.Now.AddDays(3))));
+        }
+
         [Fact]
         public void UpdateVolume_WithNegativeValue_ShouldThrow()
         {
             var vvn = CreateValidVVN();
-            Assert.Throws<BusinessRuleValidationException>(() => vvn.UpdateVolume(-10));
+            Assert.Throws<BusinessRuleValidationException>(() => vvn.UpdateVolume(-20));
         }
         
 
         [Fact]
-        public void Equals_ShouldReturnTrue_ForSameCode()
+        public void Equals_ShouldReturnTrue_WhenCodesMatch()
         {
             var vvn1 = CreateValidVVN();
             var vvn2 = new VesselVisitNotification(
-                new VvnCode("2025", "000001"),
-                ValidETA, ValidETD, 500, EmptyDocuments, ValidDocks, null, null, null, ValidImo
-            );
+                new VvnCode("2025", "000001"), ValidETA, ValidETD, 500,
+                EmptyDocuments, ValidDocks, null, null, null, ValidImo);
 
             Assert.True(vvn1.Equals(vvn2));
             Assert.Equal(vvn1.GetHashCode(), vvn2.GetHashCode());
         }
 
         [Fact]
-        public void Equals_ShouldReturnFalse_ForDifferentCode()
+        public void Equals_ShouldReturnFalse_WhenCodesDiffer()
         {
             var vvn1 = CreateValidVVN();
             var vvn2 = new VesselVisitNotification(
-                new VvnCode("2025", "000002"),
-                ValidETA, ValidETD, 500, EmptyDocuments, ValidDocks, null, null, null, ValidImo
-            );
+                new VvnCode("2025", "000002"), ValidETA, ValidETD, 500,
+                EmptyDocuments, ValidDocks, null, null, null, ValidImo);
 
             Assert.False(vvn1.Equals(vvn2));
         }
+
+        [Fact]
+        public void ToString_ShouldReturnReadableRepresentation()
+        {
+            var vvn = CreateValidVVN();
+            var str = vvn.ToString();
+
+            Assert.Contains("VVN", str);
+            Assert.Contains(vvn.Code.Code, str);
+            Assert.Contains(vvn.Status.ToString(), str);
+        }
         
+
         private VesselVisitNotification CreateValidVVN()
         {
             return new VesselVisitNotification(
@@ -258,7 +286,9 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         private static EntityDock BuildValidDock(string code, string name)
         {
             var vesselTypes = new List<VesselTypeId> { new VesselTypeId(Guid.NewGuid()) };
-            return new EntityDock(new DockCode(code), new List<PhysicalResourceCode>(), name, 12.0d, 350.0d, 50.0d, vesselTypes);
+            var physicalResources = new List<PhysicalResourceCode> { new PhysicalResourceCode("RSC-1234") };
+
+            return new EntityDock(new DockCode(code), physicalResources, name, 15.0d, 350.0d, 12.0d, vesselTypes);
         }
     }
 }

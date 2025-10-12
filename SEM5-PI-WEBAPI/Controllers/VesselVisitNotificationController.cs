@@ -10,10 +10,10 @@ namespace SEM5_PI_WEBAPI.Controllers;
 [Route("api/[controller]")]
 public class VesselVisitNotificationController : ControllerBase
 {
-    private readonly VesselVisitNotificationService _service;
+    private readonly IVesselVisitNotificationService _service;
     private readonly ILogger<VesselVisitNotificationController> _logger;
 
-    public VesselVisitNotificationController(VesselVisitNotificationService service,ILogger<VesselVisitNotificationController> logger)
+    public VesselVisitNotificationController(IVesselVisitNotificationService service,ILogger<VesselVisitNotificationController> logger)
     {
         _service = service;
         _logger = logger;
