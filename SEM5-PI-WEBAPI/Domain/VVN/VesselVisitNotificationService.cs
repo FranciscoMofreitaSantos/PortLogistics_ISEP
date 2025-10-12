@@ -1,5 +1,6 @@
 using SEM5_PI_WEBAPI.Domain.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.CargoManifests;
+using SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.CrewMembers;
@@ -19,7 +20,9 @@ public class VesselVisitNotificationService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<VesselVisitNotificationService> _logger;
     private readonly ICargoManifestRepository _cargoManifestRepository;
+    private readonly ICargoManifestEntryRepository _cargoManifestEntryRepository;
     private readonly ICrewManifestRepository _crewManifestRepository;
+    private readonly ICrewMemberRepository _crewMemberRepository;
     private readonly IStorageAreaRepository _storageAreaRepository;
     private readonly IDockRepository _dockRepository;
     private readonly IVesselRepository _vesselRepository;
@@ -30,7 +33,9 @@ public class VesselVisitNotificationService
     public VesselVisitNotificationService(
         IUnitOfWork unitOfWork,
         ICargoManifestRepository cargoManifestRepository,
+        ICargoManifestEntryRepository cargoManifestEntriesRepository,
         ICrewManifestRepository crewManifestRepository,
+        ICrewMemberRepository crewMemberRepository,
         IStorageAreaRepository storageAreaRepository,
         IVesselRepository vesselRepository,
         IDockRepository dockRepository,
@@ -42,7 +47,9 @@ public class VesselVisitNotificationService
         _unitOfWork = unitOfWork;
         _logger = logger;
         _cargoManifestRepository = cargoManifestRepository;
+        _cargoManifestEntryRepository = cargoManifestEntriesRepository;
         _crewManifestRepository = crewManifestRepository;
+        _crewMemberRepository = crewMemberRepository;
         _storageAreaRepository = storageAreaRepository;
         _vesselRepository = vesselRepository;
         _dockRepository = dockRepository;
@@ -62,6 +69,7 @@ public class VesselVisitNotificationService
         var loadingCargoManifest = await CreateCargoManifestAsync(dto.LoadingCargoManifest);
         var unloadingCargoManifest = await CreateCargoManifestAsync(dto.UnloadingCargoManifest);
         var crewManifest = await CreateCrewManifestAsync(dto.CrewManifest);
+        await _unitOfWork.CommitAsync();
 
         var vvnCode = await GenerateNextVvnCodeAsync();
         var vesselImo = await CheckForVesselInDb(dto.VesselImo);
@@ -83,11 +91,23 @@ public class VesselVisitNotificationService
             unloadingCargoManifest,
             vesselImo
         );
-
         
+        Console.WriteLine($"=================================================================================================================================");
+        
+        var mani = await _cargoManifestRepository.GetByIdAsync(loadingCargoManifest.Id);
+        Console.WriteLine($"============================ {mani.Code}");
+        
+        Console.WriteLine($"=================================================================================================================================");
+        
+        var crew = await _crewManifestRepository.GetByIdAsync(crewManifest.Id);
+        
+        Console.WriteLine($"============================ {crew.CaptainName}");
+        
+        Console.WriteLine($"=================================================================================================================================");
+
         await _repo.AddAsync(newVesselVisitNotification);
         await _unitOfWork.CommitAsync();
-
+        
         _logger.LogInformation("Business Domain: VVN successfully created with ID = {Id}", newVesselVisitNotification.Id.Value);
 
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(newVesselVisitNotification);
@@ -316,7 +336,7 @@ public class VesselVisitNotificationService
         var listEntityDock = new List<EntityDock>();
         foreach (var dockCode in listDockCodes)
         {
-            var existingDock = allDocksInSys.FirstOrDefault(d => d.Code.Equals(dockCode))
+            var existingDock = allDocksInSys.FirstOrDefault(d => d.Code.Value == dockCode.Value)
                                ?? throw new BusinessRuleValidationException(
                                    $"Dock with code [{dockCode}] not found in the system.");
             listEntityDock.Add(existingDock);
@@ -366,6 +386,8 @@ public class VesselVisitNotificationService
 
         var crewManifest = new CrewManifest(dto.TotalCrew, dto.CaptainName, crewMembers);
         await _crewManifestRepository.AddAsync(crewManifest);
+        await _unitOfWork.CommitAsync();
+
         return crewManifest;
     }
 
@@ -378,11 +400,16 @@ public class VesselVisitNotificationService
             throw new BusinessRuleValidationException("CargoManifest must contain at least one entry.");
 
         var entries = new List<CargoManifestEntry>();
+
         foreach (var entryDto in dto.Entries)
         {
             var container = await GetOrCreateContainerAsync(entryDto.Container);
-            var entry = new CargoManifestEntry(container, new StorageAreaId(entryDto.StorageAreaId),
-                entryDto.Bay, entryDto.Row, entryDto.Tier);
+
+            var storageAreaId = await GetStorageAreaId(entryDto.StorageAreaId);
+
+            var entry = new CargoManifestEntry(container, storageAreaId, entryDto.Bay, entryDto.Row, entryDto.Tier);
+
+            await _cargoManifestEntryRepository.AddAsync(entry);
             entries.Add(entry);
         }
 
@@ -390,8 +417,25 @@ public class VesselVisitNotificationService
         var cargoManifest = new CargoManifest(entries, generatedCode, dto.Type, DateTime.UtcNow, dto.CreatedBy);
 
         await _cargoManifestRepository.AddAsync(cargoManifest);
+        await _unitOfWork.CommitAsync();
+
         return cargoManifest;
     }
+
+
+    private async Task<StorageAreaId> GetStorageAreaId(Guid entryDtoStorageAreaId)
+    {
+        if (entryDtoStorageAreaId == Guid.Empty)
+            throw new BusinessRuleValidationException("Storage area Id cannot be empty.");
+
+        var storageArea = await _storageAreaRepository.GetByIdAsync(new StorageAreaId(entryDtoStorageAreaId));
+
+        if (storageArea == null)
+            throw new BusinessRuleValidationException($"Storage Area with Id [{entryDtoStorageAreaId}] not found in the database.");
+
+        return storageArea.Id;
+    }
+
 
     private async Task<EntityContainer> GetOrCreateContainerAsync(CreatingContainerDto containerDto)
     {
@@ -407,6 +451,7 @@ public class VesselVisitNotificationService
         );
 
         await _containerRepository.AddAsync(container);
+        await _unitOfWork.CommitAsync();
         return container;
     }
 
@@ -426,6 +471,10 @@ public class VesselVisitNotificationService
     {
         var list = await _repo.GetAllAsync();
         var nextSequence = list.Count + 1;
-        return new VvnCode(DateTime.Now.Year.ToString(), nextSequence.ToString());
+        
+        var formattedSequence = nextSequence.ToString("D6");
+
+        return new VvnCode(DateTime.Now.Year.ToString(), formattedSequence);
     }
+
 }

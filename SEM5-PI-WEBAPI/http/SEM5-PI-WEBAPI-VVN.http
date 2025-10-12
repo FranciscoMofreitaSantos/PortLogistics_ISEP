@@ -42,9 +42,9 @@ Accept: {{accept}}
         "bay": 2,
         "row": 3,
         "tier": 4,
-        "storageAreaId": "f0b7acb3-09d1-4b28-b04e-7e55e58c39e1",
+        "storageAreaId": "892db6bb-57cc-4e70-90d4-55f85e27c67a",
         "container": {
-          "isoCode": "MSCU1234567",
+          "isoCode": "MSCU6639870",
           "description": "Perishable frozen food cargo",
           "type": "Reefer",
           "weightKg": 10800
@@ -57,6 +57,44 @@ Accept: {{accept}}
   "vesselImo": "IMO 9876543"
 }
 
+
+# CREATE a new Vessel Visit Notification
+###
+POST {{portURL}}/api/VesselVisitNotification
+Content-Type: {{contentType}}
+Accept: {{accept}}
+
+{
+  "estimatedTimeArrival": "2025-12-01T08:00:00",
+  "estimatedTimeDeparture": "2025-12-03T18:00:00",
+  "volume": 2000,
+  "documents": null,
+  "listDocks": ["DK-0001"],
+
+  "crewManifest": null,
+
+  "loadingCargoManifest": {
+    "type": "Loading",
+    "createdBy": "Agent01",
+    "entries": [
+      {
+        "bay": 2,
+        "row": 3,
+        "tier": 4,
+        "storageAreaId": "fbddd277-3240-4008-815f-bfb332140923",
+        "container": {
+          "isoCode": "MSCU6639870",
+          "description": "Perishable frozen food cargo",
+          "type": "Reefer",
+          "weightKg": 10800
+        }
+      }
+    ]
+  },
+
+  "unloadingCargoManifest": null,
+  "vesselImo": "IMO 9876543"
+}
 ###
 # 2️⃣ UPDATE an existing Vessel Visit Notification (editable state)
 

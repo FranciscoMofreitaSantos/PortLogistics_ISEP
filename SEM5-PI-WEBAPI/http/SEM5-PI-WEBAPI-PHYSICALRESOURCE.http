@@ -85,20 +85,21 @@ Accept: application/json
   "operationalCapacity": 25.5,
   "setupTime": 10,
   "physicalResourceType": "Truck",
-  "qualificationID": "9c5e3d5a-dd32-4f8b-afc0-9cad22ea21eb"
+  "qualificationID": "71034080-e6d4-450e-aea7-0df55d201e8c"
 }
 
 
-### 1️⃣5️⃣ POST Create - missing field (no description)
+### 1️⃣5️⃣ POST Create
 POST {{portURL}}/api/PhysicalResource
 Content-Type: application/json
 Accept: application/json
 
 {
+  "description": "Dock Crane B",
   "operationalCapacity": 30.0,
   "setupTime": 8,
   "physicalResourceType": "Forklift",
-  "qualificationID": "9c5e3d5a-dd32-4f8b-afc0-9cad22ea21eb"
+  "qualificationID": "feffbd90-727c-4c7a-93ff-e89f0c2d3946"
 }
 
 

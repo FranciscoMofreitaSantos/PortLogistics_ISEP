@@ -58,7 +58,7 @@ Accept: application/json
   "distancesToDocks": [
     { "dockCode": "DK-0003", "distanceKm": 0.7 }
   ],
-  "physicalResources": [ "DC-0001", "YC-0002" ]
+  "physicalResources": ["FORKL-0001"]
 }
 
 ###
