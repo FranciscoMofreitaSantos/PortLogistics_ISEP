@@ -30,9 +30,68 @@ public class PhysicalResourceService
         var physicalResource = await _repo.GetByIdAsync(id);
 
         if (physicalResource == null)
-            return null;
+            throw new BusinessRuleValidationException($"No physical resource found with the specified ID: {id.Value}.");
 
         return MapToDto(physicalResource);
+    }
+
+    public async Task<PhysicalResourceDTO> GetByCodeAsync(PhysicalResourceCode code)
+    {
+        var physicalResource = await _repo.GetByCodeAsync(code);
+        
+        if (physicalResource == null)
+            throw new BusinessRuleValidationException($"No physical resource found with the specified code: {code.Value}.");
+        
+        return MapToDto(physicalResource);
+    }
+
+    public async Task<List<PhysicalResourceDTO>> GetByDescriptionAsync(string description)
+    {
+        var physicalResource = await _repo.GetByDescriptionAsync(description);
+        
+        if (physicalResource == null)
+            throw new BusinessRuleValidationException($"No physical resource found with the specified description: {description}.");
+        
+        return physicalResource.ConvertAll(MapToDto);
+    }
+
+    public async Task<List<PhysicalResourceDTO>> GetByQualificationAsync(QualificationId qualification)
+    {
+        var exist = await _qualificationRepository.ExistQualificationID(qualification);
+
+        if (!exist)
+            throw new BusinessRuleValidationException($"No physical resource found with the specified qualification: {qualification.Value}.");
+        
+        var physicalResource = await _repo.GetByQualificationAsync(qualification);
+
+        if (physicalResource == null)
+        {
+            var qualyName = await _qualificationRepository.GetByIdAsync(qualification);
+            throw new BusinessRuleValidationException($"No physical resource found with the specified qualification: {qualyName.Name}.");
+        }
+            
+        return physicalResource.ConvertAll(MapToDto);
+    }
+
+    public async Task<List<PhysicalResourceDTO>> GetByTypeAsync(PhysicalResourceType type)
+    {
+        var physicalResource = await _repo.GetByTypeAsync(type);
+        
+        if (physicalResource == null)
+            throw new BusinessRuleValidationException($"No physical resource found with the specified type: {type.ToString()}.");
+        
+        return physicalResource.ConvertAll(MapToDto);
+    }
+
+    public async Task<List<PhysicalResourceDTO>> GetByStatusAsync(PhysicalResourceStatus status)
+    {
+        var physicalResource = await _repo.GetByStatusAsync(status);
+
+        if (physicalResource == null)
+            throw new BusinessRuleValidationException(
+                $"No physical resource found with the specified status: {status.ToString()}.");
+        
+        return physicalResource.ConvertAll(MapToDto);
     }
 
     public async Task<PhysicalResourceDTO> AddAsync(CreatingPhysicalResourceDTO dto)
@@ -59,22 +118,68 @@ public class PhysicalResourceService
         return MapToDto(physicalResource);
     }
 
-    /*public async Task<ProductDto> UpdateAsync(ProductDto dto)
+    public async Task<PhysicalResourceDTO> UpdateAsync(PhysicalResourceId id, UpdatingPhysicalResource dto)
     {
-        await checkCategoryIdAsync(dto.CategoryId);
-        var product = await this._repo.GetByIdAsync(new ProductId(dto.Id));
+        var physicalResource = await _repo.GetByIdAsync(id);
+        
+        if (physicalResource == null)
+            return null;
+        
+        if (dto.Description != null)
+            physicalResource.UpdateDescription(dto.Description);
+        
+        if (dto.OperationalCapacity != null)
+            physicalResource.UpdateOperationalCapacity(dto.OperationalCapacity.Value);
+        
+        if (dto.SetupTime != null)
+            physicalResource.UpdateSetupTime(dto.SetupTime.Value);
 
-        if (product == null)
+        if (dto.QualificationId is not null)
+        {
+            var quaID = new QualificationId(dto.QualificationId.Value);
+            var exist = await _qualificationRepository.ExistQualificationID(quaID);
+
+            if (!exist)
+                throw new BusinessRuleValidationException("Qualification ID not found.");
+
+            physicalResource.UpdateQualification(quaID);
+        }
+
+        
+        await _unitOfWork.CommitAsync();
+        return MapToDto(physicalResource);
+    }
+
+    public async Task<PhysicalResourceDTO> DeactivationAsync(PhysicalResourceId id)
+    {
+        var physicalResource = await _repo.GetByIdAsync(id);
+        if (physicalResource == null)
             return null;
 
-        // change all fields
-        product.ChangeDescription(dto.Description);
-        product.ChangeCategoryId(dto.CategoryId);
+        if (physicalResource.Status == PhysicalResourceStatus.Unavailable)
+            throw new BusinessRuleValidationException("The physical resource is already deactivated.");
+        
+        physicalResource.UpdateStatus(PhysicalResourceStatus.Unavailable);
+        
+        await _unitOfWork.CommitAsync();
+        return MapToDto(physicalResource);
+    }
+    
+    public async Task<PhysicalResourceDTO> ReactivationAsync(PhysicalResourceId id)
+    {
+        var physicalResource = await _repo.GetByIdAsync(id);
+        if (physicalResource == null)
+            return null;
 
-        await this._unitOfWork.CommitAsync();
-
-        return new ProductDto(product.Id.AsGuid(),product.Description,product.CategoryId);
-    }*/
+        if (physicalResource.Status == PhysicalResourceStatus.Available)
+            throw new BusinessRuleValidationException("The physical resource is already activated.");
+        
+        physicalResource.UpdateStatus(PhysicalResourceStatus.Available);
+        
+        await _unitOfWork.CommitAsync();
+        return MapToDto(physicalResource);
+    }
+    
 
     private async Task CheckQualificationIdAsync(QualificationId id)
     {
