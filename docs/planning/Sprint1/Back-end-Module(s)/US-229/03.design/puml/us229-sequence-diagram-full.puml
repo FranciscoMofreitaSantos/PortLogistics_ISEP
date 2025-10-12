@@ -1,0 +1,83 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam participantPadding 20
+skinparam sequenceArrowThickness 1
+skinparam sequenceMessageAlign center
+hide footbox
+
+title Sequence Diagram – US2.2.9 Update or Complete Vessel Visit Notification
+
+actor "Shipping Agent Representative" as Agent
+
+participant "VesselVisitNotificationController" as Controller
+participant "VesselVisitNotificationService" as Service
+participant "IVesselVisitNotificationRepository" as Repo
+participant "VesselVisitNotification" as VVN
+participant "IUnitOfWork" as UoW
+
+== Update Flow ==
+
+Agent -> Controller : PUT /api/VesselVisitNotification/{id}\n(UpdateVesselVisitNotificationDto)
+Controller -> Service : UpdateAsync(VesselVisitNotificationId, dto)
+Service -> Repo : GetByIdAsync(id)
+Repo --> Service : VesselVisitNotification instance (vvn)
+
+Service -> VVN : Validate IsEditable\n(only InProgress or PendingInformation)
+VVN --> Service : Validation passed
+
+alt ETA/ETD update
+    Service -> VVN : UpdateEstimatedTimeArrival(new ClockTime(dto.ETA))
+    Service -> VVN : UpdateEstimatedTimeDeparture(new ClockTime(dto.ETD))
+end
+
+alt Volume update
+    Service -> VVN : UpdateVolume(dto.Volume)
+end
+
+alt Dock list update
+    Service -> VVN : UpdateListDocks(docks)
+end
+
+alt CrewManifest update
+    Service -> VVN : UpdateCrewManifest(new CrewManifest)
+end
+
+alt CargoManifest update
+    Service -> VVN : UpdateLoadingCargoManifest(new CargoManifest)
+    Service -> VVN : UpdateUnloadingCargoManifest(new CargoManifest)
+end
+
+Service -> UoW : CommitAsync()
+UoW --> Service : Transaction committed
+
+Service -> Controller : VesselVisitNotificationDto
+Controller --> Agent : 200 OK (Updated VVN DTO)
+
+== Submit Flow ==
+
+Agent -> Controller : PUT /api/VesselVisitNotification/{id}/submit
+Controller -> Service : SubmitByIdAsync(id)
+Service -> Repo : GetByIdAsync(id)
+Repo --> Service : vvn
+Service -> VVN : Submit()
+VVN --> Service : Status = Submitted
+Service -> UoW : CommitAsync()
+UoW --> Service : Transaction committed
+Service -> Controller : VesselVisitNotificationDto
+Controller --> Agent : 200 OK (Submitted VVN)
+
+== Withdraw Flow ==
+
+Agent -> Controller : PUT /api/VesselVisitNotification/{id}/withdraw
+Controller -> Service : WithdrawByIdAsync(id)
+Service -> Repo : GetByIdAsync(id)
+Repo --> Service : vvn
+Service -> VVN : Withdraw()
+VVN --> Service : Status = Withdrawn
+Service -> UoW : CommitAsync()
+UoW --> Service : Transaction committed
+Service -> Controller : VesselVisitNotificationDto
+Controller --> Agent : 200 OK (Withdrawn VVN)
+
+@enduml

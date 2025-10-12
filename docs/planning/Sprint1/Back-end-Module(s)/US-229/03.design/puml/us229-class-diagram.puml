@@ -1,0 +1,151 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+hide circle
+hide methods
+
+title Class Diagram – US2.2.9 Update or Complete Vessel Visit Notification
+
+package "API Layer" {
+    class VesselVisitNotificationController {
+        +GetById(id: Guid): ActionResult<VesselVisitNotificationDto>
+        +Update(id: Guid, dto: UpdateVesselVisitNotificationDto)
+        +Submit(id: Guid)
+        +Withdraw(id: Guid)
+    }
+}
+
+package "Application Layer" {
+    class VesselVisitNotificationService {
+        +UpdateAsync(id: VesselVisitNotificationId, dto: UpdateVesselVisitNotificationDto): VesselVisitNotificationDto
+        +SubmitByIdAsync(id: VesselVisitNotificationId): VesselVisitNotificationDto
+        +WithdrawByIdAsync(id: VesselVisitNotificationId): VesselVisitNotificationDto
+        -CheckForVesselInDb(imo: string): ImoNumber
+        -CreateCrewManifestAsync(dto: CreatingCrewManifestDto): CrewManifest
+        -CreateCargoManifestAsync(dto: CreatingCargoManifestDto): CargoManifest
+    }
+}
+
+package "Domain Layer" {
+    class VesselVisitNotification <<AggregateRoot>> {
+        +Code: VvnCode
+        +EstimatedTimeArrival: ClockTime
+        +EstimatedTimeDeparture: ClockTime
+        +ActualTimeArrival: ClockTime
+        +ActualTimeDeparture: ClockTime
+        +AcceptanceDate: ClockTime
+        +Volume: double
+        +Status: VvnStatus
+        +UpdateEstimatedTimeArrival(clockTime)
+        +UpdateEstimatedTimeDeparture(clockTime)
+        +UpdateVolume(volume)
+        +UpdateListDocks(docks)
+        +UpdateCrewManifest(crewManifest)
+        +UpdateLoadingCargoManifest(cargoManifest)
+        +UpdateUnloadingCargoManifest(cargoManifest)
+        +Submit()
+        +Withdraw()
+        +Resume()
+    }
+
+    class VvnCode <<ValueObject>> {
+        +Year: string
+        +PortCode: string
+        +Sequence: string
+    }
+
+    class ClockTime <<ValueObject>> {
+        +Value: DateTime
+    }
+
+    class VvnStatus <<Enumeration>> {
+        {static} InProgress
+        {static} PendingInformation
+        {static} Withdrawn
+        {static} Submitted
+        {static} Accepted
+    }
+
+    class CrewManifest <<AggregateRoot>> {
+        +TotalCrew: int
+        +CaptainName: string
+    }
+
+    class CargoManifest <<AggregateRoot>> {
+        +Code: string
+        +Type: CargoManifestType
+        +CreatedBy: string
+        +CreatedAt: DateTime
+    }
+
+    class EntityDock <<Entity>> {
+        +Code: DockCode
+        +Location: string
+    }
+
+    class Vessel <<AggregateRoot>> {
+        +ImoNumber: ImoNumber
+        +Name: string
+        +Type: VesselType
+    }
+
+    class EntityTask <<Entity>> {
+        +Code: TaskCode
+        +Description: string
+        +Type: TaskType
+        +Status: TaskStatus
+    }
+}
+
+package "Infrastructure Layer" {
+    interface IVesselVisitNotificationRepository {
+        +GetByIdAsync(id: VesselVisitNotificationId): VesselVisitNotification
+        +GetByCodeAsync(code: VvnCode): VesselVisitNotification
+        +AddAsync(vvn: VesselVisitNotification)
+        +CountAsync(): int
+    }
+
+    interface IUnitOfWork {
+        +CommitAsync()
+    }
+}
+
+package "DTOs" {
+    class UpdateVesselVisitNotificationDto {
+        +EstimatedTimeArrival: string
+        +EstimatedTimeDeparture: string
+        +Volume: double
+        +Documents: object
+        +ListDocksCodes: List<string>
+        +CrewManifest: CreatingCrewManifestDto
+        +LoadingCargoManifest: CreatingCargoManifestDto
+        +UnloadingCargoManifest: CreatingCargoManifestDto
+        +ImoNumber: string
+    }
+
+    class VesselVisitNotificationDto {
+        +Id: Guid
+        +Code: string
+        +EstimatedTimeArrival: DateTime
+        +EstimatedTimeDeparture: DateTime
+        +Volume: double
+        +Status: string
+    }
+}
+
+' ========================
+' Relationships
+' ========================
+
+VesselVisitNotificationController --> VesselVisitNotificationService : uses >
+VesselVisitNotificationService --> IVesselVisitNotificationRepository : accesses >
+VesselVisitNotificationService --> IUnitOfWork : commits >
+VesselVisitNotificationService --> VesselVisitNotification : manipulates >
+VesselVisitNotification "1" --> "0..1" CrewManifest : includes >
+VesselVisitNotification "1" --> "0..1" CargoManifest : loading >
+VesselVisitNotification "1" --> "0..1" CargoManifest : unloading >
+VesselVisitNotification "1" --> "*" EntityDock : berths at >
+VesselVisitNotification "1" --> "1" Vessel : refers to >
+VesselVisitNotification "1" --> "*" EntityTask : schedules >
+
+@enduml

@@ -1,54 +1,59 @@
-# USx -???
+# **US2.2.9 – Update or Complete Vessel Visit Notification**
 
-## 3. Design - User Story Realization 
+## **3. Design – User Story Realization**
 
-### 3.1. Rationale
+### **3.1. Rationale**
 
-_**Note that SSD - Alternative One is adopted.**_
+***Note that SSD – Alternative One is adopted.***
 
-| Interaction ID                      | Question: Which class is responsible for...           | Answer | Justification (with patterns)                                                                                 |
-|:------------------------------------|:------------------------------------------------------|:-------|:--------------------------------------------------------------------------------------------------------------|
-| Step 1 :   	                        | 	... interacting with the actor?                      | x      | Pure Fabrication: there is no reason to assign this responsibility to any existing class in the Domain Model. |
-| 			  		                             | 	... coordinating the US?                             | y      | Controller                                                                                                    |
-| Step 2 : request data (skillName)		 | 	... displaying the form for the actor to input data? | z      | Pure Fabrication                                                                                              |
+| **Interaction ID** | **Question: Which class is responsible for…**                 | **Answer**                           | **Justification (with patterns)**                                                                                                              |
+| :----------------- | :------------------------------------------------------------ | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Step 1**         | … interacting with the actor (Shipping Agent Representative)? | `VesselVisitNotificationController`  | **Controller pattern.** Handles the HTTP request and coordinates communication between the presentation and application layers.                |
+| **Step 2**         | … coordinating the use case flow and applying business logic? | `VesselVisitNotificationService`     | **Application Service.** Orchestrates the update process, checking the current VVN status and delegating to domain logic methods.              |
+| **Step 3**         | … verifying the current VVN state and validating transitions? | `VesselVisitNotification`            | **Aggregate Root.** Enforces domain invariants, validates updates, and performs controlled state transitions (`Submit()`, `Withdraw()`, etc.). |
+| **Step 4**         | … accessing or persisting the updated entity?                 | `IVesselVisitNotificationRepository` | **Repository pattern.** Provides controlled persistence operations and entity retrieval from the data store.                                   |
+| **Step 5**         | … committing changes to the data source?                      | `IUnitOfWork`                        | **Unit of Work pattern.** Ensures atomic transaction commits and maintains consistency across repositories.                                    |
 
-### Systematization ##
+---
 
-According to the taken rationale, the conceptual classes promoted to software classes are: 
+### **Systematization**
 
-*none
+According to the rationale, the following conceptual classes were promoted to software classes:
 
-Other software classes (i.e. Pure Fabrication) identified: 
+**Software Classes Identified**
 
-* none
+* `VesselVisitNotificationController`
+* `VesselVisitNotificationService`
+* `VesselVisitNotification`
+* `IVesselVisitNotificationRepository`
+* `IUnitOfWork`
 
+**Other Software Classes (Pure Fabrication)**
 
-## 3.2. Sequence Diagram (SD)
+* DTOs (`UpdateVesselVisitNotificationDto`, `VesselVisitNotificationDto`)
+* `BusinessRuleValidationException` (for enforcing domain constraints)
 
+---
 
-### Full Diagram
+## **3.2. Sequence Diagram (SD)**
 
-This diagram shows the full sequence of interactions between the classes involved in the realization of this user story.
+### **Full Diagram**
 
-![Sequence Diagram - Full](svg/usx-sequence-diagram-full.svg)
+![Sequence Diagram – Full](./puml/us229-sequence-diagram-full.svg)
 
-### Split Diagrams
+---
 
-The following diagram shows the same sequence of interactions between the classes involved in the realization of this user story, but it is split in partial diagrams to better illustrate the interactions between the classes.
+## **3.3. Class Diagram (CD)**
 
-It uses Interaction Occurrence (a.k.a. Interaction Use).
+![Class Diagram](./puml/us229-class-diagram.svg)
 
-![Sequence Diagram - split](svg/usx-sequence-diagram-split.svg)
+---
 
+### **Design Summary**
 
-**Get Skill Repository**
-
-![Sequence Diagram - Partial - Get Skill Repository](svg/usx-sequence-diagram-partial-get-skill-repository.svg)
-
-**Register Skill**
-
-![Sequence Diagram - Partial - Register Skill](svg/usx-sequence-diagram-partial-register-skill.svg)
-
-## 3.3. Class Diagram (CD)
-
-![Class Diagram](svg/usx-class-diagram.svg)
+* The **Controller** receives and interprets the HTTP requests.
+* The **Service** coordinates the update process and ensures that the current status allows modification.
+* The **Aggregate Root (`VesselVisitNotification`)** performs validation and applies business rules.
+* The **Repository** handles persistence abstraction.
+* The **Unit of Work** guarantees transactional integrity.
+* All updates strictly follow the **DDD and Layered Architecture** principles used across the system.
