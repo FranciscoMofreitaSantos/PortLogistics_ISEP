@@ -92,18 +92,18 @@ public class VesselVisitNotificationService
             vesselImo
         );
         
-        Console.WriteLine($"=================================================================================================================================");
-        
-        var mani = await _cargoManifestRepository.GetByIdAsync(loadingCargoManifest.Id);
-        Console.WriteLine($"============================ {mani.Code}");
-        
-        Console.WriteLine($"=================================================================================================================================");
-        
-        var crew = await _crewManifestRepository.GetByIdAsync(crewManifest.Id);
-        
-        Console.WriteLine($"============================ {crew.CaptainName}");
-        
-        Console.WriteLine($"=================================================================================================================================");
+        // Console.WriteLine($"=================================================================================================================================");
+        //
+        // var mani = await _cargoManifestRepository.GetByIdAsync(loadingCargoManifest.Id);
+        // Console.WriteLine($"============================ {mani.Code}");
+        //
+        // Console.WriteLine($"=================================================================================================================================");
+        //
+        // var crew = await _crewManifestRepository.GetByIdAsync(crewManifest.Id);
+        //
+        // Console.WriteLine($"============================ {crew.CaptainName}");
+        //
+        // Console.WriteLine($"=================================================================================================================================");
 
         await _repo.AddAsync(newVesselVisitNotification);
         await _unitOfWork.CommitAsync();
