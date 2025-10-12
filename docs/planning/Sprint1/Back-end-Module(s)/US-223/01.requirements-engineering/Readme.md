@@ -38,12 +38,12 @@ On a given dock may berth several vessel types (e.g. Feeder and Panamax).
 
 ### 1.3. Acceptance Criteria
 
-* **AC01 – Create: System allows creating a Dock with all required attributes.
-* **AC02 – Update: System allows updating Dock fields (including allowed VesselTypes).
-* **AC03 – Uniqueness: Dock identifier and name must be unique within the port.
+* **AC01 – Create: The system allows registering a Dock with all required attributes: DockCode, location, physical dimensions, allowed vessel types, and optional physical resource codes (PRCs).
+* **AC02 – Update: The system allows updating existing Dock information, including DockCode, location, physical dimensions, physical resource codes, and allowed vessel types.
+* **AC03 – Uniqueness: DockCode must be unique within the port. Each PhysicalResourceCode (PRC) must also be globally unique and cannot belong to more than one Dock.
 * **AC04 – Validation (dimensions): length > 0, depth > 0, maxDraft > 0; error shown if invalid.
 * **AC05 – Reference Availability: Created/updated docks are immediately available for Vessel Visit assignment.
-* **AC06 – Search/Filter: Users can search docks by name and filter by vessel type and location.
+* **AC06 – Search/Filter: Users can search docks by dockCode, location, filter by vessel type and physical resource code.
 * **AC07 – Referential Integrity: Updates must not invalidate existing Vessel Visit assignments.
 * **AC08 – Audit: Create/Update actions are logged with timestamp, officer ID, and action outcome.
 * **AC09 – Error Handling: On validation failure, the user gets clear, actionable messages; no partial records.
@@ -63,17 +63,18 @@ On a given dock may berth several vessel types (e.g. Feeder and Panamax).
 **Input Data (Create/Update form or API):**
 
 * `dockId : string` *(required, unique)*
-* `name : string` *(required, unique)*
+* `dockCode : string` *(required, unique)*
 * `location : string` *(required)*
 * `length : number > 0`
 * `depth : number > 0`
 * `maxDraft : number > 0`
-* `allowedVesselTypes : [VesselTypeId]`
+* `physicalResourceCodes[]  – list<string>, optional, must be globally unique`
+* `allowedVesselTypeIds[]   – list<VesselTypeId>, required, at least one`
 
 **Output Data:**
 
 * On success: persisted Dock DTO (id, all fields, created/updated timestamps).
-* On failure: error list with field-level messages (e.g., “Name already exists”, “Depth must be > 0”).
+* On failure: error list with field-level messages (“Name already exists”, “Depth must be > 0”).
 * For search: paged list of {id, name, location, allowedVesselTypes} with filter metadata.
 
 ---
