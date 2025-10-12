@@ -4,6 +4,8 @@ using Newtonsoft.Json.Converters;
 using SEM5_PI_WEBAPI.Domain.CargoManifests;
 using SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.Containers;
+using SEM5_PI_WEBAPI.Domain.CrewManifests;
+using SEM5_PI_WEBAPI.Domain.CrewMembers;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
@@ -14,10 +16,14 @@ using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Domain.StorageAreas;
+using SEM5_PI_WEBAPI.Domain.Tasks;
+using SEM5_PI_WEBAPI.Domain.VVN;
 using SEM5_PI_WEBAPI.Infraestructure;
 using SEM5_PI_WEBAPI.Infraestructure.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Infraestructure.CargoManifests;
 using SEM5_PI_WEBAPI.Infraestructure.Containers;
+using SEM5_PI_WEBAPI.Infraestructure.CrewManifests;
+using SEM5_PI_WEBAPI.Infraestructure.CrewMembers;
 using SEM5_PI_WEBAPI.Infraestructure.Docks;
 using SEM5_PI_WEBAPI.Infraestructure.PhysicalResources;
 using SEM5_PI_WEBAPI.Infraestructure.Qualifications;
@@ -28,6 +34,8 @@ using SEM5_PI_WEBAPI.Infraestructure.VesselsTypes;
 using SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Infraestructure.StorageAreas;
+using SEM5_PI_WEBAPI.Infraestructure.Tasks;
+using SEM5_PI_WEBAPI.Infraestructure.VVN;
 
 namespace SEM5_PI_WEBAPI
 {
@@ -108,11 +116,21 @@ namespace SEM5_PI_WEBAPI
 
             services.AddTransient<ICargoManifestRepository, CargoManifestRepository>();
             services.AddTransient<IContainerRepository, ContainerRepository>();
+            
             services.AddTransient<ICargoManifestEntryRepository, CargoManifestEntryRepository>();
             services.AddTransient<CargoManifestService>();
             
             services.AddTransient<IPhysicalResourceRepository, PhysicalResourceRepository>();
             services.AddTransient<PhysicalResourceService>();
+            
+            services.AddTransient<IVesselVisitNotificationRepository, VesselVisitNotificationRepository>();
+            services.AddTransient<VesselVisitNotificationService>();
+            
+            services.AddTransient<ICrewMemberRepository,CrewMemberRepository>();
+
+            services.AddTransient<ICrewManifestRepository, CrewManifestRepository>();
+
+            services.AddTransient<ITaskRepository,TaskRepository>();
         }
     }
 }

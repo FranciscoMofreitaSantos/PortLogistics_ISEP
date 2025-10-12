@@ -1,0 +1,129 @@
+@portURL = http://localhost:5008
+@contentType = application/json
+@accept = application/json
+
+# CREATE a new Vessel Visit Notification
+###
+POST {{portURL}}/api/VesselVisitNotification
+Content-Type: {{contentType}}
+Accept: {{accept}}
+
+{
+  "estimatedTimeArrival": "2025-12-01T08:00:00",
+  "estimatedTimeDeparture": "2025-12-03T18:00:00",
+  "volume": 2000,
+  "documents": null,
+  "listDocks": ["DK-0001"],
+
+  "crewManifest": {
+    "totalCrew": 15,
+    "captainName": "John Smith",
+    "crewMembers": [
+      {
+        "name": "Carlos Mendes",
+        "role": "ChiefOfficer",
+        "nationality": "Portugal",
+        "citizenId": "A12345"
+      },
+      {
+        "name": "Anna Becker",
+        "role": "ChiefEngineer",
+        "nationality": "Peru",
+        "citizenId": "B98765"
+      }
+    ]
+  },
+
+  "loadingCargoManifest": {
+    "type": "Loading",
+    "createdBy": "Agent01",
+    "entries": [
+      {
+        "bay": 2,
+        "row": 3,
+        "tier": 4,
+        "storageAreaId": "f0b7acb3-09d1-4b28-b04e-7e55e58c39e1",
+        "container": {
+          "isoCode": "MSCU1234567",
+          "description": "Perishable frozen food cargo",
+          "type": "Reefer",
+          "weightKg": 10800
+        }
+      }
+    ]
+  },
+
+  "unloadingCargoManifest": null,
+  "vesselImo": "IMO 9876543"
+}
+
+###
+# 2️⃣ UPDATE an existing Vessel Visit Notification (editable state)
+
+###
+PUT {{portURL}}/api/VesselVisitNotification/{{vvnId}}/update
+Content-Type: {{contentType}}
+Accept: {{accept}}
+
+{
+  "estimatedTimeArrival": "2025-12-02T10:30:00",
+  "estimatedTimeDeparture": "2025-12-04T14:00:00",
+  "volume": 2300,
+  "vesselImo": "IMO 9876544",
+  "listDocks": ["DK-0001"],
+  "crewManifest": {
+    "totalCrew": 17,
+    "captainName": "John Smith",
+    "crewMembers": [
+      {
+        "name": "Carlos Mendes",
+        "role": "FirstOfficer",
+        "nationality": "PT",
+        "citizenId": "A12345"
+      },
+      {
+        "name": "Anna Becker",
+        "role": "Engineer",
+        "nationality": "DE",
+        "citizenId": "B98765"
+      },
+      {
+        "name": "Ravi Patel",
+        "role": "Technician",
+        "nationality": "IN",
+        "citizenId": "C32154"
+      }
+    ]
+  },
+  "loadingCargoManifest": null,
+  "unloadingCargoManifest": null
+}
+
+
+# ===================================================================
+# 3️⃣ SUBMIT Vessel Visit Notification for approval
+# ===================================================================
+
+###
+PUT {{portURL}}/api/VesselVisitNotification/{{vvnId}}/submit
+Content-Type: {{contentType}}
+Accept: {{accept}}
+
+
+# ===================================================================
+# 4️⃣ WITHDRAW Vessel Visit Notification (only while editable)
+# ===================================================================
+
+###
+PUT {{portURL}}/api/VesselVisitNotification/{{vvnId}}/withdraw
+Content-Type: {{contentType}}
+Accept: {{accept}}
+
+
+# ===================================================================
+# 5️⃣ GET Vessel Visit Notification by ID
+# ===================================================================
+
+###
+GET {{portURL}}/api/VesselVisitNotification/id/{{vvnId}}
+Accept: {{accept}}

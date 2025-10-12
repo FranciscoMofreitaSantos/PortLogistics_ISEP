@@ -70,21 +70,15 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         }
 
 
-        public void UpdateEstimatedTimeArrival(ClockTime estimatedTimeArrival) =>
-            SetEstimatedTimeArrival(estimatedTimeArrival);
-
-        public void UpdateEstimatedTimeDeparture(ClockTime estimatedTimeDeparture) =>
-            SetEstimatedTimeDeparture(estimatedTimeDeparture);
-
+        public void UpdateEstimatedTimeArrival(ClockTime estimatedTimeArrival) => SetEstimatedTimeArrival(estimatedTimeArrival);
+        public void UpdateEstimatedTimeDeparture(ClockTime estimatedTimeDeparture) => SetEstimatedTimeDeparture(estimatedTimeDeparture);
         public void UpdateVolume(int volume) => SetVolume(volume);
         public void UpdateDocuments(PdfDocumentCollection? documents) => SetDocuments(documents);
         public void UpdateListDocks(IEnumerable<EntityDock> docks) => SetListDocks(docks);
         public void UpdateCrewManifest(CrewManifest? crewManifest) => SetCrewManifest(crewManifest);
         public void UpdateLoadingCargoManifest(CargoManifest? cargoManifest) => SetLoadingCargoManifest(cargoManifest);
-
-        public void UpdateUploadingCargoManifest(CargoManifest? cargoManifest) =>
-            SetUnloadingCargoManifest(cargoManifest);
-
+        public void UpdateUploadingCargoManifest(CargoManifest? cargoManifest) => SetUnloadingCargoManifest(cargoManifest);
+        public void UpdateImoNumber(ImoNumber newImo) => SetVesselImo(newImo);
 
         // ==============    
         private void SetCode(VvnCode code)

@@ -193,6 +193,71 @@ public class VesselVisitNotificationService
     }
     
     
+    public async Task<VesselVisitNotificationDto> UpdateAsync(VesselVisitNotificationId id, UpdateVesselVisitNotificationDto dto)
+{
+    _logger.LogInformation("Business Domain: Updating VVN with ID = {Id}", id.Value);
+
+    var vvnInDb = await _repo.GetByIdAsync(id);
+
+    if (vvnInDb == null) throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
+
+    if (!vvnInDb.IsEditable) throw new BusinessRuleValidationException("Only VVNs with status 'InProgress' or 'PendingInformation' can be edited.");
+
+    if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeArrival)) vvnInDb.UpdateEstimatedTimeArrival(new ClockTime(DateTime.Parse(dto.EstimatedTimeArrival)));
+
+    if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeDeparture)) vvnInDb.UpdateEstimatedTimeDeparture(new ClockTime(DateTime.Parse(dto.EstimatedTimeDeparture)));
+
+    if (dto.Volume.HasValue) vvnInDb.UpdateVolume(dto.Volume.Value);
+
+    if (dto.Documents != null) vvnInDb.UpdateDocuments(dto.Documents);
+    
+    if (dto.ListDocksCodes != null && dto.ListDocksCodes.Any())
+    {
+        var docks = await CreateListWithDocksIds(dto.ListDocksCodes);
+        vvnInDb.UpdateListDocks(docks);
+    }
+
+    if (dto.CrewManifest != null)
+    {
+        var crewManifest = await CreateCrewManifestAsync(dto.CrewManifest);
+        vvnInDb.UpdateCrewManifest(crewManifest);
+    }
+
+    if (dto.LoadingCargoManifest != null)
+    {
+        var loadingManifest = await CreateCargoManifestAsync(dto.LoadingCargoManifest);
+        vvnInDb.UpdateLoadingCargoManifest(loadingManifest);
+    }
+
+    if (dto.UnloadingCargoManifest != null)
+    {
+        var unloadingManifest = await CreateCargoManifestAsync(dto.UnloadingCargoManifest);
+        vvnInDb.UpdateUploadingCargoManifest(unloadingManifest);
+    }
+
+    if (!string.IsNullOrWhiteSpace(dto.ImoNumber))
+    {
+        var imoCode = new ImoNumber(dto.ImoNumber);
+        var foundVesselWithImo = await _vesselRepository.GetByImoNumberAsync(imoCode);
+        
+        if (foundVesselWithImo == null) throw new BusinessRuleValidationException($"No vessel with IMO Number {imoCode} was found.");
+        
+        vvnInDb.UpdateImoNumber(foundVesselWithImo.ImoNumber);
+    }
+
+    await _unitOfWork.CommitAsync();
+
+    _logger.LogInformation("VVN with ID = {Id} updated successfully.", id.Value);
+
+    return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+}
+
+    
+    
+    
+    
+    
+    
     
     
     

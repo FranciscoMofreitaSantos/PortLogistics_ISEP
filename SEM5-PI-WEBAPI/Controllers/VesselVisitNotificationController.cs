@@ -20,7 +20,7 @@ public class VesselVisitNotificationController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<VesselVisitNotificationDto>> CreateAsync(CreatingVesselVisitNotificationDto dto)
+    public async Task<ActionResult<VesselVisitNotificationDto>> CreateAsync([FromBody] CreatingVesselVisitNotificationDto dto)
     {
         _logger.LogInformation("API Request: Add VVN with body = {@Dto}", dto);
             
@@ -148,5 +148,27 @@ public class VesselVisitNotificationController : ControllerBase
     }
     
     
-    
+    [HttpPut("{id:guid}/update")]
+    public async Task<ActionResult<VesselVisitNotificationDto>> UpdateAsync(Guid id, [FromBody] UpdateVesselVisitNotificationDto dto)
+    {
+        _logger.LogInformation("API Request: PUT update VVN with ID = {Id}", id);
+
+        try
+        {
+            var updatedVvn = await _service.UpdateAsync(new VesselVisitNotificationId(id), dto);
+            _logger.LogInformation("API Response (200): VVN with ID = {Id} updated successfully", id);
+            return Ok(updatedVvn);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            _logger.LogWarning("API Error (400): Could not update VVN with ID = {Id}. Reason: {Message}", id, ex.Message);
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error updating VVN with ID = {Id}", id);
+            return StatusCode(500, "An unexpected error occurred while updating the VVN.");
+        }
+    }
+
 }
