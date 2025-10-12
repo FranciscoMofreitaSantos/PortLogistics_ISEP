@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.Vessels;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
+using SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs;
 
 namespace SEM5_PI_WEBAPI.Controllers;
 

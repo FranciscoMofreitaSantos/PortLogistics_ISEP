@@ -1,4 +1,6 @@
 
+using SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs;
+
 namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
 {
     public class VesselTypeFactory

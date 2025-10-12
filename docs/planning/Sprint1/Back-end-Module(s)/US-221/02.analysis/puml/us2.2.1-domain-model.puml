@@ -1,0 +1,108 @@
+@startuml
+' ==========================================================
+' Domain Model Diagram – US2.2.1 (Create and Manage Vessel Types)
+' Author: Jorge Ubaldo Rodrigues
+' Context: Port Management – Vessel Type Definition
+' ==========================================================
+
+skinparam monochrome true
+skinparam shadowing false
+hide methods
+hide circle
+
+title US2.2.1 – Domain Model (Vessel Type Management)
+
+package "Vessel Type Context" as VTC {
+
+    class VesselType {
+        - Name : string
+        - Description : string
+        - MaxBays : int
+        - MaxRows : int
+        - MaxTiers : int
+        - Capacity : float
+        --
+        + ChangeName(name)
+        + ChangeDescription(description)
+        + ChangeDimensions(maxBays, maxRows, maxTiers)
+    }
+
+    class VesselTypeId {
+        - Value : Guid
+    }
+
+    class VesselTypeDto {
+        + Id : Guid
+        + Name : string
+        + Description : string
+        + MaxBays : int
+        + MaxRows : int
+        + MaxTiers : int
+        + Capacity : float
+    }
+
+    class CreatingVesselTypeDto {
+        + Name : string
+        + Description : string
+        + MaxBays : int
+        + MaxRows : int
+        + MaxTiers : int
+    }
+
+    class VesselTypeFactory {
+        + CreateBasicVesselType(dto)
+        + CreateDtoVesselType(entity)
+    }
+
+    interface IVesselTypeRepository {
+        + GetAllAsync()
+        + GetByIdAsync(id)
+        + GetByNameAsync(name)
+        + GetByDescriptionAsync(description)
+        + FilterAsync(name, description, query)
+        + AddAsync(entity)
+    }
+
+    class VesselTypeService {
+        + GetAllAsync()
+        + GetByIdAsync(id)
+        + AddAsync(dto)
+        + GetByNameAsync(name)
+        + GetByDescriptionAsync(description)
+        + FilterAsync(name, description, query)
+        + UpdateAsync(id, dto)
+    }
+
+    class VesselTypeController {
+        + GetAll()
+        + GetById(id)
+        + GetByName(name)
+        + GetByDescription(desc)
+        + Create(dto)
+        + Filter(name, desc, query)
+        + Update(id, dto)
+    }
+
+    class BusinessRuleValidationException
+    class IUnitOfWork
+}
+
+' ==========================
+' Relationships
+' ==========================
+
+VesselTypeController --> VesselTypeService : uses
+VesselTypeService --> IVesselTypeRepository : depends on
+VesselTypeService --> IUnitOfWork : commits
+VesselTypeService --> VesselTypeFactory : converts entities ↔ DTOs
+VesselTypeFactory --> VesselType : creates instances
+VesselType --> VesselTypeId : identity
+IVesselTypeRepository --> VesselType : manages persistence
+
+' Possible future reference from Vessel entity (US2.2.2)
+class Vessel {
+    - ImoNumber : string
+}
+Vessel --> VesselType : references >
+
+@enduml

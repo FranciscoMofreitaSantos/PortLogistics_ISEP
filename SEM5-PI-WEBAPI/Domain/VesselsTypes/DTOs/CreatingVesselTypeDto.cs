@@ -1,4 +1,4 @@
-namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
+namespace SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs
 {
     public class CreatingVesselTypeDto
     {

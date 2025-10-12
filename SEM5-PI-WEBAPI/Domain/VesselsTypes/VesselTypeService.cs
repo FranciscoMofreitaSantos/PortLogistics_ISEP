@@ -1,8 +1,9 @@
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs;
 
 namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
 {
-    public class VesselTypeService
+    public class VesselTypeService : IVesselTypeService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IVesselTypeRepository _vesselTypeRepository;
@@ -118,6 +119,46 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes
             
             return listVesselsTypesInDb.Select(instance => VesselTypeFactory.CreateDtoVesselType(instance)).ToList();
         }
+        
+        public async Task<VesselTypeDto> UpdateAsync(VesselTypeId id, UpdateVesselTypeDto dto)
+        {
+            _logger.LogInformation("Business Domain: Request to update Vessel Type with ID = {Id}", id.Value);
+
+            var vesselTypeInDb = await _vesselTypeRepository.GetByIdAsync(id);
+            if (vesselTypeInDb == null)
+                throw new BusinessRuleValidationException($"No Vessel Type found with ID = {id.Value}");
+
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+            {
+                var vesselWithNewName = await _vesselTypeRepository.GetByNameAsync(dto.Name);
+
+                if (vesselWithNewName != null && vesselWithNewName.Id != vesselTypeInDb.Id)
+                    throw new BusinessRuleValidationException($"A Vessel Type with the name '{dto.Name}' already exists. Please choose a different name.");
+
+                vesselTypeInDb.ChangeName(dto.Name);
+            }
+
+                
+
+            if (!string.IsNullOrWhiteSpace(dto.Description))
+                vesselTypeInDb.ChangeDescription(dto.Description);
+
+            if (dto.MaxBays.HasValue)
+                vesselTypeInDb.ChangeMaxBays(dto.MaxBays.Value);
+
+            if (dto.MaxRows.HasValue)
+                vesselTypeInDb.ChangeMaxRows(dto.MaxRows.Value);
+
+            if (dto.MaxTiers.HasValue)
+                vesselTypeInDb.ChangeMaxTiers(dto.MaxTiers.Value);
+
+            await _unitOfWork.CommitAsync();
+
+            _logger.LogInformation("Business Domain: Vessel Type with ID = {Id} updated successfully.", id.Value);
+
+            return VesselTypeFactory.CreateDtoVesselType(vesselTypeInDb);
+        }
+
     }
 }
 

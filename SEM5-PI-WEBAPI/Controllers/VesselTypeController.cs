@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
+using SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs;
 
 namespace SEM5_PI_WEBAPI.Controllers
 {
@@ -9,10 +10,10 @@ namespace SEM5_PI_WEBAPI.Controllers
     public class VesselTypeController : ControllerBase
     {
         
-        private readonly VesselTypeService _service;
+        private readonly IVesselTypeService _service;
         private readonly ILogger<VesselTypeController> _logger;
 
-        public VesselTypeController(VesselTypeService service,ILogger<VesselTypeController> logger)
+        public VesselTypeController(IVesselTypeService service,ILogger<VesselTypeController> logger)
         {
             _service = service;
             _logger = logger;
@@ -132,7 +133,23 @@ namespace SEM5_PI_WEBAPI.Controllers
             
         }
         
-        
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<VesselTypeDto>> Update(Guid id, UpdateVesselTypeDto dto)
+        {
+            _logger.LogInformation("API Request: Update Vessel Type with ID = {Id} and body = {@Dto}", id, dto);
+            try
+            {
+                var updatedVesselType = await _service.UpdateAsync(new VesselTypeId(id), dto);
+                _logger.LogInformation("API Response (200): Vessel Type with ID = {Id} updated successfully.", id);
+                return Ok(updatedVesselType);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                _logger.LogWarning("API Response (400): Update failed for Vessel Type with ID = {Id}. Reason: {Message}", id, ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
         
     }
 }

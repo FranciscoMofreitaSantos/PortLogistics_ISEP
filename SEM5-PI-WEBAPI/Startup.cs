@@ -93,7 +93,7 @@ namespace SEM5_PI_WEBAPI
             services.AddTransient<QualificationService>();
 
             services.AddTransient<IVesselTypeRepository, VesselTypeRepository>();
-            services.AddTransient<VesselTypeService>();
+            services.AddScoped<IVesselTypeService,VesselTypeService>();
 
             services.AddTransient<IStaffMemberRepository, StaffMemberRepository>();
             services.AddTransient<StaffMemberService>();
@@ -124,7 +124,7 @@ namespace SEM5_PI_WEBAPI
             services.AddTransient<PhysicalResourceService>();
             
             services.AddTransient<IVesselVisitNotificationRepository, VesselVisitNotificationRepository>();
-            services.AddTransient<VesselVisitNotificationService>();
+            services.AddScoped<IVesselVisitNotificationService,VesselVisitNotificationService>();
             
             services.AddTransient<ICrewMemberRepository,CrewMemberRepository>();
 

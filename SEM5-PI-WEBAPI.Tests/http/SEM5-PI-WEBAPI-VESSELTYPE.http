@@ -125,3 +125,70 @@ Accept: application/json
   "maxRows": 0,
   "maxTiers": -1
 }
+
+
+###
+# 17. PUT Update - válido (atualiza descrição e dimensões)
+PUT {{portURL}}/api/VesselType/b928c0c9-90c8-4e41-9a6d-59ec1ffef048
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Updated description for Panamax vessel",
+  "maxBays": 22,
+  "maxRows": 16,
+  "maxTiers": 11
+}
+
+###
+# 18. PUT Update - válido (atualiza nome e descrição)
+PUT {{portURL}}/api/VesselType/b4d5f3aa-e1a9-4b32-bd94-06f8a1742b54
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Panamax Plus",
+  "description": "Renamed vessel type for testing"
+}
+
+###
+# 19. PUT Update - inválido (nome duplicado)
+PUT {{portURL}}/api/VesselType/b928c0c9-90c8-4e41-9a6d-59ec1ffef048
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Post-Panamax"
+}
+
+###
+# 20. PUT Update - inválido (descrição curta)
+PUT {{portURL}}/api/VesselType/b928c0c9-90c8-4e41-9a6d-59ec1ffef048
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "short"
+}
+
+###
+# 21. PUT Update - inválido (valores negativos)
+PUT {{portURL}}/api/VesselType/b928c0c9-90c8-4e41-9a6d-59ec1ffef048
+Content-Type: application/json
+Accept: application/json
+
+{
+  "maxBays": -10,
+  "maxRows": -5,
+  "maxTiers": -3
+}
+
+###
+# 22. PUT Update - ID inexistente
+PUT {{portURL}}/api/VesselType/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Attempting to update a non-existing Vessel Type"
+}
