@@ -8,18 +8,9 @@ using SEM5_PI_WEBAPI.Domain.VVN.Docs;
 
 namespace SEM5_PI_WEBAPI.Domain.VVN
 {
-    public enum VvnStatus
-    {
-        InProgress,
-        PendingInformation,
-        Withdrawn,
-        Submitted,
-        Accepted
-    }
-
     public class VesselVisitNotification : Entity<VesselVisitNotificationId>, IAggregateRoot
     {
-        private bool _isConstructing = false; // 👈 evita validações durante o construtor
+        private bool _isConstructing = false;
 
         public VvnCode Code { get; private set; }
 
@@ -32,7 +23,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         public int Volume { get; private set; }
         public PdfDocumentCollection Documents { get; private set; }
 
-        public VvnStatus Status { get; private set; }
+        public Status Status { get; private set; }
         public IReadOnlyCollection<EntityDock> ListDocks { get; private set; }
         public CrewManifest? CrewManifest { get; private set; }
         public CargoManifest? LoadingCargoManifest { get; private set; }
@@ -41,7 +32,9 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
         public IReadOnlyCollection<EntityTask> Tasks { get; private set; }
 
-        protected VesselVisitNotification() { }
+        protected VesselVisitNotification()
+        {
+        }
 
         public VesselVisitNotification(
             VvnCode code,
@@ -55,13 +48,14 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             CargoManifest? unloadingCargoManifest,
             ImoNumber vesselImo)
         {
-            _isConstructing = true; 
+            _isConstructing = true;
 
             if (estimatedTimeArrival == null || estimatedTimeDeparture == null)
                 throw new BusinessRuleValidationException("ETA and ETD cannot be null.");
 
             if (estimatedTimeArrival.Value >= estimatedTimeDeparture.Value)
-                throw new BusinessRuleValidationException("Estimated Time of Arrival must be before Estimated Time of Departure.");
+                throw new BusinessRuleValidationException(
+                    "Estimated Time of Arrival must be before Estimated Time of Departure.");
 
             Id = new VesselVisitNotificationId(Guid.NewGuid());
 
@@ -80,24 +74,31 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             SetActualTimeDeparture(null);
 
             AcceptenceDate = null;
-            Status = VvnStatus.InProgress;
+            Status = new Status(VvnStatus.InProgress, null);
             Tasks = new List<EntityTask>();
 
             _isConstructing = false;
         }
-        
 
-        public void UpdateEstimatedTimeArrival(ClockTime estimatedTimeArrival) => SetEstimatedTimeArrival(estimatedTimeArrival);
-        public void UpdateEstimatedTimeDeparture(ClockTime estimatedTimeDeparture) => SetEstimatedTimeDeparture(estimatedTimeDeparture);
+
+        public void UpdateEstimatedTimeArrival(ClockTime estimatedTimeArrival) =>
+            SetEstimatedTimeArrival(estimatedTimeArrival);
+
+        public void UpdateEstimatedTimeDeparture(ClockTime estimatedTimeDeparture) =>
+            SetEstimatedTimeDeparture(estimatedTimeDeparture);
+
         public void UpdateVolume(int volume) => SetVolume(volume);
         public void UpdateDocuments(PdfDocumentCollection? documents) => SetDocuments(documents);
         public void UpdateListDocks(IEnumerable<EntityDock> docks) => SetListDocks(docks);
         public void UpdateCrewManifest(CrewManifest? crewManifest) => SetCrewManifest(crewManifest);
         public void UpdateLoadingCargoManifest(CargoManifest? cargoManifest) => SetLoadingCargoManifest(cargoManifest);
-        public void UpdateUnloadingCargoManifest(CargoManifest? cargoManifest) => SetUnloadingCargoManifest(cargoManifest);
+
+        public void UpdateUnloadingCargoManifest(CargoManifest? cargoManifest) =>
+            SetUnloadingCargoManifest(cargoManifest);
+
         public void UpdateImoNumber(ImoNumber newImo) => SetVesselImo(newImo);
         public void SetTasks(IEnumerable<EntityTask> tasks) => Tasks = tasks?.ToList() ?? new List<EntityTask>();
-        
+
 
         private void SetCode(VvnCode code) => Code = code;
 
@@ -175,7 +176,8 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         private void SetLoadingCargoManifest(CargoManifest? cargoManifest)
         {
             if (!_isConstructing && !IsEditable)
-                throw new BusinessRuleValidationException("Cannot update Loading CargoManifest when VVN is not editable.");
+                throw new BusinessRuleValidationException(
+                    "Cannot update Loading CargoManifest when VVN is not editable.");
 
             LoadingCargoManifest = cargoManifest;
         }
@@ -183,7 +185,8 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         private void SetUnloadingCargoManifest(CargoManifest? cargoManifest)
         {
             if (!_isConstructing && !IsEditable)
-                throw new BusinessRuleValidationException("Cannot update Unloading CargoManifest when VVN is not editable.");
+                throw new BusinessRuleValidationException(
+                    "Cannot update Unloading CargoManifest when VVN is not editable.");
 
             UnloadingCargoManifest = cargoManifest;
         }
@@ -195,7 +198,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
             VesselImo = vesselImo;
         }
-        
+
         private void ValidateTimeConsistency()
         {
             if (EstimatedTimeArrival != null && EstimatedTimeDeparture != null &&
@@ -207,41 +210,46 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
         public void Submit()
         {
-            if (Status != VvnStatus.InProgress)
-                throw new BusinessRuleValidationException($"Only In-progress VVNs can be submitted. Current status: {Status}");
-            Status = VvnStatus.Submitted;
+            if (Status.StatusValue != VvnStatus.InProgress)
+                throw new BusinessRuleValidationException(
+                    $"Only In-progress VVNs can be submitted. Current status: {Status}");
+            Status = new Status(VvnStatus.Submitted, null);
         }
 
         public void MarkPending()
         {
-            if (Status != VvnStatus.Submitted)
-                throw new BusinessRuleValidationException($"Only Submitted VVNs can be marked Pending. Current status: {Status}");
-            Status = VvnStatus.PendingInformation;
+            if (Status.StatusValue != VvnStatus.Submitted)
+                throw new BusinessRuleValidationException(
+                    $"Only Submitted VVNs can be marked Pending. Current status: {Status}");
+            Status = new Status(VvnStatus.PendingInformation, null);
         }
 
         public void Withdraw()
         {
-            if (Status != VvnStatus.InProgress && Status != VvnStatus.PendingInformation)
-                throw new BusinessRuleValidationException($"Only In-progress or Pending VVNs can be withdrawn. Current status: {Status}");
-            Status = VvnStatus.Withdrawn;
+            if (Status.StatusValue != VvnStatus.InProgress && Status.StatusValue != VvnStatus.PendingInformation)
+                throw new BusinessRuleValidationException(
+                    $"Only In-progress or Pending VVNs can be withdrawn. Current status: {Status}");
+            Status = new Status(VvnStatus.Withdrawn, null);
         }
 
         public void Resume()
         {
-            if (Status != VvnStatus.Withdrawn)
-                throw new BusinessRuleValidationException($"Only Withdrawn VVNs can be resumed. Current status: {Status}");
-            Status = VvnStatus.InProgress;
+            if (Status.StatusValue != VvnStatus.Withdrawn)
+                throw new BusinessRuleValidationException(
+                    $"Only Withdrawn VVNs can be resumed. Current status: {Status}");
+            Status = new Status(VvnStatus.InProgress, null);
         }
 
         public void Accept()
         {
-            if (Status != VvnStatus.Submitted)
-                throw new BusinessRuleValidationException($"Only Submitted VVNs can be accepted. Current status: {Status}");
-            Status = VvnStatus.Accepted;
+            if (Status.StatusValue != VvnStatus.Submitted)
+                throw new BusinessRuleValidationException(
+                    $"Only Submitted VVNs can be accepted. Current status: {Status}");
+            Status = new (VvnStatus.Accepted, null);
             AcceptenceDate = new ClockTime(DateTime.Now);
         }
 
-        public bool IsEditable => Status == VvnStatus.InProgress || Status == VvnStatus.PendingInformation;
+        public bool IsEditable => Status.StatusValue == VvnStatus.InProgress || Status.StatusValue == VvnStatus.PendingInformation;
 
         // ============================
         // Overrides

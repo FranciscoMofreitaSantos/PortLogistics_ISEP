@@ -20,7 +20,7 @@ public class VesselVisitNotificationDto
     public int Volume { get; private set; }
     public PdfDocumentCollection Documents { get; private set; }
 
-    public VvnStatus Status { get; private set; }
+    public string Status { get; private set; }
     public IReadOnlyCollection<DockDto> ListDocks { get; private set; }
     public CrewManifestDto? CrewManifest { get; private set; }
     public CargoManifestDto? LoadingCargoManifest { get; private set; }
@@ -39,7 +39,7 @@ public class VesselVisitNotificationDto
         DateTime? acceptenceDate,
         int volume,
         PdfDocumentCollection documents,
-        VvnStatus status,
+        string status,
         IEnumerable<DockDto> docks,
         CrewManifestDto? crewManifest,
         CargoManifestDto? loadingCargoManifest,

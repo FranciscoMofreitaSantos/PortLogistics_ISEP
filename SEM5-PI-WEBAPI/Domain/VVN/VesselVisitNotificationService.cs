@@ -13,6 +13,11 @@ using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.Vessels;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
 
+
+// FALTA ASSOCIAR AS DOCKS NO MOMENTO DE ACEITAÇÃO
+// FALTA VERIFICAR SE A CARGA DO (UN)LOADING É PERIGOSA E VER SE HÁ STAFF PARA ISSO
+// NO "REMOVE" FALTA ASSOCIAR A MENSAGEM DE REJEIÇÃO
+// CORRIGIR CREW_MANIFEST
 namespace SEM5_PI_WEBAPI.Domain.VVN;
 
 public class VesselVisitNotificationService : IVesselVisitNotificationService
@@ -161,7 +166,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
                       ?? throw new BusinessRuleValidationException(
                           $"No Vessel Visit Notification found with Code = {code}");
 
-        if (vvnInDb.Status != VvnStatus.Submitted)
+        if (vvnInDb.Status.StatusValue != VvnStatus.Submitted)
         {
             throw new BusinessRuleValidationException(
                 "Provided VVN has not been submitted yet and cannot be marked as pending information.");

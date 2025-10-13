@@ -5,6 +5,7 @@ using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Domain.VVN;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
 
+
 namespace SEM5_PI_WEBAPI.Tests.Domain
 {
     public class VesselVisitNotificationTests
@@ -19,14 +20,13 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         {
             BuildValidDock("DK-0001", "North Terminal Dock")
         };
-        
 
         [Fact]
         public void CreateVesselVisitNotification_WithValidData_ShouldInitializeCorrectly()
         {
             var vvn = CreateValidVVN();
 
-            Assert.Equal(VvnStatus.InProgress, vvn.Status);
+            Assert.Equal(VvnStatus.InProgress, vvn.Status.StatusValue);
             Assert.True(vvn.IsEditable);
             Assert.Equal("2025-THPA-000001", vvn.Code.Code);
             Assert.Equal(1200, vvn.Volume);
@@ -83,7 +83,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
 
             vvn.Submit();
 
-            Assert.Equal(VvnStatus.Submitted, vvn.Status);
+            Assert.Equal(VvnStatus.Submitted, vvn.Status.StatusValue);
             Assert.False(vvn.IsEditable);
         }
 
@@ -103,7 +103,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
 
             vvn.Withdraw();
 
-            Assert.Equal(VvnStatus.Withdrawn, vvn.Status);
+            Assert.Equal(VvnStatus.Withdrawn, vvn.Status.StatusValue);
             Assert.False(vvn.IsEditable);
         }
 
@@ -124,7 +124,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             vvn.Withdraw();
             vvn.Resume();
 
-            Assert.Equal(VvnStatus.InProgress, vvn.Status);
+            Assert.Equal(VvnStatus.InProgress, vvn.Status.StatusValue);
             Assert.True(vvn.IsEditable);
         }
 
@@ -142,7 +142,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             vvn.Submit();
             vvn.Accept();
 
-            Assert.Equal(VvnStatus.Accepted, vvn.Status);
+            Assert.Equal(VvnStatus.Accepted, vvn.Status.StatusValue);
             Assert.NotNull(vvn.AcceptenceDate);
             Assert.False(vvn.IsEditable);
             Assert.Contains("VVN", vvn.ToString());
@@ -162,7 +162,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             vvn.Submit();
             vvn.MarkPending();
 
-            Assert.Equal(VvnStatus.PendingInformation, vvn.Status);
+            Assert.Equal(VvnStatus.PendingInformation, vvn.Status.StatusValue);
             Assert.True(vvn.IsEditable);
         }
 
@@ -179,22 +179,21 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             var vvn = CreateValidVVN();
 
             vvn.Submit();
-            Assert.Equal(VvnStatus.Submitted, vvn.Status);
+            Assert.Equal(VvnStatus.Submitted, vvn.Status.StatusValue);
 
             vvn.MarkPending();
-            Assert.Equal(VvnStatus.PendingInformation, vvn.Status);
+            Assert.Equal(VvnStatus.PendingInformation, vvn.Status.StatusValue);
 
             vvn.Withdraw();
-            Assert.Equal(VvnStatus.Withdrawn, vvn.Status);
+            Assert.Equal(VvnStatus.Withdrawn, vvn.Status.StatusValue);
 
             vvn.Resume();
-            Assert.Equal(VvnStatus.InProgress, vvn.Status);
+            Assert.Equal(VvnStatus.InProgress, vvn.Status.StatusValue);
 
             vvn.Submit();
             vvn.Accept();
-            Assert.Equal(VvnStatus.Accepted, vvn.Status);
+            Assert.Equal(VvnStatus.Accepted, vvn.Status.StatusValue);
         }
-        
 
         [Fact]
         public void UpdateMethods_ShouldModifyValues_WhenEditable()
@@ -215,7 +214,6 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             Assert.Equal("DK-0002", vvn.ListDocks.First().Code.Value);
         }
 
-
         [Fact]
         public void UpdateMethods_ShouldThrow_WhenNotEditable()
         {
@@ -232,7 +230,6 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             var vvn = CreateValidVVN();
             Assert.Throws<BusinessRuleValidationException>(() => vvn.UpdateVolume(-20));
         }
-        
 
         [Fact]
         public void Equals_ShouldReturnTrue_WhenCodesMatch()
@@ -267,7 +264,6 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             Assert.Contains(vvn.Code.Code, str);
             Assert.Contains(vvn.Status.ToString(), str);
         }
-        
 
         private VesselVisitNotification CreateValidVVN()
         {

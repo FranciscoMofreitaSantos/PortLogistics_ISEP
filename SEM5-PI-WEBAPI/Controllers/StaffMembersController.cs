@@ -12,9 +12,9 @@ public class StaffMembersController : ControllerBase
 {
     private readonly StaffMemberService _service;
 
-    public StaffMembersController(StaffMemberService serivce)
+    public StaffMembersController(StaffMemberService service)
     {
-        _service = serivce;
+        _service = service;
     }
 
     [HttpGet]

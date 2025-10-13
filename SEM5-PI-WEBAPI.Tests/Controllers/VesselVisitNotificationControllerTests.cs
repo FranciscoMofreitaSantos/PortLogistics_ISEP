@@ -24,7 +24,6 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             _loggerMock = new Mock<ILogger<VesselVisitNotificationController>>();
             _controller = new VesselVisitNotificationController(_serviceMock.Object, _loggerMock.Object);
         }
-        
 
         [Fact]
         public async Task CreateAsync_ShouldReturnCreated_WhenValid()
@@ -51,7 +50,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 acceptenceDate: null,
                 volume: 1200,
                 documents: new PdfDocumentCollection(),
-                status: VvnStatus.InProgress,
+                status: new Status(VvnStatus.InProgress, null).ToString(),
                 docks: new List<DockDto>(),
                 crewManifest: null,
                 loadingCargoManifest: null,
@@ -99,7 +98,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task GetById_ShouldReturnOk_WhenFound()
         {
             var id = Guid.NewGuid().ToString();
-            var dto = BuildDto(id, "2025-THPA-000001", VvnStatus.InProgress);
+            var dto = BuildDto(id, "2025-THPA-000001", new Status(VvnStatus.InProgress, null));
 
             _serviceMock.Setup(s => s.GetByIdAsync(It.IsAny<VesselVisitNotificationId>()))
                 .ReturnsAsync(dto);
@@ -109,7 +108,8 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
             Assert.Equal(id, value.Id);
-            Assert.Equal(VvnStatus.InProgress, value.Status);
+            Assert.Equal(VvnStatus.InProgress.ToString(), value.Status.Replace("Status: ", ""));
+
         }
 
         [Fact]
@@ -128,7 +128,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task WithdrawById_ShouldReturnOk_WhenSuccess()
         {
             var id = Guid.NewGuid().ToString();
-            var dto = BuildDto(id, "2025-THPA-000001", VvnStatus.Withdrawn);
+            var dto = BuildDto(id, "2025-THPA-000001", new Status(VvnStatus.Withdrawn, null));
 
             _serviceMock.Setup(s => s.WithdrawByIdAsync(It.IsAny<VesselVisitNotificationId>()))
                 .ReturnsAsync(dto);
@@ -137,7 +137,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(VvnStatus.Withdrawn, value.Status);
+            Assert.Equal(VvnStatus.Withdrawn.ToString(),  value.Status.Replace("Status: ", ""));
         }
 
         [Fact]
@@ -167,7 +167,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         [Fact]
         public async Task WithdrawByCode_ShouldReturnOk_WhenSuccess()
         {
-            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", VvnStatus.Withdrawn);
+            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", new Status(VvnStatus.Withdrawn, null));
 
             _serviceMock.Setup(s => s.WithdrawByCodeAsync(It.IsAny<VvnCode>()))
                 .ReturnsAsync(dto);
@@ -176,7 +176,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(VvnStatus.Withdrawn, value.Status);
+            Assert.Equal(VvnStatus.Withdrawn.ToString(),  value.Status.Replace("Status: ", ""));
         }
 
         [Fact]
@@ -195,7 +195,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task SubmitById_ShouldReturnOk_WhenSuccess()
         {
             var id = Guid.NewGuid().ToString();
-            var dto = BuildDto(id, "2025-THPA-000001", VvnStatus.Submitted);
+            var dto = BuildDto(id, "2025-THPA-000001", new Status(VvnStatus.Submitted, null));
 
             _serviceMock.Setup(s => s.SubmitByIdAsync(It.IsAny<VesselVisitNotificationId>()))
                 .ReturnsAsync(dto);
@@ -204,7 +204,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(VvnStatus.Submitted, value.Status);
+            Assert.Equal(VvnStatus.Submitted.ToString(),  value.Status.Replace("Status: ", ""));
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         [Fact]
         public async Task SubmitByCode_ShouldReturnOk_WhenSuccess()
         {
-            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", VvnStatus.Submitted);
+            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", new Status(VvnStatus.Submitted, null));
 
             _serviceMock.Setup(s => s.SubmitByCodeAsync(It.IsAny<VvnCode>()))
                 .ReturnsAsync(dto);
@@ -231,7 +231,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(VvnStatus.Submitted, value.Status);
+            Assert.Equal(VvnStatus.Submitted.ToString(), value.Status.Replace("Status: ", ""));
         }
 
         [Fact]
@@ -257,7 +257,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 Volume = 2000
             };
 
-            var updated = BuildDto(id.ToString(), "2025-THPA-000001", VvnStatus.InProgress, 2000);
+            var updated = BuildDto(id.ToString(), "2025-THPA-000001", new Status(VvnStatus.InProgress, null), 2000);
 
             _serviceMock.Setup(s => s.UpdateAsync(It.IsAny<VesselVisitNotificationId>(), updateDto))
                 .ReturnsAsync(updated);
@@ -296,8 +296,8 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             var obj = Assert.IsType<ObjectResult>(result.Result);
             Assert.Equal(500, obj.StatusCode);
         }
-        
-        private static VesselVisitNotificationDto BuildDto(string id, string code, VvnStatus status, int volume = 1000)
+
+        private static VesselVisitNotificationDto BuildDto(string id, string code, Status status, int volume = 1000)
         {
             return new VesselVisitNotificationDto(
                 id,
@@ -309,7 +309,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 null,
                 volume,
                 new PdfDocumentCollection(),
-                status,
+                status.ToString(),
                 new List<DockDto>(),
                 null,
                 null,

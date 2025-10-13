@@ -71,7 +71,7 @@ public static class VesselVisitNotificationFactory
             notification.AcceptenceDate?.Value,
             notification.Volume,
             notification.Documents ?? new PdfDocumentCollection(),
-            notification.Status,
+            notification.Status.ToString(true),
             dockListDto,
             crewManifestDto,
             loadingCargoManifestDto,
