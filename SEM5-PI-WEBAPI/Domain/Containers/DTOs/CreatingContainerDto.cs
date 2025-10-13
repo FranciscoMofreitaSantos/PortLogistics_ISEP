@@ -1,4 +1,4 @@
-namespace SEM5_PI_WEBAPI.Domain.Containers
+namespace SEM5_PI_WEBAPI.Domain.Containers.DTOs
 {
     public class CreatingContainerDto
     {

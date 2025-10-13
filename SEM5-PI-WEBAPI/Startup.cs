@@ -115,7 +115,9 @@ namespace SEM5_PI_WEBAPI
             services.AddTransient<DockService>();
 
             services.AddTransient<ICargoManifestRepository, CargoManifestRepository>();
+            
             services.AddTransient<IContainerRepository, ContainerRepository>();
+            services.AddScoped<IContainerService, ContainerService>();
             
             services.AddTransient<ICargoManifestEntryRepository, CargoManifestEntryRepository>();
             services.AddTransient<CargoManifestService>();

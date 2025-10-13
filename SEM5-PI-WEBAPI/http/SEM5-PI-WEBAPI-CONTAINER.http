@@ -7,11 +7,11 @@ GET {{portURL}}/api/Container
 Accept: application/json
 
 ###
-GET {{portURL}}/api/Container/id/
+GET {{portURL}}/api/Container/id/df19db42-cde4-4714-87be-a430f58bf2f3
 Accept: application/json
 
 ###
-GET {{portURL}}/api/Container/iso/
+GET {{portURL}}/api/Container/iso/MSCU6639870
 Accept: application/json
 
 ###
@@ -20,7 +20,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "isoCode": "MSCU1234567",
+  "isoCode": "MSCU6639870",
   "description": "Standard dry container with electronics",
   "type": "General",
   "weightKg": 12000
@@ -51,7 +51,7 @@ Accept: application/json
 }
 
 ###
-PATCH {{portURL}}/api/Container/update/MSCU1234567
+PATCH {{portURL}}/api/Container/update/MSCU6639870
 Content-Type: application/json
 Accept: application/json
 
