@@ -1,3 +1,4 @@
+using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StorageAreas.DTOs;
@@ -11,13 +12,16 @@ public class StorageAreaService: IStorageAreaService
     private readonly ILogger<StorageAreaService> _logger;
     private readonly IStorageAreaRepository _storageAreaRepository;
     private readonly IPhysicalResourceRepository _physicalResourceRepository;
+    private readonly IDockRepository  _dockRepository;
 
-    public StorageAreaService(IUnitOfWork unitOfWork, ILogger<StorageAreaService> logger, IStorageAreaRepository storageAreaRepository, IPhysicalResourceRepository physicalResourceRepository)
+    public StorageAreaService(IUnitOfWork unitOfWork, ILogger<StorageAreaService> logger, 
+        IStorageAreaRepository storageAreaRepository, IPhysicalResourceRepository physicalResourceRepository, IDockRepository dockRepository)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _storageAreaRepository = storageAreaRepository;
         _physicalResourceRepository = physicalResourceRepository;
+        _dockRepository = dockRepository;
     }
 
     public async Task<List<StorageAreaDto>> GetAllAsync()
@@ -121,6 +125,13 @@ public class StorageAreaService: IStorageAreaService
         if (existingSa != null)
             throw new BusinessRuleValidationException($"Storage Area with name '{dto.Name}' already exists.");
 
+        foreach (var dock in dto.DistancesToDocks)
+        {
+            var dockInDb = await _dockRepository.GetByCodeAsync(new DockCode(dock.DockCode));
+            if (dockInDb == null) throw new BusinessRuleValidationException($"Dock code '{dock.DockCode}' does not exist in DB.");
+            
+        }
+        
         foreach (string pr in dto.PhysicalResources)
         {
             var exist = await _physicalResourceRepository.GetByCodeAsync(new PhysicalResourceCode(pr));
