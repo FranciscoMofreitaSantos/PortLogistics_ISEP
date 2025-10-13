@@ -11,13 +11,12 @@ using SEM5_PI_WEBAPI.Domain.StorageAreas;
 using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.Vessels;
+using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
 
 
 // FALTA ASSOCIAR AS DOCKS NO MOMENTO DE ACEITAÇÃO
 // FALTA VERIFICAR SE A CARGA DO (UN)LOADING É PERIGOSA E VER SE HÁ STAFF PARA ISSO
-// NO "REMOVE" FALTA ASSOCIAR A MENSAGEM DE REJEIÇÃO
-// CORRIGIR CREW_MANIFEST
 namespace SEM5_PI_WEBAPI.Domain.VVN;
 
 public class VesselVisitNotificationService : IVesselVisitNotificationService
@@ -501,5 +500,17 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         var formattedSequence = nextSequence.ToString("D6");
 
         return new VvnCode(DateTime.Now.Year.ToString(), formattedSequence);
+    }
+
+    private async Task<DockId> BasicDockAttributionAlgorithm(ImoNumber imo)
+    {
+        var vessel = await _vesselRepository.GetByImoNumberAsync(imo);
+        if (vessel == null)
+            throw new BusinessRuleValidationException("Vessel with provided imo not found");
+        
+        var possibleDocks = await _dockRepository.GetAllDocksForVesselType(vessel.VesselTypeId);
+        //var availableDocks = possibleDocks.Where(d=> d.)
+
+        return null;
     }
 }

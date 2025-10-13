@@ -12,5 +12,6 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
         Task<List<EntityDock>> GetByLocationAsync(string location);
         Task<List<EntityDock>> GetFilterAsync(DockCode? code, VesselTypeId? vesselTypeId, string? location, string? query);
         Task<List<DockCode>> GetAllDockCodesAsync();
+        Task<List<EntityDock>> GetAllDocksForVesselType(VesselTypeId vesselTypeId);
     }
 }

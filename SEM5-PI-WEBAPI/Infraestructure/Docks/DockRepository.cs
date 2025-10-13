@@ -83,5 +83,13 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                 .Select(d => d.Code)
                 .ToListAsync();
         }
+
+        public async Task<List<EntityDock>> GetAllDocksForVesselType(VesselTypeId vesselTypeId)
+        {
+            return await _context.Dock
+                .Where(d => d.AllowedVesselTypeIds.Contains(vesselTypeId))
+                .ToListAsync();
+        }
+
     }
 }
