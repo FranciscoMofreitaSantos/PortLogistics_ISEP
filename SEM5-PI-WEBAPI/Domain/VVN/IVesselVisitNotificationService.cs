@@ -1,5 +1,6 @@
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
+using SEM5_PI_WEBAPI.Domain.VVN.DTOs.GetByStatus;
 
 namespace SEM5_PI_WEBAPI.Domain.VVN;
 
@@ -14,5 +15,8 @@ public interface IVesselVisitNotificationService
         Task<VesselVisitNotificationDto> UpdateAsync(VesselVisitNotificationId id, UpdateVesselVisitNotificationDto dto);
         Task<VesselVisitNotificationDto> AcceptVvnAsync(VvnCode code);
         Task<VesselVisitNotificationDto> MarkAsPendingAsync(RejectVesselVisitNotificationDto dto);
-
+        Task<List<VesselVisitNotificationDto>> GetInProgressPendingInformationVvnsByShippingAgentRepresentativeIdFiltersAsync(Guid idSarWhoImAm, FilterInProgressPendingVvnStatusDto dto);
+        Task<List<VesselVisitNotificationDto>> GetWithdrawnVvnsByShippingAgentRepresentativeIdFiltersAsync(Guid idSarWhoImAm, FilterWithdrawnVvnStatusDto dto);
+        Task<List<VesselVisitNotificationDto>> GetSubmittedVvnsByShippingAgentRepresentativeIdFiltersAsync(Guid idSarWhoImAm, FilterSubmittedVvnStatusDto dto);
+        Task<List<VesselVisitNotificationDto>> GetAcceptedVvnsByShippingAgentRepresentativeIdFiltersAsync(Guid idSarWhoImAm, FilterAcceptedVvnStatusDto dto);
 }

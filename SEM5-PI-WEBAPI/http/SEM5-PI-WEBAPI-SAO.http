@@ -1,0 +1,148 @@
+@portURL = http://localhost:5008
+
+# --- SHIPPING AGENT ORGANIZATIONS ---
+
+###
+# 1. GET all Shipping Agent Organizations (list, possibly empty)
+GET {{portURL}}/api/ShippingAgentOrganizations
+Accept: application/json
+
+###
+# 2. GET by Id - valid (replace GUID with an existing organization)
+GET {{portURL}}/api/ShippingAgentOrganizations/cbfa5eb4-7d11-4032-baeb-c2bdaa888ce6
+Accept: application/json
+
+###
+# 3. GET by Id - not found
+GET {{portURL}}/api/ShippingAgentOrganizations/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+# 4. GET by Code - valid
+GET {{portURL}}/api/ShippingAgentOrganizations/code/1234567890
+Accept: application/json
+
+###
+# 5. GET by Code - not found
+GET {{portURL}}/api/ShippingAgentOrganizations/code/9999999999
+Accept: application/json
+
+###
+# 6. GET by Legal Name - valid
+GET {{portURL}}/api/ShippingAgentOrganizations/legalName/Evergreen%20Marine%20Portugal
+Accept: application/json
+
+###
+# 7. GET by Legal Name - not found
+GET {{portURL}}/api/ShippingAgentOrganizations/legalName/Unknown%20Company
+Accept: application/json
+
+###
+# 8. GET by Tax Number - valid
+GET {{portURL}}/api/ShippingAgentOrganizations/taxnumber/PT123456789
+Accept: application/json
+
+###
+# 9. GET by Tax Number - not found
+GET {{portURL}}/api/ShippingAgentOrganizations/taxnumber/PT000000000
+Accept: application/json
+
+
+# --- POST (Create) ---
+
+###
+# 10. POST Create - valid Shipping Agent Organization (Evergreen)
+POST {{portURL}}/api/ShippingAgentOrganizations
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shippingOrganizationCode": "1234567890",
+  "legalName": "Evergreen Marine Portugal",
+  "altName": "Evergreen Shipping",
+  "address": "Rua da Ria 45, Porto, Portugal",
+  "taxnumber": "PT123456789"
+}
+
+###
+# 11. POST Create - valid Shipping Agent Organization (MSC)
+POST {{portURL}}/api/ShippingAgentOrganizations
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shippingOrganizationCode": "0987654321",
+  "legalName": "Mediterranean Shipping Company S.A.",
+  "altName": "MSC Portugal",
+  "address": "Avenida do Mar 120, Lisboa, Portugal",
+  "taxnumber": "PT987654321"
+}
+
+###
+# 12. POST Create - valid Shipping Agent Organization (OOCL)
+POST {{portURL}}/api/ShippingAgentOrganizations
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shippingOrganizationCode": "1112223334",
+  "legalName": "OOCL Europe",
+  "altName": "OOCL Shipping",
+  "address": "Rua Central 10, Leixões, Portugal",
+  "taxnumber": "PT135792468"
+}
+
+###
+# 13. POST Create - duplicate Tax Number (should fail with 400)
+POST {{portURL}}/api/ShippingAgentOrganizations
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shippingOrganizationCode": "2223334445",
+  "legalName": "Duplicate Evergreen",
+  "altName": "Evergreen Clone",
+  "address": "Rua da Duplicação 1, Porto",
+  "taxnumber": "PT123456789"
+}
+
+###
+# 14. POST Create - missing required field (legalName)
+POST {{portURL}}/api/ShippingAgentOrganizations
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shippingOrganizationCode": "3334445556",
+  "altName": "Unnamed Company",
+  "address": "Rua Desconhecida, Faro",
+  "taxnumber": "PT222333444"
+}
+
+###
+# 15. POST Create - invalid Shipping Organization Code (wrong length)
+POST {{portURL}}/api/ShippingAgentOrganizations
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shippingOrganizationCode": "SAO-006",
+  "legalName": "Invalid Code Co.",
+  "altName": "Bad Format",
+  "address": "Rua Errada, Porto",
+  "taxnumber": "PT333444555"
+}
+
+###
+# 16. POST Create - invalid Tax Number (wrong format)
+POST {{portURL}}/api/ShippingAgentOrganizations
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shippingOrganizationCode": "4445556667",
+  "legalName": "Fake Shipping Co.",
+  "altName": "FakeShip",
+  "address": "Rua do Erro, Lisboa",
+  "taxnumber": "INVALID123"
+}

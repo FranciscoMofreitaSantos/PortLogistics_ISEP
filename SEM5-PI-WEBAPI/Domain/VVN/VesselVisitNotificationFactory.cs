@@ -51,6 +51,19 @@ public static class VesselVisitNotificationFactory
         );
     }
 
+    public static List<VesselVisitNotificationDto> CreateLitsVvnDtosFromList(List<VesselVisitNotification> list)
+    {
+        var listDtos = new List<VesselVisitNotificationDto>();
+        
+        foreach (var vvn in list)
+        {
+            listDtos.Add(CreateVesselVisitNotificationDto(vvn));
+        }
+        
+        return listDtos;
+    }
+    
+    
     public static VesselVisitNotificationDto CreateVesselVisitNotificationDto(VesselVisitNotification notification)
     {
         var crewManifestDto = CreateCrewManifestDto(notification.CrewManifest);

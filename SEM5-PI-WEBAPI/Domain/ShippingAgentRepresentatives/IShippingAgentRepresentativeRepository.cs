@@ -5,6 +5,7 @@ namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives
 {
     public interface IShippingAgentRepresentativeRepository : IRepository<ShippingAgentRepresentative, ShippingAgentRepresentativeId>
     {
+        public Task<List<ShippingAgentRepresentative>> GetAllSarBySaoAsync(ShippingOrganizationCode organizationCode);
         public Task<ShippingAgentRepresentative?> GetByNameAsync(string name);
         public Task<ShippingAgentRepresentative?> GetByEmailAsync(string email);
         public Task<ShippingAgentRepresentative?> GetByStatusAsync(Status status);

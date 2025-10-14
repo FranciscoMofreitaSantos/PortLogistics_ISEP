@@ -1,4 +1,4 @@
-namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
+namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.DTOs;
 
 public class UpdatingShippingAgentRepresentativeDto
 {

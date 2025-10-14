@@ -8,11 +8,14 @@ using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.CrewMembers;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
+using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Domain.StorageAreas;
 using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.Vessels;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
+using SEM5_PI_WEBAPI.Domain.VVN.DTOs.GetByStatus;
 
 
 namespace SEM5_PI_WEBAPI.Domain.VVN;
@@ -25,6 +28,8 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     private readonly ICargoManifestEntryRepository _cargoManifestEntryRepository;
     private readonly ICrewManifestRepository _crewManifestRepository;
     private readonly ICrewMemberRepository _crewMemberRepository;
+    private readonly IShippingAgentRepresentativeRepository _shippingAgentRepresentativeRepository;
+    private readonly IShippingAgentOrganizationRepository _shippingAgentOrganizationRepository;
     private readonly IStorageAreaRepository _storageAreaRepository;
     private readonly IDockRepository _dockRepository;
     private readonly IVesselRepository _vesselRepository;
@@ -39,6 +44,8 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         ICrewManifestRepository crewManifestRepository,
         ICrewMemberRepository crewMemberRepository,
         IStorageAreaRepository storageAreaRepository,
+        IShippingAgentRepresentativeRepository shippingAgentRepresentativeRepository,
+        IShippingAgentOrganizationRepository shippingAgentOrganizationRepository,
         IVesselRepository vesselRepository,
         IDockRepository dockRepository,
         IContainerRepository containerRepository,
@@ -56,6 +63,8 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         _vesselRepository = vesselRepository;
         _dockRepository = dockRepository;
         _containerRepository = containerRepository;
+        _shippingAgentRepresentativeRepository = shippingAgentRepresentativeRepository;
+        _shippingAgentOrganizationRepository = shippingAgentOrganizationRepository;
         _repo = repo;
         _taskRepository = taskRepository;
     }
@@ -156,13 +165,14 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         var vvnInDb = await _repo.GetByIdAsync(id)
                       ?? throw new BusinessRuleValidationException(
                           $"No Vessel Visit Notification found with Code = {dto.VvnCode}");
-        
+
         vvnInDb.MarkPending(dto.Reason);
 
         await _unitOfWork.CommitAsync();
 
         _logger.LogInformation(
-            "VVN with Code = {code} marked as Pending Information with message \"{message}\" successfully.", dto.VvnCode,
+            "VVN with Code = {code} marked as Pending Information with message \"{message}\" successfully.",
+            dto.VvnCode,
             dto.Reason);
 
         return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
@@ -306,7 +316,468 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     }
 
 
+    public async Task<List<VesselVisitNotificationDto>> GetInProgressPendingInformationVvnsByShippingAgentRepresentativeIdFiltersAsync(
+         Guid idSarWhoImAm, FilterInProgressPendingVvnStatusDto dto)
+    {
+        _logger.LogInformation("Starting VVN filtering for SAR {SAR_ID} with filters: {@Filters}", idSarWhoImAm, dto);
+
+        var listRepresentatives = await GetShippingAgentRepresentativesBySaoAsync(idSarWhoImAm);
+        _logger.LogInformation("Loaded {Count} SARs belonging to the same organization.", listRepresentatives.Count);
+
+        var listVvnFiltered = await GetVvnForSpecificRepresentative(dto.SpecificRepresentative, listRepresentatives);
+        _logger.LogInformation("Initial VVN pool size before filtering: {Count}", listVvnFiltered.Count);
+
+        if (listVvnFiltered.Count == 0)
+        {
+            _logger.LogWarning("No VVNs found for SAR {SAR_ID} before applying filters.", idSarWhoImAm);
+            return new List<VesselVisitNotificationDto>();
+        }
+
+        listVvnFiltered = listVvnFiltered
+            .Where(v => v.Status.StatusValue == VvnStatus.InProgress ||
+                        v.Status.StatusValue == VvnStatus.PendingInformation)
+            .ToList();
+
+        _logger.LogInformation("After status filter (InProgress + PendingInformation): {Count} VVNs remain.",
+            listVvnFiltered.Count);
+
+        if (listVvnFiltered.Count == 0)
+        {
+            _logger.LogWarning("No VVNs remain after filtering by status for SAR {SAR_ID}.", idSarWhoImAm);
+            return new List<VesselVisitNotificationDto>();
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.VesselImoNumber))
+        {
+            _logger.LogInformation("Applying IMO filter with value: {IMO}", dto.VesselImoNumber);
+            listVvnFiltered = await GetVvnsFilterByImoNumber(listVvnFiltered, dto.VesselImoNumber);
+            _logger.LogInformation("After IMO filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeArrival))
+        {
+            _logger.LogInformation("Applying ETA filter with value: {ETA}", dto.EstimatedTimeArrival);
+            listVvnFiltered = GetVvnsFilterByEstimatedTimeArrival(listVvnFiltered, dto.EstimatedTimeArrival);
+            _logger.LogInformation("After ETA filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeDeparture))
+        {
+            _logger.LogInformation("Applying ETD filter with value: {ETD}", dto.EstimatedTimeDeparture);
+            listVvnFiltered = GetVvnsFilterByEstimatedTimeDeparture(listVvnFiltered, dto.EstimatedTimeDeparture);
+            _logger.LogInformation("After ETD filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        var result = VesselVisitNotificationFactory.CreateLitsVvnDtosFromList(listVvnFiltered);
+        _logger.LogInformation("Finished filtering. Total VVNs returned: {Count}", result.Count);
+
+        return result;
+    }
+
+
+    public async Task<List<VesselVisitNotificationDto>> GetWithdrawnVvnsByShippingAgentRepresentativeIdFiltersAsync(
+        Guid idSarWhoImAm, FilterWithdrawnVvnStatusDto dto)
+    {
+        _logger.LogInformation("Starting Withdrawn VVNs query for SAR {SAR_ID} with filters: {@Filters}", idSarWhoImAm,
+            dto);
+
+        var listRepresentatives = await GetShippingAgentRepresentativesBySaoAsync(idSarWhoImAm);
+        _logger.LogInformation("Loaded {Count} representatives under same organization.", listRepresentatives.Count);
+
+        var listVvnFiltered = await GetVvnForSpecificRepresentative(dto.SpecificRepresentative, listRepresentatives);
+        _logger.LogInformation("Initial Withdrawn VVN pool size: {Count}", listVvnFiltered.Count);
+
+        if (listVvnFiltered.Count == 0)
+        {
+            _logger.LogWarning("No VVNs found for SAR {SAR_ID} before applying filters.", idSarWhoImAm);
+            return new List<VesselVisitNotificationDto>();
+        }
+
+        listVvnFiltered = listVvnFiltered
+            .Where(v => v.Status.StatusValue == VvnStatus.Withdrawn)
+            .ToList();
+
+        _logger.LogInformation("After Withdrawn status filter: {Count} VVNs remain.", listVvnFiltered.Count);
+
+        if (!string.IsNullOrWhiteSpace(dto.VesselImoNumber))
+        {
+            _logger.LogInformation("Applying IMO filter: {IMO}", dto.VesselImoNumber);
+            listVvnFiltered = await GetVvnsFilterByImoNumber(listVvnFiltered, dto.VesselImoNumber);
+            _logger.LogInformation("After IMO filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeArrival))
+        {
+            _logger.LogInformation("Applying ETA filter: {ETA}", dto.EstimatedTimeArrival);
+            listVvnFiltered = GetVvnsFilterByEstimatedTimeArrival(listVvnFiltered, dto.EstimatedTimeArrival);
+            _logger.LogInformation("After ETA filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeDeparture))
+        {
+            _logger.LogInformation("Applying ETD filter: {ETD}", dto.EstimatedTimeDeparture);
+            listVvnFiltered = GetVvnsFilterByEstimatedTimeDeparture(listVvnFiltered, dto.EstimatedTimeDeparture);
+            _logger.LogInformation("After ETD filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        var result = VesselVisitNotificationFactory.CreateLitsVvnDtosFromList(listVvnFiltered);
+        _logger.LogInformation("Withdrawn VVN filtering completed. Total results: {Count}", result.Count);
+
+        return result;
+    }
+
+    
+    public async Task<List<VesselVisitNotificationDto>> GetSubmittedVvnsByShippingAgentRepresentativeIdFiltersAsync(
+        Guid idSarWhoImAm, FilterSubmittedVvnStatusDto dto)
+    {
+        _logger.LogInformation("Starting Submitted VVNs query for SAR {SAR_ID} with filters: {@Filters}", idSarWhoImAm,
+            dto);
+
+        var listRepresentatives = await GetShippingAgentRepresentativesBySaoAsync(idSarWhoImAm);
+        _logger.LogInformation("Loaded {Count} representatives under same organization.", listRepresentatives.Count);
+
+        var listVvnFiltered = await GetVvnForSpecificRepresentative(dto.SpecificRepresentative, listRepresentatives);
+        _logger.LogInformation("Initial Submitted VVN pool size: {Count}", listVvnFiltered.Count);
+
+        if (listVvnFiltered.Count == 0)
+        {
+            _logger.LogWarning("No VVNs found for SAR {SAR_ID} before applying filters.", idSarWhoImAm);
+            return new List<VesselVisitNotificationDto>();
+        }
+
+        listVvnFiltered = listVvnFiltered
+            .Where(v => v.Status.StatusValue == VvnStatus.Submitted)
+            .ToList();
+
+        _logger.LogInformation("After Submitted status filter: {Count} VVNs remain.", listVvnFiltered.Count);
+
+        if (!string.IsNullOrWhiteSpace(dto.VesselImoNumber))
+        {
+            _logger.LogInformation("Applying IMO filter: {IMO}", dto.VesselImoNumber);
+            listVvnFiltered = await GetVvnsFilterByImoNumber(listVvnFiltered, dto.VesselImoNumber);
+            _logger.LogInformation("After IMO filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeArrival))
+        {
+            _logger.LogInformation("Applying ETA filter: {ETA}", dto.EstimatedTimeArrival);
+            listVvnFiltered = GetVvnsFilterByEstimatedTimeArrival(listVvnFiltered, dto.EstimatedTimeArrival);
+            _logger.LogInformation("After ETA filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeDeparture))
+        {
+            _logger.LogInformation("Applying ETD filter: {ETD}", dto.EstimatedTimeDeparture);
+            listVvnFiltered = GetVvnsFilterByEstimatedTimeDeparture(listVvnFiltered, dto.EstimatedTimeDeparture);
+            _logger.LogInformation("After ETD filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.SubmittedDate))
+        {
+            _logger.LogInformation("Applying submit date: {SUBM}", dto.SubmittedDate);
+            listVvnFiltered = GetVvnsFilterBySubmittedDate(listVvnFiltered, dto.SubmittedDate);
+            _logger.LogInformation("After submit date: {SUBM}", listVvnFiltered.Count);
+        }
+
+        var result = VesselVisitNotificationFactory.CreateLitsVvnDtosFromList(listVvnFiltered);
+        _logger.LogInformation("Submitted VVN filtering completed. Total results: {Count}", result.Count);
+
+        return result;
+    }
+
+        public async Task<List<VesselVisitNotificationDto>> GetAcceptedVvnsByShippingAgentRepresentativeIdFiltersAsync(
+        Guid idSarWhoImAm, FilterAcceptedVvnStatusDto dto)
+    {
+        _logger.LogInformation("Starting Accepted VVNs query for SAR {SAR_ID} with filters: {@Filters}", idSarWhoImAm,
+            dto);
+
+        var listRepresentatives = await GetShippingAgentRepresentativesBySaoAsync(idSarWhoImAm);
+        _logger.LogInformation("Loaded {Count} representatives under same organization.", listRepresentatives.Count);
+
+        var listVvnFiltered = await GetVvnForSpecificRepresentative(dto.SpecificRepresentative, listRepresentatives);
+        _logger.LogInformation("Initial Accepted VVN pool size: {Count}", listVvnFiltered.Count);
+
+        if (listVvnFiltered.Count == 0)
+        {
+            _logger.LogWarning("No VVNs found for SAR {SAR_ID} before applying filters.", idSarWhoImAm);
+            return new List<VesselVisitNotificationDto>();
+        }
+
+        listVvnFiltered = listVvnFiltered
+            .Where(v => v.Status.StatusValue == VvnStatus.Accepted)
+            .ToList();
+
+        _logger.LogInformation("After Accepted status filter: {Count} VVNs remain.", listVvnFiltered.Count);
+
+        if (!string.IsNullOrWhiteSpace(dto.VesselImoNumber))
+        {
+            _logger.LogInformation("Applying IMO filter: {IMO}", dto.VesselImoNumber);
+            listVvnFiltered = await GetVvnsFilterByImoNumber(listVvnFiltered, dto.VesselImoNumber);
+            _logger.LogInformation("After IMO filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeArrival))
+        {
+            _logger.LogInformation("Applying ETA filter: {ETA}", dto.EstimatedTimeArrival);
+            listVvnFiltered = GetVvnsFilterByEstimatedTimeArrival(listVvnFiltered, dto.EstimatedTimeArrival);
+            _logger.LogInformation("After ETA filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeDeparture))
+        {
+            _logger.LogInformation("Applying ETD filter: {ETD}", dto.EstimatedTimeDeparture);
+            listVvnFiltered = GetVvnsFilterByEstimatedTimeDeparture(listVvnFiltered, dto.EstimatedTimeDeparture);
+            _logger.LogInformation("After ETD filter: {Count} VVNs remain.", listVvnFiltered.Count);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.SubmittedDate))
+        {
+            _logger.LogInformation("Applying submit date: {SUBM}", dto.SubmittedDate);
+            listVvnFiltered = GetVvnsFilterBySubmittedDate(listVvnFiltered, dto.SubmittedDate);
+            _logger.LogInformation("After submit date: {SUBM}", listVvnFiltered.Count);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(dto.AcceptedDate))
+        {
+            _logger.LogInformation("Applying accepted date: {ACPT}", dto.AcceptedDate);
+            listVvnFiltered = GetVvnsFilterByAcceptedDate(listVvnFiltered, dto.AcceptedDate);
+            _logger.LogInformation("After accepted date: {ACPT}", listVvnFiltered.Count);
+        }
+
+        var result = VesselVisitNotificationFactory.CreateLitsVvnDtosFromList(listVvnFiltered);
+        _logger.LogInformation("Accepted VVN filtering completed. Total results: {Count}", result.Count);
+
+        return result;
+    }
+    
     //========================================
+    private List<VesselVisitNotification> GetVvnsFilterByAcceptedDate(
+        List<VesselVisitNotification> vvnList, string acceptedDate)
+    {
+        if (string.IsNullOrWhiteSpace(acceptedDate))
+        {
+            _logger.LogInformation("Skipping Accepted Date filter (no value provided).");
+            return vvnList;
+        }
+
+        if (!DateTime.TryParse(acceptedDate, out var parsedDate))
+        {
+            _logger.LogWarning("Invalid Accepted Date format received: {ACPT}", acceptedDate);
+            throw new BusinessRuleValidationException(
+                $"Invalid Accepted Date format: {acceptedDate}");
+        }
+
+        var filterClockTime = new ClockTime(parsedDate);
+        _logger.LogInformation("Filtering VVNs by Accepted Date near {Date}", filterClockTime.Value);
+
+        var filtered = vvnList
+            .Where(v => v.AcceptenceDate != null &&
+                        Math.Abs((v.AcceptenceDate.Value - filterClockTime.Value).TotalHours) <= 1)
+            .ToList();
+
+        _logger.LogInformation("Accepted Date filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
+        return filtered;
+    }
+    
+    private List<VesselVisitNotification> GetVvnsFilterBySubmittedDate(
+        List<VesselVisitNotification> vvnList, string submittedDate)
+    {
+        if (string.IsNullOrWhiteSpace(submittedDate))
+        {
+            _logger.LogInformation("Skipping Submitted Date filter (no value provided).");
+            return vvnList;
+        }
+
+        if (!DateTime.TryParse(submittedDate, out var parsedDate))
+        {
+            _logger.LogWarning("Invalid Submitted Date format received: {SBMT}", submittedDate);
+            throw new BusinessRuleValidationException(
+                $"Invalid Submitted Date format: {submittedDate}");
+        }
+
+        var filterClockTime = new ClockTime(parsedDate);
+        _logger.LogInformation("Filtering VVNs by Submitted Date near {Date}", filterClockTime.Value);
+
+        var filtered = vvnList
+            .Where(v => v.SubmittedDate != null &&
+                        Math.Abs((v.SubmittedDate.Value - filterClockTime.Value).TotalHours) <= 1)
+            .ToList();
+
+        _logger.LogInformation("Submitted Date filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
+        return filtered;
+    }
+    private List<VesselVisitNotification> GetVvnsFilterByEstimatedTimeDeparture(
+        List<VesselVisitNotification> vvnList, string estimatedTimeDeparture)
+    {
+        if (string.IsNullOrWhiteSpace(estimatedTimeDeparture))
+        {
+            _logger.LogInformation("Skipping ETD filter (no value provided).");
+            return vvnList;
+        }
+
+        if (!DateTime.TryParse(estimatedTimeDeparture, out var parsedDate))
+        {
+            _logger.LogWarning("Invalid ETD format received: {ETD}", estimatedTimeDeparture);
+            throw new BusinessRuleValidationException(
+                $"Invalid EstimatedTimeDeparture format: {estimatedTimeDeparture}");
+        }
+
+        var filterClockTime = new ClockTime(parsedDate);
+        _logger.LogInformation("Filtering VVNs by ETD near {Date}", filterClockTime.Value);
+
+        var filtered = vvnList
+            .Where(v => v.EstimatedTimeDeparture != null &&
+                        Math.Abs((v.EstimatedTimeDeparture.Value - filterClockTime.Value).TotalHours) <= 1)
+            .ToList();
+
+        _logger.LogInformation("ETD filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
+        return filtered;
+    }
+
+    private List<VesselVisitNotification> GetVvnsFilterByEstimatedTimeArrival(
+        List<VesselVisitNotification> vvnList, string estimatedTimeArrival)
+    {
+        if (string.IsNullOrWhiteSpace(estimatedTimeArrival))
+        {
+            _logger.LogInformation("Skipping ETA filter (no value provided).");
+            return vvnList;
+        }
+
+        if (!DateTime.TryParse(estimatedTimeArrival, out var parsedDate))
+        {
+            _logger.LogWarning("Invalid ETA format received: {ETA}", estimatedTimeArrival);
+            throw new BusinessRuleValidationException($"Invalid EstimatedTimeArrival format: {estimatedTimeArrival}");
+        }
+
+        var filterClockTime = new ClockTime(parsedDate);
+        _logger.LogInformation("Filtering VVNs by ETA near {Date}", filterClockTime.Value);
+
+        var filtered = vvnList
+            .Where(v => v.EstimatedTimeArrival != null &&
+                        Math.Abs((v.EstimatedTimeArrival.Value - filterClockTime.Value).TotalHours) <= 1)
+            .ToList();
+
+        _logger.LogInformation("ETA filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
+        return filtered;
+    }
+
+
+    private async Task<List<VesselVisitNotification>> GetVvnsFilterByImoNumber(
+        List<VesselVisitNotification> vvnList, string imoNumber)
+    {
+        _logger.LogInformation("Filtering VVNs by IMO number: {IMO}", imoNumber);
+
+        var vesselInDb = await _vesselRepository.GetByImoNumberAsync(new ImoNumber(imoNumber));
+
+        if (vesselInDb == null)
+        {
+            _logger.LogWarning("No vessel found in DB with IMO {IMO}", imoNumber);
+            throw new BusinessRuleValidationException($"No vessel found with IMO number {imoNumber}.");
+        }
+
+        var filtered = vvnList
+            .Where(v => v.VesselImo.Value == vesselInDb.ImoNumber.Value)
+            .ToList();
+
+        _logger.LogInformation("IMO filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
+        return filtered;
+    }
+
+
+    private async Task<List<VesselVisitNotification>> GetVvnForSpecificRepresentative(
+        Guid? representativeId,
+        List<ShippingAgentRepresentative> listRepresentatives)
+    {
+        _logger.LogInformation("Collecting VVNs for representative {RepId} (null = all).", representativeId);
+
+        var listVvnCodes = new List<VvnCode>();
+
+        if (representativeId == null)
+        {
+            foreach (var representative in listRepresentatives)
+            {
+                _logger.LogDebug("Processing SAR {Name} ({Id}) with {NotifCount} notifications.",
+                    representative.Name, representative.Id.AsGuid(), representative.Notifs.Count);
+
+                foreach (var notif in representative.Notifs)
+                {
+                    if (!listVvnCodes.Any(v => v.Code == notif.Code))
+                    {
+                        listVvnCodes.Add(notif);
+                        _logger.LogDebug("Added notification {Code}.", notif.Code);
+                    }
+                }
+            }
+        }
+        else
+        {
+            var selected = listRepresentatives.FirstOrDefault(r => r.Id.AsGuid() == representativeId);
+            if (selected != null)
+            {
+                _logger.LogInformation("Selected specific SAR {Name} ({Id}) with {NotifCount} notifications.",
+                    selected.Name, selected.Id.AsGuid(), selected.Notifs.Count);
+                listVvnCodes.AddRange(selected.Notifs);
+            }
+            else
+            {
+                _logger.LogWarning("No representative found with ID {RepId}", representativeId);
+            }
+        }
+
+        var listNotifications = new List<VesselVisitNotification>();
+
+        foreach (var code in listVvnCodes)
+        {
+            var notif = await _repo.GetByCodeAsync(code);
+            if (notif == null)
+            {
+                _logger.LogWarning("VVN {Code} is associated to a SAR but not found in DB.", code.Code);
+                throw new BusinessRuleValidationException($"No VVN found on DB but it's associated to a SAR = {code}");
+            }
+
+            listNotifications.Add(notif);
+            _logger.LogDebug("Added full VVN entity for {Code}.", code.Code);
+        }
+
+        _logger.LogInformation("Total VVNs collected: {Count}", listNotifications.Count);
+        return listNotifications;
+    }
+
+
+    private async Task<List<ShippingAgentRepresentative>> GetShippingAgentRepresentativesBySaoAsync(Guid idSarWhoImAm)
+    {
+        _logger.LogInformation("Fetching organization and colleagues for SAR {SAR_ID}", idSarWhoImAm);
+
+        var representativeInDb = await _shippingAgentRepresentativeRepository
+            .GetByIdAsync(new ShippingAgentRepresentativeId(idSarWhoImAm));
+
+        if (representativeInDb == null)
+        {
+            _logger.LogWarning("No representative found in DB with ID {SAR_ID}", idSarWhoImAm);
+            throw new BusinessRuleValidationException($"No representative found with ID {idSarWhoImAm}");
+        }
+
+        var organizationCode = representativeInDb.SAO;
+        if (organizationCode == null)
+        {
+            _logger.LogError("Representative {SAR_ID} has no organization assigned!", idSarWhoImAm);
+            throw new BusinessRuleValidationException($"SAR {idSarWhoImAm} is not associated with any organization.");
+        }
+
+        var organizationInDb = await _shippingAgentOrganizationRepository.GetByCodeAsync(organizationCode.Value);
+        if (organizationInDb == null)
+        {
+            _logger.LogError("Organization with code {Code} not found for SAR {SAR_ID}", organizationCode.Value,
+                idSarWhoImAm);
+            throw new BusinessRuleValidationException($"No organization found for code {organizationCode.Value}");
+        }
+
+        var reps = await _shippingAgentRepresentativeRepository.GetAllSarBySaoAsync(organizationCode);
+        _logger.LogInformation("Found {Count} SARs under organization {OrgCode}", reps.Count, organizationCode.Value);
+
+        return reps;
+    }
+
 
     private async Task<VesselVisitNotificationId> GetIdByCodeAsync(VvnCode code)
     {

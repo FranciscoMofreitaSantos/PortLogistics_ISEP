@@ -65,12 +65,14 @@ public class ShippingAgentOrganizationService
         return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.ShippingOrganizationCode, q.LegalName, q.AltName, q.Address, q.Taxnumber);
     }
 
-    public async Task<ShippingAgentOrganization> AddAsync(CreatingShippingAgentOrganizationDto dto)
+    public async Task<ShippingAgentOrganizationDto> AddAsync(CreatingShippingAgentOrganizationDto dto)
     {
+        var saoInDb = await _repo.GetByTaxNumberAsync(new TaxNumber(dto.Taxnumber));
+        if (saoInDb != null) throw new BusinessRuleValidationException($"Shipping agent organization with tax number {dto.Taxnumber} already exist.");
 
-        var shippingAgentOrganization = new ShippingAgentOrganization(dto.ShippingOrganizationCode, dto.LegalName, dto.AltName, dto.Address, dto.Taxnumber);
+        var shippingAgentOrganization = ShippingAgentOrganizationFactory.CreateEntity(dto);
         await _repo.AddAsync(shippingAgentOrganization);
         await _unitOfWork.CommitAsync();
-        return shippingAgentOrganization;
+        return ShippingAgentOrganizationFactory.CreateDto(shippingAgentOrganization);
     }
 }

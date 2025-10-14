@@ -13,6 +13,11 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
             _context = context;
         }
 
+        public async Task<List<ShippingAgentRepresentative>> GetAllSarBySaoAsync(ShippingOrganizationCode organizationCode)
+        {
+            return await _context.ShippingAgentRepresentative.Where(s => s.SAO.Value == organizationCode.Value).ToListAsync();
+        }
+
         public async Task<ShippingAgentRepresentative?> GetByNameAsync(string name)
         {
             return await _context.ShippingAgentRepresentative

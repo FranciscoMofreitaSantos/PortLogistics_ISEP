@@ -1,0 +1,256 @@
+@portURL = http://localhost:5008
+
+###
+# GET all representatives (possibly empty)
+GET {{portURL}}/api/ShippingAgentRepresentatives
+Accept: application/json
+
+
+###
+# GET by Id - valid (replace GUID with a real ID)
+GET {{portURL}}/api/ShippingAgentRepresentatives/cbfa5eb4-7d11-4032-baeb-c2bdaa888ce6
+Accept: application/json
+
+
+###
+# GET by Id - not found
+GET {{portURL}}/api/ShippingAgentRepresentatives/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+
+###
+# GET by Name - valid
+GET {{portURL}}/api/ShippingAgentRepresentatives/name/John%20Doe
+Accept: application/json
+
+
+###
+# GET by Name - not found
+GET {{portURL}}/api/ShippingAgentRepresentatives/name/Unknown%20Representative
+Accept: application/json
+
+
+###
+# GET by Email - valid
+GET {{portURL}}/api/ShippingAgentRepresentatives/email/john.doe@evergreen.com
+Accept: application/json
+
+
+###
+# GET by Email - not found
+GET {{portURL}}/api/ShippingAgentRepresentatives/email/notfound@email.com
+Accept: application/json
+
+
+###
+# GET by Status - activated
+GET {{portURL}}/api/ShippingAgentRepresentatives/status/activated
+Accept: application/json
+
+
+###
+# GET by Status - deactivated
+GET {{portURL}}/api/ShippingAgentRepresentatives/status/deactivated
+Accept: application/json
+
+
+
+###
+# 10. POST Create - valid representative (Evergreen)
+POST {{portURL}}/api/ShippingAgentRepresentatives
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "John Doe",
+  "citizenId": "123456789",
+  "nationality": "Portuguese",
+  "email": "john.doe@evergreen.com",
+  "phoneNumber": "+351912345678",
+  "status": "activated",
+  "sao": "1234567890"
+}
+
+
+###
+# 11. POST Create - valid representative (MSC)
+POST {{portURL}}/api/ShippingAgentRepresentatives
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Maria Silva",
+  "citizenId": "987654321",
+  "nationality": "Brazilian",
+  "email": "maria.silva@msc.com",
+  "phoneNumber": "+351965432187",
+  "status": "deactivated",
+  "sao": "0987654321"
+}
+
+
+###
+# 12. POST Create - valid representative (OOCL)
+POST {{portURL}}/api/ShippingAgentRepresentatives
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Alex Chen",
+  "citizenId": "112233445",
+  "nationality": "Chinese",
+  "email": "alex.chen@oocl.com",
+  "phoneNumber": "+351911223344",
+  "status": "activated",
+  "sao": "5555555555"
+}
+
+
+###
+# 13. POST Create - missing required field (email)
+POST {{portURL}}/api/ShippingAgentRepresentatives
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "No Email Rep",
+  "citizenId": "123123123",
+  "nationality": "Spanish",
+  "phoneNumber": "+351933333333",
+  "status": "activated",
+  "sao": "2223334445"
+}
+
+
+###
+# 14. POST Create - invalid status (should fail)
+POST {{portURL}}/api/ShippingAgentRepresentatives
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Invalid Status Rep",
+  "citizenId": "000111222",
+  "nationality": "French",
+  "email": "rep@invalid.com",
+  "phoneNumber": "+351900000000",
+  "status": "paused",
+  "sao": "1112223334"
+}
+
+
+###
+# 15. POST Create - invalid SAO (wrong format)
+POST {{portURL}}/api/ShippingAgentRepresentatives
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Wrong SAO Format",
+  "citizenId": "000999888",
+  "nationality": "German",
+  "email": "rep@wrong.com",
+  "phoneNumber": "+351911000000",
+  "status": "activated",
+  "sao": "ABC123"
+}
+
+
+###
+# 16. PATCH - update email and status
+PATCH {{portURL}}/api/ShippingAgentRepresentatives/update/John%20Doe
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "john.doe@evergreen-updated.com",
+  "status": "deactivated"
+}
+
+
+###
+# 17. PATCH - update phone only
+PATCH {{portURL}}/api/ShippingAgentRepresentatives/update/Maria%20Silva
+Content-Type: application/json
+Accept: application/json
+
+{
+  "phoneNumber": "+351999888777"
+}
+
+
+###
+# 18. PATCH - invalid status (should fail)
+PATCH {{portURL}}/api/ShippingAgentRepresentatives/update/John%20Doe
+Content-Type: application/json
+Accept: application/json
+
+{
+  "status": "unknownstatus"
+}
+
+
+###
+# 9. PATCH - non-existing representative (should fail)
+PATCH {{portURL}}/api/ShippingAgentRepresentatives/update/FakeRep
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "fake@nowhere.com"
+}
+
+
+
+###
+# 20. Add notification to representative (valid)
+POST {{portURL}}/api/ShippingAgentRepresentatives/John%20Doe/notifications
+Content-Type: application/json
+Accept: application/json
+
+"VVN001"
+
+
+###
+# 21. Add another notification (different code)
+POST {{portURL}}/api/ShippingAgentRepresentatives/John%20Doe/notifications
+Content-Type: application/json
+Accept: application/json
+
+"VVN002"
+
+
+###
+# 22. Add duplicate notification (should fail)
+POST {{portURL}}/api/ShippingAgentRepresentatives/John%20Doe/notifications
+Content-Type: application/json
+Accept: application/json
+
+"VVN001"
+
+
+###
+# 23. Add notification to Maria Silva
+POST {{portURL}}/api/ShippingAgentRepresentatives/Maria%20Silva/notifications
+Content-Type: application/json
+Accept: application/json
+
+"VVN003"
+
+
+###
+# 24. Add notification to non-existing representative (should fail)
+POST {{portURL}}/api/ShippingAgentRepresentatives/Unknown%20Rep/notifications
+Content-Type: application/json
+Accept: application/json
+
+"VVN999"
+
+
+###
+# 25. Add invalid VVN code format (should fail)
+POST {{portURL}}/api/ShippingAgentRepresentatives/John%20Doe/notifications
+Content-Type: application/json
+Accept: application/json
+
+"123"

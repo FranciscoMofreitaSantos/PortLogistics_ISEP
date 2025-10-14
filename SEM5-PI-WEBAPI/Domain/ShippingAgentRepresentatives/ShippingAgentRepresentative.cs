@@ -27,7 +27,7 @@ public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>
 
     protected ShippingAgentRepresentative() { }
 
-    public ShippingAgentRepresentative(string name, string citizenId, string nationality, string email, string phoneNumber,Status status, ShippingOrganizationCode sao, List<VvnCode> notifs)
+    public ShippingAgentRepresentative(string name, string citizenId, string nationality, string email, string phoneNumber,Status status, ShippingOrganizationCode sao)
     {
         Name = name;
         CitizenId = citizenId;
@@ -36,12 +36,23 @@ public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>
         PhoneNumber = phoneNumber;
         Status = status;
         SAO = sao;
-        Notifs = notifs;
+        Notifs = new List<VvnCode>();
         Id = new ShippingAgentRepresentativeId(Guid.NewGuid());
     }
 
 
+    public void AddNotification(VvnCode notif)
+    {
+        if (notif == null)
+            throw new BusinessRuleValidationException("Notification cannot be null.");
 
+        if (Notifs.Any(n => n.Equals(notif)))
+            throw new BusinessRuleValidationException($"Notification {notif.Code} already exists for this representative.");
+
+        Notifs.Add(notif);
+    }
+
+    
     public override bool Equals(object? obj) =>
         obj is ShippingAgentRepresentative other && Id == other.Id;
 

@@ -1,7 +1,6 @@
-using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
-using SEM5_PI_WEBAPI.Domain.VVN;
-namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
+
+namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.DTOs;
 
 public class ShippingAgentRepresentativeDto
 {

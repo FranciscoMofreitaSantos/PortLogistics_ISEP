@@ -3,6 +3,7 @@ using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VVN;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
+using SEM5_PI_WEBAPI.Domain.VVN.DTOs.GetByStatus;
 
 namespace SEM5_PI_WEBAPI.Controllers;
 
@@ -225,6 +226,176 @@ public class VesselVisitNotificationController : ControllerBase
         {
             _logger.LogError(ex, "Unexpected error rejecting VVN with code = {id}", dto.VvnCode);
             return StatusCode(500, "An unexpected error occurred while rejecting the VVN.");
+        }
+    }
+
+    
+    [HttpGet("shippingAgentRepresentative/inProgress-pendingInformation/{id:guid}")]
+    public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetInProgressOrPendingVvnsByFiltersAsync(
+        [FromRoute(Name = "id")] Guid idSarWhoImAm,
+        [FromQuery] Guid? specificRepresentative,
+        [FromQuery] string? vesselImoNumber,
+        [FromQuery] string? estimatedTimeArrival,
+        [FromQuery] string? estimatedTimeDeparture)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "API Request: Fetching VVNs (InProgress & PendingInformation) for SAR {SAR_ID} with filters: rep={Rep}, IMO={IMO}, ETA={ETA}, ETD={ETD}",
+                idSarWhoImAm, specificRepresentative, vesselImoNumber, estimatedTimeArrival, estimatedTimeDeparture);
+
+            var dto = new FilterInProgressPendingVvnStatusDto
+            {
+                SpecificRepresentative = specificRepresentative,
+                VesselImoNumber = vesselImoNumber,
+                EstimatedTimeArrival = estimatedTimeArrival,
+                EstimatedTimeDeparture = estimatedTimeDeparture
+            };
+
+            var vvDtoList = await _service.GetInProgressPendingInformationVvnsByShippingAgentRepresentativeIdFiltersAsync(idSarWhoImAm, dto);
+
+            _logger.LogInformation("API Response (200): Found {Count} VVNs for SAR {SAR_ID}", vvDtoList.Count, idSarWhoImAm);
+
+            return Ok(vvDtoList);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            _logger.LogWarning("API Error (404): {Message}", ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error fetching VVNs for SAR {SAR_ID}", idSarWhoImAm);
+            return StatusCode(500, "An unexpected error occurred while fetching VVNs.");
+        }
+    }
+
+    
+    
+    [HttpGet("shippingAgentRepresentative/withDrawn/{id:guid}")]
+    public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetWithdrawnVvnsByFiltersAsync(
+        [FromRoute(Name = "id")] Guid idSarWhoImAm,
+        [FromQuery] Guid? specificRepresentative,
+        [FromQuery] string? vesselImoNumber,
+        [FromQuery] string? estimatedTimeArrival,
+        [FromQuery] string? estimatedTimeDeparture)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "API Request: Fetching Withdrawn VVNs for SAR {SAR_ID} with filters: rep={Rep}, IMO={IMO}, ETA={ETA}, ETD={ETD}",
+                idSarWhoImAm, specificRepresentative, vesselImoNumber, estimatedTimeArrival, estimatedTimeDeparture);
+
+            var dto = new FilterWithdrawnVvnStatusDto
+            {
+                SpecificRepresentative = specificRepresentative,
+                VesselImoNumber = vesselImoNumber,
+                EstimatedTimeArrival = estimatedTimeArrival,
+                EstimatedTimeDeparture = estimatedTimeDeparture
+            };
+
+            var vvns = await _service.GetWithdrawnVvnsByShippingAgentRepresentativeIdFiltersAsync(idSarWhoImAm, dto);
+
+            _logger.LogInformation("API Response (200): Found {Count} withdrawn VVNs for SAR {SAR_ID}.", vvns.Count, idSarWhoImAm);
+            return Ok(vvns);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            _logger.LogWarning("API Response (404): No withdrawn VVNs found for SAR {SAR_ID}. Reason: {Msg}", idSarWhoImAm, ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error fetching withdrawn VVNs for SAR {SAR_ID}", idSarWhoImAm);
+            return StatusCode(500, "An unexpected error occurred while retrieving withdrawn VVNs.");
+        }
+    }
+
+
+
+    [HttpGet("shippingAgentRepresentative/submitted/{id:guid}")]
+    public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetSubmittedVvnsByFiltersAsync(
+        [FromRoute(Name = "id")] Guid idSarWhoImAm,
+        [FromQuery] Guid? specificRepresentative,
+        [FromQuery] string? vesselImoNumber,
+        [FromQuery] string? estimatedTimeArrival,
+        [FromQuery] string? estimatedTimeDeparture,
+        [FromQuery] string? submittedDate)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "API Request: Fetching Submitted VVNs for SAR {SAR_ID} with filters: rep={Rep}, IMO={IMO}, ETA={ETA}, ETD={ETD}, SubmittedDate={SubmittedDate}",
+                idSarWhoImAm, specificRepresentative, vesselImoNumber, estimatedTimeArrival, estimatedTimeDeparture,submittedDate);
+
+            var dto = new FilterSubmittedVvnStatusDto()
+            {
+                SpecificRepresentative = specificRepresentative,
+                VesselImoNumber = vesselImoNumber,
+                EstimatedTimeArrival = estimatedTimeArrival,
+                EstimatedTimeDeparture = estimatedTimeDeparture,
+                SubmittedDate = submittedDate
+            };
+
+            var vvns = await _service.GetSubmittedVvnsByShippingAgentRepresentativeIdFiltersAsync(idSarWhoImAm, dto);
+
+            _logger.LogInformation("API Response (200): Found {Count} submitted VVNs for SAR {SAR_ID}.", vvns.Count, idSarWhoImAm);
+            return Ok(vvns);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            _logger.LogWarning("API Response (404): No submitted VVNs found for SAR {SAR_ID}. Reason: {Msg}", idSarWhoImAm, ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error fetching submitted VVNs for SAR {SAR_ID}", idSarWhoImAm);
+            return StatusCode(500, "An unexpected error occurred while retrieving submitted VVNs.");
+        }
+    }
+
+
+
+    [HttpGet("shippingAgentRepresentative/accepted/{id:guid}")]
+    public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetAcceptedVvnsByFiltersAsync(
+        [FromRoute(Name = "id")] Guid idSarWhoImAm,
+        [FromQuery] Guid? specificRepresentative,
+        [FromQuery] string? vesselImoNumber,
+        [FromQuery] string? estimatedTimeArrival,
+        [FromQuery] string? estimatedTimeDeparture,
+        [FromQuery] string? submittedDate,
+        [FromQuery] string? acceptedDate)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "API Request: Fetching Accepted VVNs for SAR {SAR_ID} with filters: rep={Rep}, IMO={IMO}, ETA={ETA}, ETD={ETD}, SubmittedDate={SubmittedDate}, AcceptedDate={AcceptedDate}",
+                idSarWhoImAm, specificRepresentative, vesselImoNumber, estimatedTimeArrival, estimatedTimeDeparture,submittedDate,acceptedDate);
+
+            var dto = new FilterAcceptedVvnStatusDto()
+            {
+                SpecificRepresentative = specificRepresentative,
+                VesselImoNumber = vesselImoNumber,
+                EstimatedTimeArrival = estimatedTimeArrival,
+                EstimatedTimeDeparture = estimatedTimeDeparture,
+                SubmittedDate = submittedDate,
+                AcceptedDate = acceptedDate
+            };
+
+            var vvns = await _service.GetAcceptedVvnsByShippingAgentRepresentativeIdFiltersAsync(idSarWhoImAm, dto);
+
+            _logger.LogInformation("API Response (200): Found {Count} accepted VVNs for SAR {SAR_ID}.", vvns.Count, idSarWhoImAm);
+            return Ok(vvns);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            _logger.LogWarning("API Response (404): No accepted VVNs found for SAR {SAR_ID}. Reason: {Msg}", idSarWhoImAm, ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error fetching accepted VVNs for SAR {SAR_ID}", idSarWhoImAm);
+            return StatusCode(500, "An unexpected error occurred while retrieving accepted VVNs.");
         }
     }
 }

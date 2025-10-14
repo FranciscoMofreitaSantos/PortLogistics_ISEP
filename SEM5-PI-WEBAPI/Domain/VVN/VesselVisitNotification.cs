@@ -2,7 +2,6 @@ using SEM5_PI_WEBAPI.Domain.CargoManifests;
 using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
-using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
 
@@ -18,6 +17,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         public ClockTime? ActualTimeArrival { get; private set; }
         public ClockTime EstimatedTimeDeparture { get; private set; }
         public ClockTime? ActualTimeDeparture { get; private set; }
+        public ClockTime? SubmittedDate { get; private set; }
         public ClockTime? AcceptenceDate { get; private set; }
 
         public int Volume { get; private set; }
@@ -70,7 +70,8 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
             SetActualTimeArrival(null);
             SetActualTimeDeparture(null);
-
+    
+            SubmittedDate = null;
             AcceptenceDate = null;
             Status = new Status(VvnStatus.InProgress, null);
             Tasks = new List<EntityTask>();
@@ -211,6 +212,8 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             if (Status.StatusValue != VvnStatus.InProgress)
                 throw new BusinessRuleValidationException(
                     $"Only In-progress VVNs can be submitted. Current status: {Status}");
+            
+            SubmittedDate = new ClockTime(DateTime.Now);
             Status = new Status(VvnStatus.Submitted, null);
         }
 
@@ -219,6 +222,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             if (Status.StatusValue != VvnStatus.Submitted)
                 throw new BusinessRuleValidationException(
                     $"Only Submitted VVNs can be marked Pending. Current status: {Status}");
+            SubmittedDate = null;
             Status = new Status(VvnStatus.PendingInformation, message);
         }
 
