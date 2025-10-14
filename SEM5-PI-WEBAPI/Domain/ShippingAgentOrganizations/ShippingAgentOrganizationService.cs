@@ -19,7 +19,7 @@ public class ShippingAgentOrganizationService
         var list = await this._repo.GetAllAsync();
 
         List<ShippingAgentOrganizationDto> listDto = list.ConvertAll<ShippingAgentOrganizationDto>(q =>
-            new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName,q.AltName,q.Address,q.Taxnumber));
+            new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.ShippingOrganizationCode, q.LegalName,q.AltName,q.Address,q.Taxnumber));
 
         return listDto;
     }
@@ -31,7 +31,7 @@ public class ShippingAgentOrganizationService
         if (q == null)
             return null;
 
-        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName,q.AltName,q.Address,q.Taxnumber);
+        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.ShippingOrganizationCode, q.LegalName,q.AltName,q.Address,q.Taxnumber);
     }
     
     public async Task<ShippingAgentOrganizationDto> GetByLegalNameAsync(string legalname)
@@ -41,17 +41,18 @@ public class ShippingAgentOrganizationService
         if (q == null)
             return null;
 
-        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName, q.AltName, q.Address, q.Taxnumber);
+        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.ShippingOrganizationCode, q.LegalName, q.AltName, q.Address, q.Taxnumber);
     }
     
-    public async Task<ShippingAgentOrganizationDto> GetByCodeAsync(string code)
+    public async Task<ShippingAgentOrganizationDto> GetByCodeAsync(string shippingOrganizationCode)
     {
-        var q = await this._repo.GetByCodeAsync(code);
+        ShippingOrganizationCode c = ShippingOrganizationCode.FromString(shippingOrganizationCode);
+        var q = await this._repo.GetByCodeAsync(shippingOrganizationCode);
 
         if (q == null)
             return null;
 
-        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName, q.AltName, q.Address, q.Taxnumber);
+        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.ShippingOrganizationCode, q.LegalName, q.AltName, q.Address, q.Taxnumber);
     }
 
     public async Task<ShippingAgentOrganizationDto> GetByTaxNumberAsync(TaxNumber taxnumber)
@@ -61,13 +62,13 @@ public class ShippingAgentOrganizationService
         if (q == null)
             return null;
 
-        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.Code, q.LegalName, q.AltName, q.Address, q.Taxnumber);
+        return new ShippingAgentOrganizationDto(q.Id.AsGuid(), q.ShippingOrganizationCode, q.LegalName, q.AltName, q.Address, q.Taxnumber);
     }
 
     public async Task<ShippingAgentOrganization> AddAsync(CreatingShippingAgentOrganizationDto dto)
     {
 
-        var shippingAgentOrganization = new ShippingAgentOrganization(dto.Code, dto.LegalName, dto.AltName, dto.Address, dto.Taxnumber);
+        var shippingAgentOrganization = new ShippingAgentOrganization(dto.ShippingOrganizationCode, dto.LegalName, dto.AltName, dto.Address, dto.Taxnumber);
         await _repo.AddAsync(shippingAgentOrganization);
         await _unitOfWork.CommitAsync();
         return shippingAgentOrganization;

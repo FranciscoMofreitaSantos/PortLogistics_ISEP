@@ -16,7 +16,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
         public async Task<ShippingAgentOrganization?> GetByCodeAsync(string code)
         {
             return await _context.ShippingAgentOrganization
-                .FirstOrDefaultAsync(x => x.Code.ToLower().Trim() == code.ToLower().Trim());
+                .FirstOrDefaultAsync(x => x.ShippingOrganizationCode.ToString().ToLower().Trim() == code.ToLower().Trim());
         }
         public async Task<ShippingAgentOrganization?> GetByLegalNameAsync(string legalName)
         {
@@ -30,9 +30,9 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
         }
         
 
-        public async Task<List<ShippingAgentOrganization>> GetFilterAsync(string? code,string? legalName,string? altName, string? address, TaxNumber? taxNumber, string? query)
+        public async Task<List<ShippingAgentOrganization>> GetFilterAsync(string? shippingOrganizationCode,string? legalName,string? altName, string? address, TaxNumber? taxNumber, string? query)
         {
-            var normalizedCode = code?.Trim().ToLower();
+            var normalizedCode = shippingOrganizationCode?.Trim().ToLower();
             var normalizedLegalName = legalName?.Trim().ToLower();
             var normalizedAltName = altName?.Trim().ToLower();
             var normalizedAddress = address?.Trim().ToLower();
@@ -42,7 +42,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
             var queryable = _context.ShippingAgentOrganization.AsQueryable();
 
             if (!string.IsNullOrEmpty(normalizedCode))
-                queryable = queryable.Where(v => v.Code.ToLower().Contains(normalizedCode));
+                queryable = queryable.Where(v => v.ShippingOrganizationCode.ToString().ToLower().Contains(normalizedCode));
 
             if (!string.IsNullOrEmpty(normalizedLegalName))
                 queryable = queryable.Where(v => v.LegalName.ToLower().Contains(normalizedLegalName));
@@ -58,7 +58,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
 
             if (!string.IsNullOrEmpty(normalizedQuery))
                 queryable = queryable.Where(v =>
-                    v.Code.ToLower().Contains(normalizedQuery) ||
+                    v.ShippingOrganizationCode.ToString().ToLower().Contains(normalizedQuery) ||
                     v.LegalName.ToLower().Contains(normalizedQuery) ||
                     v.AltName.ToLower().Contains(normalizedQuery) ||
                     v.Address.ToLower().Contains(normalizedQuery) ||

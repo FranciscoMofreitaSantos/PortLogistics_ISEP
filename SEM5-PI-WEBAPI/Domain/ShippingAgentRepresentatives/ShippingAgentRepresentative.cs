@@ -1,4 +1,8 @@
+using System.Runtime.Intrinsics.X86;
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
+using SEM5_PI_WEBAPI.Domain.VVN;
 namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 
 public enum Status
@@ -17,9 +21,13 @@ public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>
 
     public Status Status { get; set; }
 
+    public ShippingOrganizationCode SAO { get; set; }
 
+    public List<VvnCode> Notifs { get; set; } 
 
-    public ShippingAgentRepresentative(string name, string citizenId, string nationality, string email, string phoneNumber,Status status)
+    protected ShippingAgentRepresentative() { }
+
+    public ShippingAgentRepresentative(string name, string citizenId, string nationality, string email, string phoneNumber,Status status, ShippingOrganizationCode sao, List<VvnCode> notifs)
     {
         Name = name;
         CitizenId = citizenId;
@@ -27,6 +35,8 @@ public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>
         Email = email;
         PhoneNumber = phoneNumber;
         Status = status;
+        SAO = sao;
+        Notifs = notifs;
         Id = new ShippingAgentRepresentativeId(Guid.NewGuid());
     }
 
@@ -39,4 +49,28 @@ public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>
 
 
     public override string ToString() => $"{Name}: {CitizenId}: {Nationality}: {Email}: {PhoneNumber}";
+
+    public void UpdateEmail(string email)
+    {
+        Email = email;
+    }
+    public void UpdateStatus(string status)
+    {
+       if (string.IsNullOrWhiteSpace(status))
+        throw new ArgumentException("Status cannot be null or empty.", nameof(status));
+
+        // Try to parse the string to a valid enum value (case-insensitive)
+        if (Enum.TryParse<Status>(status, true, out var parsedStatus))
+        {
+            Status = parsedStatus;
+        }
+        else
+        {
+            throw new ArgumentException($"Invalid status value: {status}. Valid values are: {string.Join(", ", Enum.GetNames(typeof(Status)))}");
+        }
+    }
+    public void UpdatePhoneNumber(string phoneNumber)
+    {
+        PhoneNumber = phoneNumber;
+    }
 }

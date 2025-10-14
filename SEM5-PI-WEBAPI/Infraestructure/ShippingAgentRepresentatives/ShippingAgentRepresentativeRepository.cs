@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Infraestructure.Shared;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
 {
@@ -30,7 +31,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
                 .FirstOrDefaultAsync(x => x.Status == status);
         }
 
-        public async Task<List<ShippingAgentRepresentative>> GetFilterAsync(string? name, string? citizenId, string? nationality, string? email, string? phoneNumber,Status? status, string? query)
+        public async Task<List<ShippingAgentRepresentative>> GetFilterAsync(string? name, string? citizenId, string? nationality, string? email, string? phoneNumber,Status? status,ShippingOrganizationCode? sao, string? query)
         {
             var normalizedName = name?.Trim().ToLower();
             var normalizedCitizendId = citizenId?.Trim().ToLower();
@@ -59,6 +60,9 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
             if (status != null)
                 queryable = queryable.Where(v => v.Status == status);
 
+            if (sao != null)
+                queryable = queryable.Where(v => v.SAO == sao);
+
             if (!string.IsNullOrEmpty(normalizedQuery))
                 queryable = queryable.Where(v =>
                     v.Name.ToLower().Contains(normalizedQuery) ||
@@ -66,20 +70,13 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
                     v.Nationality.ToLower().Contains(normalizedQuery) ||
                     v.Email.ToLower().Contains(normalizedQuery) ||
                     v.PhoneNumber.ToLower().Contains(normalizedQuery) ||
-                    v.Status == status);
+                    v.Status == status ||
+                    v.SAO == sao);
 
             return await queryable.ToListAsync();
         }
 
-        public Task<ShippingAgentRepresentative> GetByStatus(Status status)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<ShippingAgentRepresentative>> GetFilterAsync(string? name, string? citizenId, string? nationality, string? email, string? phoneNumber, Status status, string? query)
-        {
-            throw new NotImplementedException();
-        }
+      
     }
 }
 

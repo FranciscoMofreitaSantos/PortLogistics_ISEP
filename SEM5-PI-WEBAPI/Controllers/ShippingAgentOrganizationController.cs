@@ -61,7 +61,7 @@ public class ShippingAgentOrganizationsController : ControllerBase
         }
     }
     
-    [HttpGet("name/{name}")]
+    [HttpGet("legalName/{legalName}")]
     public async Task<ActionResult<ShippingAgentOrganization>> GetByLegalNameAsync(string LegalName)
     {
         try

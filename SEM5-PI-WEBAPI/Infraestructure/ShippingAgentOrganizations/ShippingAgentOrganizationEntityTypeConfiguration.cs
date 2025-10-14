@@ -11,10 +11,14 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
             builder.ToTable("ShippingAgentOrganizations");
 
             builder.HasKey(b => b.Id);
-
-            builder.Property(b => b.Code)
-                .IsRequired();
-
+            
+            builder.OwnsOne(b => b.ShippingOrganizationCode, shippingOrganizationCode =>
+            {
+                shippingOrganizationCode.Property(p => p.Value)
+                    .HasColumnName("ShippingOrganizationCode")
+                    .IsRequired();
+            });
+            
             builder.Property(b => b.LegalName)
                 .IsRequired();
 
@@ -31,7 +35,6 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
                     .IsRequired();
             });
 
-            builder.HasIndex(b => b.Code).IsUnique();
         }
     }
 }

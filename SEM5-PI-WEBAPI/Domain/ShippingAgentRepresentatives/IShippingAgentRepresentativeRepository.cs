@@ -1,4 +1,5 @@
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives
 {
@@ -7,6 +8,6 @@ namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives
         public Task<ShippingAgentRepresentative?> GetByNameAsync(string name);
         public Task<ShippingAgentRepresentative?> GetByEmailAsync(string email);
         public Task<ShippingAgentRepresentative?> GetByStatusAsync(Status status);
-        public Task<List<ShippingAgentRepresentative>> GetFilterAsync(string? name, string? citizenId, string? nationality, string? email, string? phoneNumber,Status status, string? query);
+        public Task<List<ShippingAgentRepresentative>> GetFilterAsync(string? name, string? citizenId, string? nationality, string? email, string? phoneNumber,Status? status,ShippingOrganizationCode? sao, string? query);
     }
 }

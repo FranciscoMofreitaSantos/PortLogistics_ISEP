@@ -4,7 +4,7 @@ using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 public class ShippingAgentOrganization : Entity<ShippingAgentOrganizationId>, IAggregateRoot
 {
-    public string Code { get; set; }
+    public ShippingOrganizationCode ShippingOrganizationCode { get; set; }
     public string LegalName { get; private set; }
     public string AltName { get; set; }
     public string Address { get; set; }
@@ -12,9 +12,9 @@ public class ShippingAgentOrganization : Entity<ShippingAgentOrganizationId>, IA
 
     protected ShippingAgentOrganization() { }
     
-    public ShippingAgentOrganization(string code,string legalName,string altName, string address, TaxNumber taxNumber)
+    public ShippingAgentOrganization(ShippingOrganizationCode shippingOrganizationCode,string legalName,string altName, string address, TaxNumber taxNumber)
     {
-        Code = code;
+        ShippingOrganizationCode = shippingOrganizationCode;
         LegalName = legalName;
         Address = address;
         Taxnumber = taxNumber;
@@ -28,15 +28,5 @@ public class ShippingAgentOrganization : Entity<ShippingAgentOrganizationId>, IA
 
     public override int GetHashCode() => Id.GetHashCode();
 
-    public void CheckCode(string code)
-    {
-        if (!System.Text.RegularExpressions.Regex.IsMatch(code, @"^[A-Za-z0-9]{10}$"))
-            throw new ArgumentException("Invalid organization code format. Expected a 10-character alphanumeric code.");
-        
-        Code = code;
-    }
-
-
-
-    public override string ToString() => $"{Code}: {LegalName}: {Address}: {Taxnumber}";
+    public override string ToString() => $"{ShippingOrganizationCode}: {LegalName}: {Address}: {Taxnumber}";
 }

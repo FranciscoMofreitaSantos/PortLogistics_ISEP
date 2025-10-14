@@ -114,4 +114,25 @@ public class ShippingAgentRepresentativesController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+    [HttpPatch("update/{name}")]
+    public async Task<ActionResult<ShippingAgentRepresentativeDto>> UpdateAsync(string name, [FromBody] UpdatingShippingAgentRepresentativeDto? dto)
+    {
+        if (dto == null) return BadRequest("No changes provided.");
+    
+        try
+        {
+            _logger.LogInformation("API Request: Partial update for Shipping AgentRepresentative with name = {NAME}", name);
+
+            var containerDto = await _service.PatchByNameAsync(name, dto);
+
+            _logger.LogInformation("API Response (200): Container with NAME = {NAME} patched successfully", name);
+            return Ok(containerDto);
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Error (400): {Message}", e.Message);
+            return BadRequest(e.Message);
+        }
+    }
 }
