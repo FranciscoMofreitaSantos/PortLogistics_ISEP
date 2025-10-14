@@ -15,11 +15,8 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         private ClockTime ValidETD => new(DateTime.Now.AddDays(2));
         private ImoNumber ValidImo => new("IMO 1234567");
         private static PdfDocumentCollection EmptyDocuments => new();
-
-        private List<EntityDock> ValidDocks => new()
-        {
-            BuildValidDock("DK-0001", "North Terminal Dock")
-        };
+        private DockCode _dockCode = new DockCode("DK-0001");
+       
 
         [Fact]
         public void CreateVesselVisitNotification_WithValidData_ShouldInitializeCorrectly()
@@ -30,7 +27,6 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             Assert.True(vvn.IsEditable);
             Assert.Equal("2025-THPA-000001", vvn.Code.Code);
             Assert.Equal(1200, vvn.Volume);
-            Assert.NotEmpty(vvn.ListDocks);
             Assert.Null(vvn.ActualTimeArrival);
         }
 
@@ -39,7 +35,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         {
             Assert.Throws<BusinessRuleValidationException>(() =>
                 new VesselVisitNotification(ValidCode, ValidETA, ValidETD, -10,
-                    EmptyDocuments, ValidDocks, null, null, null, ValidImo));
+                    EmptyDocuments, null, null, null, ValidImo));
         }
 
         [Fact]
@@ -47,23 +43,12 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         {
             var vvn = new VesselVisitNotification(
                 ValidCode, ValidETA, ValidETD, 800,
-                null, ValidDocks, null, null, null, ValidImo);
+                null, null, null, null, ValidImo);
 
             Assert.NotNull(vvn.Documents);
             Assert.Empty(vvn.Documents.Pdfs);
         }
-
-        [Fact]
-        public void CreateVesselVisitNotification_WithEmptyDockList_ShouldInitializeEmpty()
-        {
-            var vvn = new VesselVisitNotification(
-                ValidCode, ValidETA, ValidETD, 800,
-                EmptyDocuments, new List<EntityDock>(), null, null, null, ValidImo);
-
-            Assert.NotNull(vvn.ListDocks);
-            Assert.Empty(vvn.ListDocks);
-        }
-
+        
         [Fact]
         public void CreateVesselVisitNotification_WithInvalidTimeOrder_ShouldThrow()
         {
@@ -73,7 +58,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             Assert.Throws<BusinessRuleValidationException>(() =>
                 new VesselVisitNotification(
                     ValidCode, eta, etd, 400,
-                    EmptyDocuments, ValidDocks, null, null, null, ValidImo));
+                    EmptyDocuments, null, null, null, ValidImo));
         }
 
         [Fact]
@@ -201,17 +186,17 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             var vvn = CreateValidVVN();
             var newETA = new ClockTime(DateTime.Now.AddDays(5));
             var newETD = new ClockTime(DateTime.Now.AddDays(6));
-            var newDocks = new List<EntityDock> { BuildValidDock("DK-0002", "Dock 2") };
+            var newDock = new DockCode("DK-0002");
 
             vvn.UpdateEstimatedTimeDeparture(newETD);
             vvn.UpdateEstimatedTimeArrival(newETA);
             vvn.UpdateVolume(999);
-            vvn.UpdateListDocks(newDocks);
+            vvn.UpdateDock(newDock);
 
             Assert.Equal(newETA, vvn.EstimatedTimeArrival);
             Assert.Equal(newETD, vvn.EstimatedTimeDeparture);
             Assert.Equal(999, vvn.Volume);
-            Assert.Equal("DK-0002", vvn.ListDocks.First().Code.Value);
+            Assert.Equal("DK-0002", vvn.Dock.ToString());
         }
 
         [Fact]
@@ -237,7 +222,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             var vvn1 = CreateValidVVN();
             var vvn2 = new VesselVisitNotification(
                 new VvnCode("2025", "000001"), ValidETA, ValidETD, 500,
-                EmptyDocuments, ValidDocks, null, null, null, ValidImo);
+                EmptyDocuments, null, null, null, ValidImo);
 
             Assert.True(vvn1.Equals(vvn2));
             Assert.Equal(vvn1.GetHashCode(), vvn2.GetHashCode());
@@ -249,7 +234,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             var vvn1 = CreateValidVVN();
             var vvn2 = new VesselVisitNotification(
                 new VvnCode("2025", "000002"), ValidETA, ValidETD, 500,
-                EmptyDocuments, ValidDocks, null, null, null, ValidImo);
+                EmptyDocuments, null, null, null, ValidImo);
 
             Assert.False(vvn1.Equals(vvn2));
         }
@@ -273,7 +258,6 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
                 ValidETD,
                 1200,
                 EmptyDocuments,
-                ValidDocks,
                 null, null, null,
                 ValidImo
             );
