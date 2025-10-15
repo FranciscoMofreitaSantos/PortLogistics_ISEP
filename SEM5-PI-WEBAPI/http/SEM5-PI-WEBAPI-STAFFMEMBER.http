@@ -72,7 +72,7 @@ Accept: application/json
 
 {
   "MecNumber": "1250001",
-  "Email": "mendyupdated@gmail.com",
+  "Email": "mendy_updated@gmail.com",
   "Schedule": {
     "Shift": "Morning",
     "DaysOfWeek": "1010101"

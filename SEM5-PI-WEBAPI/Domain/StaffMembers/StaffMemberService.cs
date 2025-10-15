@@ -143,10 +143,14 @@ public class StaffMemberService : IStaffMemberService
         {
             foreach (var code in updateDto.QualificationCodes)
             {
-                var qualificationId = await _repoQualifications.GetQualificationIdByCodeAsync(code);
-                if (qualificationId != null)
+                var qualification = await _repoQualifications.GetQualificationByCodeAsync(code);
+                if (qualification != null)
                 {
-                    staff.AddQualification(qualificationId);
+                    staff.AddQualification(qualification.Id);
+                }
+                else
+                {
+                    throw new BusinessRuleValidationException($"Qualification Code: {code} not in Database");
                 }
             }
         }
@@ -155,10 +159,14 @@ public class StaffMemberService : IStaffMemberService
             var qualificationIds = new List<QualificationId>();
             foreach (var code in updateDto.QualificationCodes)
             {
-                var qualificationId = await _repoQualifications.GetQualificationIdByCodeAsync(code);
-                if (qualificationId != null)
+                var qualification = await _repoQualifications.GetQualificationByCodeAsync(code);
+                if (qualification != null)
                 {
-                    qualificationIds.Add(qualificationId);
+                    qualificationIds.Add(qualification.Id);
+                }
+                else
+                {
+                    throw new BusinessRuleValidationException($"Qualification Code: {code} not in Database");
                 }
             }
             
@@ -200,11 +208,10 @@ public class StaffMemberService : IStaffMemberService
         var qualificationIds = new List<QualificationId>();
         foreach (var code in codes)
         {
-            var q = await _repoQualifications.GetQualificationIdByCodeAsync(code);
+            var q = await _repoQualifications.GetQualificationByCodeAsync(code);
             if (q == null)
-                throw new BusinessRuleValidationException(
-                    $"Invalid Qualification Code: {code}");
-            qualificationIds.Add(q);
+                throw new BusinessRuleValidationException($"Invalid Qualification Code: {code}");
+            qualificationIds.Add(q.Id);
         }
 
         return qualificationIds;
@@ -234,9 +241,9 @@ public class StaffMemberService : IStaffMemberService
 
         foreach (var code in codes)
         {
-            var id = await _repoQualifications.GetQualificationIdByCodeAsync(code);
-            if (id != null)
-                ids.Add(id);
+            var q = await _repoQualifications.GetQualificationByCodeAsync(code);
+            if (q != null)
+                ids.Add(q.Id);
         }
 
         if (codes.Count() != ids.Count())
