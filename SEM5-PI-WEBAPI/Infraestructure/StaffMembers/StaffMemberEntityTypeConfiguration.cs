@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SEM5_PI_WEBAPI.Domain.StaffMembers;
+using SEM5_PI_WEBAPI.Domain.Qualifications;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.StaffMembers;
 
@@ -13,8 +14,8 @@ public class StaffMemberEntityTypeConfiguration : IEntityTypeConfiguration<Staff
 
         builder.Property(s => s.ShortName)
             .IsRequired()
-            .HasMaxLength(20); 
-        
+            .HasMaxLength(20);
+
         var mecanographicNumberConverter = new ValueConverter<MecanographicNumber, string>(
             v => v.ToString(),
             v => new MecanographicNumber(v));
@@ -22,7 +23,7 @@ public class StaffMemberEntityTypeConfiguration : IEntityTypeConfiguration<Staff
         builder.Property(s => s.MecanographicNumber)
             .HasConversion(mecanographicNumberConverter)
             .IsRequired()
-            .HasMaxLength(7); 
+            .HasMaxLength(7);
 
         builder.Property(s => s.IsActive)
             .IsRequired();
@@ -51,10 +52,24 @@ public class StaffMemberEntityTypeConfiguration : IEntityTypeConfiguration<Staff
                 .HasColumnName("Days")
                 .IsRequired();
         });
+
+        var qualificationIdConverter = new ValueConverter<QualificationId, Guid>(
+            id => id.AsGuid(),
+            guid => new QualificationId(guid)
+        );
         
-        builder
-            .HasMany(s => s.Qualifications)
-            .WithMany() 
-            .UsingEntity(join => join.ToTable("StaffMemberQualifications"));
+        builder.OwnsMany(s => s.Qualifications, a =>
+        {
+            a.ToTable("StaffMember_Qualification");
+            a.WithOwner().HasForeignKey("StaffMemberId");
+            a.Property(v => v.Value)
+                .HasColumnName("QualificationId")
+                .IsRequired();
+            a.HasKey("StaffMemberId", "Value");
+        });
+        
+        builder.Navigation(s => s.Qualifications)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
+    
 }

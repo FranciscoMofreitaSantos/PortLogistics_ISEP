@@ -10,4 +10,6 @@ public interface IStaffMemberRepository : IRepository<StaffMember, StaffMemberId
     Task<List<StaffMember>> GetByStatusAsync(bool status);
     Task<List<StaffMember>> GetByQualificationsAsync(List<QualificationId> codes);
     Task<List<StaffMember>> GetByExactQualificationsAsync(List<QualificationId> codes);
+    Task<bool> EmailIsInTheSystem(Email email);
+    Task<bool> PhoneIsInTheSystem(PhoneNumber phone);
 }

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StaffMembers;
 using SEM5_PI_WEBAPI.Domain.StaffMembers.DTOs;
@@ -37,13 +36,13 @@ public class StaffMembersController : ControllerBase
     }
 
     [HttpGet("by-qualifications")]
-    public async Task<ActionResult<List<StaffMemberDto>>> GetByQualifications([FromQuery] List<string> qualificationCodes)
+    public async Task<ActionResult<List<StaffMemberDto>>> GetByQualifications(
+        [FromQuery] List<string> qualificationCodes)
     {
         if (!qualificationCodes.Any())
             return BadRequest("At least one qualification code must be provided.");
-        
-        var staffList = await _service.GetByQualificationsAsync(qualificationCodes);
 
+        var staffList = await _service.GetByQualificationsAsync(qualificationCodes);
         return Ok(staffList);
     }
 
@@ -54,7 +53,7 @@ public class StaffMembersController : ControllerBase
         if (!qualificationCodes.Any())
             return BadRequest("At least one qualification code must be provided.");
 
-        
+
         var staffList = await _service.GetByExactQualificationsAsync(qualificationCodes);
 
         return Ok(staffList);
@@ -78,7 +77,7 @@ public class StaffMembersController : ControllerBase
         return Ok(staff);
     }
 
-    
+
     [HttpGet("status/{status}")]
     public async Task<ActionResult<IEnumerable<StaffMemberDto>>> GetByStatus(bool status)
     {
@@ -101,21 +100,37 @@ public class StaffMembersController : ControllerBase
         }
     }
 
-    [HttpPatch("update/")]
+    [HttpPut("update/")]
     public async Task<ActionResult<StaffMemberDto>> Update(UpdateStaffMemberDto dto)
     {
-        var updatedStaff = await _service.UpdateAsync(dto);
-        if (updatedStaff == null)
-            return NotFound();
-        return Ok(updatedStaff);
+        try
+        {
+            var updatedStaff = await _service.UpdateAsync(dto);
+            if (updatedStaff == null)
+                return NotFound();
+            return Ok(updatedStaff);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
-    [HttpPatch("toggle/")]
+    [HttpPut("toggle/{mec}")]
     public async Task<ActionResult<StaffMemberDto>> ToggleStatus(string mec)
     {
-        var updatedStaff = await _service.ToggleAsync(mec);
-        if (updatedStaff == null)
-            return NotFound();
-        return Ok(updatedStaff);
+        try
+        {
+
+            var updatedStaff = await _service.ToggleAsync(mec);
+            if (updatedStaff == null)
+                return NotFound();
+            return Ok(updatedStaff);
+
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 }

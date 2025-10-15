@@ -14,11 +14,12 @@ public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
     public PhoneNumber Phone { get; private set; }
     public Schedule Schedule { get; private set; }
     public bool IsActive { get; set; }
-    public List<QualificationId>? Qualifications { get; set; }
 
-    protected StaffMember()
-    {
-    }
+    
+    private readonly List<QualificationId> _qualifications = new();
+    public IReadOnlyCollection<QualificationId> Qualifications => _qualifications.AsReadOnly();
+
+    protected StaffMember() { }
 
     public StaffMember(
         string shortName,
@@ -26,7 +27,7 @@ public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
         Email email,
         PhoneNumber phone,
         Schedule schedule,
-        List<QualificationId>? qualifications)
+        IEnumerable<QualificationId>? qualifications = null)
     {
         Id = new StaffMemberId(Guid.NewGuid());
         ShortName = shortName;
@@ -35,9 +36,10 @@ public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
         Phone = phone ?? throw new BusinessRuleValidationException("Phone number is required.");
         Schedule = schedule ?? throw new BusinessRuleValidationException("Schedule is required.");
         IsActive = true;
-        Qualifications = qualifications ?? new List<QualificationId>();
-    }
 
+        if (qualifications != null)
+            _qualifications = new List<QualificationId>(qualifications);
+    }
 
     public void UpdateShortName(string newShortName)
     {
@@ -66,21 +68,23 @@ public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
         IsActive = !IsActive;
     }
 
-    public void SetQualifications(List<QualificationId> qualificationIds)
+    
+    public void SetQualifications(IEnumerable<QualificationId> qualificationIds)
     {
-        Qualifications = qualificationIds;
+        _qualifications.Clear();
+        _qualifications.AddRange(qualificationIds);
     }
 
     public void AddQualification(QualificationId qualification)
     {
-        if (Qualifications.Contains(qualification))
+        if (_qualifications.Contains(qualification))
             throw new BusinessRuleValidationException("Duplicated Qualification, not added.");
-        Qualifications.Add(qualification);
+        _qualifications.Add(qualification);
     }
 
     public void RemoveQualification(QualificationId qualification)
     {
-        if (!Qualifications.Remove(qualification))
+        if (!_qualifications.Remove(qualification))
             throw new BusinessRuleValidationException("Qualification not found. Not removed!");
     }
 

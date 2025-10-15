@@ -1,3 +1,4 @@
+using SEM5_PI_WEBAPI.Domain.BusinessShared;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StaffMembers.DTOs;
@@ -10,9 +11,7 @@ public class StaffMemberService
     private readonly IStaffMemberRepository _repo;
     private readonly IQualificationRepository _repoQualifications;
 
-    public StaffMemberService(
-        IUnitOfWork unitOfWork,
-        IStaffMemberRepository repo,
+    public StaffMemberService(IUnitOfWork unitOfWork, IStaffMemberRepository repo,
         IQualificationRepository repoQualifications)
     {
         _unitOfWork = unitOfWork;
@@ -73,7 +72,8 @@ public class StaffMemberService
     
     public async Task<StaffMemberDto> AddAsync(CreatingStaffMemberDto dto)
     {
-        await EnsureNotRepeatedAsync(dto.Email, dto.Phone);
+        await EnsureNotRepeatedEmailAsync(new Email(dto.Email));
+        await EnsureNotRepeatedPhoneAsync(new PhoneNumber(dto.Phone));
 
         var qualificationCodes = dto.QualificationCodes;
         List<QualificationId> qualificationIds = new();
@@ -84,13 +84,13 @@ public class StaffMemberService
         }
 
         var mecanographicNumber = await GenerateMecanographicNumberAsync();
-
+        var daysEnum = Schedule.ParseDaysFromBinary(dto.Schedule.DaysOfWeek);
         var staffMember = new StaffMember(
             dto.ShortName,
             new MecanographicNumber(mecanographicNumber),
-            dto.Email,
-            dto.Phone,
-            dto.Schedule,
+            new Email(dto.Email),
+            new PhoneNumber(dto.Phone),
+            new Schedule(dto.Schedule.Shift, daysEnum),
             qualificationIds
         );
 
@@ -106,24 +106,29 @@ public class StaffMemberService
         if (staff == null)
             throw new BusinessRuleValidationException($"No StaffMember with mec number: {updateDto.MecNumber}");
 
-        if (updateDto.Email != null || updateDto.Phone != null)
+        if (updateDto.Email != null)
         {
-            var emailToCheck = updateDto.Email ?? staff.Email;
-            var phoneToCheck = updateDto.Phone ?? staff.Phone;
-            await EnsureNotRepeatedAsync(emailToCheck, phoneToCheck);
+            var emailToCheck = new Email(updateDto.Email);
+            await EnsureNotRepeatedEmailAsync(emailToCheck);
+        }
+
+        if (updateDto.Phone != null)
+        {
+            var phoneToCheck = new PhoneNumber(updateDto.Phone);
+            await EnsureNotRepeatedPhoneAsync(phoneToCheck);
         }
 
         if (updateDto.ShortName != null)
             staff.UpdateShortName(updateDto.ShortName);
 
         if (updateDto.Email != null)
-            staff.UpdateEmail(updateDto.Email);
+            staff.UpdateEmail(new Email(updateDto.Email));
 
         if (updateDto.Phone != null)
-            staff.UpdatePhone(updateDto.Phone);
+            staff.UpdatePhone(new PhoneNumber(updateDto.Phone));
 
         if (updateDto.Schedule != null)
-            staff.UpdateSchedule(updateDto.Schedule);
+            staff.UpdateSchedule(updateDto.Schedule.ToDomain());
 
         if (updateDto.IsActive.HasValue)
             staff.IsActive = updateDto.IsActive.Value;
@@ -176,19 +181,16 @@ public class StaffMemberService
         return await MapToDto(staff);
     }
 
-    private async Task EnsureNotRepeatedAsync(Email email, PhoneNumber phone)
+    private async Task EnsureNotRepeatedEmailAsync(Email email)
     {
-        var allStaff = await _repo.GetAllAsync();
-
-        bool repeatedEmail = allStaff.Any(s =>
-            s.Email.Address.Equals(email.Address, StringComparison.OrdinalIgnoreCase));
-
-        bool repeatedPhone = allStaff.Any(s =>
-            s.Phone.Number.Equals(phone.Number, StringComparison.OrdinalIgnoreCase));
-
+        bool repeatedEmail = await _repo.EmailIsInTheSystem(email);
         if (repeatedEmail)
             throw new BusinessRuleValidationException("Repeated Email for StaffMember!");
+    }
 
+    private async Task EnsureNotRepeatedPhoneAsync(PhoneNumber phone)
+    {
+        bool repeatedPhone = await _repo.PhoneIsInTheSystem(phone);
         if (repeatedPhone)
             throw new BusinessRuleValidationException("Repeated Phone Number for StaffMember!");
     }
@@ -257,9 +259,9 @@ public class StaffMemberService
             staff.Id.AsGuid(),
             staff.ShortName,
             staff.MecanographicNumber.Value,
-            staff.Email,
-            staff.Phone,
-            staff.Schedule,
+            staff.Email.ToString(),
+            staff.Phone.ToString(),
+            new ScheduleDto(staff.Schedule.Shift, staff.Schedule.DaysToBinary()),
             staff.IsActive,
             staff.Qualifications != null ? codes : new List<string>()
         );

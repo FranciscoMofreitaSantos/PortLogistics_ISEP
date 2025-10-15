@@ -1,16 +1,12 @@
-using SEM5_PI_WEBAPI.Domain.BusinessShared;
-using System;
-using System.Collections.Generic;
-
 namespace SEM5_PI_WEBAPI.Domain.StaffMembers.DTOs;
 
 public class UpdateStaffMemberDto
 {
-    public string MecNumber { get; }
+    public string MecNumber { get; set; }
     public string? ShortName { get; set; }
-    public Email? Email { get; set; }
-    public PhoneNumber? Phone { get; set; }
-    public Schedule? Schedule { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public ScheduleDto? Schedule { get; set; }
     public bool? IsActive { get; set; }
     public List<string>? QualificationCodes { get; set; }
     public bool? AddQualifications { get; set; }
@@ -19,7 +15,7 @@ public class UpdateStaffMemberDto
     {
     }
 
-    public UpdateStaffMemberDto(string mecNumber, string? shortName, Email? email, PhoneNumber? phone, Schedule? schedule, bool? isActive,
+    public UpdateStaffMemberDto(string mecNumber, string? shortName, string? email, string? phone, ScheduleDto? schedule, bool? isActive,
         List<string>? qualificationCodes, bool? addQualifications)
     {
         MecNumber = mecNumber;

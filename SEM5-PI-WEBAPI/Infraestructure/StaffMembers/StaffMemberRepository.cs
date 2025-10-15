@@ -69,5 +69,19 @@ public class StaffMemberRepository : BaseRepository<StaffMember, StaffMemberId>,
                 ids.All(qualId => s.Qualifications.Any(q => q == qualId))
             )
             .ToListAsync();
+        
+    }
+
+    public async Task<bool> EmailIsInTheSystem(Email email)
+    {
+        return await _staffMembers
+            .AnyAsync(s => s.Email.Address.Equals(email.Address));
+    }
+
+    public async Task<bool> PhoneIsInTheSystem(PhoneNumber phone)
+    {
+        
+        return await _staffMembers
+            .AnyAsync(s => s.Phone.Number.Equals(phone.Number));
     }
 }
