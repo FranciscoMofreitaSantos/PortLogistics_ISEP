@@ -18,7 +18,7 @@ public class QualificationRepository : BaseRepository<Qualification, Qualificati
         return await ExistsAsync(q => q.Id.Equals(qualificationId));
     }
     
-    public async Task<Qualification?> GetQualificationByCode(string code)
+    public async Task<Qualification?> GetQualificationByCodeAsync(string code)
     {
         return await _context.FirstOrDefaultAsync(r => r.Code.Equals(code));
     }
@@ -27,15 +27,7 @@ public class QualificationRepository : BaseRepository<Qualification, Qualificati
     {
         return await _context.FirstOrDefaultAsync(r => r.Name.Equals(name));
     }
-
-    public async Task<QualificationId?> GetQualificationIdByCodeAsync(string code)
-    {
-        var qualification = await GetQualificationByCode(code);
-        if (qualification != null)
-            return qualification.Id;
-
-        return null;  
-    }
+    
 
     
 }

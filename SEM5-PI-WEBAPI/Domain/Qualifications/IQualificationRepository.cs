@@ -6,8 +6,7 @@ namespace SEM5_PI_WEBAPI.Domain.Qualifications
     public interface IQualificationRepository : IRepository<Qualification, QualificationId>
     {
         Task<bool> ExistQualificationID(QualificationId qualificationId);
-        Task<Qualification?> GetQualificationByCode(string code);
+        Task<Qualification?> GetQualificationByCodeAsync(string code);
         Task<Qualification?> GetQualificationByName(string name);
-        Task<QualificationId?> GetQualificationIdByCodeAsync(string code);
     }
 }

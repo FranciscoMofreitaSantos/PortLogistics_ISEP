@@ -39,7 +39,7 @@ public class QualificationService : IQualificationService
 
     public async Task<QualificationDto> GetByCodeAsync(string code)
     {
-        var qualy = await _repo.GetQualificationByCode(code);
+        var qualy = await _repo.GetQualificationByCodeAsync(code);
         
         if (qualy == null)
             throw new BusinessRuleValidationException($"No qualification with code {code} was found");
