@@ -239,6 +239,9 @@ public class StaffMemberService
                 ids.Add(id);
         }
 
+        if (codes.Count() != ids.Count())
+            throw new BusinessRuleValidationException("Please review the qualifications provided, some do not exist!");
+
         return ids;
     }
 
