@@ -2,7 +2,7 @@ using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.Qualifications;
 
-public class QualificationService
+public class QualificationService : IQualificationService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IQualificationRepository _repo;
@@ -57,7 +57,7 @@ public class QualificationService
         return MapToDto(qualy);
     }
 
-    public async Task<string> GenerateNextQualificationCodeAsync()
+    private async Task<string> GenerateNextQualificationCodeAsync()
     {
         var allCodes = await _repo.GetAllAsync();
 

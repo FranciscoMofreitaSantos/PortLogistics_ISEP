@@ -9,9 +9,9 @@ namespace SEM5_PI_WEBAPI.Controllers;
 [ApiController]
 public class StaffMembersController : ControllerBase
 {
-    private readonly StaffMemberService _service;
+    private readonly IStaffMemberService _service;
 
-    public StaffMembersController(StaffMemberService service)
+    public StaffMembersController(IStaffMemberService service)
     {
         _service = service;
     }

@@ -5,7 +5,7 @@ using SEM5_PI_WEBAPI.Domain.StaffMembers.DTOs;
 
 namespace SEM5_PI_WEBAPI.Domain.StaffMembers;
 
-public class StaffMemberService
+public class StaffMemberService : IStaffMemberService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IStaffMemberRepository _repo;
@@ -161,7 +161,7 @@ public class StaffMemberService
                     qualificationIds.Add(qualificationId);
                 }
             }
-
+            
             staff.SetQualifications(qualificationIds);
         }
 

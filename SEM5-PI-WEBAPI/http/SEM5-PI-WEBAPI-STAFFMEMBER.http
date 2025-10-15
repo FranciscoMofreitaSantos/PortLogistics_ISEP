@@ -6,7 +6,7 @@
 GET {{portURL}}/api/StaffMembers
 Accept: application/json
 
-### --- Get by at least one qualification
+### --- Get by qualification (at least one of the list)
 GET {{portURL}}/api/StaffMembers/by-qualifications
 Content-Type: application/json
 Accept: application/json
@@ -17,7 +17,7 @@ Accept: application/json
   ]
 }
 
-### --- Get by exact qualofications
+### --- Get by exact qualifications
 GET {{portURL}}/api/StaffMembers/by-exact-qualifications
 Content-Type: application/json
 Accept: application/json
@@ -72,7 +72,13 @@ Accept: application/json
 
 {
   "MecNumber": "1250001",
-  "Email": "mendy_updated@gmail.com" 
+  "Email": "mendyupdated@gmail.com",
+  "Schedule": {
+    "Shift": "Morning",
+    "DaysOfWeek": "1010101"
+  },
+  "qualificationCodes": ["QLF-002"],
+  "addQualifications" : "false"
 }
 
 
