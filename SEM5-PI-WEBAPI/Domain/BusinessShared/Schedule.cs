@@ -3,7 +3,7 @@ using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.BusinessShared;
 
-public class Schedule
+public class Schedule : IValueObject
 {
     public ShiftType Shift { get; set; }
     public WeekDays Days { get; set; }
@@ -27,6 +27,9 @@ public class Schedule
             return WeekDays.None;
         }
 
+        if (binary.Length > 7)
+            throw new BusinessRuleValidationException($"Binary value '{binary}' too large for Days");
+
         try
         {
             int intValue = Convert.ToInt32(binary, 2);
@@ -35,10 +38,6 @@ public class Schedule
         catch (FormatException)
         {
             throw new BusinessRuleValidationException($"Invalid binary format for Days: '{binary}'");
-        }
-        catch (OverflowException)
-        {
-            throw new BusinessRuleValidationException($"Binary value '{binary}' too large for Days");
         }
     }
 }

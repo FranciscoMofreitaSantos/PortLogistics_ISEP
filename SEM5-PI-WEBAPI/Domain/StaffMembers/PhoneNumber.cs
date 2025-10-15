@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 public class PhoneNumber : IValueObject
 {
     private static readonly Regex PhoneRegex = new Regex(
-        @"^\+?[1-9]\d{1,14}$", 
+        @"^\+[1-9]\d{1,14}$", 
         RegexOptions.Compiled);
 
     public string Number { get; private set; }  
