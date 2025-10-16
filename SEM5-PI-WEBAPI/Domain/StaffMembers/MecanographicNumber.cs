@@ -8,7 +8,7 @@ namespace SEM5_PI_WEBAPI.Domain.StaffMembers
     {
         public string Value { get; private set; }
         public int Year { get; private set; }
-        public int Number { get; private set; }  // incremental part
+        public int Number { get; private set; } 
 
         public MecanographicNumber(string value)
         {

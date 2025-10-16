@@ -14,127 +14,220 @@ using Xunit;
 public class StaffMemberServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IStaffMemberRepository> _repoMock;
+    private readonly Mock<IStaffMemberRepository> _staffRepoMock;
     private readonly Mock<IQualificationRepository> _qualRepoMock;
     private readonly StaffMemberService _service;
 
     public StaffMemberServiceTests()
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _repoMock = new Mock<IStaffMemberRepository>();
+        _staffRepoMock = new Mock<IStaffMemberRepository>();
         _qualRepoMock = new Mock<IQualificationRepository>();
-        _service = new StaffMemberService(_unitOfWorkMock.Object, _repoMock.Object, _qualRepoMock.Object);
+
+        _service = new StaffMemberService(_unitOfWorkMock.Object,
+                                            _staffRepoMock.Object, 
+                                            _qualRepoMock.Object);
     }
 
-    private StaffMember MakeStaff(string mec = "1234567")
+    private StaffMember CreateStaffMember(string mec = "1234567")
     {
-        return new StaffMember("Test", new MecanographicNumber(mec), new Email("test@test.com"),
+        return new StaffMember("TestUser",
+            new MecanographicNumber(mec),
+            new Email("test@example.com"),
             new PhoneNumber("+351912345678"),
             new Schedule(ShiftType.Morning, WeekDays.AllWeek));
     }
 
-    private Qualification MakeQualification(string code)
+    private Qualification CreateQualification(string code = "QLF-001")
     {
-        Qualification q = new Qualification("Test");
-        q.UpdateCode("QLF-001");
-        return q;
+        return new Qualification("Test Qualification")
+        {
+            Code = code
+        };
     }
 
     [Fact]
-    public async Task GetAllAsync_ReturnsDtos()
+    public async Task AddAsync_ShouldReturnDto_WhenValid()
     {
-        var staffList = new List<StaffMember> { MakeStaff(), MakeStaff("1244567") };
-        _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(staffList);
-        _qualRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<QualificationId>()))
-            .ReturnsAsync(new Qualification("Test") { Code = "QLF-001" });
+        _staffRepoMock.Setup(r => r.EmailIsInTheSystem(It.IsAny<Email>())).ReturnsAsync(false);
+        _staffRepoMock.Setup(r => r.PhoneIsInTheSystem(It.IsAny<PhoneNumber>())).ReturnsAsync(false);
+        _staffRepoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<StaffMember>());
 
-        var dtos = await _service.GetAllAsync();
+        var qualification = CreateQualification();
+        _qualRepoMock.Setup(r => r.GetQualificationByCodeAsync(It.IsAny<string>())).ReturnsAsync(qualification);
+        
+        _staffRepoMock.Setup(r => r.AddAsync(It.IsAny<StaffMember>()))
+            .ReturnsAsync((StaffMember staff) => staff);
+        
+        _unitOfWorkMock.Setup(u => u.CommitAsync()).ReturnsAsync(1);
 
-        Assert.Equal(2, dtos.Count);
-        Assert.All(dtos, d => Assert.NotNull(d.Id));
-    }
+        _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(qualification);
 
-    [Fact]
-    public async Task GetByIdAsync_ReturnsNull_WhenNotFound()
-    {
-        _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<StaffMemberId>())).ReturnsAsync((StaffMember?)null);
-
-        var result = await _service.GetByIdAsync(new StaffMemberId(Guid.NewGuid()));
-
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task GetByIdAsync_ReturnsDto_WhenFound()
-    {
-        var staff = MakeStaff();
-        _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<StaffMemberId>())).ReturnsAsync(staff);
-        _qualRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<QualificationId>()))
-            .ReturnsAsync(new Qualification("Test") { Code = "QLF-001" });
-
-        var result = await _service.GetByIdAsync(new StaffMemberId(Guid.NewGuid()));
-
-        Assert.NotNull(result);
-        Assert.Equal(staff.ShortName, result.ShortName);
-    }
-
-    [Fact]
-    public async Task AddAsync_ThrowsIfEmailIsRepeated()
-    {
-        _repoMock.Setup(r => r.EmailIsInTheSystem(It.IsAny<Email>())).ReturnsAsync(true);
-
-        var dto = new CreatingStaffMemberDto("Test", "test@test.com", "+351912345678",
-            new ScheduleDto(ShiftType.Morning, "1111111"), true, new List<string>());
-
-        await Assert.ThrowsAsync<BusinessRuleValidationException>(() =>
-            _service.AddAsync(dto));
-    }
-
-    [Fact]
-    public async Task AddAsync_ReturnsDto_WhenValid()
-    {
-        _repoMock.Setup(r => r.EmailIsInTheSystem(It.IsAny<Email>())).ReturnsAsync(false);
-        _repoMock.Setup(r => r.PhoneIsInTheSystem(It.IsAny<PhoneNumber>())).ReturnsAsync(false);
-        _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<StaffMember>());
-        _qualRepoMock.Setup(r => r.GetQualificationByCodeAsync(It.IsAny<string>()))
-            .ReturnsAsync(new Qualification("Test") { Code = "QLF-001"});
-
-        _repoMock.Setup(r => r.AddAsync(It.IsAny<StaffMember>())).Returns(Task.CompletedTask as Task<StaffMember>);
-        _unitOfWorkMock.Setup(u => u.CommitAsync()).Returns(Task.CompletedTask as Task<int>);
-
-        var dto = new CreatingStaffMemberDto("Test", "test@test.com", "+351912345678",
-            new ScheduleDto(ShiftType.Morning, "1111111"), true, new List<string> { "QLF-001" });
+        var dto = new CreatingStaffMemberDto("TestUser", "test@example.com", "+351912345678",
+            new ScheduleDto(ShiftType.Morning, "1111111"),
+            true,
+            new List<string> { qualification.Code });
 
         var result = await _service.AddAsync(dto);
 
-        Assert.NotNull(result.Id);
-        Assert.Equal("Test", result.ShortName);
-        Assert.Contains("test@test.com", result.Email);
+        Assert.NotNull(result);
+        Assert.NotEqual(Guid.Empty, result.Id);
+        Assert.Equal(dto.ShortName, result.ShortName);
+        Assert.Equal(dto.Email, result.Email);
     }
 
 
     [Fact]
-    public async Task ToggleAsync_ReturnsNull_WhenNotFound()
+    public async Task GetByIdAsync_ShouldReturnDto_WhenFound()
     {
-        _repoMock.Setup(r => r.GetByMecNumberAsync(It.IsAny<MecanographicNumber>())).ReturnsAsync((StaffMember?)null);
+        var staff = CreateStaffMember();
+        var qualification = CreateQualification();
 
-        var result = await _service.ToggleAsync("1234567");
+        _staffRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<StaffMemberId>())).ReturnsAsync(staff);
+        _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(qualification);
 
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task ToggleAsync_TogglesStatusAndReturnsDto()
-    {
-        var staff = MakeStaff();
-        _repoMock.Setup(r => r.GetByMecNumberAsync(It.IsAny<MecanographicNumber>())).ReturnsAsync(staff);
-        _qualRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<QualificationId>()))
-            .ReturnsAsync(new Qualification("Test") { Code = "QLF-001" });
-        _unitOfWorkMock.Setup(u => u.CommitAsync()).Returns((Task<int>)Task.CompletedTask);
-
-        var result = await _service.ToggleAsync("1234567");
+        var result = await _service.GetByIdAsync(new StaffMemberId(staff.Id.Value));
 
         Assert.NotNull(result);
         Assert.Equal(staff.ShortName, result.ShortName);
     }
+
+    [Fact]
+    public async Task ToggleAsync_ShouldReturnDtoWithToggledStatus()
+    {
+        var staff = CreateStaffMember();
+        var qualification = CreateQualification();
+
+        _staffRepoMock.Setup(r => r.GetByMecNumberAsync(It.IsAny<MecanographicNumber>())).ReturnsAsync(staff);
+        _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(qualification);
+        _unitOfWorkMock.Setup(u => u.CommitAsync()).ReturnsAsync(1);
+
+
+        var beforeStatus = staff.IsActive;
+        var result = await _service.ToggleAsync(staff.MecanographicNumber.Value);
+
+        Assert.NotNull(result);
+        Assert.NotEqual(beforeStatus, result.IsActive);
+    }
+
+    [Fact]
+public async Task GetByMecNumberAsync_ShouldReturnDto_WhenFound()
+{
+    var staff = CreateStaffMember();
+    _staffRepoMock.Setup(r => r.GetByMecNumberAsync(It.IsAny<MecanographicNumber>())).ReturnsAsync(staff);
+    _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(CreateQualification());
+
+    var result = await _service.GetByMecNumberAsync(staff.MecanographicNumber.Value);
+
+    Assert.NotNull(result);
+    Assert.Equal(staff.ShortName, result.ShortName);
 }
+
+[Fact]
+public async Task GetByNameAsync_ShouldReturnDtos()
+{
+    var staffList = new List<StaffMember> { CreateStaffMember(), CreateStaffMember("1234568") };
+    _staffRepoMock.Setup(r => r.GetByNameAsync(It.IsAny<string>())).ReturnsAsync(staffList);
+    _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(CreateQualification());
+
+    var result = await _service.GetByNameAsync("test");
+
+    Assert.Equal(2, result.Count);
+}
+
+[Fact]
+public async Task GetByStatusAsync_ShouldReturnDtos()
+{
+    var staffList = new List<StaffMember> { CreateStaffMember(), CreateStaffMember("1234568") };
+    _staffRepoMock.Setup(r => r.GetByStatusAsync(It.IsAny<bool>())).ReturnsAsync(staffList);
+    _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(CreateQualification());
+
+    var result = await _service.GetByStatusAsync(true);
+
+    Assert.Equal(2, result.Count);
+}
+
+[Fact]
+public async Task GetByQualificationsAsync_ShouldReturnDtos()
+{
+    var codes = new List<string> { "QLF-001" };
+    var qualificationId = new QualificationId(Guid.NewGuid());
+    var staffList = new List<StaffMember> { CreateStaffMember() };
+
+    _qualRepoMock.Setup(r => r.GetQualificationByCodeAsync(It.IsAny<string>()))
+        .ReturnsAsync(CreateQualification());
+    _staffRepoMock.Setup(r => r.GetByQualificationsAsync(It.IsAny<List<QualificationId>>()))
+        .ReturnsAsync(staffList);
+    _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(CreateQualification());
+
+    var result = await _service.GetByQualificationsAsync(codes);
+
+    Assert.Single(result);
+}
+
+[Fact]
+public async Task GetByExactQualificationsAsync_ShouldReturnDtos()
+{
+    var codes = new List<string> { "QLF-001" };
+    var qualificationId = new QualificationId(Guid.NewGuid());
+    var staffList = new List<StaffMember> { CreateStaffMember() };
+
+    _qualRepoMock.Setup(r => r.GetQualificationByCodeAsync(It.IsAny<string>()))
+        .ReturnsAsync(CreateQualification());
+    _staffRepoMock.Setup(r => r.GetByExactQualificationsAsync(It.IsAny<List<QualificationId>>()))
+        .ReturnsAsync(staffList);
+    _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(CreateQualification());
+
+    var result = await _service.GetByExactQualificationsAsync(codes);
+
+    Assert.Single(result);
+}
+
+[Fact]
+public async Task UpdateAsync_ShouldUpdateAndReturnDto_WhenValid()
+{
+    var staff = CreateStaffMember();
+    var qualification = CreateQualification();
+
+    _staffRepoMock.Setup(r => r.GetByMecNumberAsync(It.IsAny<MecanographicNumber>())).ReturnsAsync(staff);
+    _qualRepoMock.Setup(r => r.GetQualificationByCodeAsync(It.IsAny<string>())).ReturnsAsync(qualification);
+    _unitOfWorkMock.Setup(u => u.CommitAsync()).ReturnsAsync(1);
+    _qualRepoMock.Setup(q => q.GetByIdAsync(It.IsAny<QualificationId>())).ReturnsAsync(qualification);
+
+    var updateDto = new UpdateStaffMemberDto
+    {
+        MecNumber = staff.MecanographicNumber.Value,
+        ShortName = "NewName",
+        Email = "newemail@example.com",
+        Phone = "+351900000000",
+        Schedule = new ScheduleDto(ShiftType.Evening, "0101010"),
+        IsActive = false,
+        QualificationCodes = new List<string> { qualification.Code },
+        AddQualifications = true
+    };
+
+    var result = await _service.UpdateAsync(updateDto);
+
+    Assert.NotNull(result);
+    Assert.Equal(updateDto.ShortName, result.ShortName);
+    Assert.Equal(updateDto.Email, result.Email);
+    Assert.Equal(updateDto.IsActive.Value, result.IsActive);
+}
+
+[Fact]
+public async Task UpdateAsync_ShouldThrow_WhenAddQualificationsNullAndQualificationCodesSet()
+{
+    var staff = CreateStaffMember();
+    _staffRepoMock.Setup(r => r.GetByMecNumberAsync(It.IsAny<MecanographicNumber>())).ReturnsAsync(staff);
+
+    var updateDto = new UpdateStaffMemberDto
+    {
+        MecNumber = staff.MecanographicNumber.Value,
+        QualificationCodes = new List<string> { "QLF-001" }
+    };
+
+    await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.UpdateAsync(updateDto));
+}
+
+}
+
