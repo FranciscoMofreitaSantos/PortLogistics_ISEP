@@ -60,7 +60,7 @@ public class EntityPhysicalResource : Entity<PhysicalResourceId>, IAggregateRoot
 
     private void SetDescription(string description)
     {
-        if (string.IsNullOrEmpty(description))
+        if (string.IsNullOrWhiteSpace(description))
             throw new BusinessRuleValidationException("Description cannot be null or whitespace");
         
         if (description.Length > MaxDescription)

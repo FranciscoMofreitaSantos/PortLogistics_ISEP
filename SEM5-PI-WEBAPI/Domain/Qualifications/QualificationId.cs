@@ -25,4 +25,17 @@ public class QualificationId : EntityId
     {
         return (Guid)ObjValue;
     }
+    
+    public override bool Equals(object? obj)
+    {
+        if (obj is QualificationId other)
+            return AsGuid().Equals(other.AsGuid());
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return AsGuid().GetHashCode();
+    }
+
 }
