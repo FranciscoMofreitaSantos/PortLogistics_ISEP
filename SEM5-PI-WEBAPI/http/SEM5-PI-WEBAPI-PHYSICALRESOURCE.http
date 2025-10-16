@@ -81,11 +81,11 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "description": "Dock Crane A",
+  "description": "Volvo Truck",
   "operationalCapacity": 25.5,
   "setupTime": 10,
   "physicalResourceType": "Truck",
-  "qualificationID": "adf8140f-4ecc-4d8a-a83a-9ed4664319a2"
+  "qualificationID": "3ead253f-c5aa-4d03-a290-36a65521fb3d"
 }
 
 

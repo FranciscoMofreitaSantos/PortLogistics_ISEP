@@ -5,7 +5,7 @@ using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Domain.PhysicalResources;
 
-public class PhysicalResourceService
+public class PhysicalResourceService : IPhysicalResourceService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPhysicalResourceRepository _repo;

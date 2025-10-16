@@ -1,19 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations.DTOs;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ShippingAgentOrganizationsController : ControllerBase
+public class ShippingAgentOrganizationController : ControllerBase
 {
-    private readonly ILogger<ShippingAgentOrganizationsController> _logger;
+    private readonly ILogger<ShippingAgentOrganizationController> _logger;
 
-    private readonly ShippingAgentOrganizationService _service;
+    private readonly IShippingAgentOrganizationService _service;
 
-    public ShippingAgentOrganizationsController(ShippingAgentOrganizationService service,ILogger<ShippingAgentOrganizationsController> logger)
+    public ShippingAgentOrganizationController(IShippingAgentOrganizationService service,ILogger<ShippingAgentOrganizationController> logger)
     {
         _logger = logger;
         _service = service;
@@ -47,7 +48,7 @@ public class ShippingAgentOrganizationsController : ControllerBase
         {
             _logger.LogInformation("API Request: Fetching SAO with Code = {code}", Code);
             
-            var shippingAgentOrganizationDto = await _service.GetByCodeAsync(Code);
+            var shippingAgentOrganizationDto = await _service.GetByCodeAsync(new ShippingOrganizationCode(Code));
             
             _logger.LogWarning("API Response (200): SAO with Code = {code} -> FOUND", Code);
             
@@ -106,11 +107,11 @@ public class ShippingAgentOrganizationsController : ControllerBase
 
 
     [HttpPost]
-    public async Task<ActionResult<ShippingAgentOrganizationDto>> Create(CreatingShippingAgentOrganizationDto dto)
+    public async Task<ActionResult<ShippingAgentOrganizationDto>> Create([FromBody] CreatingShippingAgentOrganizationDto dto)
     {
         try
         {
-            var q = await _service.AddAsync(dto);
+            var q = await _service.CreateAsync(dto);
 
             return CreatedAtAction(nameof(GetGetById), new { id = q.Id }, q);
         }

@@ -8,9 +8,9 @@ namespace SEM5_PI_WEBAPI.Controllers;
 [ApiController]
 public class QualificationsController : ControllerBase
 {
-    private readonly QualificationService _service;
+    private readonly IQualificationService _service;
 
-    public QualificationsController(QualificationService service)
+    public QualificationsController(IQualificationService service)
     {
         _service = service;
     }
@@ -24,14 +24,23 @@ public class QualificationsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<QualificationDto>> GetGetById(Guid id)
     {
-        var q = await _service.GetByIdAsync(new QualificationId(id));
-
-        if (q == null)
+        try
         {
-            return NotFound();
-        }
 
-        return q;
+            var q = await _service.GetByIdAsync(new QualificationId(id));
+
+            if (q == null)
+            {
+                return NotFound();
+            }
+
+            return q;
+
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            return BadRequest(new { error = e.Message });
+        }
     }
 
     [HttpGet("code/{code}")]

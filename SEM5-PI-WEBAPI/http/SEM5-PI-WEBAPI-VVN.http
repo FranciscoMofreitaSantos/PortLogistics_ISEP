@@ -13,7 +13,6 @@ Accept: {{accept}}
   "estimatedTimeDeparture": "2025-12-03T18:00:00",
   "volume": 2000,
   "documents": null,
-  "listDocks": ["DK-0001"],
 
   "crewManifest": {
     "totalCrew": 15,
@@ -21,13 +20,13 @@ Accept: {{accept}}
     "crewMembers": [
       {
         "name": "Carlos Mendes",
-        "role": "ChiefOfficer",
+        "role": "Captain",
         "nationality": "Portugal",
         "citizenId": "A12345"
       },
       {
         "name": "Anna Becker",
-        "role": "ChiefEngineer",
+        "role": "SafetyOfficer",
         "nationality": "Peru",
         "citizenId": "B98765"
       }
@@ -36,17 +35,17 @@ Accept: {{accept}}
 
   "loadingCargoManifest": {
     "type": "Loading",
-    "createdBy": "Agent01",
+    "createdBy": "Agent01@gmail.com",
     "entries": [
       {
         "bay": 2,
         "row": 3,
         "tier": 4,
-        "storageAreaId": "e811c3dc-4bdb-4df0-b9eb-1749ce0cf531",
+        "storageAreaName": "Yard B",
         "container": {
           "isoCode": "MSCU6639870",
           "description": "Perishable frozen food cargo",
-          "type": "Reefer",
+          "type": "Hazmat",
           "weightKg": 10800
         }
       }
@@ -69,7 +68,6 @@ Accept: {{accept}}
   "estimatedTimeDeparture": "2025-12-03T18:00:00",
   "volume": 2000,
   "documents": null,
-  "listDocks": ["DK-0001"],
 
   "crewManifest": null,
 
@@ -96,7 +94,7 @@ Accept: {{accept}}
   "vesselImo": "IMO 9876543"
 }
 ###
-# 2️⃣ UPDATE an existing Vessel Visit Notification (editable state)
+# 2 - UPDATE an existing Vessel Visit Notification (editable state)
 
 ###
 PUT {{portURL}}/api/VesselVisitNotification/b7d33c6d-9335-4ac7-8309-9afb528c3e89/update
@@ -170,20 +168,16 @@ Accept: {{accept}}
   "unloadingCargoManifest": null
 }
 
-
-# ===================================================================
-# 3️⃣ SUBMIT Vessel Visit Notification for approval
-# ===================================================================
+###
+# 3 - SUBMIT Vessel Visit Notification for approval
 
 ###
-PUT {{portURL}}/api/VesselVisitNotification/b66d20a8-8bbc-4f9d-8f8f-345165fd8bed/submit
+PUT {{portURL}}/api/VesselVisitNotification/d16d133f-9b81-43a9-b651-c0a8bbfef135/submit
 Content-Type: {{contentType}}
 Accept: {{accept}}
 
 
-# ===================================================================
-# 4️⃣ WITHDRAW Vessel Visit Notification (only while editable)
-# ===================================================================
+# 4 - WITHDRAW Vessel Visit Notification (only while editable)
 
 ###
 PUT {{portURL}}/api/VesselVisitNotification/b8bbb8ac-0739-495c-8e6d-85039f2889eb/withdraw
@@ -191,10 +185,67 @@ Content-Type: {{contentType}}
 Accept: {{accept}}
 
 
-# ===================================================================
-# 5️⃣ GET Vessel Visit Notification by ID
-# ===================================================================
+# 5 - GET Vessel Visit Notification by ID
 
 ###
-GET {{portURL}}/api/VesselVisitNotification/id/b8bbb8ac-0739-495c-8e6d-85039f2889eb
+GET {{portURL}}/api/VesselVisitNotification/id/b6a5e2c0-0a58-42ef-8612-3cf7a47d65ec
 Accept: {{accept}}
+
+
+# ️6 - PUT Accept VVN
+
+###
+PUT {{portURL}}/api/VesselVisitNotification/accept/id/b6a5e2c0-0a58-42ef-8612-3cf7a47d65ec
+Accept: {{accept}}
+
+# ️7 - PUT Reject/MarkAsPending VVN
+
+###
+PUT {{portURL}}/api/VesselVisitNotification/reject
+Content-Type: {{contentType}}
+Accept: {{accept}}
+
+{
+    "vvnCode": "2025-THPA-000002",
+    "reason": "Rejecting the VVN due to inconsistencies found in the estimated time of arrival and departure, which require correction before approval."
+}
+
+
+###
+# ️8 - Get InProgress & PendingInformation
+
+### 
+GET {{portURL}}/api/VesselVisitNotification/shippingAgentRepresentative/inProgress-pendingInformation/72f1d6b2-3475-46b8-bb2c-2cf2b379a913
+    ?specificRepresentative=73fbd011-5c94-4029-8a6b-22c1900a39a2
+    &vesselImoNumber=IMO9706906
+    &estimatedTimeArrival=2025-10-15T10:00
+    &estimatedTimeDeparture=2025-10-15T18:00
+Accept: application/json
+
+# ️9 - Get Withdrawn
+
+### 
+GET {{portURL}}/api/VesselVisitNotification/shippingAgentRepresentative/withdrawn/72f1d6b2-3475-46b8-bb2c-2cf2b379a913
+    ?vesselImoNumber=IMO9088888
+    &estimatedTimeArrival=2025-10-15T09:00
+Accept: application/json
+
+# ️10 - Get Submitted
+
+### 
+GET {{portURL}}/api/VesselVisitNotification/shippingAgentRepresentative/submitted/72f1d6b2-3475-46b8-bb2c-2cf2b379a913
+    ?submittedDate=2025-10-10T08:00
+    &vesselImoNumber=IMO9000123
+Accept: application/json
+
+# ️11 - Get Accepted
+
+
+### 
+GET {{portURL}}/api/VesselVisitNotification/shippingAgentRepresentative/accepted/72f1d6b2-3475-46b8-bb2c-2cf2b379a913
+    ?acceptedDate=2025-10-11T14:00
+    &submittedDate=2025-10-10T08:00
+    &vesselImoNumber=IMO9706906
+Accept: application/json
+
+

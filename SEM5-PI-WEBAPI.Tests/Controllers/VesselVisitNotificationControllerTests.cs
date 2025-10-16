@@ -33,7 +33,6 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 DateTime.Now.AddDays(2).ToString("O"),
                 1200,
                 "doc1.pdf",
-                new List<string> { "DK-0001" },
                 null,
                 null,
                 null,
@@ -51,7 +50,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 volume: 1200,
                 documents: new PdfDocumentCollection(),
                 status: new Status(VvnStatus.InProgress, null).ToString(),
-                docks: new List<DockDto>(),
+                dock: "DK-001",
                 crewManifest: null,
                 loadingCargoManifest: null,
                 unloadingCargoManifest: null,
@@ -78,7 +77,6 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 DateTime.Now.AddDays(-1).ToString("O"),
                 500,
                 null,
-                new List<string>(),
                 null,
                 null,
                 null,
@@ -108,8 +106,8 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
             Assert.Equal(id, value.Id);
-            Assert.Equal(VvnStatus.InProgress.ToString(), value.Status.Replace("Status: ", ""));
-
+            Assert.Equal("InProgress", value.Status.Replace("Status: ", ""));
+            
         }
 
         [Fact]
@@ -309,8 +307,8 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 null,
                 volume,
                 new PdfDocumentCollection(),
+                "DK-001",
                 status.ToString(),
-                new List<DockDto>(),
                 null,
                 null,
                 null,

@@ -30,11 +30,7 @@
 
   <ItemGroup>
     <Folder Include="Logs\" />
-    <Folder Include="Logs\Containers\" />
-    <Folder Include="Logs\GeneralLogs\" />
-    <Folder Include="Logs\StorageArea\" />
-    <Folder Include="Logs\VesselsTypes\" />
-    <Folder Include="Logs\Vessels\" />
+    <Folder Include="Logs\Bootstrap\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,5 +46,23 @@
     <Compile Remove="Migrations\20251008211528_Initial.cs" />
     <Compile Remove="Migrations\20251008211528_Initial.Designer.cs" />
   </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Seed\Qualifications.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Seed\StaffMembers.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Seed\VesselsTypes.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Seed\Vessels.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Seed\VesselVisitNotifications.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
 </Project>

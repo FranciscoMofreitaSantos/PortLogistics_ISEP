@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StaffMembers;
 using SEM5_PI_WEBAPI.Domain.StaffMembers.DTOs;
@@ -10,9 +9,9 @@ namespace SEM5_PI_WEBAPI.Controllers;
 [ApiController]
 public class StaffMembersController : ControllerBase
 {
-    private readonly StaffMemberService _service;
+    private readonly IStaffMemberService _service;
 
-    public StaffMembersController(StaffMemberService service)
+    public StaffMembersController(IStaffMemberService service)
     {
         _service = service;
     }
@@ -26,65 +25,106 @@ public class StaffMembersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<StaffMemberDto>> GetById(Guid id)
     {
-        var staff = await _service.GetByIdAsync(new StaffMemberId(id));
-
-        if (staff == null)
+        try
         {
-            return NotFound();
-        }
+            var staff = await _service.GetByIdAsync(new StaffMemberId(id));
 
-        return staff;
+            if (staff == null)
+            {
+                return NotFound();
+            }
+
+            return staff;
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     [HttpGet("by-qualifications")]
-    public async Task<ActionResult<List<StaffMemberDto>>> GetByQualifications([FromQuery] List<Guid> ids)
+    public async Task<ActionResult<List<StaffMemberDto>>> GetByQualifications(CodesListDto codesListDto)
     {
-        if (ids == null || !ids.Any())
-            return BadRequest("At least one qualification id must be provided.");
+        try
+        {
+            var qualificationCodes = codesListDto.QualificationsCodes;
+            if (!qualificationCodes.Any())
+                return BadRequest("At least one qualification code must be provided.");
 
-        var qualificationIds = ids.Select(guid => new QualificationId(guid)).ToList();
-        var staffList = await _service.GetByQualificationsAsync(qualificationIds);
-
-        return Ok(staffList);
+            var staffList = await _service.GetByQualificationsAsync(qualificationCodes);
+            return Ok(staffList);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
 
     [HttpGet("by-exact-qualifications")]
-    public async Task<ActionResult<List<StaffMemberDto>>> GetByAllQualifications(List<Guid> ids)
+    public async Task<ActionResult<List<StaffMemberDto>>> GetByAllQualifications(CodesListDto codesListDto)
     {
-        if (ids == null || !ids.Any())
-            return BadRequest("At least one qualification id must be provided.");
+        try
+        {
+            var qualificationCodes = codesListDto.QualificationsCodes;
+            if (!qualificationCodes.Any())
+                return BadRequest("At least one qualification code must be provided.");
 
-        var qualificationIds = ids.Select(guid => new QualificationId(guid)).ToList();
-        var staffList = await _service.GetByExactQualificationsAsync(qualificationIds);
+            var staffList = await _service.GetByExactQualificationsAsync(qualificationCodes);
 
-        return Ok(staffList);
+            return Ok(staffList);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     [HttpGet("mec/{mec}")]
     public async Task<ActionResult<StaffMemberDto>> GetByMecanographicNumber(string mec)
     {
-        var staff = await _service.GetByMecNumberAsync(mec);
-        if (staff == null)
-            return NotFound();
-        return Ok(staff);
+        try
+        {
+            var staff = await _service.GetByMecNumberAsync(mec);
+            if (staff == null)
+                return NotFound();
+            return Ok(staff);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     [HttpGet("name/{name}")]
     public async Task<ActionResult<List<StaffMemberDto>>> GetByName(string name)
     {
-        var staff = await _service.GetByNameAsync(name);
-        if (staff == null || staff.Count == 0)
-            return NotFound();
-        return Ok(staff);
+        try
+        {
+            var staff = await _service.GetByNameAsync(name);
+            if (staff == null || staff.Count == 0)
+                return NotFound();
+            return Ok(staff);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
-    
+
     [HttpGet("status/{status}")]
     public async Task<ActionResult<IEnumerable<StaffMemberDto>>> GetByStatus(bool status)
     {
-        var staffList = await _service.GetByStatusAsync(status);
-        return Ok(staffList);
+        try
+        {
+            var staffList = await _service.GetByStatusAsync(status);
+            return Ok(staffList);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     [HttpPost]
@@ -102,21 +142,35 @@ public class StaffMembersController : ControllerBase
         }
     }
 
-    [HttpPatch("{id}")]
-    public async Task<ActionResult<StaffMemberDto>> Update(Guid id, UpdateStaffMemberDto dto)
+    [HttpPut("update/")]
+    public async Task<ActionResult<StaffMemberDto>> Update(UpdateStaffMemberDto dto)
     {
-        var updatedStaff = await _service.UpdateAsync(new StaffMemberId(id), dto);
-        if (updatedStaff == null)
-            return NotFound();
-        return Ok(updatedStaff);
+        try
+        {
+            var updatedStaff = await _service.UpdateAsync(dto);
+            if (updatedStaff == null)
+                return NotFound();
+            return Ok(updatedStaff);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
-    [HttpPatch("{id}/toggle")]
-    public async Task<ActionResult<StaffMemberDto>> ToggleStatus(Guid id)
+    [HttpPut("toggle/{mec}")]
+    public async Task<ActionResult<StaffMemberDto>> ToggleStatus(string mec)
     {
-        var updatedStaff = await _service.ToggleAsync(new StaffMemberId(id));
-        if (updatedStaff == null)
-            return NotFound();
-        return Ok(updatedStaff);
+        try
+        {
+            var updatedStaff = await _service.ToggleAsync(mec);
+            if (updatedStaff == null)
+                return NotFound();
+            return Ok(updatedStaff);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 }

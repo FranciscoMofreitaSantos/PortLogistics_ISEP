@@ -1,17 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.DTOs;
 
 namespace SEM5_PI_WEBAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ShippingAgentRepresentativesController : ControllerBase
+public class ShippingAgentRepresentativeController : ControllerBase
 {
-    private readonly ShippingAgentRepresentativeService _service;
-    private readonly ILogger<ShippingAgentRepresentativesController> _logger;
+    private readonly IShippingAgentRepresentativeService _service;
+    private readonly ILogger<ShippingAgentRepresentativeController> _logger;
 
-    public ShippingAgentRepresentativesController(ShippingAgentRepresentativeService service, ILogger<ShippingAgentRepresentativesController> logger)
+    public ShippingAgentRepresentativeController(IShippingAgentRepresentativeService service, ILogger<ShippingAgentRepresentativeController> logger)
     {
         _logger = logger;
         _service = service;
@@ -23,7 +24,6 @@ public class ShippingAgentRepresentativesController : ControllerBase
         return Ok(await _service.GetAllAsync());
     }
 
-    // GET: api/Products/5
     [HttpGet("{id}")]
     public async Task<ActionResult<ShippingAgentRepresentativeDto>> GetGetById(Guid id)
     {
@@ -101,7 +101,7 @@ public class ShippingAgentRepresentativesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ShippingAgentRepresentativeDto>> Create(CreatingShippingAgentRepresentativeDto dto)
+    public async Task<ActionResult<ShippingAgentRepresentativeDto>> Create([FromBody] CreatingShippingAgentRepresentativeDto dto)
     {
         try
         {
@@ -124,10 +124,10 @@ public class ShippingAgentRepresentativesController : ControllerBase
         {
             _logger.LogInformation("API Request: Partial update for Shipping AgentRepresentative with name = {NAME}", name);
 
-            var containerDto = await _service.PatchByNameAsync(name, dto);
+            var updatedDto = await _service.PatchByNameAsync(name, dto);
+            _logger.LogInformation("API Response (200): Representative with NAME = {NAME} patched successfully", name);
+            return Ok(updatedDto);
 
-            _logger.LogInformation("API Response (200): Container with NAME = {NAME} patched successfully", name);
-            return Ok(containerDto);
         }
         catch (BusinessRuleValidationException e)
         {
@@ -135,4 +135,24 @@ public class ShippingAgentRepresentativesController : ControllerBase
             return BadRequest(e.Message);
         }
     }
+    
+    [HttpPost("{name}/notifications")]
+    public async Task<ActionResult<ShippingAgentRepresentativeDto>> AddNotificationAsync(string name, [FromBody] string vvnCode)
+    {
+        try
+        {
+            _logger.LogInformation("API Request: Adding notification {vvnCode} to SAR {name}", vvnCode, name);
+
+            var updatedRepresentative = await _service.AddNotificationAsync(name, vvnCode);
+
+            _logger.LogInformation("API Response (200): Notification added successfully to SAR {name}", name);
+            return Ok(updatedRepresentative);
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Error (400): {Message}", e.Message);
+            return BadRequest(new { Message = e.Message });
+        }
+    }
+
 }

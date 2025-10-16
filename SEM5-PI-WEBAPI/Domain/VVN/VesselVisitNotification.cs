@@ -2,7 +2,6 @@ using SEM5_PI_WEBAPI.Domain.CargoManifests;
 using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
-using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
 
@@ -18,14 +17,15 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
         public ClockTime? ActualTimeArrival { get; private set; }
         public ClockTime EstimatedTimeDeparture { get; private set; }
         public ClockTime? ActualTimeDeparture { get; private set; }
+        public ClockTime? SubmittedDate { get; private set; }
         public ClockTime? AcceptenceDate { get; private set; }
 
         public int Volume { get; private set; }
         public PdfDocumentCollection Documents { get; private set; }
 
         public Status Status { get; private set; }
-        public IReadOnlyCollection<EntityDock> ListDocks { get; private set; }
-        public CrewManifest? CrewManifest { get; private set; }
+        public DockCode? Dock { get; private set; }
+        public CrewManifest CrewManifest { get; private set; }
         public CargoManifest? LoadingCargoManifest { get; private set; }
         public CargoManifest? UnloadingCargoManifest { get; private set; }
         public ImoNumber VesselImo { get; private set; }
@@ -42,7 +42,6 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             ClockTime estimatedTimeDeparture,
             int volume,
             PdfDocumentCollection? documents,
-            IEnumerable<EntityDock>? docks,
             CrewManifest? crewManifest,
             CargoManifest? loadingCargoManifest,
             CargoManifest? unloadingCargoManifest,
@@ -64,7 +63,6 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             SetEstimatedTimeDeparture(estimatedTimeDeparture);
             SetVolume(volume);
             SetDocuments(documents);
-            SetListDocks(docks);
             SetCrewManifest(crewManifest);
             SetLoadingCargoManifest(loadingCargoManifest);
             SetUnloadingCargoManifest(unloadingCargoManifest);
@@ -72,7 +70,8 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
             SetActualTimeArrival(null);
             SetActualTimeDeparture(null);
-
+    
+            SubmittedDate = null;
             AcceptenceDate = null;
             Status = new Status(VvnStatus.InProgress, null);
             Tasks = new List<EntityTask>();
@@ -89,7 +88,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
         public void UpdateVolume(int volume) => SetVolume(volume);
         public void UpdateDocuments(PdfDocumentCollection? documents) => SetDocuments(documents);
-        public void UpdateListDocks(IEnumerable<EntityDock> docks) => SetListDocks(docks);
+        public void UpdateDock(DockCode dock) => SetDock(dock);
         public void UpdateCrewManifest(CrewManifest? crewManifest) => SetCrewManifest(crewManifest);
         public void UpdateLoadingCargoManifest(CargoManifest? cargoManifest) => SetLoadingCargoManifest(cargoManifest);
 
@@ -157,12 +156,12 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
                 : documents;
         }
 
-        private void SetListDocks(IEnumerable<EntityDock>? docks)
+        private void SetDock(DockCode dock)
         {
             if (!_isConstructing && !IsEditable)
-                throw new BusinessRuleValidationException("Cannot update docks when VVN is not editable.");
+                throw new BusinessRuleValidationException("Cannot update dock when VVN is not editable.");
 
-            ListDocks = docks?.ToList() ?? new List<EntityDock>();
+            Dock = dock;
         }
 
         private void SetCrewManifest(CrewManifest? crewManifest)
@@ -213,6 +212,8 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             if (Status.StatusValue != VvnStatus.InProgress)
                 throw new BusinessRuleValidationException(
                     $"Only In-progress VVNs can be submitted. Current status: {Status}");
+            
+            SubmittedDate = new ClockTime(DateTime.Now);
             Status = new Status(VvnStatus.Submitted, null);
         }
 
@@ -221,6 +222,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
             if (Status.StatusValue != VvnStatus.Submitted)
                 throw new BusinessRuleValidationException(
                     $"Only Submitted VVNs can be marked Pending. Current status: {Status}");
+            SubmittedDate = null;
             Status = new Status(VvnStatus.PendingInformation, message);
         }
 

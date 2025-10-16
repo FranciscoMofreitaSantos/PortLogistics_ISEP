@@ -48,13 +48,11 @@ public class VesselService : IVesselService
         
         if (imoexist != null) throw new BusinessRuleValidationException($"Vessel with IMO Number '{creatingVesselDto.ImoNumber}' already exists on DB.");
     
-        var typeDontExist = (await _vesselTypeRepository.GetByIdAsync(creatingVesselDto.VesselTypeId)) == null;
+        var typeDontExist = (await _vesselTypeRepository.GetByNameAsync(creatingVesselDto.VesselTypeName)) ;
 
-        if (typeDontExist)
-            throw new BusinessRuleValidationException(
-                $"Vessel Type with ID '{creatingVesselDto.VesselTypeId.Value}' doesn't exists on DB.");
+        if (typeDontExist == null) throw new BusinessRuleValidationException($"Vessel Type with Name '{creatingVesselDto.VesselTypeName}' doesn't exists on DB.");
         
-        Vessel createdVessel = VesselFactory.CreateVessel(creatingVesselDto);
+        Vessel createdVessel = VesselFactory.CreateVessel(creatingVesselDto,typeDontExist.Id);
             
         await _vesselRepository.AddAsync(createdVessel);
         await _unitOfWork.CommitAsync();

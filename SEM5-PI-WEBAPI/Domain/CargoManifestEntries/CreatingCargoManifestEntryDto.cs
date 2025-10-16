@@ -10,15 +10,15 @@ public class CreatingCargoManifestEntryDto
     public int Row { get; set; }
     public int Tier { get; set; }
     public CreatingContainerDto Container { get; set; }
-    public Guid StorageAreaId { get; set; }
+    public string StorageAreaName { get; set; }
 
     public CreatingCargoManifestEntryDto(int bay, int row, int tier, CreatingContainerDto container,
-        Guid storageAreaId)
+        string storageAreaName)
     {
         Bay = bay;
         Row = row;
         Tier = tier;
         Container = container;
-        StorageAreaId = storageAreaId;
+        StorageAreaName = storageAreaName;
     }
 }

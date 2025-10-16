@@ -54,20 +54,49 @@ public class StaffMemberRepository : BaseRepository<StaffMember, StaffMemberId>,
 
     public async Task<List<StaffMember>> GetByQualificationsAsync(List<QualificationId> ids)
     {
+        var idValues = ids.Select(id => id.Value).ToList();
         return await _staffMembers
             .Include(s => s.Qualifications)
-            .Where(s => s.Qualifications.Any(q => ids.Contains(q.Id)))
+            .Where(s => s.Qualifications.Any(q => idValues.Contains(q.Value)))
             .ToListAsync();
+
     }
 
     public async Task<List<StaffMember>> GetByExactQualificationsAsync(List<QualificationId> ids)
     {
-        return await _staffMembers
+        var idValues = ids.Select(id => id.Value).ToList();
+
+        var staffMembers = await _staffMembers
             .Include(s => s.Qualifications)
-            .Where(s =>
-                s.Qualifications.Count == ids.Count &&
-                ids.All(qualId => s.Qualifications.Any(q => q.Id == qualId))
-            )
+            .Where(s => s.Qualifications.Count() == idValues.Count())
             .ToListAsync();
+        
+        //Console.WriteLine(staffMembers[0].Qualifications.Count());
+        foreach (var id in ids)
+            Console.WriteLine(id.Value);
+        {
+            
+        }
+        Console.WriteLine(ids.Count());
+
+        var filtered = staffMembers.Where(s =>
+            s.Qualifications.Select(q => q.Value).OrderBy(x => x)
+                .SequenceEqual(idValues.OrderBy(x => x))).ToList();
+
+        return filtered;
+    }
+
+
+    public async Task<bool> EmailIsInTheSystem(Email email)
+    {
+        return await _staffMembers
+            .AnyAsync(s => s.Email.Address.Equals(email.Address));
+    }
+
+    public async Task<bool> PhoneIsInTheSystem(PhoneNumber phone)
+    {
+        
+        return await _staffMembers
+            .AnyAsync(s => s.Phone.Number.Equals(phone.Number));
     }
 }

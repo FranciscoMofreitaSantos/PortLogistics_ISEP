@@ -77,19 +77,34 @@ public class TaxNumber : IValueObject
             throw new ArgumentException($"Invalid {CountryCode} tax number format: {Value}");
     }
 
+    public static TaxNumber FromString(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ArgumentException("Tax number cannot be null or empty.", nameof(value));
+
+        return new TaxNumber(value);
+    }
+
     public override string ToString() => Value;
 
-    public static bool TryParse(string input, out TaxNumber? result)
+    public static bool TryParse(string? input, out TaxNumber? result)
+{
+    result = null;
+
+    if (string.IsNullOrWhiteSpace(input))
+        return false;
+
+    try
     {
-        try
-        {
-            result = new TaxNumber(input);
-            return true;
-        }
-        catch
-        {
-            result = null;
-            return false;
-        }
+        result = new TaxNumber(input);
+        return true;
     }
+    catch
+    {
+        // Any exception means parsing failed
+        result = null;
+        return false;
+    }
+}
+   
 }

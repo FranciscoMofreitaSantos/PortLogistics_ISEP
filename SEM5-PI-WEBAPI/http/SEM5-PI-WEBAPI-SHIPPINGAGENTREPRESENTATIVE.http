@@ -1,0 +1,87 @@
+@portURL = http://localhost:5008
+
+### --- SHIPPING AGENT ORGANIZATION ---
+
+###
+GET {{portURL}}/api/ShippingAgentRepresentative
+Accept: application/json
+
+###
+GET {{portURL}}/api/ShippingAgentRepresentative/name/Alexandre
+Accept: application/json
+
+###
+GET {{portURL}}/api/ShippingAgentRepresentative/email/alexandre@gmail.com
+Accept: application/json
+
+###
+GET {{portURL}}/api/ShippingAgentRepresentative/status/activated
+Accept: application/json
+
+###
+POST {{portURL}}/api/ShippingAgentRepresentative
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Name": "Alexandre",
+  "CitizenId": "111111",
+  "Nationality": "Portuguese",
+  "Email": "alexandre@gmail.com",
+  "PhoneNumber": "987654321",
+  "Status": "activated",
+  "SAO": "1234567890"
+}
+
+###
+POST {{portURL}}/api/ShippingAgentRepresentative
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Name": "Alexandre2",
+  "CitizenId": "111111",
+  "Nationality": "Portuguese",
+  "Email": "alexandre@gmail.com",
+  "PhoneNumber": "987654321",
+  "Status": "activated",
+  "SAO": "1234567890"
+}
+
+### Update representative status by name (1)
+PATCH {{portURL}}/api/ShippingAgentRepresentative/update/Alexandre
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Status": "deactivated"
+}
+
+### Update representative status by name (2)
+PATCH {{portURL}}/api/ShippingAgentRepresentative/update/Alexandre
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Status": "activated"
+}
+
+### Update representative status by email (1)
+PATCH {{portURL}}/api/ShippingAgentRepresentative/update/Alexandre
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Email": "alexandre@gmail.com"
+}
+
+### Update representative status by email (2)
+PATCH {{portURL}}/api/ShippingAgentRepresentative/update/Alexandre
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Email": "alexandre.costa@gmail.com"
+}
+
+

@@ -36,6 +36,7 @@ using SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Infraestructure.StorageAreas;
 using SEM5_PI_WEBAPI.Infraestructure.Tasks;
 using SEM5_PI_WEBAPI.Infraestructure.VVN;
+using SEM5_PI_WEBAPI.Seed;
 
 namespace SEM5_PI_WEBAPI
 {
@@ -90,22 +91,22 @@ namespace SEM5_PI_WEBAPI
             services.AddTransient<IUnitOfWork, UnitOfWork>();
 
             services.AddTransient<IQualificationRepository, QualificationRepository>();
-            services.AddTransient<QualificationService>();
+            services.AddScoped<IQualificationService, QualificationService>();
 
             services.AddTransient<IVesselTypeRepository, VesselTypeRepository>();
             services.AddScoped<IVesselTypeService,VesselTypeService>();
 
             services.AddTransient<IStaffMemberRepository, StaffMemberRepository>();
-            services.AddTransient<StaffMemberService>();
+            services.AddScoped<IStaffMemberService, StaffMemberService>();
 
             services.AddTransient<IVesselRepository, VesselRepository>();
             services.AddScoped<IVesselService,VesselService>();
 
             services.AddTransient<IShippingAgentOrganizationRepository, ShippingAgentOrganizationRepository>();
-            services.AddTransient<ShippingAgentOrganizationService>();
+            services.AddScoped<IShippingAgentOrganizationService,ShippingAgentOrganizationService>();
 
             services.AddTransient<IShippingAgentRepresentativeRepository, ShippingAgentRepresentativeRepository>();
-            services.AddTransient<ShippingAgentRepresentativeService>();
+            services.AddScoped<IShippingAgentRepresentativeService,ShippingAgentRepresentativeService>();
 
 
             services.AddTransient<IStorageAreaRepository, StorageAreaRepository>();
@@ -120,10 +121,9 @@ namespace SEM5_PI_WEBAPI
             services.AddScoped<IContainerService, ContainerService>();
             
             services.AddTransient<ICargoManifestEntryRepository, CargoManifestEntryRepository>();
-            services.AddTransient<CargoManifestService>();
             
             services.AddTransient<IPhysicalResourceRepository, PhysicalResourceRepository>();
-            services.AddTransient<PhysicalResourceService>();
+            services.AddScoped<IPhysicalResourceService, PhysicalResourceService>();
             
             services.AddTransient<IVesselVisitNotificationRepository, VesselVisitNotificationRepository>();
             services.AddScoped<IVesselVisitNotificationService,VesselVisitNotificationService>();
@@ -133,6 +133,8 @@ namespace SEM5_PI_WEBAPI
             services.AddTransient<ICrewManifestRepository, CrewManifestRepository>();
 
             services.AddTransient<ITaskRepository,TaskRepository>();
+            
+            services.AddTransient<Bootstrap>();
         }
     }
 }

@@ -1,11 +1,12 @@
-﻿Write-Host "Deleting database and migrations..."
-Remove-Item ../SEM5-PI-WEBAPI.db -ErrorAction Ignore
-Remove-Item -Recurse -Force ../Migrations -ErrorAction Ignore
+﻿Write-Host "Deleting database and migrations..." -ForegroundColor Red
 
-Write-Host "Creating initial migration..."
+Remove-Item -Path "SEM5-PI-WEBAPI.db" -ErrorAction SilentlyContinue
+Remove-Item -Path "Migrations" -Recurse -Force -ErrorAction SilentlyContinue
+
+Write-Host "Creating initial migration..." -ForegroundColor Yellow
 dotnet ef migrations add Initial
 
-Write-Host "Applying migration..."
+Write-Host "Applying migration..." -ForegroundColor Cyan
 dotnet ef database update
 
-Write-Host "Database cleaned and recreated successfully!"
+Write-Host " Database cleaned and recreated!" -ForegroundColor Green

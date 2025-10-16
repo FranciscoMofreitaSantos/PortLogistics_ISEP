@@ -60,7 +60,7 @@ Accept: application/json
   "imoNumber": "IMO 9876543",
   "name": "Ever Given",
   "owner": "Evergreen Marine",
-  "vesselTypeId": "5e9bf997-966d-43f6-a6fb-c23afbe7e8cf"
+  "vesselTypeName": "Panamax"
 }
 
 ###
@@ -73,7 +73,7 @@ Accept: application/json
   "imoNumber": "IMO 9399014",
   "name": "MSC Gülsün",
   "owner": "Mediterranean Shipping Company",
-  "vesselTypeId": "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
+  "vesselTypeName": "Panamax"
 }
 
 ###
@@ -86,7 +86,7 @@ Accept: application/json
   "imoNumber": "IMO 9706901",
   "name": "OOCL Hong Kong",
   "owner": "OOCL",
-  "vesselTypeId": "c7798221-c758-47fd-a343-21d49b78c806"
+  "vesselTypeName": "Panamax"
 }
 
 
@@ -100,7 +100,7 @@ Accept: application/json
   "imoNumber": "IMO 9319466", 
   "name": "Duplicate Ever Given",
   "owner": "Evergreen Marine",
-  "vesselTypeId": "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
+  "vesselTypeName": "Panamax"
 }
 
 ###
@@ -112,7 +112,7 @@ Accept: application/json
 {
   "imoNumber": "IMO 9999999",
   "owner": "NoName Shipping",
-  "vesselTypeId": "b928c0c9-90c8-4e41-9a6d-59ec1ffef048"
+  "vesselTypeName": "Panamax8"
 }
 
 ###
@@ -125,7 +125,7 @@ Accept: application/json
   "imoNumber": "12345", 
   "name": "Invalid IMO",
   "owner": "Bad Company",
-  "vesselTypeId": "c7798221-c758-47fd-a343-21d49b78c806"
+  "vesselTypeName": "Panamax"
 }
 
 

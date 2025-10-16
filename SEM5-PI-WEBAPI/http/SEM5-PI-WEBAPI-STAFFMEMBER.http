@@ -2,59 +2,86 @@
 
 ### --- STAFF MEMBERS ---
 
-###
+### --- Get All
 GET {{portURL}}/api/StaffMembers
 Accept: application/json
 
-###
-GET {{portURL}}/api/StaffMembers/by-qualifications?ids=0d868c4e-2c92-4d4d-9cab-70c549e839d0
+### --- Get by qualification (at least one of the list)
+GET {{portURL}}/api/StaffMembers/by-qualifications
+Content-Type: application/json
 Accept: application/json
 
-###
-GET {{portURL}}/api/StaffMembers/by-exact-qualifications?ids=0d868c4e-2c92-4d4d-9cab-70c549e839d0&ids=d3419e74-9413-460e-916f-c420876c5dc6
+{
+  "qualificationsCodes": [
+    "QLF-001"
+  ]
+}
+
+### --- Get by exact qualifications
+GET {{portURL}}/api/StaffMembers/by-exact-qualifications
+Content-Type: application/json
 Accept: application/json
 
+{
+  "qualificationsCodes": [
+    "QLF-001",
+    "QLF-002"
+  ]
+}
 
 
-###
-GET {{portURL}}/api/StaffMembers/6d5045ef-e932-425f-91cb-becd305312af
+### --- Get by database id
+GET {{portURL}}/api/StaffMembers/8977010e-da0b-467d-aea3-3627e7180a2f
 Accept: application/json
 
-###
+### --- Get by mec number
 GET {{portURL}}/api/StaffMembers/mec/1250001
 Accept: application/json
 
-###
+### --- Get by Name
 GET {{portURL}}/api/StaffMembers/name/Paulo Mendes
 Accept: application/json
 
-###
+### --- Get by status
 GET {{portURL}}/api/StaffMembers/status/true
 Accept: application/json
 
-###
+### 
 POST {{portURL}}/api/StaffMembers
 Content-Type: application/json
 Accept: application/json
 
 {
   "shortName": "Paulo Mendes",
-  "email": { "address": "mendy@gmail.com" },
-  "phone": { "number": "+351912345678" },
-  "schedule": { "shift": "Morning", "days": 31 },
+  "email": "mendy@gmail.com" ,
+  "phone": "+351912345678" ,
+  "schedule": 
+    { 
+      "shift": "Morning",
+      "daysOfWeek": "0011111"
+    },
   "isActive": true,
-  "qualificationIds": ["d3419e74-9413-460e-916f-c420876c5dc6", "0d868c4e-2c92-4d4d-9cab-70c549e839d0"]
+  "qualificationCodes": ["QLF-001", "QLF-002"]
 }
 
+
 ###
-PATCH {{portURL}}/api/StaffMembers/6d5045ef-e932-425f-91cb-becd305312af
+PUT {{portURL}}/api/StaffMembers/update
 Content-Type: application/json
 Accept: application/json
 
 {
-  "email": { "address": "mendy-updated@gmail.com" }
+  "MecNumber": "1250001",
+  "Email": "mendy_updated@gmail.com",
+  "Schedule": {
+    "Shift": "Morning",
+    "DaysOfWeek": "1010101"
+  },
+  "qualificationCodes": ["QLF-007"],
+  "addQualifications" : "false"
 }
 
+
 ###
-PATCH {{portURL}}/api/StaffMembers/6d5045ef-e932-425f-91cb-becd305312af/toggle
+PUT {{portURL}}/api/StaffMembers/toggle/1250001
 Accept: application/json
