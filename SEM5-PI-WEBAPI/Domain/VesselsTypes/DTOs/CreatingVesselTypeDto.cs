@@ -8,6 +8,8 @@ namespace SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs
         public int MaxRows { get; set; }
         public int MaxTiers { get; set; }
 
+        public CreatingVesselTypeDto() { }
+
         public CreatingVesselTypeDto(string nameIn,string? descriptionIn, int maxBaysIn,int maxRowsIn ,int maxTiersIn)
         {
             Name = nameIn;

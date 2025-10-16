@@ -27,7 +27,6 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             _controller = new VesselController(_service, _controllerLogger.Object);
         }
 
-
         [Fact]
         public async Task GetAll_ShouldReturnOk_WhenVesselsExist()
         {
@@ -47,7 +46,6 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             Assert.Contains(data, v => v.Name == "Poseidon");
         }
 
-
         [Fact]
         public async Task GetById_ShouldReturnNotFound_WhenVesselDoesNotExist()
         {
@@ -60,18 +58,17 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             Assert.Contains("No Vessel Found", notFound.Value!.ToString());
         }
 
-
         [Fact]
         public async Task Create_ShouldReturnCreated_WhenValidData()
         {
-            var vesselTypeId = new VesselTypeId(Guid.NewGuid());
-            var dto = new CreatingVesselDto("IMO 1111117", "Aurora", "GlobalMarine", vesselTypeId.Value.ToString());
+            var vesselType = new VesselType("Cargo", 5, 5, 5, "Cargo vessel type");
+            var dto = new CreatingVesselDto("IMO 1111117", "Aurora", "GlobalMarine", vesselType.Name);
 
             _vesselRepoMock.Setup(r => r.GetByImoNumberAsync(It.IsAny<ImoNumber>()))
                            .ReturnsAsync((Vessel)null);
 
-            _vesselTypeRepoMock.Setup(r => r.GetByIdAsync(dto.VesselTypeId))
-                               .ReturnsAsync(new VesselType("Cargo", 5, 5, 5, "Cargo vessel type"));
+            _vesselTypeRepoMock.Setup(r => r.GetByNameAsync(dto.VesselTypeName))
+                               .ReturnsAsync(vesselType);
 
             _vesselRepoMock.Setup(r => r.AddAsync(It.IsAny<Vessel>()))
                            .ReturnsAsync((Vessel v) => v);
@@ -90,18 +87,37 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task Create_ShouldReturnBadRequest_WhenImoAlreadyExists()
         {
-            var vesselTypeId = new VesselTypeId(Guid.NewGuid());
-            var dto = new CreatingVesselDto("IMO 1111117", "Atlantis", "SeaCorp", vesselTypeId.Value.ToString());
+            var vesselType = new VesselType("Cargo", 5, 5, 5, "Cargo vessel type");
+            var dto = new CreatingVesselDto("IMO 1111117", "Atlantis", "SeaCorp", vesselType.Name);
+
+            var existingVessel = new Vessel(dto.ImoNumber, dto.Name, dto.Owner, new VesselTypeId(Guid.NewGuid()));
 
             _vesselRepoMock.Setup(r => r.GetByImoNumberAsync(It.IsAny<ImoNumber>()))
-                           .ReturnsAsync(new Vessel(dto.ImoNumber, dto.Name, dto.Owner, dto.VesselTypeId));
+                           .ReturnsAsync(existingVessel);
 
             var result = await _controller.CreateAsync(dto);
 
             var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Contains("already exists", badRequest.Value!.ToString());
         }
-        
+
+        [Fact]
+        public async Task Create_ShouldReturnBadRequest_WhenVesselTypeDoesNotExist()
+        {
+            var dto = new CreatingVesselDto("IMO 1111117", "Odyssey", "SeaTrade", "NonExistentType");
+
+            _vesselRepoMock.Setup(r => r.GetByImoNumberAsync(It.IsAny<ImoNumber>()))
+                           .ReturnsAsync((Vessel)null);
+
+            _vesselTypeRepoMock.Setup(r => r.GetByNameAsync(dto.VesselTypeName))
+                               .ReturnsAsync((VesselType)null);
+
+            var result = await _controller.CreateAsync(dto);
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Contains("doesn't exists", badRequest.Value!.ToString());
+        }
+
         [Fact]
         public async Task GetByImo_ShouldReturnOk_WhenVesselExists()
         {
@@ -127,7 +143,6 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             var notFound = Assert.IsType<NotFoundObjectResult>(result.Result);
             Assert.Contains("No Vessel Found", notFound.Value!.ToString());
         }
-
 
         [Fact]
         public async Task PatchByImo_ShouldReturnOk_WhenUpdatedSuccessfully()
