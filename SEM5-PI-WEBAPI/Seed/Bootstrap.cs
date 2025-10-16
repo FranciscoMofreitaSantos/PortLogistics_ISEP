@@ -8,6 +8,8 @@ using SEM5_PI_WEBAPI.Domain.Vessels;
 using SEM5_PI_WEBAPI.Domain.Vessels.DTOs;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs;
+using SEM5_PI_WEBAPI.Domain.VVN;
+using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
 
 namespace SEM5_PI_WEBAPI.Seed;
 
@@ -18,6 +20,7 @@ public class Bootstrap
     private readonly IShippingAgentOrganizationService _shippingAgentOrganizationService;
     private readonly IQualificationService _qualificationService;
     private readonly IStaffMemberService _staffMemberService;
+    private readonly IVesselVisitNotificationService _vesselVisitNotificationService;
     private readonly ILogger<Bootstrap> _logger;
 
     // Cache local
@@ -29,6 +32,7 @@ public class Bootstrap
         IVesselTypeService vesselTypeService,
         IVesselService vesselService,
         IShippingAgentOrganizationService shippingAgentOrganizationService,
+        IVesselVisitNotificationService vesselVisitNotificationService,
         IQualificationService qualificationService,
         IStaffMemberService staffMemberService)
     {
@@ -38,6 +42,7 @@ public class Bootstrap
         _shippingAgentOrganizationService = shippingAgentOrganizationService;
         _qualificationService = qualificationService;
         _staffMemberService = staffMemberService;
+        _vesselVisitNotificationService = vesselVisitNotificationService;
     }
 
     public async Task SeedAsync()
@@ -49,11 +54,13 @@ public class Bootstrap
         await SeedShippingAgentOrganizationsAsync("Seed/ShippingAgents.json");
         await SeedQualificationsAsync("Seed/Qualifications.json");
         await SeedStaffMembersAsync("Seed/StaffMembers.json");
+        await SeedVesselVisitNotificationsAsync("Seed/VesselVisitNotifications.json");
+        
 
         _logger.LogInformation("[Bootstrap] JSON data seeding completed successfully.");
     }
 
-    
+
     // ===============================================================
     // JSON SEED HELPERS
     // ===============================================================
@@ -92,7 +99,8 @@ public class Bootstrap
             try
             {
                 await _vesselService.CreateAsync(dto);
-                _logger.LogInformation("[Bootstrap] Vessel '{Name}' ({IMO}) created successfully.", dto.Name, dto.ImoNumber);
+                _logger.LogInformation("[Bootstrap] Vessel '{Name}' ({IMO}) created successfully.", dto.Name,
+                    dto.ImoNumber);
             }
             catch (Exception ex)
             {
@@ -114,7 +122,8 @@ public class Bootstrap
             {
                 var created = await _shippingAgentOrganizationService.CreateAsync(dto);
                 _saoList.Add(created);
-                _logger.LogInformation("[Bootstrap] SAO '{AltName}' ({TaxNumber}) created successfully.", dto.AltName, dto.Taxnumber);
+                _logger.LogInformation("[Bootstrap] SAO '{AltName}' ({TaxNumber}) created successfully.", dto.AltName,
+                    dto.Taxnumber);
             }
             catch (Exception ex)
             {
@@ -160,12 +169,34 @@ public class Bootstrap
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("[Bootstrap] Could not add Staff Member '{ShortName}': {Message}", dto.ShortName, ex.Message);
+                _logger.LogWarning("[Bootstrap] Could not add Staff Member '{ShortName}': {Message}", dto.ShortName,
+                    ex.Message);
+            }
+        }
+    }
+    private async Task SeedVesselVisitNotificationsAsync(string filePath)
+    {
+        _logger.LogInformation("[Bootstrap] Loading Vessel Visit Notifications from {Path}", filePath);
+
+        var vvn = await LoadJsonAsync<CreatingVesselVisitNotificationDto>(filePath);
+        if (vvn == null) return;
+
+        foreach (var v in vvn)
+        {
+            try
+            {
+                var r = await _vesselVisitNotificationService.AddAsync(v);
+                _logger.LogInformation("[Bootstrap] Vessel Visit Notification '{id}' created successfully.", r.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("[Bootstrap] Could not add Vessel Visit Notification: {Message}",
+                    ex.Message);
             }
         }
     }
 
-    
+
     // ===============================================================
     // GENERIC JSON LOADER
     // ===============================================================

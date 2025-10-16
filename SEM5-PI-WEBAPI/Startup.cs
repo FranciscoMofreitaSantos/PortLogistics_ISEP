@@ -121,10 +121,9 @@ namespace SEM5_PI_WEBAPI
             services.AddScoped<IContainerService, ContainerService>();
             
             services.AddTransient<ICargoManifestEntryRepository, CargoManifestEntryRepository>();
-            services.AddTransient<CargoManifestService>();
             
             services.AddTransient<IPhysicalResourceRepository, PhysicalResourceRepository>();
-            services.AddTransient<PhysicalResourceService>();
+            services.AddScoped<IPhysicalResourceService, PhysicalResourceService>();
             
             services.AddTransient<IVesselVisitNotificationRepository, VesselVisitNotificationRepository>();
             services.AddScoped<IVesselVisitNotificationService,VesselVisitNotificationService>();

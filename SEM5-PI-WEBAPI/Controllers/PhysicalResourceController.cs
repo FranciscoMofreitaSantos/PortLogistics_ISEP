@@ -17,9 +17,9 @@ public class PhysicalResourceController : ControllerBase
         { "description", "operationalCapacity", "setupTime", "qualificationId" };
 
     
-    private readonly PhysicalResourceService  _service;
+    private readonly IPhysicalResourceService  _service;
 
-    public PhysicalResourceController(PhysicalResourceService service)
+    public PhysicalResourceController(IPhysicalResourceService service)
     {
         _service = service;
     }

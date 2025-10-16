@@ -872,7 +872,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         {
             var container = await GetOrCreateContainerAsync(entryDto.Container);
 
-            var storageAreaId = await GetStorageAreaId(entryDto.StorageAreaId);
+            var storageAreaId = await GetStorageAreaId(entryDto.StorageAreaName);
 
             var entry = new CargoManifestEntry(container, storageAreaId, entryDto.Bay, entryDto.Row, entryDto.Tier);
 
@@ -891,16 +891,16 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     }
 
 
-    private async Task<StorageAreaId> GetStorageAreaId(Guid entryDtoStorageAreaId)
+    private async Task<StorageAreaId> GetStorageAreaId(string entryDtoStorageAreaName)
     {
-        if (entryDtoStorageAreaId == Guid.Empty)
+        if (entryDtoStorageAreaName.IsNullOrEmpty())
             throw new BusinessRuleValidationException("Storage area Id cannot be empty.");
 
-        var storageArea = await _storageAreaRepository.GetByIdAsync(new StorageAreaId(entryDtoStorageAreaId));
+        var storageArea = await _storageAreaRepository.GetByNameAsync(entryDtoStorageAreaName);
 
         if (storageArea == null)
             throw new BusinessRuleValidationException(
-                $"Storage Area with Id [{entryDtoStorageAreaId}] not found in the database.");
+                $"Storage Area with Name [{entryDtoStorageAreaName}] not found in the database.");
 
         return storageArea.Id;
     }

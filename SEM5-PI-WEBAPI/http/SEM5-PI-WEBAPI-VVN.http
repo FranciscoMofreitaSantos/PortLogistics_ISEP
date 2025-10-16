@@ -26,7 +26,7 @@ Accept: {{accept}}
       },
       {
         "name": "Anna Becker",
-        "role": "ChiefEngineer",
+        "role": "SafetyOfficer",
         "nationality": "Peru",
         "citizenId": "B98765"
       }
@@ -41,7 +41,7 @@ Accept: {{accept}}
         "bay": 2,
         "row": 3,
         "tier": 4,
-        "storageAreaId": "e6ced4ab-2901-4d7f-b8c0-d2a32fe506d6",
+        "storageAreaName": "Yard B",
         "container": {
           "isoCode": "MSCU6639870",
           "description": "Perishable frozen food cargo",

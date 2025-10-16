@@ -81,7 +81,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "description": "Dock Crane A",
+  "description": "Volvo Truck",
   "operationalCapacity": 25.5,
   "setupTime": 10,
   "physicalResourceType": "Truck",
