@@ -1,5 +1,4 @@
-namespace SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
-using SEM5_PI_WEBAPI.Domain.ValueObjects;
+namespace SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations.DTOs;
 
 public class CreatingShippingAgentOrganizationDto
 {

@@ -6,7 +6,7 @@ using SEM5_PI_WEBAPI.Domain.VVN;
 
 namespace SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 
-public class ShippingAgentRepresentativeService
+public class ShippingAgentRepresentativeService : IShippingAgentRepresentativeService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IShippingAgentRepresentativeRepository _repo;

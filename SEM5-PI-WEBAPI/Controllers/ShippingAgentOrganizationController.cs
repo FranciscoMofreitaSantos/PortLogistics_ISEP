@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations.DTOs;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Controllers;
@@ -11,9 +12,9 @@ public class ShippingAgentOrganizationController : ControllerBase
 {
     private readonly ILogger<ShippingAgentOrganizationController> _logger;
 
-    private readonly ShippingAgentOrganizationService _service;
+    private readonly IShippingAgentOrganizationService _service;
 
-    public ShippingAgentOrganizationController(ShippingAgentOrganizationService service,ILogger<ShippingAgentOrganizationController> logger)
+    public ShippingAgentOrganizationController(IShippingAgentOrganizationService service,ILogger<ShippingAgentOrganizationController> logger)
     {
         _logger = logger;
         _service = service;

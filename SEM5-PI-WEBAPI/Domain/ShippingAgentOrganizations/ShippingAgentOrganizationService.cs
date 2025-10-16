@@ -1,9 +1,10 @@
 using SEM5_PI_WEBAPI.Domain.Shared;
+using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations.DTOs;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
 namespace SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 
-public class ShippingAgentOrganizationService
+public class ShippingAgentOrganizationService: IShippingAgentOrganizationService
 {
     private readonly ILogger<ShippingAgentOrganizationService> _logger;
     private readonly IUnitOfWork _unitOfWork;

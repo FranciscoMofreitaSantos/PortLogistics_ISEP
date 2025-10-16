@@ -9,10 +9,10 @@ namespace SEM5_PI_WEBAPI.Controllers;
 [ApiController]
 public class ShippingAgentRepresentativeController : ControllerBase
 {
-    private readonly ShippingAgentRepresentativeService _service;
+    private readonly IShippingAgentRepresentativeService _service;
     private readonly ILogger<ShippingAgentRepresentativeController> _logger;
 
-    public ShippingAgentRepresentativeController(ShippingAgentRepresentativeService service, ILogger<ShippingAgentRepresentativeController> logger)
+    public ShippingAgentRepresentativeController(IShippingAgentRepresentativeService service, ILogger<ShippingAgentRepresentativeController> logger)
     {
         _logger = logger;
         _service = service;
