@@ -1,12 +1,7 @@
 [
-  { "name": "Nautical Science", "code": "NAS-001" },
-  { "name": "Marine Engineering", "code": "MAE-001" },
-  { "name": "Port Operations", "code": "POO-001" },
-  { "name": "Logistics Management", "code": "LOM-001" },
-  { "name": "Maritime Safety", "code": "MAS-001" },
-  { "name": "Ship Navigation", "code": "SHN-001" },
-  { "name": "Cargo Handling", "code": "CAH-001" },
-  { "name": "Environmental Protection", "code": "ENP-001" },
-  { "name": "Maritime Law", "code": "MAL-001" },
-  { "name": "Fleet Management", "code": "FLM-001" }
+  { "name": "Truck Driver", "code": "TRK-001" },
+  { "name": "STS Crane Operator", "code": "STS-001" },
+  { "name": "Forklift Operator", "code": "FLK-001" },
+  { "name": "Port Security Specialist", "code": "PSS-001" },
+  { "name": "Harbor Pilot", "code": "HBP-001" }
 ]

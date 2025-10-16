@@ -47,7 +47,7 @@ namespace SEM5_PI_WEBAPI
                             e.Properties["SourceContext"].ToString().Contains("SEM5_PI_WEBAPI.Controllers") ||
                             e.Properties["SourceContext"].ToString().Contains("SEM5_PI_WEBAPI.Domain") ||
                             e.Properties["SourceContext"].ToString().Contains("RequestLogsMiddleware") ||
-                            e.Properties["SourceContext"].ToString().Contains("SEM5_PI_WEBAPI.Bootstrap")
+                            e.Properties["SourceContext"].ToString().Contains("SEM5_PI_WEBAPI.Seed")
                             )
                         )
                         .WriteTo.Console(
@@ -63,7 +63,7 @@ namespace SEM5_PI_WEBAPI
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(e=>
                         e.Properties.ContainsKey("SourceContext") && (
-                            e.Properties["SourceContext"].ToString().Contains("SEM5_PI_WEBAPI.Bootstrap")
+                            e.Properties["SourceContext"].ToString().Contains("SEM5_PI_WEBAPI.Seed")
                             )
                     )
                     .WriteTo.File("Logs/Bootstrap/bootstrap-.log",

@@ -84,15 +84,8 @@ public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
     
     public void SetQualifications(IEnumerable<QualificationId> qualificationIds)
     {
-        var toRemove = _qualifications.Where(q => !qualificationIds.Contains(q)).ToList();
-        foreach (var q in toRemove)
-            _qualifications.Remove(q);
-        
-        foreach (var q in qualificationIds)
-        {
-            if (!_qualifications.Contains(q))
-                _qualifications.Add(q);
-        }
+        _qualifications.Clear();
+        _qualifications.AddRange(qualificationIds);
     }
 
 
