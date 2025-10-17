@@ -853,7 +853,6 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
         var crewManifest = new CrewManifest(dto.TotalCrew, dto.CaptainName, crewMembers);
         await _crewManifestRepository.AddAsync(crewManifest);
-        //await _unitOfWork.CommitAsync();
 
         return crewManifest;
     }
@@ -870,7 +869,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
         foreach (var entryDto in dto.Entries)
         {
-            var container = await GetOrCreateContainerAsync(entryDto.Container);
+            var container = await CreateContainerAsync(entryDto.Container);
 
             var storageAreaId = await GetStorageAreaId(entryDto.StorageAreaName);
 
@@ -885,7 +884,6 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             new CargoManifest(entries, generatedCode, dto.Type, DateTime.UtcNow, new Email(dto.CreatedBy));
 
         await _cargoManifestRepository.AddAsync(cargoManifest);
-        //await _unitOfWork.CommitAsync();
 
         return cargoManifest;
     }
@@ -906,13 +904,10 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     }
 
 
-    private async Task<EntityContainer> GetOrCreateContainerAsync(CreatingContainerDto containerDto)
+    private async Task<EntityContainer> CreateContainerAsync(CreatingContainerDto containerDto)
     {
-        var container = await _containerRepository.GetByIsoNumberAsync(new Iso6346Code(containerDto.IsoCode));
-        if (container != null)
-            return container;
-
-        container = new EntityContainer(
+        
+        var container = new EntityContainer(
             containerDto.IsoCode,
             containerDto.Description,
             containerDto.Type,
@@ -920,7 +915,6 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         );
 
         await _containerRepository.AddAsync(container);
-        //await _unitOfWork.CommitAsync();
         return container;
     }
 
