@@ -1,6 +1,8 @@
 ﻿using SEM5_PI_WEBAPI.Domain.Dock.DTOs;
+using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
+using SEM5_PI_WEBAPI.Domain.Vessels;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 
 namespace SEM5_PI_WEBAPI.Domain.Dock 
@@ -10,17 +12,20 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDockRepository _dockRepository;
         private readonly IVesselTypeRepository _vesselTypeRepository;
+        private readonly IPhysicalResourceRepository _physicalResourceRepository;
         private readonly ILogger<DockService> _logger;
 
         public DockService(
             IUnitOfWork unitOfWork,
             IDockRepository dockRepository,
             IVesselTypeRepository vesselTypeRepository,
+            IPhysicalResourceRepository physicalResourceRepository,
             ILogger<DockService> logger)
         {
             _unitOfWork = unitOfWork;
             _dockRepository = dockRepository;
             _vesselTypeRepository = vesselTypeRepository;
+            _physicalResourceRepository = physicalResourceRepository;
             _logger = logger;
         }
 
@@ -38,28 +43,27 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
             var code = new DockCode(dto.Code);
             var existing = await _dockRepository.GetByCodeAsync(code);
             if (existing is not null) throw new BusinessRuleValidationException($"Dock with code '{code.Value}' already exists.");
-
-            if (dto.PhysicalResourceCodes != null)
+            List<PhysicalResourceCode> prcList = new List<PhysicalResourceCode>();
+            foreach (var raw in dto.PhysicalResourceCodes) 
             {
-                foreach (var raw in dto.PhysicalResourceCodes)
-                {
                     var prc = new PhysicalResourceCode(raw);
+                    var physicalResource = await _physicalResourceRepository.GetByCodeAsync(prc);
+                    if (physicalResource == null) throw new BusinessRuleValidationException($"PhysicalResource with code '{prc.Value}' does not exist in DB.");
                     var existingPrc = await _dockRepository.GetByPhysicalResourceCodeAsync(prc);
                     if (existingPrc is not null)
-                        throw new BusinessRuleValidationException($"Dock with PhysicalResourceCode '{prc.Value}' already exists.");
-                }
+                        throw new BusinessRuleValidationException($"Dock with PhysicalResourceCode '{prc.Value}' already exists in DB.");
+                    prcList.Add(physicalResource.Code);
             }
-
-            if (dto.AllowedVesselTypeNames == null || !dto.AllowedVesselTypeNames.Any())
-                throw new BusinessRuleValidationException("At least one VesselTypeId is required.");
-
+            dto.PhysicalResourceCodesList = prcList;
+            
             List<VesselTypeId> vesselsTypes = new List<VesselTypeId>();
             foreach (var raw in dto.AllowedVesselTypeNames)
             {
                 var vt = await _vesselTypeRepository.GetByNameAsync(raw);
                 if (vt == null)
-                    throw new BusinessRuleValidationException($"VesselType '{raw}' does not exist.");
-                vesselsTypes.Add(vt.Id);
+                    throw new BusinessRuleValidationException($"VesselType '{raw}' does not exist in DB.");
+                //vesselsTypes.Add(vt.Id);
+                vesselsTypes.Add(new VesselTypeId(vt.Id.Value));
             }
 
             dto.VesselsTypesObjs = vesselsTypes;

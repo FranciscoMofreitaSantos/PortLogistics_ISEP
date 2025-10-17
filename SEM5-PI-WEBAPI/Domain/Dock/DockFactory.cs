@@ -8,12 +8,10 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
     {
         public static EntityDock RegisterDock(RegisterDockDto dto)
         {
-            var prcs = dto.PhysicalResourceCodes?.Select(x => new PhysicalResourceCode(x)).ToList()
-                       ?? new List<PhysicalResourceCode>();
-
+            
             return new EntityDock(
                 new DockCode(dto.Code),
-                prcs,
+                dto.PhysicalResourceCodesList,
                 dto.Location,
                 dto.LengthM,
                 dto.DepthM,

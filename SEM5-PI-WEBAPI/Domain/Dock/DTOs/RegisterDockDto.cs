@@ -1,4 +1,5 @@
-﻿using SEM5_PI_WEBAPI.Domain.VesselsTypes;
+﻿using SEM5_PI_WEBAPI.Domain.ValueObjects;
+using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 
 namespace SEM5_PI_WEBAPI.Domain.Dock.DTOs
 {
@@ -6,6 +7,7 @@ namespace SEM5_PI_WEBAPI.Domain.Dock.DTOs
     {
         public string Code { get; set; } = null!;
         public List<string> PhysicalResourceCodes { get; set; } = new();
+        public List<PhysicalResourceCode> PhysicalResourceCodesList { get; set; } 
         public string Location { get; set; } = null!;
         public double LengthM  { get; set; }
         public double DepthM   { get; set; }

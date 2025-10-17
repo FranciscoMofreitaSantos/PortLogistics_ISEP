@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SEM5_PI_WEBAPI.Domain.Dock;
-using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.Docks
 {
@@ -32,7 +31,6 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                    .HasMaxLength(20)
                    .IsRequired();
 
-            // PhysicalResourceCodes continua como OwnsMany (não é relação)
             builder.OwnsMany(d => d.PhysicalResourceCodes, prc =>
             {
                 prc.ToTable("DockPhysicalResourceCodes");
@@ -45,31 +43,23 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                 prc.HasIndex("DockId", "Value").IsUnique();
             });
 
-            
-            builder.Ignore(d => d.AllowedVesselTypeIds);
-            
-            builder
-                .HasMany<VesselType>()
-                .WithMany()
-                .UsingEntity<Dictionary<string, object>>(
-                    "Dock_VesselType",
-                    j => j
-                        .HasOne<VesselType>()
-                        .WithMany()
-                        .HasForeignKey("VesselTypeId")
-                        .HasConstraintName("FK_Dock_VesselType_VesselTypeId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    j => j
-                        .HasOne<EntityDock>()
-                        .WithMany()
-                        .HasForeignKey("DockId")
-                        .HasConstraintName("FK_Dock_VesselType_DockId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    j =>
-                    {
-                        j.HasKey("DockId", "VesselTypeId");
-                        j.ToTable("Dock_VesselType");
-                    });
+            builder.OwnsMany(d => d.AllowedVesselTypeIds, a =>
+            {
+                a.ToTable("DockAllowedVesselTypes");
+                a.WithOwner().HasForeignKey("DockId");
+
+                a.Property<Guid>("Id");
+                a.HasKey("Id");
+
+                a.Property(v => v.Value)
+                    .HasColumnName("VesselTypeId")
+                    .IsRequired();
+
+                a.HasIndex("DockId", "Value").IsUnique();
+            });
+
+            builder.Navigation(d => d.AllowedVesselTypeIds)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             builder.Navigation(d => d.PhysicalResourceCodes)
                 .UsePropertyAccessMode(PropertyAccessMode.Field);

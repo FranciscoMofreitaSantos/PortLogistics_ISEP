@@ -7,7 +7,7 @@ GET {{portURL}}/api/Dock
 Accept: application/json
 
 ### Get by Id
-GET {{portURL}}/api/Dock/id/ce588dc6-a706-4160-83e5-50eb8caf89e2
+GET {{portURL}}/api/Dock/id/0a7671cf-ff93-42e6-95b3-d00946d63273
 Accept: application/json
 
 ### Get by Code
@@ -15,10 +15,10 @@ GET {{portURL}}/api/Dock/code/DK-0001
 Accept: application/json
 
 ### Get by PhysicalResourceCode
-GET {{portURL}}/api/Dock/physical-code/ABC-1234
+GET {{portURL}}/api/Dock/physical-code/RSTAC-0001
 Accept: application/json
 
-### Get all Dock codes
+### Get all Dock codes tenho q ver
 GET {{portURL}}/api/Dock/codes
 Accept: application/json
 
