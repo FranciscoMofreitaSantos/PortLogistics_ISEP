@@ -31,7 +31,7 @@ public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>
     public ShippingAgentRepresentative(string name, CitizenId citizenId, Nationality nationality, string email, string phoneNumber,Status status, ShippingOrganizationCode sao)
     {
         if (!IsValidEmail(email))
-        throw new BusinessRuleValidationException("Invalid email format.");
+            throw new BusinessRuleValidationException("Invalid email format.");
 
         Name = name;
         CitizenId = citizenId;

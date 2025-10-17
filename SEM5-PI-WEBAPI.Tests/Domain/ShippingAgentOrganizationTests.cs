@@ -20,7 +20,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             Assert.Equal("Evergreen Marine Portugal", org.LegalName);
             Assert.Equal("Evergreen Shipping", org.AltName);
             Assert.Equal("Rua da Ria 45, Porto, Portugal", org.Address);
-            Assert.Equal(ValidTaxNumber, org.Taxnumber);
+            Assert.Equal(ValidTaxNumber.Value, org.Taxnumber.Value);
         }
 
         [Theory]

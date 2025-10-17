@@ -15,6 +15,9 @@ public class ShippingAgentOrganization : Entity<ShippingAgentOrganizationId>, IA
     public ShippingAgentOrganization(ShippingOrganizationCode shippingOrganizationCode,string legalName,string altName, string address, TaxNumber taxNumber)
     {
         ShippingOrganizationCode = shippingOrganizationCode;
+        if (string.IsNullOrWhiteSpace(legalName))
+            throw new BusinessRuleValidationException("Legal name cannot be empty.");
+
         LegalName = legalName;
         Address = address;
         Taxnumber = taxNumber;

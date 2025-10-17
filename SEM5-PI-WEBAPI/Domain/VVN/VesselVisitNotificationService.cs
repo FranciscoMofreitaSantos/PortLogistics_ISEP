@@ -83,8 +83,8 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         var crewManifest = await CreateCrewManifestAsync(dto.CrewManifest);
         await _unitOfWork.CommitAsync();
 
-        var vvnCode = await GenerateNextVvnCodeAsync();
         var vesselImo = await CheckForVesselInDb(dto.VesselImo);
+        var vvnCode = await GenerateNextVvnCodeAsync();
 
         if (unloadingCargoManifest != null)
             checkNeededPersonel(unloadingCargoManifest, crewManifest);

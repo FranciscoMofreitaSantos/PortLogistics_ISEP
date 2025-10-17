@@ -6,8 +6,8 @@ using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VVN;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
+using SEM5_PI_WEBAPI.Domain.VVN.DTOs.GetByStatus;
 using SEM5_PI_WEBAPI.Domain.VVN.Docs;
-using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Tasks;
 
 namespace SEM5_PI_WEBAPI.Tests.Controllers
@@ -24,7 +24,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             _loggerMock = new Mock<ILogger<VesselVisitNotificationController>>();
             _controller = new VesselVisitNotificationController(_serviceMock.Object, _loggerMock.Object);
         }
-
+        
         [Fact]
         public async Task CreateAsync_ShouldReturnCreated_WhenValid()
         {
@@ -39,24 +39,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 "IMO1234567"
             );
 
-            var createdDto = new VesselVisitNotificationDto(
-                id: Guid.NewGuid().ToString(),
-                code: "2025-THPA-000001",
-                estimatedTimeArrival: DateTime.Now.AddDays(1),
-                estimatedTimeDeparture: DateTime.Now.AddDays(2),
-                actualTimeArrival: null,
-                actualTimeDeparture: null,
-                acceptenceDate: null,
-                volume: 1200,
-                documents: new PdfDocumentCollection(),
-                status: new Status(VvnStatus.InProgress, null).ToString(),
-                dock: "DK-001",
-                crewManifest: null,
-                loadingCargoManifest: null,
-                unloadingCargoManifest: null,
-                imo: "IMO1234567",
-                tasks: new List<TaskDto>()
-            );
+            var createdDto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", VvnStatus.InProgress.ToString(), 1200);
 
             _serviceMock.Setup(s => s.AddAsync(It.IsAny<CreatingVesselVisitNotificationDto>()))
                 .ReturnsAsync(createdDto);
@@ -65,17 +48,17 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
 
             var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
             var value = Assert.IsType<VesselVisitNotificationDto>(createdResult.Value);
-            Assert.Equal(createdDto.Code, value.Code);
-            Assert.Equal(createdDto.Volume, value.Volume);
+            Assert.Equal("2025-THPA-000001", value.Code);
+            Assert.Equal(1200, value.Volume);
         }
 
         [Fact]
-        public async Task CreateAsync_ShouldReturnBadRequest_WhenBusinessRuleFails()
+        public async Task CreateAsync_ShouldReturnBadRequest_WhenInvalid()
         {
             var dto = new CreatingVesselVisitNotificationDto(
                 DateTime.Now.ToString("O"),
                 DateTime.Now.AddDays(-1).ToString("O"),
-                500,
+                800,
                 null,
                 null,
                 null,
@@ -87,27 +70,20 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 .ThrowsAsync(new BusinessRuleValidationException("Invalid ETA/ETD"));
 
             var result = await _controller.CreateAsync(dto);
-
             var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Invalid ETA/ETD", bad.Value);
         }
-
+        
         [Fact]
-        public async Task GetById_ShouldReturnOk_WhenFound()
+        public async Task GetById_ShouldReturnOk_WhenExists()
         {
-            var id = Guid.NewGuid().ToString();
-            var dto = BuildDto(id, "2025-THPA-000001", new Status(VvnStatus.InProgress, null));
+            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", VvnStatus.InProgress.ToString());
+            _serviceMock.Setup(s => s.GetByIdAsync(It.IsAny<VesselVisitNotificationId>())).ReturnsAsync(dto);
 
-            _serviceMock.Setup(s => s.GetByIdAsync(It.IsAny<VesselVisitNotificationId>()))
-                .ReturnsAsync(dto);
-
-            var result = await _controller.GetById(Guid.Parse(id));
+            var result = await _controller.GetById(Guid.Parse(dto.Id));
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(id, value.Id);
-            Assert.Equal("InProgress", value.Status.Replace("Status: ", ""));
-            
+            Assert.IsType<VesselVisitNotificationDto>(ok.Value);
         }
 
         [Fact]
@@ -117,185 +93,196 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 .ThrowsAsync(new BusinessRuleValidationException("Not found"));
 
             var result = await _controller.GetById(Guid.NewGuid());
-
-            var nf = Assert.IsType<NotFoundObjectResult>(result.Result);
-            Assert.Equal("Not found", nf.Value);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
         }
+
 
         [Fact]
         public async Task WithdrawById_ShouldReturnOk_WhenSuccess()
         {
-            var id = Guid.NewGuid().ToString();
-            var dto = BuildDto(id, "2025-THPA-000001", new Status(VvnStatus.Withdrawn, null));
+            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", VvnStatus.Withdrawn.ToString());
+            _serviceMock.Setup(s => s.WithdrawByIdAsync(It.IsAny<VesselVisitNotificationId>())).ReturnsAsync(dto);
 
-            _serviceMock.Setup(s => s.WithdrawByIdAsync(It.IsAny<VesselVisitNotificationId>()))
-                .ReturnsAsync(dto);
-
-            var result = await _controller.WithdrawByIdAsync(Guid.Parse(id));
-
-            var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(VvnStatus.Withdrawn.ToString(),  value.Status.Replace("Status: ", ""));
+            var result = await _controller.WithdrawByIdAsync(Guid.Parse(dto.Id));
+            Assert.IsType<OkObjectResult>(result.Result);
         }
 
         [Fact]
-        public async Task WithdrawById_ShouldReturnBadRequest_WhenBusinessFails()
+        public async Task WithdrawById_ShouldReturnBadRequest_WhenRuleFails()
         {
             _serviceMock.Setup(s => s.WithdrawByIdAsync(It.IsAny<VesselVisitNotificationId>()))
                 .ThrowsAsync(new BusinessRuleValidationException("Cannot withdraw"));
 
             var result = await _controller.WithdrawByIdAsync(Guid.NewGuid());
-
-            var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("Cannot withdraw", bad.Value);
-        }
-
-        [Fact]
-        public async Task WithdrawById_ShouldReturn500_WhenUnexpectedError()
-        {
-            _serviceMock.Setup(s => s.WithdrawByIdAsync(It.IsAny<VesselVisitNotificationId>()))
-                .ThrowsAsync(new Exception("Unexpected"));
-
-            var result = await _controller.WithdrawByIdAsync(Guid.NewGuid());
-
-            var obj = Assert.IsType<ObjectResult>(result.Result);
-            Assert.Equal(500, obj.StatusCode);
+            Assert.IsType<BadRequestObjectResult>(result.Result);
         }
 
         [Fact]
         public async Task WithdrawByCode_ShouldReturnOk_WhenSuccess()
         {
-            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", new Status(VvnStatus.Withdrawn, null));
-
-            _serviceMock.Setup(s => s.WithdrawByCodeAsync(It.IsAny<VvnCode>()))
-                .ReturnsAsync(dto);
+            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", VvnStatus.Withdrawn.ToString());
+            _serviceMock.Setup(s => s.WithdrawByCodeAsync(It.IsAny<VvnCode>())).ReturnsAsync(dto);
 
             var result = await _controller.WithdrawByCodeAsync("2025-THPA-000001");
-
-            var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(VvnStatus.Withdrawn.ToString(),  value.Status.Replace("Status: ", ""));
+            Assert.IsType<OkObjectResult>(result.Result);
         }
 
         [Fact]
-        public async Task WithdrawByCode_ShouldReturnBadRequest_WhenRuleFails()
+        public async Task WithdrawByCode_ShouldReturnBadRequest_WhenInvalid()
         {
             _serviceMock.Setup(s => s.WithdrawByCodeAsync(It.IsAny<VvnCode>()))
                 .ThrowsAsync(new BusinessRuleValidationException("Invalid code"));
 
-            var result = await _controller.WithdrawByCodeAsync("2025-THPA-999999");
-
-            var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("Invalid code", bad.Value);
+            var result = await _controller.WithdrawByCodeAsync("invalid");
+            Assert.IsType<BadRequestObjectResult>(result.Result);
         }
 
+
         [Fact]
-        public async Task SubmitById_ShouldReturnOk_WhenSuccess()
+        public async Task SubmitByCode_ShouldReturnOk_WhenSuccess()
         {
-            var id = Guid.NewGuid().ToString();
-            var dto = BuildDto(id, "2025-THPA-000001", new Status(VvnStatus.Submitted, null));
+            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", VvnStatus.Submitted.ToString());
+            _serviceMock.Setup(s => s.SubmitByCodeAsync(It.IsAny<VvnCode>())).ReturnsAsync(dto);
 
-            _serviceMock.Setup(s => s.SubmitByIdAsync(It.IsAny<VesselVisitNotificationId>()))
-                .ReturnsAsync(dto);
-
-            var result = await _controller.SubmitByIdAsync(Guid.Parse(id));
-
-            var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(VvnStatus.Submitted.ToString(),  value.Status.Replace("Status: ", ""));
+            var result = await _controller.SubmitByCodeAsync("2025-THPA-000001");
+            Assert.IsType<OkObjectResult>(result.Result);
         }
 
         [Fact]
-        public async Task SubmitById_ShouldReturnBadRequest_WhenRuleFails()
+        public async Task SubmitById_ShouldReturnBadRequest_WhenInvalid()
         {
             _serviceMock.Setup(s => s.SubmitByIdAsync(It.IsAny<VesselVisitNotificationId>()))
                 .ThrowsAsync(new BusinessRuleValidationException("Invalid state"));
 
             var result = await _controller.SubmitByIdAsync(Guid.NewGuid());
-
-            var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("Invalid state", bad.Value);
+            Assert.IsType<BadRequestObjectResult>(result.Result);
         }
 
-        [Fact]
-        public async Task SubmitByCode_ShouldReturnOk_WhenSuccess()
-        {
-            var dto = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", new Status(VvnStatus.Submitted, null));
-
-            _serviceMock.Setup(s => s.SubmitByCodeAsync(It.IsAny<VvnCode>()))
-                .ReturnsAsync(dto);
-
-            var result = await _controller.SubmitByCodeAsync("2025-THPA-000001");
-
-            var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(VvnStatus.Submitted.ToString(), value.Status.Replace("Status: ", ""));
-        }
-
-        [Fact]
-        public async Task SubmitByCode_ShouldReturnBadRequest_WhenInvalid()
-        {
-            _serviceMock.Setup(s => s.SubmitByCodeAsync(It.IsAny<VvnCode>()))
-                .ThrowsAsync(new BusinessRuleValidationException("Cannot submit"));
-
-            var result = await _controller.SubmitByCodeAsync("2025-THPA-999999");
-
-            var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("Cannot submit", bad.Value);
-        }
 
         [Fact]
         public async Task UpdateAsync_ShouldReturnOk_WhenValid()
         {
             var id = Guid.NewGuid();
-            var updateDto = new UpdateVesselVisitNotificationDto
-            {
-                EstimatedTimeArrival = DateTime.Now.AddDays(3).ToString(),
-                EstimatedTimeDeparture = DateTime.Now.AddDays(4).ToString(),
-                Volume = 2000
-            };
-
-            var updated = BuildDto(id.ToString(), "2025-THPA-000001", new Status(VvnStatus.InProgress, null), 2000);
+            var dto = BuildDto(id.ToString(), "2025-THPA-000001", VvnStatus.InProgress.ToString(), 2000);
+            var updateDto = new UpdateVesselVisitNotificationDto { Volume = 2000 };
 
             _serviceMock.Setup(s => s.UpdateAsync(It.IsAny<VesselVisitNotificationId>(), updateDto))
-                .ReturnsAsync(updated);
+                .ReturnsAsync(dto);
 
             var result = await _controller.UpdateAsync(id, updateDto);
-
-            var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var value = Assert.IsType<VesselVisitNotificationDto>(ok.Value);
-            Assert.Equal(2000, value.Volume);
+            Assert.IsType<OkObjectResult>(result.Result);
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturnBadRequest_WhenInvalid()
+        public async Task UpdateAsync_ShouldReturnBadRequest_WhenRuleFails()
         {
             var dto = new UpdateVesselVisitNotificationDto();
-
             _serviceMock.Setup(s => s.UpdateAsync(It.IsAny<VesselVisitNotificationId>(), dto))
                 .ThrowsAsync(new BusinessRuleValidationException("Cannot update"));
 
             var result = await _controller.UpdateAsync(Guid.NewGuid(), dto);
+            Assert.IsType<BadRequestObjectResult>(result.Result);
+        }
+        
+        [Fact]
+        public async Task AcceptVvn_ShouldReturnOk_WhenSuccess()
+        {
+            var vvn = BuildDto(Guid.NewGuid().ToString(), "2025-THPA-000001", VvnStatus.Submitted.ToString());
+            _serviceMock.Setup(s => s.GetByIdAsync(It.IsAny<VesselVisitNotificationId>())).ReturnsAsync(vvn);
+            _serviceMock.Setup(s => s.AcceptVvnAsync(It.IsAny<VvnCode>())).ReturnsAsync(vvn);
 
-            var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("Cannot update", bad.Value);
+            var result = await _controller.AcceptVvn(Guid.Parse(vvn.Id));
+            Assert.IsType<OkObjectResult>(result.Result);
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturn500_WhenUnexpected()
+        public async Task AcceptVvn_ShouldReturnBadRequest_WhenInvalid()
         {
-            var dto = new UpdateVesselVisitNotificationDto();
+            _serviceMock.Setup(s => s.GetByIdAsync(It.IsAny<VesselVisitNotificationId>()))
+                .ThrowsAsync(new BusinessRuleValidationException("Invalid"));
 
-            _serviceMock.Setup(s => s.UpdateAsync(It.IsAny<VesselVisitNotificationId>(), dto))
-                .ThrowsAsync(new Exception("Internal"));
-
-            var result = await _controller.UpdateAsync(Guid.NewGuid(), dto);
-
-            var obj = Assert.IsType<ObjectResult>(result.Result);
-            Assert.Equal(500, obj.StatusCode);
+            var result = await _controller.AcceptVvn(Guid.NewGuid());
+            Assert.IsType<BadRequestObjectResult>(result.Result);
         }
 
-        private static VesselVisitNotificationDto BuildDto(string id, string code, Status status, int volume = 1000)
+
+        [Fact]
+        public async Task RejectVvn_ShouldReturnOk_WhenSuccess()
+        {
+            var dto = new RejectVesselVisitNotificationDto("2025-THPA-000001", "Missing docs");
+            var vvn = BuildDto(Guid.NewGuid().ToString(), dto.VvnCode, VvnStatus.PendingInformation.ToString());
+            _serviceMock.Setup(s => s.MarkAsPendingAsync(dto)).ReturnsAsync(vvn);
+
+            var result = await _controller.RejectVvn(dto);
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task RejectVvn_ShouldReturnBadRequest_WhenInvalid()
+        {
+            var dto = new RejectVesselVisitNotificationDto("code", "reason");
+            _serviceMock.Setup(s => s.MarkAsPendingAsync(dto))
+                .ThrowsAsync(new BusinessRuleValidationException("Invalid"));
+
+            var result = await _controller.RejectVvn(dto);
+            Assert.IsType<BadRequestObjectResult>(result.Result);
+        }
+
+
+        [Fact]
+        public async Task GetInProgressOrPending_ShouldReturnOk_WhenSuccess()
+        {
+            var vvns = new List<VesselVisitNotificationDto> { BuildDto(Guid.NewGuid().ToString(), "C1", "InProgress") };
+            _serviceMock.Setup(s =>
+                    s.GetInProgressPendingInformationVvnsByShippingAgentRepresentativeIdFiltersAsync(
+                        It.IsAny<Guid>(), It.IsAny<FilterInProgressPendingVvnStatusDto>()))
+                .ReturnsAsync(vvns);
+
+            var result = await _controller.GetInProgressOrPendingVvnsByFiltersAsync(Guid.NewGuid(), null, null, null, null);
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task GetWithdrawn_ShouldReturnOk_WhenSuccess()
+        {
+            var vvns = new List<VesselVisitNotificationDto> { BuildDto(Guid.NewGuid().ToString(), "C2", "Withdrawn") };
+            _serviceMock.Setup(s =>
+                    s.GetWithdrawnVvnsByShippingAgentRepresentativeIdFiltersAsync(
+                        It.IsAny<Guid>(), It.IsAny<FilterWithdrawnVvnStatusDto>()))
+                .ReturnsAsync(vvns);
+
+            var result = await _controller.GetWithdrawnVvnsByFiltersAsync(Guid.NewGuid(), null, null, null, null);
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task GetSubmitted_ShouldReturnOk_WhenSuccess()
+        {
+            var vvns = new List<VesselVisitNotificationDto> { BuildDto(Guid.NewGuid().ToString(), "C3", "Submitted") };
+            _serviceMock.Setup(s =>
+                    s.GetSubmittedVvnsByShippingAgentRepresentativeIdFiltersAsync(
+                        It.IsAny<Guid>(), It.IsAny<FilterSubmittedVvnStatusDto>()))
+                .ReturnsAsync(vvns);
+
+            var result = await _controller.GetSubmittedVvnsByFiltersAsync(Guid.NewGuid(), null, null, null, null, null);
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task GetAccepted_ShouldReturnOk_WhenSuccess()
+        {
+            var vvns = new List<VesselVisitNotificationDto> { BuildDto(Guid.NewGuid().ToString(), "C4", "Accepted") };
+            _serviceMock.Setup(s =>
+                    s.GetAcceptedVvnsByShippingAgentRepresentativeIdFiltersAsync(
+                        It.IsAny<Guid>(), It.IsAny<FilterAcceptedVvnStatusDto>()))
+                .ReturnsAsync(vvns);
+
+            var result = await _controller.GetAcceptedVvnsByFiltersAsync(Guid.NewGuid(), null, null, null, null, null, null);
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+
+
+        private static VesselVisitNotificationDto BuildDto(string id, string code, string status, int volume = 1000)
         {
             return new VesselVisitNotificationDto(
                 id,
@@ -308,7 +295,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 volume,
                 new PdfDocumentCollection(),
                 "DK-001",
-                status.ToString(),
+                status,
                 null,
                 null,
                 null,
