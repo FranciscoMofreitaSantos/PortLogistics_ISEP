@@ -29,14 +29,23 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
 
         public async Task<List<EntityDock>> GetByVesselTypeAsync(VesselTypeId vesselTypeId)
         {
+            var dockIds = await _context.Database
+                .SqlQuery<Guid>($"SELECT DockId FROM Dock_VesselType WHERE VesselTypeId = {vesselTypeId.Value}")
+                .ToListAsync();
+
+            if (!dockIds.Any())
+                return new List<EntityDock>();
+
             return await _context.Dock
-                .Where(d => d.AllowedVesselTypeIds.Any(vt => vt.Value == vesselTypeId.Value))
+                .Where(d => dockIds.Contains(d.Id.AsGuid()))
                 .ToListAsync();
         }
 
         public async Task<List<EntityDock>> GetByLocationAsync(string location)
         {
-            if (string.IsNullOrWhiteSpace(location)) return new List<EntityDock>();
+            if (string.IsNullOrWhiteSpace(location)) 
+                return new List<EntityDock>();
+            
             var norm = location.Trim().ToLower();
 
             return await _context.Dock
@@ -56,13 +65,22 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
             if (code is not null)
                 q = q.Where(d => d.Code.Value == code.Value);
 
-            if (vesselTypeId is not null)
-                q = q.Where(d => d.AllowedVesselTypeIds.Any(vt => vt.Value == vesselTypeId.Value));
-
             if (!string.IsNullOrWhiteSpace(location))
             {
                 var loc = location.Trim().ToLower();
                 q = q.Where(d => d.Location.ToLower().Contains(loc));
+            }
+
+            if (status.HasValue)
+                q = q.Where(d => d.Status == status.Value);
+            
+            if (vesselTypeId is not null)
+            {
+                var dockIdsWithVesselType = await _context.Database
+                    .SqlQuery<Guid>($"SELECT DockId FROM Dock_VesselType WHERE VesselTypeId = {vesselTypeId.Value}")
+                    .ToListAsync();
+
+                q = q.Where(d => dockIdsWithVesselType.Contains(d.Id.AsGuid()));
             }
 
             if (!string.IsNullOrWhiteSpace(query))
@@ -74,9 +92,6 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                     d.PhysicalResourceCodes.Any(p => p.Value.ToLower().Contains(norm))
                 );
             }
-
-            if (status.HasValue)
-                q = q.Where(d => d.Status == status.Value);
 
             return await q.ToListAsync();
         }
@@ -90,9 +105,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
 
         public async Task<List<EntityDock>> GetAllDocksForVesselType(VesselTypeId vesselTypeId)
         {
-            return await _context.Dock
-                .Where(d => d.AllowedVesselTypeIds.Any(vt => vt.Value == vesselTypeId.Value))
-                .ToListAsync();
+            return await GetByVesselTypeAsync(vesselTypeId);
         }
 
         public bool SetUnavailable(DockCode code)

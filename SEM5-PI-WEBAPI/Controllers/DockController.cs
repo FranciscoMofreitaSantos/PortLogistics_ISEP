@@ -10,9 +10,9 @@ namespace SEM5_PI_WEBAPI.Controllers;
 public class DockController : ControllerBase
 {
     private readonly ILogger<DockController> _logger;
-    private readonly IDockService _service;
+    private readonly DockService _service;
 
-    public DockController(IDockService service, ILogger<DockController> logger)
+    public DockController(DockService service, ILogger<DockController> logger)
     {
         _service = service;
         _logger = logger;

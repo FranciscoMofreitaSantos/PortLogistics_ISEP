@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SEM5_PI_WEBAPI.Domain.Dock;
+using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 
 namespace SEM5_PI_WEBAPI.Infraestructure.Docks
 {
@@ -31,31 +32,46 @@ namespace SEM5_PI_WEBAPI.Infraestructure.Docks
                    .HasMaxLength(20)
                    .IsRequired();
 
+            // PhysicalResourceCodes continua como OwnsMany (não é relação)
             builder.OwnsMany(d => d.PhysicalResourceCodes, prc =>
             {
                 prc.ToTable("DockPhysicalResourceCodes");
                 prc.WithOwner().HasForeignKey("DockId");
+                prc.Property<int>("Id");
+                prc.HasKey("Id");
                 prc.Property(p => p.Value)
                     .HasColumnName("PhysicalResourceCode")
                     .IsRequired();
-                prc.HasKey("DockId", "Value");
-                prc.HasIndex(p => p.Value).IsUnique();
+                prc.HasIndex("DockId", "Value").IsUnique();
             });
 
-            builder.OwnsMany(d => d.AllowedVesselTypeIds, a =>
-            {
-                a.ToTable("DockAllowedVesselTypes");
-                a.WithOwner().HasForeignKey("DockId");
-                a.Property(v => v.Value)
-                    .HasColumnName("VesselTypeId")
-                    .IsRequired();
-                a.HasKey("DockId", "Value");
-            });
+            
+            builder.Ignore(d => d.AllowedVesselTypeIds);
+            
+            builder
+                .HasMany<VesselType>()
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "Dock_VesselType",
+                    j => j
+                        .HasOne<VesselType>()
+                        .WithMany()
+                        .HasForeignKey("VesselTypeId")
+                        .HasConstraintName("FK_Dock_VesselType_VesselTypeId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j => j
+                        .HasOne<EntityDock>()
+                        .WithMany()
+                        .HasForeignKey("DockId")
+                        .HasConstraintName("FK_Dock_VesselType_DockId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("DockId", "VesselTypeId");
+                        j.ToTable("Dock_VesselType");
+                    });
 
             builder.Navigation(d => d.PhysicalResourceCodes)
-                .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-            builder.Navigation(d => d.AllowedVesselTypeIds)
                 .UsePropertyAccessMode(PropertyAccessMode.Field);
         }
     }
