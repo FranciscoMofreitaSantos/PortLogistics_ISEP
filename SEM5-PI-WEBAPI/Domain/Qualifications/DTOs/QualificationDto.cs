@@ -1,4 +1,4 @@
-namespace SEM5_PI_WEBAPI.Domain.Qualifications;
+namespace SEM5_PI_WEBAPI.Domain.Qualifications.DTOs;
 
 public class QualificationDto
 {

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.IdentityModel.Tokens;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.Qualifications;
@@ -13,6 +14,8 @@ public class Qualification : Entity<QualificationId>, IAggregateRoot
 
     public Qualification(string name)
     {
+        if (name.IsNullOrEmpty())
+            throw new BusinessRuleValidationException("Name cannot be empty!");
         Name = name;
         Code = "";
         Id = new QualificationId(Guid.NewGuid());

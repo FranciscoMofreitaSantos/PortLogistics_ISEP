@@ -1,3 +1,4 @@
+using SEM5_PI_WEBAPI.Domain.Qualifications.DTOs;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
 namespace SEM5_PI_WEBAPI.Domain.Qualifications;
@@ -15,26 +16,19 @@ public class QualificationService : IQualificationService
 
     public async Task<List<QualificationDto>> GetAllAsync()
     {
-        var list = await this._repo.GetAllAsync();
-
-        List<QualificationDto> listDto = list.ConvertAll<QualificationDto>(q =>
-            new QualificationDto(q.Id.AsGuid(),
-                q.Name,
-                q.Code));
-
-        return listDto;
+        var list = await _repo.GetAllAsync();
+        
+        return QualificationFactory.CreateQualificationDtoList(list);
     }
 
     public async Task<QualificationDto> GetByIdAsync(QualificationId id)
     {
-        var q = await this._repo.GetByIdAsync(id);
+        var q = await _repo.GetByIdAsync(id);
 
         if (q == null)
             return null;
-
-        return new QualificationDto(q.Id.AsGuid(),
-            q.Name,
-            q.Code);
+        
+        return QualificationFactory.CreateQualificationDto(q);
     }
 
     public async Task<QualificationDto> GetByCodeAsync(string code)
@@ -43,8 +37,8 @@ public class QualificationService : IQualificationService
         
         if (qualy == null)
             throw new BusinessRuleValidationException($"No qualification with code {code} was found");
-
-        return MapToDto(qualy);
+        
+        return QualificationFactory.CreateQualificationDto(qualy);
     }
 
     public async Task<QualificationDto> GetByNameAsync(string name)
@@ -54,42 +48,53 @@ public class QualificationService : IQualificationService
         if (qualy == null)
             throw new BusinessRuleValidationException($"No qualification with name {name} was found");
         
-        return MapToDto(qualy);
-    }
-
-    private async Task<string> GenerateNextQualificationCodeAsync()
-    {
-        var allCodes = await _repo.GetAllAsync();
-
-        var maxNumber = allCodes.Where(q => !string.IsNullOrEmpty(q.Code))
-            .Select(q => int.Parse(q.Code.Substring(4))).Count();
-
-        string nextCode = $"QLF-{(maxNumber + 1).ToString("D3")}";
-        return nextCode;
+        return QualificationFactory.CreateQualificationDto(qualy);
     }
 
     public async Task<QualificationDto> AddAsync(CreatingQualificationDto dto)
     {
         await EnsureNotRepeatedAsync(dto);
-
+        
         string code = await GetCodeAsync(dto);
-
-        var qualification = new Qualification(dto.Name);
-        qualification.UpdateCode(code);
+        var dtoWithCode = new CreatingQualificationDto(dto.Name, code);
+        
+        var qualification = QualificationFactory.CreateQualification(dtoWithCode);
 
         await _repo.AddAsync(qualification);
         await _unitOfWork.CommitAsync();
-
-        return new QualificationDto(qualification.Id.AsGuid(), qualification.Name, qualification.Code);
+        
+        return QualificationFactory.CreateQualificationDto(qualification);
     }
 
+    public async Task<QualificationDto?> UpdateAsync(QualificationId id, CreatingQualificationDto dto)
+    {
+        var qualification = await _repo.GetByIdAsync(id);
+        if (qualification == null) 
+            return null;
+        
+        if (dto.Code != null) 
+        {
+            qualification.UpdateCode(FormatCode(dto.Code));
+        }
+        
+        if (dto.Name != null) 
+        {
+            qualification.UpdateName(dto.Name);
+        }
+        
+        await _unitOfWork.CommitAsync();
+        
+        return QualificationFactory.CreateQualificationDto(qualification);
+    }
 
     private async Task EnsureNotRepeatedAsync(CreatingQualificationDto dto)
     {
         var allQualifications = await _repo.GetAllAsync();
 
-        bool repeatedCode = !string.IsNullOrEmpty(dto.Code) && allQualifications.Any(q => q.Code == dto.Code);
-        bool repeatedName = allQualifications.Any(q => q.Name.Trim().Equals(dto.Name.Trim(), StringComparison.OrdinalIgnoreCase));
+        bool repeatedCode = !string.IsNullOrEmpty(dto.Code) && 
+                           allQualifications.Any(q => q.Code == dto.Code);
+        bool repeatedName = allQualifications.Any(q => 
+                           q.Name.Trim().Equals(dto.Name.Trim(), StringComparison.OrdinalIgnoreCase));
 
         if (repeatedName)
             throw new BusinessRuleValidationException("Repeated Qualification name!");
@@ -107,21 +112,17 @@ public class QualificationService : IQualificationService
         return await GenerateNextQualificationCodeAsync();
     }
 
-    public async Task<QualificationDto?> UpdateAsync(QualificationId id, CreatingQualificationDto dto)
+    private async Task<string> GenerateNextQualificationCodeAsync()
     {
-        var qualification = await _repo.GetByIdAsync(id);
-        if (qualification == null) return null;
-        
-        if(dto.Code != null) {qualification.UpdateCode(FormatCode(dto.Code));}
-        if (dto.Name != null) {qualification.UpdateName(dto.Name);}
-        
-        await _unitOfWork.CommitAsync();
-        return MapToDto(qualification);
-    }
+        var allCodes = await _repo.GetAllAsync();
 
-    private static QualificationDto MapToDto(Qualification qualification)
-    {
-        return new QualificationDto(qualification.Id.AsGuid(), qualification.Name, qualification.Code);
+        var maxNumber = allCodes
+            .Where(q => !string.IsNullOrEmpty(q.Code))
+            .Select(q => int.Parse(q.Code.Substring(4)))
+            .Count();
+
+        string nextCode = $"QLF-{(maxNumber + 1).ToString("D3")}";
+        return nextCode;
     }
 
     private string FormatCode(string code)

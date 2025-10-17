@@ -1,3 +1,5 @@
+using SEM5_PI_WEBAPI.Domain.Qualifications.DTOs;
+
 namespace SEM5_PI_WEBAPI.Tests.Controllers;
 
 using System;
