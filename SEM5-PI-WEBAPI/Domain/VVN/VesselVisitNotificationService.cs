@@ -10,7 +10,6 @@ using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
-using SEM5_PI_WEBAPI.Domain.StaffMembers;
 using SEM5_PI_WEBAPI.Domain.StorageAreas;
 using SEM5_PI_WEBAPI.Domain.Tasks;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
@@ -87,10 +86,10 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         var vvnCode = await GenerateNextVvnCodeAsync();
 
         if (unloadingCargoManifest != null)
-            checkNeededPersonel(unloadingCargoManifest, crewManifest);
+            CheckNeededPeople(unloadingCargoManifest, crewManifest);
 
         if (loadingCargoManifest != null)
-            checkNeededPersonel(loadingCargoManifest, crewManifest);
+            CheckNeededPeople(loadingCargoManifest, crewManifest);
 
         var newVesselVisitNotification = VesselVisitNotificationFactory.CreateVesselVisitNotification(
             vvnCode,
@@ -847,11 +846,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
     private async Task<CrewManifest> CreateCrewManifestAsync(CreatingCrewManifestDto dto)
     {
-        var crewMembers = dto.CrewMembers?
-            .Select(cm => new CrewMember(cm.Name, cm.Role, cm.Nationality, new CitizenId(cm.CitizenId)))
-            .ToList() ?? new List<CrewMember>();
-
-        var crewManifest = new CrewManifest(dto.TotalCrew, dto.CaptainName, crewMembers);
+        var crewManifest = CrewManifestFactory.CreateCrewManifest(dto);
         await _crewManifestRepository.AddAsync(crewManifest);
 
         return crewManifest;
@@ -870,18 +865,17 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         foreach (var entryDto in dto.Entries)
         {
             var container = await CreateContainerAsync(entryDto.Container);
-
             var storageAreaId = await GetStorageAreaId(entryDto.StorageAreaName);
 
-            var entry = new CargoManifestEntry(container, storageAreaId, entryDto.Bay, entryDto.Row, entryDto.Tier);
+            var entry = CargoManifestEntryFactory.CreateCargoManifestEntry(entryDto, container, storageAreaId);
 
             await _cargoManifestEntryRepository.AddAsync(entry);
             entries.Add(entry);
         }
 
         var generatedCode = await GenerateNextCargoManifestCodeAsync();
-        var cargoManifest =
-            new CargoManifest(entries, generatedCode, dto.Type, DateTime.UtcNow, new Email(dto.CreatedBy));
+
+        var cargoManifest = CargoManifestFactory.CreateCargoManifest(dto, entries, generatedCode);
 
         await _cargoManifestRepository.AddAsync(cargoManifest);
 
@@ -906,14 +900,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
     private async Task<EntityContainer> CreateContainerAsync(CreatingContainerDto containerDto)
     {
-        
-        var container = new EntityContainer(
-            containerDto.IsoCode,
-            containerDto.Description,
-            containerDto.Type,
-            containerDto.WeightKg
-        );
-
+        var container = ContainerFactory.CreateEntityContainer(containerDto);
         await _containerRepository.AddAsync(container);
         return container;
     }
@@ -961,7 +948,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         return availableDocks[attributedDock].Code;
     }
 
-    private void checkNeededPersonel(CargoManifest cargoManifest, CrewManifest crewManifest)
+    private void CheckNeededPeople(CargoManifest cargoManifest, CrewManifest crewManifest)
     {
         bool hasHazmat = false;
         foreach (var entry in cargoManifest.ContainerEntries)
