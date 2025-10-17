@@ -154,7 +154,7 @@ public class PhysicalResourceController : ControllerBase
     
 
     [HttpPost]
-    public async Task<ActionResult<PhysicalResourceDTO>> Create(CreatingPhysicalResourceDTO dto)
+    public async Task<ActionResult<PhysicalResourceDTO>> Create(CreatingPhysicalResourceDto dto)
     {
         try
         {

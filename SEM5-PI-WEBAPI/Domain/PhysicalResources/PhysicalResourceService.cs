@@ -94,13 +94,14 @@ public class PhysicalResourceService : IPhysicalResourceService
         return physicalResource.ConvertAll(MapToDto);
     }
 
-    public async Task<PhysicalResourceDTO> AddAsync(CreatingPhysicalResourceDTO dto)
+    public async Task<PhysicalResourceDTO> AddAsync(CreatingPhysicalResourceDto dto)
     {
-        if (dto.QualificationID is not null)
+        QualificationId? qualificationId = null;
+        if (dto.QualificationCode is not null)
         {
-            await CheckQualificationIdAsync(new QualificationId(dto.QualificationID.Value));
+            qualificationId = await CheckQualificationIdAsync(dto.QualificationCode);
         }
-
+        
         var code = await GenerateCodeAsync(dto.PhysicalResourceType);
 
         var physicalResource = new EntityPhysicalResource(
@@ -109,7 +110,7 @@ public class PhysicalResourceService : IPhysicalResourceService
             dto.OperationalCapacity,
             dto.SetupTime,
             dto.PhysicalResourceType,
-            new QualificationId(dto.QualificationID.Value)
+            qualificationId
         );
 
         await _repo.AddAsync(physicalResource);
@@ -181,12 +182,14 @@ public class PhysicalResourceService : IPhysicalResourceService
     }
     
 
-    private async Task CheckQualificationIdAsync(QualificationId id)
+    private async Task<QualificationId> CheckQualificationIdAsync(string qfCode)
     {
-        var exist = await _qualificationRepository.ExistQualificationID(id);
+        var exist = await _qualificationRepository.GetQualificationByCodeAsync(qfCode);
 
-        if (!exist)
-            throw new BusinessRuleValidationException("Qualification ID does not exist");
+        if (exist == null)
+            throw new BusinessRuleValidationException($"Qualification Code {qfCode} does not exist on DB.");
+        
+        return exist.Id;
     }
 
     private static PhysicalResourceDTO MapToDto(EntityPhysicalResource entityPhysicalResource)

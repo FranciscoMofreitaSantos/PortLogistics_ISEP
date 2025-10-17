@@ -1,6 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using SEM5_PI_WEBAPI.Domain.Dock;
+using SEM5_PI_WEBAPI.Domain.Dock.DTOs;
+using SEM5_PI_WEBAPI.Domain.PhysicalResources;
+using SEM5_PI_WEBAPI.Domain.PhysicalResources.DTOs;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations.DTOs;
@@ -26,6 +29,7 @@ public class Bootstrap
     private readonly IStaffMemberService _staffMemberService;
     private readonly IVesselVisitNotificationService _vesselVisitNotificationService;
     private readonly IShippingAgentRepresentativeService _shippingAgentRepresentativeService;
+    private readonly IPhysicalResourceService _physicalResourceService;
     private readonly IDockService _dockService;
     private readonly ILogger<Bootstrap> _logger;
     
@@ -38,7 +42,7 @@ public class Bootstrap
         IVesselVisitNotificationService vesselVisitNotificationService,
         IDockService dockService,
         IQualificationService qualificationService,
-        
+        IPhysicalResourceService physicalResourceService,
         IStaffMemberService staffMemberService)
     {
         _logger = logger;
@@ -49,6 +53,7 @@ public class Bootstrap
         _staffMemberService = staffMemberService;
         _vesselVisitNotificationService = vesselVisitNotificationService;
         _shippingAgentRepresentativeService = shippingAgentRepresentativeService;
+        _physicalResourceService = physicalResourceService;
         _dockService = dockService;
     }
 
@@ -63,6 +68,8 @@ public class Bootstrap
         await SeedShippingAgentRepresentativesAsync("Seed/ShippingAgentsRepresentative.json");
         
         await SeedQualificationsAsync("Seed/Qualifications.json");
+        await SeedPhysicalResourcesAsync("Seed/PhysicalResource.json");
+        await SeedDockAsync("Seed/Docks.json");
         //await SeedStaffMembersAsync("Seed/StaffMembers.json");
         
         //await SeedVesselVisitNotificationsAsync("Seed/VesselVisitNotifications.json");
@@ -178,6 +185,48 @@ public class Bootstrap
             catch (Exception ex)
             {
                 _logger.LogWarning("[Bootstrap] Could not add Qualification '{Name}': {Message}", dto.Name, ex.Message);
+            }
+        }
+    }
+    
+    private async Task SeedPhysicalResourcesAsync(string filePath)
+    {
+        _logger.LogInformation("[Bootstrap] Loading Physical Resource from {Path}", filePath);
+
+        var physicalResources = await LoadJsonAsync<CreatingPhysicalResourceDto>(filePath);
+        if (physicalResources == null) return;
+
+        foreach (var dto in physicalResources)
+        {
+            try
+            {
+                await _physicalResourceService.AddAsync(dto);
+                _logger.LogInformation("[Bootstrap] Physical Resource '{Name}' created successfully.", dto.QualificationCode);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("[Bootstrap] Could not add Physical Resource '{Name}': {Message}", dto.QualificationCode, ex.Message);
+            }
+        }
+    }
+    
+    private async Task SeedDockAsync(string filePath)
+    {
+        _logger.LogInformation("[Bootstrap] Loading Dock from {Path}", filePath);
+
+        var docks = await LoadJsonAsync<RegisterDockDto>(filePath);
+        if (docks == null) return;
+
+        foreach (var dto in docks)
+        {
+            try
+            {
+                await _dockService.CreateAsync(dto);
+                _logger.LogInformation("[Bootstrap] Dock with code : '{Code}' created successfully.", dto.Code);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("[Bootstrap] Could not add Dock with code : '{Code}': {Message}", dto.Code, ex.Message);
             }
         }
     }

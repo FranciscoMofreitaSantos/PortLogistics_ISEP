@@ -77,22 +77,38 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         [Fact]
         public async Task Create_ShouldReturnCreated_WhenValid()
         {
-            var dto = new CreatingPhysicalResourceDTO("Truck A", 25.0, 10.0, PhysicalResourceType.Truck, Guid.NewGuid());
+            var dto = new CreatingPhysicalResourceDto(
+                "Truck A",
+                25.0,
+                10.0,
+                PhysicalResourceType.Truck,
+                "QUAL-001"
+            );
+
             var created = CreateDTO();
 
-            _serviceMock.Setup(s => s.AddAsync(dto)).ReturnsAsync(created);
+            _serviceMock.Setup(s => s.AddAsync(It.IsAny<CreatingPhysicalResourceDto>()))
+                .ReturnsAsync(created);
 
             var result = await _controller.Create(dto);
 
             var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
-            Assert.IsType<PhysicalResourceDTO>(createdResult.Value);
+            var value = Assert.IsType<PhysicalResourceDTO>(createdResult.Value);
+            Assert.Equal("Truck A", value.Description);
         }
 
         [Fact]
         public async Task Create_ShouldReturnBadRequest_WhenBusinessRuleException()
         {
-            var dto = new CreatingPhysicalResourceDTO("Truck A", 25.0, 10.0, PhysicalResourceType.Truck, Guid.NewGuid());
-            _serviceMock.Setup(s => s.AddAsync(dto))
+            var dto = new CreatingPhysicalResourceDto(
+                "Truck A",
+                25.0,
+                10.0,
+                PhysicalResourceType.Truck,
+                "QUAL-001"
+            );
+
+            _serviceMock.Setup(s => s.AddAsync(It.IsAny<CreatingPhysicalResourceDto>()))
                 .ThrowsAsync(new BusinessRuleValidationException("Invalid Qualification"));
 
             var result = await _controller.Create(dto);
@@ -114,7 +130,8 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             var result = await _controller.Update(Guid.NewGuid(), body);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
-            Assert.IsType<PhysicalResourceDTO>(ok.Value);
+            var dto = Assert.IsType<PhysicalResourceDTO>(ok.Value);
+            Assert.Equal(updated.Id, dto.Id);
         }
 
         [Fact]

@@ -36,15 +36,18 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         [Fact]
         public async Task AddAsync_ShouldCreatePhysicalResource_WhenValid()
         {
-            var dto = new CreatingPhysicalResourceDTO(
+            var dto = new CreatingPhysicalResourceDto(
                 "Truck A",
                 25.0,
                 10.0,
                 PhysicalResourceType.Truck,
-                Guid.NewGuid());
+                "QUL-001");
 
-            _qualRepoMock.Setup(r => r.ExistQualificationID(It.IsAny<QualificationId>()))
-                .ReturnsAsync(true);
+            var qualification = new Qualification("Driver License");
+            qualification.UpdateCode("QUL-001");
+
+            _qualRepoMock.Setup(r => r.GetQualificationByCodeAsync("QUL-001"))
+                .ReturnsAsync(qualification);
 
             _repoMock.Setup(r => r.CountByTypeAsync(It.IsAny<PhysicalResourceType>()))
                 .ReturnsAsync(0);
@@ -63,17 +66,17 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         }
 
         [Fact]
-        public async Task AddAsync_ShouldThrow_WhenQualificationDoesNotExist()
+        public async Task AddAsync_ShouldThrow_WhenQualificationCodeNotFound()
         {
-            var dto = new CreatingPhysicalResourceDTO(
+            var dto = new CreatingPhysicalResourceDto(
                 "Truck A",
                 25.0,
                 10.0,
                 PhysicalResourceType.Truck,
-                Guid.NewGuid());
+                "INVALID");
 
-            _qualRepoMock.Setup(r => r.ExistQualificationID(It.IsAny<QualificationId>()))
-                .ReturnsAsync(false);
+            _qualRepoMock.Setup(r => r.GetQualificationByCodeAsync("INVALID"))
+                .ReturnsAsync((Qualification?)null);
 
             await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.AddAsync(dto));
         }
@@ -97,7 +100,7 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         public async Task GetByIdAsync_ShouldThrow_WhenNotFound()
         {
             _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<PhysicalResourceId>()))
-                .ReturnsAsync((EntityPhysicalResource)null!);
+                .ReturnsAsync((EntityPhysicalResource?)null);
 
             await Assert.ThrowsAsync<BusinessRuleValidationException>(() =>
                 _service.GetByIdAsync(new PhysicalResourceId(Guid.NewGuid())));
@@ -121,7 +124,7 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         public async Task GetByCodeAsync_ShouldThrow_WhenNotFound()
         {
             _repoMock.Setup(r => r.GetByCodeAsync(It.IsAny<PhysicalResourceCode>()))
-                .ReturnsAsync((EntityPhysicalResource)null!);
+                .ReturnsAsync((EntityPhysicalResource?)null);
 
             await Assert.ThrowsAsync<BusinessRuleValidationException>(() =>
                 _service.GetByCodeAsync(new PhysicalResourceCode("ABC-9999")));
@@ -149,7 +152,7 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         public async Task UpdateAsync_ShouldReturnNull_WhenNotFound()
         {
             _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<PhysicalResourceId>()))
-                .ReturnsAsync((EntityPhysicalResource)null!);
+                .ReturnsAsync((EntityPhysicalResource?)null);
 
             var dto = new UpdatingPhysicalResource("Updated", 10, 5, null);
             var result = await _service.UpdateAsync(new PhysicalResourceId(Guid.NewGuid()), dto);

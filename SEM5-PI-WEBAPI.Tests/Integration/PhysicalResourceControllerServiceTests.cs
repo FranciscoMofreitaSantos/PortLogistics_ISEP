@@ -161,11 +161,12 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task Create_ShouldReturnCreated_WhenValid()
         {
-            var dto = new CreatingPhysicalResourceDTO(
-                "Truck A", 25.0, 10.0, PhysicalResourceType.Truck, Guid.NewGuid());
+            var dto = new CreatingPhysicalResourceDto(
+                "Truck A", 25.0, 10.0, PhysicalResourceType.Truck, "QUAL-001");
             var created = CreateDto();
 
-            _serviceMock.Setup(s => s.AddAsync(dto)).ReturnsAsync(created);
+            _serviceMock.Setup(s => s.AddAsync(It.IsAny<CreatingPhysicalResourceDto>()))
+                .ReturnsAsync(created);
 
             var result = await _controller.Create(dto);
 
@@ -176,10 +177,10 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task Create_ShouldReturnBadRequest_WhenBusinessRuleFails()
         {
-            var dto = new CreatingPhysicalResourceDTO(
-                "Truck A", 25.0, 10.0, PhysicalResourceType.Truck, Guid.NewGuid());
+            var dto = new CreatingPhysicalResourceDto(
+                "Truck A", 25.0, 10.0, PhysicalResourceType.Truck, "QUAL-001");
 
-            _serviceMock.Setup(s => s.AddAsync(dto))
+            _serviceMock.Setup(s => s.AddAsync(It.IsAny<CreatingPhysicalResourceDto>()))
                 .ThrowsAsync(new BusinessRuleValidationException("Qualification not found."));
 
             var result = await _controller.Create(dto);
