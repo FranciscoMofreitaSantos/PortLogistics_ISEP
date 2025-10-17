@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SEM5_PI_WEBAPI.Domain.PhysicalResources;
-using SEM5_PI_WEBAPI.Domain.PhysicalResources.DTOs;
+using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations.DTOs;
@@ -27,6 +26,7 @@ public class Bootstrap
     private readonly IStaffMemberService _staffMemberService;
     private readonly IVesselVisitNotificationService _vesselVisitNotificationService;
     private readonly IShippingAgentRepresentativeService _shippingAgentRepresentativeService;
+    private readonly IDockService _dockService;
     private readonly ILogger<Bootstrap> _logger;
     
     public Bootstrap(
@@ -36,6 +36,7 @@ public class Bootstrap
         IShippingAgentOrganizationService shippingAgentOrganizationService,
         IShippingAgentRepresentativeService shippingAgentRepresentativeService,
         IVesselVisitNotificationService vesselVisitNotificationService,
+        IDockService dockService,
         IQualificationService qualificationService,
         
         IStaffMemberService staffMemberService)
@@ -48,6 +49,7 @@ public class Bootstrap
         _staffMemberService = staffMemberService;
         _vesselVisitNotificationService = vesselVisitNotificationService;
         _shippingAgentRepresentativeService = shippingAgentRepresentativeService;
+        _dockService = dockService;
     }
 
     public async Task SeedAsync()

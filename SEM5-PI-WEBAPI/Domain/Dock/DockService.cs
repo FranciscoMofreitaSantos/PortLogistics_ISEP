@@ -37,8 +37,7 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
 
             var code = new DockCode(dto.Code);
             var existing = await _dockRepository.GetByCodeAsync(code);
-            if (existing is not null)
-                throw new BusinessRuleValidationException($"Dock with code '{code.Value}' already exists.");
+            if (existing is not null) throw new BusinessRuleValidationException($"Dock with code '{code.Value}' already exists.");
 
             if (dto.PhysicalResourceCodes != null)
             {
@@ -51,18 +50,19 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
                 }
             }
 
-            if (dto.AllowedVesselTypeIds == null || !dto.AllowedVesselTypeIds.Any())
+            if (dto.AllowedVesselTypeNames == null || !dto.AllowedVesselTypeNames.Any())
                 throw new BusinessRuleValidationException("At least one VesselTypeId is required.");
 
-            foreach (var raw in dto.AllowedVesselTypeIds)
+            List<VesselTypeId> vesselsTypes = new List<VesselTypeId>();
+            foreach (var raw in dto.AllowedVesselTypeNames)
             {
-                if (!Guid.TryParse(raw, out var g) || g == Guid.Empty)
-                    throw new BusinessRuleValidationException("Invalid VesselTypeId.");
-
-                var vt = await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
+                var vt = await _vesselTypeRepository.GetByNameAsync(raw);
                 if (vt == null)
-                    throw new BusinessRuleValidationException($"VesselType '{g}' does not exist.");
+                    throw new BusinessRuleValidationException($"VesselType '{raw}' does not exist.");
+                vesselsTypes.Add(vt.Id);
             }
+
+            dto.VesselsTypesObjs = vesselsTypes;
 
             var dock = DockFactory.RegisterDock(dto);
             await _dockRepository.AddAsync(dock);

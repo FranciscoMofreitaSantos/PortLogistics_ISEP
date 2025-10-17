@@ -40,14 +40,14 @@ namespace SEM5_PI_WEBAPI.Tests.Services
             string code = "DK-0001",
             string location = "Terminal Norte A-3",
             IEnumerable<string>? prcs = null,
-            IEnumerable<string>? vtIds = null)
+            IEnumerable<string>? vtNames = null)
         {
             return new RegisterDockDto(
                 code,
                 prcs ?? new[] { "RES-0001", "CRN-0002" },
                 location,
                 350, 15.5, 14.8,
-                vtIds ?? new[] { Guid.NewGuid().ToString() },
+                vtNames ?? new[] { "Cargo" },
                 DockStatus.Available
             );
         }
@@ -70,16 +70,15 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         [Fact]
         public async Task CreateAsync_ShouldCreate_WhenValid()
         {
-            var vtId = Guid.NewGuid().ToString();
-            var dto = MakeRegisterDto(vtIds: new[] { vtId });
+            var dto = MakeRegisterDto(vtNames: new[] { "Cargo" });
 
             _repo.Setup(r => r.GetByCodeAsync(It.IsAny<DockCode>())).ReturnsAsync((EntityDock?)null);
             _repo.Setup(r => r.GetByPhysicalResourceCodeAsync(It.IsAny<PhysicalResourceCode>())).ReturnsAsync((EntityDock?)null);
-            _vtRepo.Setup(r => r.GetByIdAsync(It.IsAny<VesselTypeId>())).ReturnsAsync(new VesselType("A", 2, 2, 2, "Description that is valid for this test."));
+            _vtRepo.Setup(r => r.GetByNameAsync(It.IsAny<string>()))
+                   .ReturnsAsync(new VesselType("Cargo", 2, 2, 2, "Valid vessel type description"));
             _repo.Setup(r => r.AddAsync(It.IsAny<EntityDock>()))
                 .ReturnsAsync((EntityDock e) => e);
-            _uow.Setup(u => u.CommitAsync())
-                .ReturnsAsync(1);
+            _uow.Setup(u => u.CommitAsync()).ReturnsAsync(1);
 
             var created = await _service.CreateAsync(dto);
 
@@ -104,7 +103,8 @@ namespace SEM5_PI_WEBAPI.Tests.Services
             var dto = MakeRegisterDto(prcs: new[] { "RES-0001" });
             _repo.Setup(r => r.GetByCodeAsync(It.IsAny<DockCode>())).ReturnsAsync((EntityDock?)null);
             _repo.Setup(r => r.GetByPhysicalResourceCodeAsync(It.IsAny<PhysicalResourceCode>())).ReturnsAsync(MakeDock());
-            _vtRepo.Setup(r => r.GetByIdAsync(It.IsAny<VesselTypeId>())).ReturnsAsync(new VesselType("A", 2, 2, 2, "Description that is valid for this test."));
+            _vtRepo.Setup(r => r.GetByNameAsync(It.IsAny<string>()))
+                   .ReturnsAsync(new VesselType("Cargo", 2, 2, 2, "Valid vessel type description"));
 
             var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.CreateAsync(dto));
             Assert.Contains("PhysicalResourceCode", ex.Message);
@@ -113,7 +113,7 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         [Fact]
         public async Task CreateAsync_ShouldThrow_WhenNoVesselTypes()
         {
-            var dto = MakeRegisterDto(vtIds: Array.Empty<string>());
+            var dto = MakeRegisterDto(vtNames: Array.Empty<string>());
             _repo.Setup(r => r.GetByCodeAsync(It.IsAny<DockCode>())).ReturnsAsync((EntityDock?)null);
 
             var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.CreateAsync(dto));
@@ -121,23 +121,12 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         }
 
         [Fact]
-        public async Task CreateAsync_ShouldThrow_WhenVesselTypeGuidInvalid()
-        {
-            var dto = MakeRegisterDto(vtIds: new[] { "not-a-guid" });
-            _repo.Setup(r => r.GetByCodeAsync(It.IsAny<DockCode>())).ReturnsAsync((EntityDock?)null);
-
-            var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.CreateAsync(dto));
-            Assert.Contains("Invalid VesselTypeId", ex.Message);
-        }
-
-        [Fact]
         public async Task CreateAsync_ShouldThrow_WhenVesselTypeDoesNotExist()
         {
-            var g = Guid.NewGuid().ToString();
-            var dto = MakeRegisterDto(vtIds: new[] { g });
+            var dto = MakeRegisterDto(vtNames: new[] { "NonExistingType" });
             _repo.Setup(r => r.GetByCodeAsync(It.IsAny<DockCode>())).ReturnsAsync((EntityDock?)null);
             _repo.Setup(r => r.GetByPhysicalResourceCodeAsync(It.IsAny<PhysicalResourceCode>())).ReturnsAsync((EntityDock?)null);
-            _vtRepo.Setup(r => r.GetByIdAsync(It.IsAny<VesselTypeId>())).ReturnsAsync((VesselType?)null);
+            _vtRepo.Setup(r => r.GetByNameAsync(It.IsAny<string>())).ReturnsAsync((VesselType?)null);
 
             var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.CreateAsync(dto));
             Assert.Contains("does not exist", ex.Message);
@@ -178,7 +167,6 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         public async Task GetByCodeAsync_ShouldThrow_WhenMissing()
         {
             _repo.Setup(r => r.GetByCodeAsync(It.IsAny<DockCode>())).ReturnsAsync((EntityDock?)null);
-
             await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.GetByCodeAsync("DK-9999"));
         }
 
@@ -197,7 +185,6 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         public async Task GetByPhysicalResourceCodeAsync_ShouldThrow_WhenMissing()
         {
             _repo.Setup(r => r.GetByPhysicalResourceCodeAsync(It.IsAny<PhysicalResourceCode>())).ReturnsAsync((EntityDock?)null);
-
             await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.GetByPhysicalResourceCodeAsync("RES-0001"));
         }
 
@@ -267,7 +254,7 @@ namespace SEM5_PI_WEBAPI.Tests.Services
             _repo.Setup(r => r.GetByCodeAsync(It.Is<DockCode>(c => c.Value == "DK-0500"))).ReturnsAsync(current);
             _repo.Setup(r => r.GetByCodeAsync(It.Is<DockCode>(c => c.Value == "DK-0501"))).ReturnsAsync((EntityDock?)null);
             _repo.Setup(r => r.GetByPhysicalResourceCodeAsync(It.IsAny<PhysicalResourceCode>())).ReturnsAsync((EntityDock?)null);
-            _vtRepo.Setup(r => r.GetByIdAsync(It.IsAny<VesselTypeId>())).ReturnsAsync(new VesselType("A", 2, 2, 2, "Description that is valid for this test."));
+            _vtRepo.Setup(r => r.GetByIdAsync(It.IsAny<VesselTypeId>())).ReturnsAsync(new VesselType("A", 2, 2, 2, "Valid description"));
             _uow.Setup(u => u.CommitAsync()).ReturnsAsync(1);
 
             var dto = new UpdateDockDto

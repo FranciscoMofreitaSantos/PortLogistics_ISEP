@@ -8,7 +8,6 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
     {
         public static EntityDock RegisterDock(RegisterDockDto dto)
         {
-            var vtIds = dto.AllowedVesselTypeIds.Select(id => new VesselTypeId(new Guid(id))).ToList();
             var prcs = dto.PhysicalResourceCodes?.Select(x => new PhysicalResourceCode(x)).ToList()
                        ?? new List<PhysicalResourceCode>();
 
@@ -19,7 +18,7 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
                 dto.LengthM,
                 dto.DepthM,
                 dto.MaxDraftM,
-                vtIds,
+                dto.VesselsTypesObjs,
                 DockStatus.Available
             );
         }

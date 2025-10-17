@@ -1,0 +1,13 @@
+[
+  {
+    "code": "DK-0001",
+    "physicalResourceCodes": ["ABC-1234", "XYZ-5678"],
+    "location": "Terminal Norte A-3",
+    "lengthM": 350.0,
+    "depthM": 15.5,
+    "maxDraftM": 14.8,
+    "allowedVesselTypeNames": [
+      "Panamax"
+    ]
+  }  
+]

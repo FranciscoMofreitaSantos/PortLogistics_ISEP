@@ -1,4 +1,6 @@
-﻿namespace SEM5_PI_WEBAPI.Domain.Dock.DTOs
+﻿using SEM5_PI_WEBAPI.Domain.VesselsTypes;
+
+namespace SEM5_PI_WEBAPI.Domain.Dock.DTOs
 {
     public class RegisterDockDto
     {
@@ -8,8 +10,8 @@
         public double LengthM  { get; set; }
         public double DepthM   { get; set; }
         public double MaxDraftM { get; set; }
-        public List<string> AllowedVesselTypeIds { get; set; } = new();
-
+        public List<string> AllowedVesselTypeNames { get; set; } = new();
+        public List<VesselTypeId> VesselsTypesObjs { get; set; } = new List<VesselTypeId>();
         public DockStatus Status { get; set; } = DockStatus.Available;
 
         public RegisterDockDto() { }
@@ -21,7 +23,7 @@
             double lengthM,
             double depthM,
             double maxDraftM,
-            IEnumerable<string> allowedVesselTypeIds,
+            IEnumerable<string> allowedVesselTypeNames,
             DockStatus status = DockStatus.Available)
         {
             Code = code;
@@ -30,7 +32,7 @@
             LengthM = lengthM;
             DepthM = depthM;
             MaxDraftM = maxDraftM;
-            AllowedVesselTypeIds = allowedVesselTypeIds?.ToList() ?? new List<string>();
+            AllowedVesselTypeNames = allowedVesselTypeNames?.ToList() ?? new List<string>();
             Status = status;
         }
     }
