@@ -9,76 +9,129 @@ public class StaffMemberService : IStaffMemberService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IStaffMemberRepository _repo;
     private readonly IQualificationRepository _repoQualifications;
+    private readonly ILogger<StaffMemberService> _logger;
 
-    public StaffMemberService(IUnitOfWork unitOfWork, IStaffMemberRepository repo,
-        IQualificationRepository repoQualifications)
+    public StaffMemberService(
+        IUnitOfWork unitOfWork,
+        IStaffMemberRepository repo,
+        IQualificationRepository repoQualifications,
+        ILogger<StaffMemberService> logger)
     {
         _unitOfWork = unitOfWork;
         _repo = repo;
         _repoQualifications = repoQualifications;
+        _logger = logger;
     }
 
     public async Task<List<StaffMemberDto>> GetAllAsync()
     {
+        _logger.LogInformation("Business Domain: Request to fetch all Staff Members.");
+
         var list = await _repo.GetAllAsync();
         var dtos = await Task.WhenAll(list.Select(MapToDto));
+
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members DTOs.", dtos.Length);
+
         return dtos.ToList();
     }
 
     public async Task<StaffMemberDto?> GetByIdAsync(StaffMemberId id)
     {
+        _logger.LogInformation("Business Domain: Request to fetch Staff Member with ID = {Id}", id.Value);
+
         var staff = await _repo.GetByIdAsync(id);
-        return staff == null ? null : await MapToDto(staff);
+        if (staff == null)
+        {
+            _logger.LogWarning("Business Domain: No Staff Member found with ID = {Id}", id.Value);
+            return null;
+        }
+
+        var dto = await MapToDto(staff);
+        _logger.LogInformation("Business Domain: Staff Member with ID = {Id} found and mapped successfully.", id.Value);
+
+        return dto;
     }
 
-    public async Task<StaffMemberDto?> GetByMecNumberAsync(string m)
+    public async Task<StaffMemberDto?> GetByMecNumberAsync(string mec)
     {
-        var mec = new MecanographicNumber(m);
-        var staff = await _repo.GetByMecNumberAsync(mec);
-        return staff == null ? null : await MapToDto(staff);
+        _logger.LogInformation("Business Domain: Request to fetch Staff Member with Mecanographic Number = {Mec}", mec);
+
+        var staff = await _repo.GetByMecNumberAsync(new MecanographicNumber(mec));
+        if (staff == null)
+        {
+            _logger.LogWarning("Business Domain: No Staff Member found with Mecanographic Number = {Mec}", mec);
+            return null;
+        }
+
+        var dto = await MapToDto(staff);
+        _logger.LogInformation("Business Domain: Staff Member with Mecanographic Number = {Mec} found and mapped successfully.", mec);
+
+        return dto;
     }
 
     public async Task<List<StaffMemberDto>> GetByNameAsync(string name)
     {
+        _logger.LogInformation("Business Domain: Request to fetch Staff Members with Name = {Name}", name);
+
         var staff = await _repo.GetByNameAsync(name);
         var dtos = await Task.WhenAll(staff.Select(MapToDto));
+
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Name = {Name}.", dtos.Length, name);
+
         return dtos.ToList();
     }
 
     public async Task<List<StaffMemberDto>> GetByStatusAsync(bool status)
     {
+        _logger.LogInformation("Business Domain: Request to fetch Staff Members with Status = {Status}", status);
+
         var staff = await _repo.GetByStatusAsync(status);
         var dtos = await Task.WhenAll(staff.Select(MapToDto));
+
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Status = {Status}.", dtos.Length, status);
+
         return dtos.ToList();
     }
 
     public async Task<List<StaffMemberDto>> GetByQualificationsAsync(List<string> codes)
     {
+        _logger.LogInformation("Business Domain: Request to fetch Staff Members with Qualifications Codes: {Codes}", string.Join(',', codes));
+
         var ids = await GetQualificationIdsFromCodesAsync(codes);
         var staff = await _repo.GetByQualificationsAsync(ids);
         var dtos = await Task.WhenAll(staff.Select(MapToDto));
+
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Qualifications Codes: {Codes}.", dtos.Length, string.Join(',', codes));
+
         return dtos.ToList();
     }
 
     public async Task<List<StaffMemberDto>> GetByExactQualificationsAsync(List<string> codes)
     {
+        _logger.LogInformation("Business Domain: Request to fetch Staff Members with Exact Qualifications Codes: {Codes}", string.Join(',', codes));
+
         var ids = await GetQualificationIdsFromCodesAsync(codes);
         var staff = await _repo.GetByExactQualificationsAsync(ids);
         var dtos = await Task.WhenAll(staff.Select(MapToDto));
+
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Exact Qualifications Codes: {Codes}.", dtos.Length, string.Join(',', codes));
+
         return dtos.ToList();
     }
 
     public async Task<StaffMemberDto> AddAsync(CreatingStaffMemberDto dto)
     {
+        _logger.LogInformation("Business Domain: Request to add new Staff Member with Email = {Email}", dto.Email);
+
         await EnsureNotRepeatedEmailAsync(new Email(dto.Email));
         await EnsureNotRepeatedPhoneAsync(new PhoneNumber(dto.Phone));
-        
+
         var qualificationIds = dto.QualificationCodes != null
             ? await LoadQualificationsAsync(dto.QualificationCodes)
             : new List<QualificationId>();
-        
+
         var mecanographicNumber = new MecanographicNumber(await GenerateMecanographicNumberAsync());
-        
+
         var staffMember = StaffMemberFactory.CreateStaffMember(
             dto,
             mecanographicNumber,
@@ -87,16 +140,24 @@ public class StaffMemberService : IStaffMemberService
 
         await _repo.AddAsync(staffMember);
         await _unitOfWork.CommitAsync();
-        
+
         var qualificationCodes = await GetQualificationCodesAsync(staffMember.Qualifications);
+
+        _logger.LogInformation("Business Domain: Staff Member created successfully with Mecanographic Number = {MecNumber}", mecanographicNumber);
+
         return StaffMemberFactory.CreateStaffMemberDto(staffMember, qualificationCodes);
     }
 
     public async Task<StaffMemberDto> UpdateAsync(UpdateStaffMemberDto updateDto)
     {
+        _logger.LogInformation("Business Domain: Request to update Staff Member with Mecanographic Number = {MecNumber}", updateDto.MecNumber);
+
         var staff = await _repo.GetByMecNumberAsync(new MecanographicNumber(updateDto.MecNumber));
         if (staff == null)
+        {
+            _logger.LogWarning("Business Domain: No Staff Member found with Mecanographic Number = {MecNumber}", updateDto.MecNumber);
             throw new BusinessRuleValidationException($"No StaffMember with mec number: {updateDto.MecNumber}");
+        }
 
         if (updateDto.Email != null)
         {
@@ -153,21 +214,32 @@ public class StaffMemberService : IStaffMemberService
         }
 
         await _unitOfWork.CommitAsync();
-        
+
         var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);
+
+        _logger.LogInformation("Business Domain: Staff Member with Mecanographic Number = {MecNumber} updated successfully.", updateDto.MecNumber);
+
         return StaffMemberFactory.CreateStaffMemberDto(staff, qualificationCodes);
     }
 
     public async Task<StaffMemberDto?> ToggleAsync(string mec)
     {
+        _logger.LogInformation("Business Domain: Request to toggle status of Staff Member with Mecanographic Number = {MecNumber}", mec);
+
         var staff = await _repo.GetByMecNumberAsync(new MecanographicNumber(mec));
         if (staff == null)
+        {
+            _logger.LogWarning("Business Domain: No Staff Member found with Mecanographic Number = {MecNumber}", mec);
             return null;
+        }
 
         staff.ToggleStatus();
         await _unitOfWork.CommitAsync();
-        
+
         var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);
+
+        _logger.LogInformation("Business Domain: Status toggled for Staff Member with Mecanographic Number = {MecNumber}", mec);
+
         return StaffMemberFactory.CreateStaffMemberDto(staff, qualificationCodes);
     }
 
@@ -175,14 +247,20 @@ public class StaffMemberService : IStaffMemberService
     {
         bool repeatedEmail = await _repo.EmailIsInTheSystem(email);
         if (repeatedEmail)
+        {
+            _logger.LogWarning("Business Domain: Repeated Email detected: {Email}", email.ToString());
             throw new BusinessRuleValidationException("Repeated Email for StaffMember!");
+        }
     }
 
     private async Task EnsureNotRepeatedPhoneAsync(PhoneNumber phone)
     {
         bool repeatedPhone = await _repo.PhoneIsInTheSystem(phone);
         if (repeatedPhone)
+        {
+            _logger.LogWarning("Business Domain: Repeated Phone Number detected: {Phone}", phone.ToString());
             throw new BusinessRuleValidationException("Repeated Phone Number for StaffMember!");
+        }
     }
 
     private async Task<List<QualificationId>> LoadQualificationsAsync(List<string> codes)
@@ -233,7 +311,7 @@ public class StaffMemberService : IStaffMemberService
 
         return ids;
     }
-    
+
     private async Task<List<string>> GetQualificationCodesAsync(IReadOnlyCollection<QualificationId> qualificationIds)
     {
         var codes = new List<string>();
@@ -250,7 +328,7 @@ public class StaffMemberService : IStaffMemberService
 
         return codes;
     }
-    
+
     private async Task<StaffMemberDto> MapToDto(StaffMember staff)
     {
         var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);

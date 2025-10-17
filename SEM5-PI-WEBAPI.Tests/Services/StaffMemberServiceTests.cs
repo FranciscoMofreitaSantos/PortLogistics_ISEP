@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace SEM5_PI_WEBAPI.Tests.Services;
 
 using System;
@@ -13,20 +15,18 @@ using Xunit;
 
 public class StaffMemberServiceTests
 {
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IStaffMemberRepository> _staffRepoMock;
-    private readonly Mock<IQualificationRepository> _qualRepoMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
+    private readonly Mock<IStaffMemberRepository> _staffRepoMock = new();
+    private readonly Mock<IQualificationRepository> _qualRepoMock = new();
+    private readonly Mock<ILogger<StaffMemberService>> _loggerMock = new();
     private readonly StaffMemberService _service;
 
     public StaffMemberServiceTests()
     {
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _staffRepoMock = new Mock<IStaffMemberRepository>();
-        _qualRepoMock = new Mock<IQualificationRepository>();
-
+        
         _service = new StaffMemberService(_unitOfWorkMock.Object,
                                             _staffRepoMock.Object, 
-                                            _qualRepoMock.Object);
+                                            _qualRepoMock.Object, _loggerMock.Object);
     }
 
     private StaffMember CreateStaffMember(string mec = "1234567")

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using SEM5_PI_WEBAPI.Domain.BusinessShared;
 
 namespace SEM5_PI_WEBAPI.Tests.Controllers;
@@ -16,12 +17,14 @@ using Xunit;
 public class StaffMembersControllerTests
 {
     private readonly Mock<IStaffMemberService> _serviceMock;
+    private readonly Mock<ILogger<StaffMembersController>> _loggerMock;
     private readonly StaffMembersController _controller;
 
     public StaffMembersControllerTests()
     {
         _serviceMock = new Mock<IStaffMemberService>();
-        _controller = new StaffMembersController(_serviceMock.Object);
+        _loggerMock = new Mock<ILogger<StaffMembersController>>();
+        _controller = new StaffMembersController(_serviceMock.Object, _loggerMock.Object);
     }
 
     private StaffMemberDto BuildDto()
@@ -38,8 +41,9 @@ public class StaffMembersControllerTests
 
         var result = await _controller.GetAll();
 
-        var ok = Assert.IsType<List<StaffMemberDto>>(result.Value);
-        Assert.Equal(2, ok.Count);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var okValue = Assert.IsType<List<StaffMemberDto>>(okResult.Value);
+        Assert.Equal(2, okValue.Count);
     }
 
     [Fact]
@@ -60,8 +64,9 @@ public class StaffMembersControllerTests
 
         var result = await _controller.GetById(Guid.NewGuid());
 
-        var ok = Assert.IsType<StaffMemberDto>(result.Value);
-        Assert.Equal(dto.Id, ok.Id);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var okValue = Assert.IsType<StaffMemberDto>(okResult.Value);
+        Assert.Equal(dto.Id, okValue.Id);
     }
 
     [Fact]
