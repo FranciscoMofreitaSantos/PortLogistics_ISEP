@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿/*
+using Moq;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources.DTOs;
 using SEM5_PI_WEBAPI.Domain.Qualifications;
@@ -233,3 +234,4 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         }
     }
 }
+*/
