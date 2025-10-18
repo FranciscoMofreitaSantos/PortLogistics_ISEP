@@ -1,4 +1,4 @@
-﻿/*
+﻿using Microsoft.Extensions.Logging;
 using Moq;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources.DTOs;
@@ -13,12 +13,13 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         private readonly Mock<IUnitOfWork> _uowMock = new();
         private readonly Mock<IPhysicalResourceRepository> _repoMock = new();
         private readonly Mock<IQualificationRepository> _qualRepoMock = new();
+        private readonly Mock<ILogger<PhysicalResourceService>> _loggerMock = new();
 
         private readonly PhysicalResourceService _service;
 
         public PhysicalResourceServiceTests()
         {
-            _service = new PhysicalResourceService(_uowMock.Object, _repoMock.Object, _qualRepoMock.Object);
+            _service = new PhysicalResourceService(_uowMock.Object, _repoMock.Object, _qualRepoMock.Object,  _loggerMock.Object);
         }
 
         private EntityPhysicalResource CreateResource()
@@ -234,4 +235,3 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         }
     }
 }
-*/

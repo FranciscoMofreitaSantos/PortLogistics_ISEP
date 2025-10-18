@@ -13,7 +13,7 @@ Accept: application/json
 
 
 ### 2️⃣ GET by Id - valid
-GET {{portURL}}/api/PhysicalResource/get/6ad4cf47-a9f2-44da-90cc-e4852a4b07c1
+GET {{portURL}}/api/PhysicalResource/get/c2929239-4fd3-4e58-9784-ae444ce87c5d
 Accept: application/json
 
 
@@ -85,7 +85,7 @@ Accept: application/json
   "operationalCapacity": 25.5,
   "setupTime": 10,
   "physicalResourceType": "Truck",
-  "qualificationID": "3ead253f-c5aa-4d03-a290-36a65521fb3d"
+  "qualificationID": "a8236cf0-1c4a-4989-8055-63cbdc32ded2"
 }
 
 
