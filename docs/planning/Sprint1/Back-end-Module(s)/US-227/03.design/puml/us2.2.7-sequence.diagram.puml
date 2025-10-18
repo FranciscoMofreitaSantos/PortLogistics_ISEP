@@ -1,0 +1,55 @@
+@startuml
+
+actor "Port Authority Officer" as Officer
+
+boundary "VesselVisitNotificationController" as Controller
+entity "VesselVisitNotificationService" as Service
+entity "VesselVisitNotificationRepository" as VVNRepo
+entity "DockRepository" as DockRepo
+entity "TaskRepository" as TaskRepo
+entity "UnitOfWork" as UoW
+entity "VesselVisitNotification" as VVN
+entity "VesselVisitNotificationDto" as VVNDtO
+
+== Accept ==
+
+Officer -> Controller : PUT /accept/id/{id}
+Controller -> Service : AcceptVvnAsync(VvnCode)
+Service -> VVNRepo : GetCompleteByIdAsync(id)
+VVNRepo --> Service : VVN
+Service -> DockRepo : BasicDockAttributionAlgorithm(vesselImo)
+DockRepo --> Service : Dock
+Service -> VVN : Accept() / UpdateDock(dock)
+
+alt If UnloadingCargoManifest exists
+    Service -> Service : CreateTasksAsync(UnloadingCargoManifest, dock)
+    Service -> TaskRepo : Add + save Unloading Tasks
+    Service -> VVN : SetTasks(unloadingTasks)
+end
+
+alt If LoadingCargoManifest exists
+    Service -> Service : CreateTasksAsync(LoadingCargoManifest, dock)
+    Service -> TaskRepo : Add + save Loading Tasks
+    Service -> VVN : SetTasks(loadingTasks)
+end
+
+Service -> VVNRepo : Update VVN state
+Service -> UoW : CommitAsync
+Service -> VVNDtO : CreateVesselVisitNotificationDto(VVN)
+Service --> Controller : VVNDtO
+Controller --> Officer : 200 OK, VVNDtO
+
+== Reject ==
+
+Officer -> Controller : PUT /reject
+Controller -> Service : MarkAsPendingAsync(RejectVesselVisitNotificationDto)
+Service -> VVNRepo : GetByIdAsync(id)
+VVNRepo --> Service : VVN
+Service -> VVN : MarkPending(reason)
+Service -> VVNRepo : Update VVN state
+Service -> UoW : CommitAsync
+Service -> VVNDtO : CreateVesselVisitNotificationDto(VVN)
+Service --> Controller : VVNDtO
+Controller --> Officer : 200 OK, VVNDtO
+
+@enduml
