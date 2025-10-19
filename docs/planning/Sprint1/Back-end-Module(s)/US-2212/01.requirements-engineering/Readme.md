@@ -15,23 +15,22 @@ As a **Logistics Operator**, I want to **register and manage physical resources*
 > Physical resources include **cranes, trucks, forklifts, and other operational equipment** used in port and yard operations.  
 > Each resource must have a **unique alphanumeric code** (`CODE`), a **description**, and an associated **type** (e.g., Truck, Crane).  
 > Resources must also store:
-> - **Operational capacity** (depending on the type, e.g., tons/hour for cranes);
 > - **Setup time** (if applicable);
-> - **Current status** (`Available`, `Unavailable`, `UnderMaintenance`);
 > - An optional **qualification requirement**, ensuring that only certified staff can operate specific equipment.
 
 > **Deactivation** and **reactivation** must preserve all data and ensure auditability for operational traceability.
 
 **From forum (clarifications):**
 
-> **Question:** Can two resources share the same code?  
-> **Answer:** No. Each physical resource must have a **unique code** for identification.
+> **Question:** Dear Client, in what unit is the setup time expressed?
+> **Answer:** Across the entire system, data related with time must be record internally in the same time unit: seconds.
+However, for input/output purpose, time values should be requested/presented in a format easing the user readability.
 
-> **Question:** Is setup time required for all resources?  
-> **Answer:** No. It is **optional** and only relevant to resources that require preparation before use (e.g., cranes).
+> **Question:**When creating a physical resource, should its status be automatically assigned to available or should the Logistics Operator choose it.  
+> **Answer:** By default, it can be available.
 
-> **Question:** What happens when a qualification is removed from the database?  
-> **Answer:** The system should **prevent orphan references** — qualifications linked to resources must exist and remain valid.
+> **Question:** Is there any constraints in terms of number of characteres for description?  
+> **Answer:** Description: 255 chars max.
 
 ---
 
@@ -43,8 +42,6 @@ As a **Logistics Operator**, I want to **register and manage physical resources*
 * **AC04 – Deactivate:** System allows deactivating a resource, changing its status to `Unavailable`.
 * **AC05 – Reactivate:** System allows reactivating a previously deactivated resource, restoring its status to `Available`.
 * **AC06 – Uniqueness:** Resource `Code` must be unique across the system.
-* **AC07 – Validation:** System must reject invalid input (negative capacity, null description, non-existent qualification).
-* **AC08 – Logging:** All actions (Create, Update, Deactivate, Reactivate) must be logged with timestamps and relevant identifiers.
 
 ---
 
@@ -52,7 +49,6 @@ As a **Logistics Operator**, I want to **register and manage physical resources*
 
 * **Depends on:**
     * US 2.2.13 – *Register and Manage Qualifications*, since `QualificationId` is a foreign reference.
-    * Authentication and authorization modules (to ensure only logistics operators manage resources).
 
 * **Provides data to:**
     * Planning and Scheduling modules that allocate physical resources to operations.
@@ -68,9 +64,8 @@ As a **Logistics Operator**, I want to **register and manage physical resources*
 | `description` | string | ✅ Yes | Resource description (max 80 chars). |
 | `physicalResourceType` | enum | ✅ Yes | Type of resource (e.g., `Truck`, `Crane`, `Forklift`). |
 | `operationalCapacity` | double | ✅ Yes | Operational capacity; must be > 0. |
-| `setupTime` | double | ❌ No | Time required to prepare the resource. |
+| `setupTime` | double | ✅ Yes | Time required to prepare the resource; must be > 0. |
 | `qualificationCode` | string | ❌ No | Optional qualification reference. |
-| `status` | enum | ✅ Yes | `Available`, `Unavailable`, or `UnderMaintenance`. |
 
 #### **Output Data**
 
@@ -89,7 +84,7 @@ As a **Logistics Operator**, I want to **register and manage physical resources*
 
 ### 1.6. System Sequence Diagram (SSD)
 
-![System Sequence Diagram - Register and Manage Physical Resources](./svg/us2.2.12-sequence-diagram.svg)
+![System Sequence Diagram - Register and Manage Physical Resources](./puml/us2.2.12-sequence-diagram.svg)
 
 ---
 
