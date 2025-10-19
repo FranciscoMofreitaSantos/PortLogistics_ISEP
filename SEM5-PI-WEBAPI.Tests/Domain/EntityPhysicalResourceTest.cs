@@ -47,7 +47,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         [Fact]
         public void CreatePhysicalResource_WithTooLongDescription_ShouldThrow()
         {
-            string longDesc = new string('A', 200);
+            string longDesc = new string('A', 256);
             Assert.Throws<BusinessRuleValidationException>(() =>
                 new EntityPhysicalResource(ValidCode, longDesc, 25, 10, PhysicalResourceType.Truck, ValidGlobalQualification));
         }

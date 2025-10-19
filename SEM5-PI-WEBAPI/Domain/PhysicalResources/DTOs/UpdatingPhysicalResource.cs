@@ -4,7 +4,7 @@ namespace SEM5_PI_WEBAPI.Domain.PhysicalResources.DTOs;
 
 public class UpdatingPhysicalResource
 {
-   [MaxLength(80)]
+   [MaxLength(255)]
    public string? Description { get; set; }
    
    [Range(0, double.MaxValue, ErrorMessage = "Operational Capacity cannot be negative.")]

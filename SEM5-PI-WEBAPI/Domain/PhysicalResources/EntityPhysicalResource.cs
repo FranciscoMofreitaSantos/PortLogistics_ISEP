@@ -15,12 +15,12 @@ public enum PhysicalResourceStatus
 
 public class EntityPhysicalResource : Entity<PhysicalResourceId>, IAggregateRoot
 {
-    private const int MaxDescription = 80;
+    private const int MaxDescription = 255;
     
     
     [MaxLength(10)] public PhysicalResourceCode Code { get; set; }
 
-    [MaxLength(80)] public string Description { get; set; }
+    [MaxLength(MaxDescription)] public string Description { get; set; }
 
     public double OperationalCapacity { get; set; }
 

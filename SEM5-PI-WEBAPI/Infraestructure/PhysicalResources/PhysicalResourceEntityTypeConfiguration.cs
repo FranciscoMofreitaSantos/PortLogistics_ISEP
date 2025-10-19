@@ -22,7 +22,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.PhysicalResources
             });
             
             builder.Property(r => r.Description)
-                .HasMaxLength(80)
+                .HasMaxLength(255)
                 .IsRequired();
 
             builder.Property(r => r.OperationalCapacity)

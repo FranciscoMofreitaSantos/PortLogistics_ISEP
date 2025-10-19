@@ -11,7 +11,7 @@ public class PhysicalResourceDTO
     public PhysicalResourceCode Code { get; set; }
     
     [Required]
-    [MaxLength(80)]
+    [MaxLength(255)]
     public string Description { get; set; }
     
     [Required]
