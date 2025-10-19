@@ -15,8 +15,8 @@
 **Postconditions**
 
 * A new **Dock** is persisted or an existing one is updated.
-* Docks are available for reference when assigning vessel visits.
-* Changes are auditable (who/when/what).
+* Docks are available for future reference in vessel visit scheduling and assignments.
+* All changes are logged for accountability.
 
 ---
 
@@ -38,15 +38,15 @@ On a given dock may berth several vessel types (e.g. Feeder and Panamax).
 
 ### 1.3. Acceptance Criteria
 
-* **AC01 – Create: The system allows registering a Dock with all required attributes: DockCode, location, physical dimensions, allowed vessel types, and optional physical resource codes (PRCs).
-* **AC02 – Update: The system allows updating existing Dock information, including DockCode, location, physical dimensions, physical resource codes, and allowed vessel types.
-* **AC03 – Uniqueness: DockCode must be unique within the port. Each PhysicalResourceCode (PRC) must also be globally unique and cannot belong to more than one Dock.
+* **AC01 – Create: The system shall allow registering a new Dock with all required attributes: DockCode, location, physical dimensions (length, depth, max draft), allowed vessel types, and optionally, physical resource codes (PRCs).
+* **AC02 – Update: The system shall allow updating existing Dock details, including DockCode, location, physical dimensions, physical resource codes, allowed vessel types, and status.
+* **AC03 – Uniqueness: Each DockCode must be unique. Each PhysicalResourceCode (PRC) must also be globally unique and must not belong to more than one dock.
 * **AC04 – Validation (dimensions): length > 0, depth > 0, maxDraft > 0; error shown if invalid.
-* **AC05 – Reference Availability: Created/updated docks are immediately available for Vessel Visit assignment.
-* **AC06 – Search/Filter: Users can search docks by dockCode, location, filter by vessel type and physical resource code.
-* **AC07 – Referential Integrity: Updates must not invalidate existing Vessel Visit assignments.
-* **AC08 – Audit: Create/Update actions are logged with timestamp, officer ID, and action outcome.
-* **AC09 – Error Handling: On validation failure, the user gets clear, actionable messages; no partial records.
+* **AC05 – Reference Availability: Newly created or updated docks must be immediately available for vessel visit scheduling and assignment.
+* **AC06 – Search/Filter: Users shall be able to search or filter docks by dockCode, location, vessel type, and physical resource codes.
+* **AC07 – Referential Integrity: Updates to docks shall not compromise existing or scheduled vessel visit assignments.
+* **AC08 – Audit: All create and update actions shall be logged with timestamp, user (officer) identity, and action outcome.
+* **AC09 – Error Handling: On validation errors, the system shall provide clear and actionable error messages. No partial or inconsistent dock data shall be saved.
 
 ---
 
@@ -62,20 +62,20 @@ On a given dock may berth several vessel types (e.g. Feeder and Panamax).
 
 **Input Data (Create/Update form or API):**
 
-* `dockId : string` *(required, unique)*
 * `dockCode : string` *(required, unique)*
 * `location : string` *(required)*
 * `length : number > 0`
 * `depth : number > 0`
 * `maxDraft : number > 0`
-* `physicalResourceCodes[]  – list<string>, optional, must be globally unique`
-* `allowedVesselTypeIds[]   – list<VesselTypeId>, required, at least one`
+* `physicalResourceCodes[]  – list<string>
+* `allowedVesselTypeIds[]   – list<VesselTypeId>
+* `status` : Defaults to Available
 
 **Output Data:**
 
-* On success: persisted Dock DTO (id, all fields, created/updated timestamps).
-* On failure: error list with field-level messages (“Name already exists”, “Depth must be > 0”).
-* For search: paged list of {id, name, location, allowedVesselTypes} with filter metadata.
+* On success: Persisted Dock data (ID, all fields, status, timestamps if available).
+* On failure: Error list with descriptive messages (“DockCode already exists”, “Depth must be > 0”).
+* For search: List of docks {id, code, location, allowedVesselTypes, status} with filtering metadata.
 
 ---
 
