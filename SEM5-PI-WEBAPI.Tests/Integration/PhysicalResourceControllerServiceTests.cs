@@ -90,9 +90,9 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             var entity = new EntityPhysicalResource(
                 new PhysicalResourceCode("TRUCK-0001"),
                 dto.Description,
-                dto.OperationalCapacity,
-                dto.SetupTime,
-                dto.PhysicalResourceType,
+                dto.OperationalCapacity.Value,
+                dto.SetupTime.Value,
+                dto.PhysicalResourceType.Value,
                 null);
 
             _qualMock.Setup(q => q.GetQualificationByCodeAsync(dto.QualificationCode!))

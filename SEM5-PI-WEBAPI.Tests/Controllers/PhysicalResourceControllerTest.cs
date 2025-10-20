@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using SEM5_PI_WEBAPI.Controllers;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources.DTOs;
-using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 
@@ -20,10 +19,11 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public PhysicalResourceControllerTests()
         {
             _serviceMock = new Mock<IPhysicalResourceService>();
-            _controller = new PhysicalResourceController(_serviceMock.Object,  _loggerMock.Object);
+            _loggerMock = new Mock<ILogger<PhysicalResourceController>>();
+            _controller = new PhysicalResourceController(_serviceMock.Object, _loggerMock.Object);
         }
 
-        private PhysicalResourceDTO CreateDTO()
+        private PhysicalResourceDTO CreateDto()
         {
             return new PhysicalResourceDTO(
                 Guid.NewGuid(),
@@ -40,27 +40,29 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         [Fact]
         public async Task GetAll_ShouldReturnOk_WhenResourcesExist()
         {
-            var list = new List<PhysicalResourceDTO> { CreateDTO() };
+            var list = new List<PhysicalResourceDTO> { CreateDto() };
             _serviceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(list);
 
             var result = await _controller.GetAll();
 
-            Assert.NotNull(result.Value);
-            Assert.Single(result.Value);
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var value = Assert.IsType<List<PhysicalResourceDTO>>(ok.Value);
+            Assert.Single(value);
         }
 
         // --- GET BY ID ---
         [Fact]
         public async Task GetById_ShouldReturnOk_WhenFound()
         {
-            var dto = CreateDTO();
+            var dto = CreateDto();
             _serviceMock.Setup(s => s.GetByIdAsync(It.IsAny<PhysicalResourceId>()))
                 .ReturnsAsync(dto);
 
             var result = await _controller.GetByID(Guid.NewGuid());
 
-            Assert.NotNull(result.Value);
-            Assert.Equal(dto.Description, result.Value.Description);
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var value = Assert.IsType<PhysicalResourceDTO>(ok.Value);
+            Assert.Equal(dto.Description, value.Description);
         }
 
         [Fact]
@@ -71,7 +73,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
 
             var result = await _controller.GetByID(Guid.NewGuid());
 
-            var notFound = Assert.IsType<NotFoundObjectResult>(result.Result);
+            var notFound = Assert.IsType<NotFoundResult>(result.Result);
             Assert.Equal(404, notFound.StatusCode);
         }
 
@@ -80,15 +82,9 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task Create_ShouldReturnCreated_WhenValid()
         {
             var dto = new CreatingPhysicalResourceDto(
-                "Truck A",
-                25.0,
-                10.0,
-                PhysicalResourceType.Truck,
-                "QUAL-001"
-            );
+                "Truck A", 25.0, 10.0, PhysicalResourceType.Truck, "QUAL-001");
 
-            var created = CreateDTO();
-
+            var created = CreateDto();
             _serviceMock.Setup(s => s.AddAsync(It.IsAny<CreatingPhysicalResourceDto>()))
                 .ReturnsAsync(created);
 
@@ -103,32 +99,26 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task Create_ShouldReturnBadRequest_WhenBusinessRuleException()
         {
             var dto = new CreatingPhysicalResourceDto(
-                "Truck A",
-                25.0,
-                10.0,
-                PhysicalResourceType.Truck,
-                "QUAL-001"
-            );
+                "Truck A", 25.0, 10.0, PhysicalResourceType.Truck, "QUAL-001");
 
             _serviceMock.Setup(s => s.AddAsync(It.IsAny<CreatingPhysicalResourceDto>()))
                 .ThrowsAsync(new BusinessRuleValidationException("Invalid Qualification"));
 
             var result = await _controller.Create(dto);
 
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal(400, badRequest.StatusCode);
+            var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal(400, bad.StatusCode);
         }
 
         // --- PATCH UPDATE ---
         [Fact]
         public async Task Update_ShouldReturnOk_WhenValidFields()
         {
-            var updated = CreateDTO();
+            var updated = CreateDto();
             _serviceMock.Setup(s => s.UpdateAsync(It.IsAny<PhysicalResourceId>(), It.IsAny<UpdatingPhysicalResource>()))
                 .ReturnsAsync(updated);
 
             var body = new JObject { ["description"] = "Updated" };
-
             var result = await _controller.Update(Guid.NewGuid(), body);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
@@ -140,11 +130,10 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task Update_ShouldReturnBadRequest_WhenInvalidField()
         {
             var body = new JObject { ["invalidField"] = "x" };
-
             var result = await _controller.Update(Guid.NewGuid(), body);
 
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Contains("cannot be updated", badRequest.Value!.ToString());
+            var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Contains("cannot be updated", bad.Value!.ToString());
         }
 
         [Fact]
@@ -168,22 +157,23 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             var body = new JObject { ["description"] = "Updated" };
             var result = await _controller.Update(Guid.NewGuid(), body);
 
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal(400, badRequest.StatusCode);
+            var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal(400, bad.StatusCode);
         }
 
         // --- DEACTIVATE ---
         [Fact]
         public async Task Deactivate_ShouldReturnOk_WhenSuccess()
         {
-            var dto = CreateDTO();
+            var dto = CreateDto();
             _serviceMock.Setup(s => s.DeactivationAsync(It.IsAny<PhysicalResourceId>()))
                 .ReturnsAsync(dto);
 
             var result = await _controller.Deactivate(Guid.NewGuid());
 
-            Assert.NotNull(result.Value);
-            Assert.Equal(dto.Id, result.Value.Id);
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var value = Assert.IsType<PhysicalResourceDTO>(ok.Value);
+            Assert.Equal(dto.Id, value.Id);
         }
 
         [Fact]
@@ -214,14 +204,15 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         [Fact]
         public async Task Reactivate_ShouldReturnOk_WhenSuccess()
         {
-            var dto = CreateDTO();
+            var dto = CreateDto();
             _serviceMock.Setup(s => s.ReactivationAsync(It.IsAny<PhysicalResourceId>()))
                 .ReturnsAsync(dto);
 
             var result = await _controller.Activate(Guid.NewGuid());
 
-            Assert.NotNull(result.Value);
-            Assert.Equal(dto.Id, result.Value.Id);
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var value = Assert.IsType<PhysicalResourceDTO>(ok.Value);
+            Assert.Equal(dto.Id, value.Id);
         }
 
         [Fact]
