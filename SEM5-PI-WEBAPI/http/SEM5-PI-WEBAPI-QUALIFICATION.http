@@ -4,11 +4,11 @@ GET {{portURL}}/api/qualifications
 Accept: application/json
 
 ###
-GET {{portURL}}/api/qualifications/code/QLF-001
+GET {{portURL}}/api/qualifications/code/TRK-001
 Accept: application/json
 
 ###
-GET {{portURL}}/api/qualifications/name/Xu Quer Rola
+GET {{portURL}}/api/qualifications/name/Logistics Coordinator
 Accept: application/json
 
 ###
@@ -17,7 +17,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "name": "Qualification 1"
+  "code": "DDD-002",
+  "name": ""
 }
 
 ###

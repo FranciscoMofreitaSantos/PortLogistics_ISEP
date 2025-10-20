@@ -5,7 +5,7 @@
     "phone": "+351912345600",
     "schedule": { "shift": 1, "daysOfWeek": "1111111" },
     "isActive": true,
-    "qualificationCodes": [ "TRK-001", "STS-001" ]
+    "qualificationCodes": []
   },
   {
     "shortName": "Bob Smith",

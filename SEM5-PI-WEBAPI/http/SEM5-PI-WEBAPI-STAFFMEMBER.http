@@ -13,7 +13,7 @@ Accept: application/json
 
 {
   "qualificationsCodes": [
-    "QLF-001"
+    "TRK-001"
   ]
 }
 
@@ -24,8 +24,7 @@ Accept: application/json
 
 {
   "qualificationsCodes": [
-    "QLF-001",
-    "QLF-002"
+    "TRK-001", "FLK-001"
   ]
 }
 
@@ -61,7 +60,7 @@ Accept: application/json
       "daysOfWeek": "0011111"
     },
   "isActive": true,
-  "qualificationCodes": ["QLF-001", "QLF-002"]
+  "qualificationCodes": ["TRK-001", "VTC-001"]
 }
 
 
@@ -77,7 +76,7 @@ Accept: application/json
     "Shift": "Morning",
     "DaysOfWeek": "1010101"
   },
-  "qualificationCodes": ["QLF-007"],
+  "qualificationCodes": [],
   "addQualifications" : "false"
 }
 

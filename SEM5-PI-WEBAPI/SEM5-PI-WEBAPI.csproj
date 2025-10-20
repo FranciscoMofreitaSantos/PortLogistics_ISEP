@@ -31,8 +31,6 @@
 
   <ItemGroup>
     <Folder Include="Logs\" />
-    <Folder Include="Logs\Bootstrap\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

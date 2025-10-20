@@ -78,7 +78,6 @@ public class Bootstrap
         await SeedPhysicalResourcesAsync("Seed/PhysicalResource.json");
         await SeedDockAsync("Seed/Docks.json");
         await SeedStorageAreaNotificationsAsync("Seed/StorageAreas.json");
-        //await SeedStaffMembersAsync("Seed/StaffMembers.json");
         
         await SeedVesselVisitNotificationsAsync("Seed/VesselVisitNotifications.json");
         
