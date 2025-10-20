@@ -11,14 +11,16 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
 {
     public class ShippingAgentRepresentativeTests
     {
-        private readonly Nationality ValidNationality = Nationality.Portugal;
+         private readonly Nationality ValidNationality = Nationality.Portugal;
         private readonly CitizenId ValidCitizenId = new ("A78B776");
-        private readonly ShippingOrganizationCode ValidSAO = new ShippingOrganizationCode("1234567890");
+        private readonly ShippingOrganizationCode ValidSAO = new("AB123456"); // ✅ alphanumeric, <=10
         private readonly PhoneNumber ValidPhone = new PhoneNumber("+351914671555");
 
-        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Activated = SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated;
+        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Activated =
+            SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated;
 
-        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Deactivated = SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.deactivated;
+        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Deactivated =
+            SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.deactivated;
 
         private const string ValidName = "John Doe";
         private const string ValidEmail = "john.doe@example.com";

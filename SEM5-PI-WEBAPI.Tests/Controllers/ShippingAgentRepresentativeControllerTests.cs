@@ -30,7 +30,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             "john.doe@example.com",
             new PhoneNumber("+351912345678"),
             Status.activated,
-            new ShippingOrganizationCode("1234567890"),
+            new ShippingOrganizationCode("AB1234567"),
             new List<VvnCode>()
         );
 

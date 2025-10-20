@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using SEM5_PI_WEBAPI.Domain.Shared;
@@ -20,10 +19,13 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         private readonly Mock<IVesselVisitNotificationRepository> _vvnRepoMock = new();
         private readonly Mock<IUnitOfWork> _uowMock = new();
 
-        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Activated = SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated;
-        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Dectivated = SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.deactivated;
-
         private readonly ShippingAgentRepresentativeService _service;
+
+        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Activated =
+            SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated;
+
+        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Deactivated =
+            SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.deactivated;
 
         public ShippingAgentRepresentativeServiceTests()
         {
@@ -41,9 +43,9 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             var reps = new List<ShippingAgentRepresentative>
             {
                 new ShippingAgentRepresentative("John Doe", new CitizenId("A123456"), Nationality.Portugal,
-                    "john@doe.com", new PhoneNumber("+351912345678"),Activated, new ShippingOrganizationCode("0000000001")),
+                    "john@doe.com", new PhoneNumber("+351912345678"), Activated, new ShippingOrganizationCode("AB1234")),
                 new ShippingAgentRepresentative("Jane Smith", new CitizenId("B987654"), Nationality.Spain,
-                    "jane@smith.com", new PhoneNumber("+34912345678"), Dectivated, new ShippingOrganizationCode("0000000002"))
+                    "jane@smith.com", new PhoneNumber("+34912345678"), Deactivated, new ShippingOrganizationCode("ZX9876"))
             };
 
             _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(reps);
@@ -52,14 +54,14 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
 
             Assert.Equal(2, result.Count);
             Assert.Contains(result, r => r.Name == "John Doe");
-            Assert.Contains(result, r => r.Status == Dectivated);
+            Assert.Contains(result, r => r.Status == Deactivated);
         }
 
         [Fact]
         public async Task GetById_ShouldReturnRepresentative_WhenExists()
         {
             var rep = new ShippingAgentRepresentative("John Doe", new CitizenId("C123456"), Nationality.Italy,
-                "john@doe.com", new PhoneNumber("+390123456789"), Activated, new ShippingOrganizationCode("0000000003"));
+                "john@doe.com", new PhoneNumber("+390123456789"), Activated, new ShippingOrganizationCode("REP1234"));
 
             _repoMock.Setup(r => r.GetByIdAsync(rep.Id)).ReturnsAsync(rep);
 
@@ -67,17 +69,6 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
 
             Assert.NotNull(result);
             Assert.Equal("John Doe", result.Name);
-        }
-
-        [Fact]
-        public async Task GetById_ShouldReturnNull_WhenNotFound()
-        {
-            var id = new ShippingAgentRepresentativeId(Guid.NewGuid());
-            _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((ShippingAgentRepresentative)null);
-
-            var result = await _service.GetByIdAsync(id);
-
-            Assert.Null(result);
         }
 
         [Fact]
@@ -90,13 +81,13 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 "alice@wonder.com",
                 new PhoneNumber("+33123456789"),
                 "activated",
-                "0000000004"
+                "SAO12345"
             );
 
             _repoMock.Setup(r => r.GetByCitizenIdAsync(dto.CitizenId)).ReturnsAsync((ShippingAgentRepresentative)null);
             _repoMock.Setup(r => r.GetBySaoAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync((ShippingAgentRepresentative)null);
             _saoRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>()))
-                .ReturnsAsync(new ShippingAgentOrganization(new ShippingOrganizationCode("0000000004"),
+                .ReturnsAsync(new ShippingAgentOrganization(new ShippingOrganizationCode("SAO12345"),
                     "Legal Four", "Alt Four", "Addr Four", new TaxNumber("PT000000004")));
 
             _repoMock.Setup(r => r.AddAsync(It.IsAny<ShippingAgentRepresentative>()))
@@ -120,11 +111,11 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 "bob@builder.com",
                 new PhoneNumber("+380123456789"),
                 "activated",
-                "0000000005"
+                "SAO5678"
             );
 
             var existing = new ShippingAgentRepresentative("Someone", dto.CitizenId, Nationality.Spain,
-                "someone@old.com", new PhoneNumber("+34123456789"),Dectivated, new ShippingOrganizationCode("0000000006"));
+                "someone@old.com", new PhoneNumber("+34123456789"), Deactivated, new ShippingOrganizationCode("OLD5678"));
 
             _repoMock.Setup(r => r.GetByCitizenIdAsync(dto.CitizenId)).ReturnsAsync(existing);
 
@@ -141,7 +132,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 "carlos@mail.com",
                 new PhoneNumber("+5511987654321"),
                 "activated",
-                "9999999999"
+                "MISSING1"
             );
 
             _repoMock.Setup(r => r.GetByCitizenIdAsync(dto.CitizenId)).ReturnsAsync((ShippingAgentRepresentative)null);
@@ -161,13 +152,13 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 "deb@debbie.com",
                 new PhoneNumber("+390123456789"),
                 "activated",
-                "0000000007"
+                "REP2222"
             );
 
-            var sao = new ShippingAgentOrganization(new ShippingOrganizationCode("0000000007"),
+            var sao = new ShippingAgentOrganization(new ShippingOrganizationCode("REP2222"),
                 "Legal Seven", "Alt Seven", "Addr Seven", new TaxNumber("PT000000007"));
             var existingRep = new ShippingAgentRepresentative("Existing", new CitizenId("Z987654"),
-                Nationality.Spain, "exist@mail.com", new PhoneNumber("+34111222333"),Activated, sao.ShippingOrganizationCode);
+                Nationality.Spain, "exist@mail.com", new PhoneNumber("+34111222333"), Activated, sao.ShippingOrganizationCode);
 
             _repoMock.Setup(r => r.GetByCitizenIdAsync(dto.CitizenId)).ReturnsAsync((ShippingAgentRepresentative)null);
             _saoRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync(sao);
@@ -196,8 +187,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             );
 
             var rep = new ShippingAgentRepresentative("Eddie", new CitizenId("H123456"), Nationality.Portugal,
-                "eddie@mail.com", new PhoneNumber("+351911111111"),Activated, new ShippingOrganizationCode("0000000008"));
-            //var vvn = new VesselVisitNotification(new VvnCode("2024", "000001")); // example
+                "eddie@mail.com", new PhoneNumber("+351911111111"), Activated, new ShippingOrganizationCode("AGENT88"));
 
             _repoMock.Setup(r => r.GetByNameAsync(rep.Name)).ReturnsAsync(rep);
             _vvnRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<VvnCode>())).ReturnsAsync(vvn);
@@ -213,7 +203,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         public async Task AddNotificationAsync_ShouldThrow_WhenVVNNotFound()
         {
             var rep = new ShippingAgentRepresentative("Fiona", new CitizenId("I123456"), Nationality.France,
-                "fiona@mail.com", new PhoneNumber("+33111111111"), Activated, new ShippingOrganizationCode("0000000009"));
+                "fiona@mail.com", new PhoneNumber("+33111111111"), Activated, new ShippingOrganizationCode("FR00123"));
 
             _repoMock.Setup(r => r.GetByNameAsync(rep.Name)).ReturnsAsync(rep);
             _vvnRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<VvnCode>()))

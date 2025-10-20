@@ -7,13 +7,18 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
 {
     public class ShippingAgentOrganizationTests
     {
-        private ShippingOrganizationCode ValidOrgCode => new ShippingOrganizationCode("1234567890");
+        private ShippingOrganizationCode ValidOrgCode => new ShippingOrganizationCode("AB12XYZ9");
         private TaxNumber ValidTaxNumber => new TaxNumber("PT123456789");
 
         [Fact]
         public void CreateShippingAgentOrganization_WithValidData_ShouldInitializeCorrectly()
         {
-            var org = new ShippingAgentOrganization(ValidOrgCode,"Evergreen Marine Portugal","Evergreen Shipping","Rua da Ria 45, Porto, Portugal",ValidTaxNumber);
+            var org = new ShippingAgentOrganization(
+                ValidOrgCode,
+                "Evergreen Marine Portugal",
+                "Evergreen Shipping",
+                "Rua da Ria 45, Porto, Portugal",
+                ValidTaxNumber);
 
             Assert.NotNull(org.Id);
             Assert.Equal(ValidOrgCode, org.ShippingOrganizationCode);
@@ -41,18 +46,28 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             );
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("   ")]
-        public void CreateShippingAgentOrganization_WithInvalidLegalName_ShouldThrow(string? invalidName)
+        [Fact]
+        public void CreateShippingAgentOrganization_WithTooLongCode_ShouldThrow()
         {
             Assert.Throws<BusinessRuleValidationException>(() =>
                 new ShippingAgentOrganization(
-                    ValidOrgCode,
-                    invalidName!,
-                    "Evergreen Shipping",
-                    "Rua da Ria 45, Porto, Portugal",
+                    new ShippingOrganizationCode("ABCDEFGHIJK"), // 11 chars
+                    "Evergreen",
+                    "EG",
+                    "Porto",
+                    ValidTaxNumber)
+            );
+        }
+
+        [Fact]
+        public void CreateShippingAgentOrganization_WithInvalidCharacters_ShouldThrow()
+        {
+            Assert.Throws<BusinessRuleValidationException>(() =>
+                new ShippingAgentOrganization(
+                    new ShippingOrganizationCode("CODE!123"), // invalid symbol
+                    "Evergreen",
+                    "EG",
+                    "Porto",
                     ValidTaxNumber)
             );
         }

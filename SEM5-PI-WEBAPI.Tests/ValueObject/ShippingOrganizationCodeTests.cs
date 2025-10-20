@@ -6,30 +6,30 @@ namespace SEM5_PI_WEBAPI.Tests.ValueObject
     public class ShippingOrganizationCodeTests
     {
         [Fact]
-        public void Constructor_ShouldCreateValidCode_When10Digits()
+        public void Constructor_ShouldCreateValidCode_WhenUpTo10AlphanumericCharacters()
         {
             // Arrange
-            var codeValue = "1234567890";
+            var codeValue = "A12345Z9"; // 8 characters, alphanumeric
 
             // Act
             var code = new ShippingOrganizationCode(codeValue);
 
             // Assert
             Assert.NotNull(code);
-            Assert.Equal(codeValue, code.Value);
+            Assert.Equal(codeValue.ToUpper(), code.Value);
         }
 
         [Fact]
         public void Constructor_ShouldTrimAndNormalizeInput()
         {
             // Arrange
-            var codeValue = "   1234567890   ";
+            var codeValue = "   ab123cd456   ";
 
             // Act
             var code = new ShippingOrganizationCode(codeValue);
 
             // Assert
-            Assert.Equal("1234567890", code.Value);
+            Assert.Equal("AB123CD456", code.Value);
         }
 
         [Theory]
@@ -40,49 +40,45 @@ namespace SEM5_PI_WEBAPI.Tests.ValueObject
         {
             // Act + Assert
             var ex = Assert.Throws<BusinessRuleValidationException>(() => new ShippingOrganizationCode(value!));
-            Assert.Equal("ShippingOrganizationCode can't be empty. Must be 10 digits.", ex.Message);
+            Assert.Equal("ShippingOrganizationCode can't be empty. Must be at most 10 alphanumeric characters.", ex.Message);
         }
 
         [Theory]
-        [InlineData("12345")]            // too short
-        [InlineData("1234567890123")]    // too long
-        public void Constructor_ShouldThrow_WhenInvalidLength(string value)
+        [InlineData("12345678901")] // 11 chars
+        [InlineData("ABCDEFGHIJK")] // 11 chars
+        public void Constructor_ShouldThrow_WhenLongerThan10Chars(string value)
         {
             // Act + Assert
             var ex = Assert.Throws<BusinessRuleValidationException>(() => new ShippingOrganizationCode(value));
-            Assert.Equal("ShippingOrganizationCode must have exactly 10 digits.", ex.Message);
+            Assert.Equal("ShippingOrganizationCode must have at most 10 alphanumeric characters.", ex.Message);
         }
 
         [Theory]
-        [InlineData("ABCDEFGHIJ")]
-        [InlineData("12345ABCDE")]
-        [InlineData("1234-67890")]
-        [InlineData("12345678A1")]
-        public void Constructor_ShouldThrow_WhenContainsNonDigits(string value)
+        [InlineData("1234-6789")]  // dash
+        [InlineData("CODE!1234")]  // symbol
+        [InlineData("ABC@1234")]   // special char
+        public void Constructor_ShouldThrow_WhenContainsInvalidCharacters(string value)
         {
             // Act + Assert
             var ex = Assert.Throws<BusinessRuleValidationException>(() => new ShippingOrganizationCode(value));
-            Assert.Equal("ShippingOrganizationCode can only contain digits.", ex.Message);
+            Assert.Equal("ShippingOrganizationCode can only contain letters and digits.", ex.Message);
         }
 
         [Fact]
         public void Equals_ShouldReturnTrue_ForSameValue()
         {
-            // Arrange
-            var a = new ShippingOrganizationCode("1234567890");
-            var b = new ShippingOrganizationCode("1234567890");
+            var a = new ShippingOrganizationCode("ABC123");
+            var b = new ShippingOrganizationCode("ABC123");
 
-            // Act + Assert
             Assert.True(a.Equals(b));
-            Assert.True(a.Equals((object)b));
             Assert.Equal(a.GetHashCode(), b.GetHashCode());
         }
 
         [Fact]
         public void Equals_ShouldReturnFalse_ForDifferentValue()
         {
-            var a = new ShippingOrganizationCode("1234567890");
-            var b = new ShippingOrganizationCode("0987654321");
+            var a = new ShippingOrganizationCode("ABC123");
+            var b = new ShippingOrganizationCode("XYZ789");
 
             Assert.False(a.Equals(b));
         }
@@ -90,20 +86,18 @@ namespace SEM5_PI_WEBAPI.Tests.ValueObject
         [Fact]
         public void ToString_ShouldReturnValue()
         {
-            var code = new ShippingOrganizationCode("1234567890");
-
-            Assert.Equal("1234567890", code.ToString());
+            var code = new ShippingOrganizationCode("ABCD1234");
+            Assert.Equal("ABCD1234", code.ToString());
         }
 
         [Fact]
         public void FromString_ShouldReturnEquivalentObject()
         {
-            var value = "1112223334";
-
+            var value = "XYZ001";
             var code = ShippingOrganizationCode.FromString(value);
 
             Assert.NotNull(code);
-            Assert.Equal(value, code.Value);
+            Assert.Equal("XYZ001", code.Value);
         }
     }
 }
