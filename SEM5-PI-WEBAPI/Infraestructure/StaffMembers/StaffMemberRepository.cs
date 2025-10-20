@@ -52,38 +52,25 @@ public class StaffMemberRepository : BaseRepository<StaffMember, StaffMemberId>,
     {
         var idGuids = ids.Select(id => id.AsGuid()).ToList();
         
-        var staffMemberIds = await _context.Set<Dictionary<string, object>>("StaffMember_Qualification")
-            .Where(sq => idGuids.Contains((Guid)sq["QualificationId"]))
-            .Select(sq => (Guid)sq["StaffMemberId"])
-            .Distinct()
-            .ToListAsync();
-
-        return await _staffMembers
-            .Where(s => staffMemberIds.Contains(s.Id.AsGuid()))
-            .ToListAsync();
+        var allStaff = await _staffMembers.ToListAsync();
+    
+        return allStaff
+            .Where(s => s.Qualifications.Any(q => idGuids.Contains(q.AsGuid())))
+            .ToList();
     }
 
     public async Task<List<StaffMember>> GetByExactQualificationsAsync(List<QualificationId> ids)
     {
         var idGuids = ids.Select(id => id.AsGuid()).ToList();
+        var count = idGuids.Count;
         
-        var staffMembersWithQualifications = await (
-            from sm in _staffMembers
-            join sq in _context.Set<Dictionary<string, object>>("StaffMember_Qualification")
-                on sm.Id.AsGuid() equals (Guid)sq["StaffMemberId"] into qualifications
-            select new
-            {
-                StaffMember = sm,
-                QualificationIds = qualifications.Select(q => (Guid)q["QualificationId"]).ToList()
-            }).ToListAsync();
-        
-        var filtered = staffMembersWithQualifications
-            .Where(x => x.QualificationIds.Count == idGuids.Count &&
-                       x.QualificationIds.OrderBy(q => q).SequenceEqual(idGuids.OrderBy(q => q)))
-            .Select(x => x.StaffMember)
+        var allStaff = await _staffMembers.ToListAsync();
+    
+        return allStaff
+            .Where(s => 
+                s.Qualifications.Count == count &&
+                s.Qualifications.All(q => idGuids.Contains(q.AsGuid())))
             .ToList();
-
-        return filtered;
     }
 
     public async Task<bool> EmailIsInTheSystem(Email email)

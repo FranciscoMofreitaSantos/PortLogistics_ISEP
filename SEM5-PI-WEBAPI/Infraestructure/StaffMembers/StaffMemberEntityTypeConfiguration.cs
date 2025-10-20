@@ -53,30 +53,25 @@ public class StaffMemberEntityTypeConfiguration : IEntityTypeConfiguration<Staff
             .IsRequired();
     });
     
-    builder
-        .Ignore(s => s.Qualifications); 
-    
-    builder
-        .HasMany<Qualification>()
-        .WithMany()
-        .UsingEntity<Dictionary<string, object>>(
-            "StaffMember_Qualification",
-            j => j
-                .HasOne<Qualification>()
-                .WithMany()
-                .HasForeignKey("QualificationId")
-                .HasConstraintName("FK_StaffMember_Qualification_QualificationId")
-                .OnDelete(DeleteBehavior.Cascade),
-            j => j
-                .HasOne<StaffMember>()
-                .WithMany()
-                .HasForeignKey("StaffMemberId")
-                .HasConstraintName("FK_StaffMember_Qualification_StaffMemberId")
-                .OnDelete(DeleteBehavior.Cascade),
-            j =>
-            {
-                j.HasKey("StaffMemberId", "QualificationId");
-                j.ToTable("StaffMember_Qualification");
-            });
+    builder.Ignore(s => s.Qualifications);
+
+  
+    builder.OwnsMany(s => s.Qualifications, q =>
+    {
+        q.ToTable("StaffMember_Qualification");
+        q.WithOwner().HasForeignKey("StaffMemberId");
+        
+        q.Property<int>("Id");
+        q.HasKey("Id");
+        
+        q.Property(qid => qid.Value)
+            .HasColumnName("QualificationId")
+            .IsRequired();
+        
+        q.HasIndex("StaffMemberId", "Value").IsUnique();
+    });
+
+    builder.Navigation(s => s.Qualifications)
+        .UsePropertyAccessMode(PropertyAccessMode.Field);
 }
 }
