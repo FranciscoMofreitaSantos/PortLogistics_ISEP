@@ -9,7 +9,6 @@ namespace SEM5_PI_WEBAPI.Domain.ValueObjects;
 public class TaxNumber : IValueObject
 {
     public string Value { get; private set; }
-    public string CountryCode { get; private set; }
 
     private static readonly Dictionary<string, Regex> VatRegexes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -50,7 +49,6 @@ public class TaxNumber : IValueObject
             throw new ArgumentException("Tax number cannot be null or empty.", nameof(taxNumber));
 
         Value = Normalize(taxNumber);
-        CountryCode = Value.Length >= 2 ? Value.Substring(0, 2).ToUpperInvariant() : string.Empty;
 
         Validate();
     }
@@ -67,14 +65,16 @@ public class TaxNumber : IValueObject
     /// Valida formate de cada pais
     private void Validate()
     {
-        if (CountryCode.Length != 2)
+        string countryCode = Value.Length >= 2 ? Value.Substring(0, 2).ToUpperInvariant() : string.Empty;
+
+        if (countryCode.Length != 2)
             throw new ArgumentException("Invalid country code in tax number.");
 
-        if (!VatRegexes.TryGetValue(CountryCode, out var regex))
-            throw new ArgumentException($"Unsupported country code: {CountryCode}");
+        if (!VatRegexes.TryGetValue(countryCode, out var regex))
+            throw new ArgumentException($"Unsupported country code: {countryCode}");
 
         if (!regex.IsMatch(Value))
-            throw new ArgumentException($"Invalid {CountryCode} tax number format: {Value}");
+            throw new ArgumentException($"Invalid {countryCode} tax number format: {Value}");
     }
 
     public static TaxNumber FromString(string value)

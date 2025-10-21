@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
-
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
 {
     internal class ShippingAgentOrganizationEntityTypeConfiguration : IEntityTypeConfiguration<ShippingAgentOrganization>
@@ -12,12 +12,13 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
 
             builder.HasKey(b => b.Id);
             
-            builder.OwnsOne(b => b.ShippingOrganizationCode, shippingOrganizationCode =>
-            {
-                shippingOrganizationCode.Property(p => p.Value)
-                    .HasColumnName("ShippingOrganizationCode")
-                    .IsRequired();
-            });
+            builder.Property(b => b.ShippingOrganizationCode)
+                .HasConversion(
+                    code => code.Value,
+                    str => new ShippingOrganizationCode(str)
+                )
+                .HasColumnName("ShippingOrganizationCode")
+                .IsRequired();
             
             builder.Property(b => b.LegalName)
                 .IsRequired();
@@ -28,12 +29,13 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
             builder.Property(b => b.Address)
                 .IsRequired();
 
-            builder.OwnsOne(b => b.Taxnumber, tax =>
-            {
-                tax.Property(t => t.Value)
-                    .HasColumnName("TaxNumber")
-                    .IsRequired();
-            });
+            builder.Property(b => b.Taxnumber)
+                .HasConversion(
+                    tax => tax.Value,
+                    str => new TaxNumber(str)
+                )
+                .HasColumnName("TaxNumber")
+                .IsRequired();
 
         }
     }
