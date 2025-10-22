@@ -562,63 +562,64 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     }
 
     //========================================
-    private List<VesselVisitNotification> GetVvnsFilterByAcceptedDate(
-        List<VesselVisitNotification> vvnList, string acceptedDate)
+private List<VesselVisitNotification> GetVvnsFilterByAcceptedDate(
+    List<VesselVisitNotification> vvnList, string acceptedDate)
+{
+    if (string.IsNullOrWhiteSpace(acceptedDate))
     {
-        if (string.IsNullOrWhiteSpace(acceptedDate))
-        {
-            _logger.LogInformation("Skipping Accepted Date filter (no value provided).");
-            return vvnList;
-        }
-
-        if (!DateTime.TryParse(acceptedDate, out var parsedDate))
-        {
-            _logger.LogWarning("Invalid Accepted Date format received: {ACPT}", acceptedDate);
-            throw new BusinessRuleValidationException(
-                $"Invalid Accepted Date format: {acceptedDate}");
-        }
-
-        var filterClockTime = new ClockTime(parsedDate);
-        _logger.LogInformation("Filtering VVNs by Accepted Date near {Date}", filterClockTime.Value);
-
-        var filtered = vvnList
-            .Where(v => v.AcceptenceDate != null &&
-                        Math.Abs((v.AcceptenceDate.Value - filterClockTime.Value).TotalHours) <= 1)
-            .ToList();
-
-        _logger.LogInformation("Accepted Date filter result: {Count}/{Total} VVNs matched.", filtered.Count,
-            vvnList.Count);
-        return filtered;
+        _logger.LogInformation("Skipping Accepted Date filter (no value provided).");
+        return vvnList;
     }
 
-    private List<VesselVisitNotification> GetVvnsFilterBySubmittedDate(
-        List<VesselVisitNotification> vvnList, string submittedDate)
+    if (!DateTime.TryParse(acceptedDate, out var parsedDate))
     {
-        if (string.IsNullOrWhiteSpace(submittedDate))
-        {
-            _logger.LogInformation("Skipping Submitted Date filter (no value provided).");
-            return vvnList;
-        }
-
-        if (!DateTime.TryParse(submittedDate, out var parsedDate))
-        {
-            _logger.LogWarning("Invalid Submitted Date format received: {SBMT}", submittedDate);
-            throw new BusinessRuleValidationException(
-                $"Invalid Submitted Date format: {submittedDate}");
-        }
-
-        var filterClockTime = new ClockTime(parsedDate);
-        _logger.LogInformation("Filtering VVNs by Submitted Date near {Date}", filterClockTime.Value);
-
-        var filtered = vvnList
-            .Where(v => v.SubmittedDate != null &&
-                        Math.Abs((v.SubmittedDate.Value - filterClockTime.Value).TotalHours) <= 1)
-            .ToList();
-
-        _logger.LogInformation("Submitted Date filter result: {Count}/{Total} VVNs matched.", filtered.Count,
-            vvnList.Count);
-        return filtered;
+        _logger.LogWarning("Invalid Accepted Date format received: {ACPT}", acceptedDate);
+        throw new BusinessRuleValidationException($"Invalid Accepted Date format: {acceptedDate}");
     }
+
+    var filterClockTime = new ClockTime(parsedDate);
+    _logger.LogInformation("Filtering VVNs by Accepted Date near {Date}", filterClockTime.Value);
+
+    var filtered = vvnList
+        .Where(v =>
+            v.AcceptenceDate?.Value != null &&
+            filterClockTime.Value != null &&
+            Math.Abs(((DateTime)v.AcceptenceDate.Value - (DateTime)filterClockTime.Value).TotalHours) <= 1)
+        .ToList();
+
+    _logger.LogInformation("Accepted Date filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
+    return filtered;
+}
+
+private List<VesselVisitNotification> GetVvnsFilterBySubmittedDate(
+    List<VesselVisitNotification> vvnList, string submittedDate)
+{
+    if (string.IsNullOrWhiteSpace(submittedDate))
+    {
+        _logger.LogInformation("Skipping Submitted Date filter (no value provided).");
+        return vvnList;
+    }
+
+    if (!DateTime.TryParse(submittedDate, out var parsedDate))
+    {
+        _logger.LogWarning("Invalid Submitted Date format received: {SBMT}", submittedDate);
+        throw new BusinessRuleValidationException($"Invalid Submitted Date format: {submittedDate}");
+    }
+
+    var filterClockTime = new ClockTime(parsedDate);
+    _logger.LogInformation("Filtering VVNs by Submitted Date near {Date}", filterClockTime.Value);
+
+    var filtered = vvnList
+        .Where(v =>
+            v.SubmittedDate?.Value != null &&
+            filterClockTime.Value != null &&
+            Math.Abs(((DateTime)v.SubmittedDate.Value - (DateTime)filterClockTime.Value).TotalHours) <= 1)
+        .ToList();
+
+    _logger.LogInformation("Submitted Date filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
+    return filtered;
+}
+
 
     private List<VesselVisitNotification> GetVvnsFilterByEstimatedTimeDeparture(
         List<VesselVisitNotification> vvnList, string estimatedTimeDeparture)
@@ -640,10 +641,11 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         _logger.LogInformation("Filtering VVNs by ETD near {Date}", filterClockTime.Value);
 
         var filtered = vvnList
-            .Where(v => v.EstimatedTimeDeparture != null &&
-                        Math.Abs((v.EstimatedTimeDeparture.Value - filterClockTime.Value).TotalHours) <= 1)
+            .Where(v => v.EstimatedTimeDeparture?.Value != null &&
+                        filterClockTime.Value != null &&
+                        Math.Abs(((DateTime)v.EstimatedTimeDeparture.Value - (DateTime)filterClockTime.Value).TotalHours) <= 1)
             .ToList();
-
+        
         _logger.LogInformation("ETD filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
         return filtered;
     }
@@ -667,13 +669,16 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         _logger.LogInformation("Filtering VVNs by ETA near {Date}", filterClockTime.Value);
 
         var filtered = vvnList
-            .Where(v => v.EstimatedTimeArrival != null &&
-                        Math.Abs((v.EstimatedTimeArrival.Value - filterClockTime.Value).TotalHours) <= 1)
+            .Where(v =>
+                v.EstimatedTimeArrival?.Value != null &&
+                filterClockTime.Value != null &&
+                Math.Abs(((DateTime)v.EstimatedTimeArrival.Value - (DateTime)filterClockTime.Value).TotalHours) <= 1)
             .ToList();
 
         _logger.LogInformation("ETA filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
         return filtered;
     }
+
 
 
     private async Task<List<VesselVisitNotification>> GetVvnsFilterByImoNumber(
