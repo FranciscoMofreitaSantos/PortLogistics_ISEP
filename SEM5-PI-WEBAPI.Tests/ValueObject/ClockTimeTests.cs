@@ -17,11 +17,10 @@ namespace SEM5_PI_WEBAPI.Tests.ValueObject
 
             // Assert
             Assert.Equal(date, clockTime.Value);
-            Assert.Equal("2025-10-12 14:30", clockTime.ToString());
+            Assert.Equal("2025-10-12 14:30:00 UTC", clockTime.ToString());
         }
 
         [Theory]
-        [InlineData(1999, 12, 31, 23, 59, 0)]
         [InlineData(2101, 1, 1, 0, 0, 0)]
         public void Constructor_ShouldThrow_WhenYearIsOutsideAllowedRange(int year, int month, int day, int hour, int minute, int second)
         {
@@ -30,10 +29,20 @@ namespace SEM5_PI_WEBAPI.Tests.ValueObject
 
             // Act & Assert
             var ex = Assert.Throws<BusinessRuleValidationException>(() => new ClockTime(invalidDate));
-            Assert.Equal("Invalid year for VVN time.", ex.Message);
+            Assert.Equal("Invalid year for VVN time: 2101", ex.Message);
         }
         
+        [Theory]
+        [InlineData(1999, 12, 31, 23, 59, 0)]
+        public void Constructor_ShouldThrow_WhenYearIsOutsideAllowedRangee(int year, int month, int day, int hour, int minute, int second)
+        {
+            // Arrange
+            var invalidDate = new DateTime(year, month, day, hour, minute, second);
 
+            // Act & Assert
+            var ex = Assert.Throws<BusinessRuleValidationException>(() => new ClockTime(invalidDate));
+            Assert.Equal("Invalid year for VVN time: 1999", ex.Message);
+        }
         [Fact]
         public void ClockTimes_WithSameValue_ShouldBeEqual()
         {
@@ -70,7 +79,7 @@ namespace SEM5_PI_WEBAPI.Tests.ValueObject
             var formatted = clockTime.ToString();
 
             // Assert
-            Assert.Equal("2025-01-05 08:45", formatted);
+            Assert.Equal("2025-01-05 08:45:00 UTC", formatted);
         }
     }
 }
