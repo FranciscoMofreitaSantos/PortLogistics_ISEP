@@ -16,24 +16,4 @@ public class TaskFactory
 
         return new EntityTask(taskCode, dto.Description, dto.Type);
     }
-
-    public static TaskDto CreateTaskDto(EntityTask task)
-    {
-        return new TaskDto(
-            task.Id.AsGuid(),
-            task.Code.Value,
-            task.StartTime,
-            task.EndTime,
-            task.Description,
-            task.Type,
-            task.Status
-        );
-    }
-
-    public static List<TaskDto> CreateTaskDtoList(IReadOnlyCollection<EntityTask> tasks)
-    {
-        return tasks
-            .Select(CreateTaskDto)
-            .ToList();
-    }
 }

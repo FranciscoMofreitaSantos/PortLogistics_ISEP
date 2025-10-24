@@ -21,7 +21,7 @@ public class QualificationService : IQualificationService
     {
         _logger.LogInformation("Fetching all qualifications.");
         var list = await _repo.GetAllAsync();
-        var dtos = QualificationFactory.CreateQualificationDtoList(list);
+        var dtos = QualificationMapper.ToDtoList(list); 
         _logger.LogInformation("Returning {Count} qualifications.", dtos.Count);
         return dtos;
     }
@@ -37,7 +37,7 @@ public class QualificationService : IQualificationService
             return null;
         }
 
-        var dto = QualificationFactory.CreateQualificationDto(q);
+        var dto = QualificationMapper.ToDto(q); 
         _logger.LogInformation("Qualification with ID: {Id} found.", id.Value);
         return dto;
     }
@@ -53,7 +53,7 @@ public class QualificationService : IQualificationService
             throw new BusinessRuleValidationException($"No qualification with code {code} was found");
         }
 
-        var dto = QualificationFactory.CreateQualificationDto(qualy);
+        var dto = QualificationMapper.ToDto(qualy);
         _logger.LogInformation("Qualification found for code: {Code}", code);
         return dto;
     }
@@ -69,7 +69,7 @@ public class QualificationService : IQualificationService
             throw new BusinessRuleValidationException($"No qualification with name {name} was found");
         }
 
-        var dto = QualificationFactory.CreateQualificationDto(qualy);
+        var dto = QualificationMapper.ToDto(qualy);
         _logger.LogInformation("Qualification found for name: {Name}", name);
         return dto;
     }
@@ -82,12 +82,12 @@ public class QualificationService : IQualificationService
         string code = await GetCodeAsync(dto);
         var dtoWithCode = new CreatingQualificationDto(dto.Name, code);
 
-        var qualification = QualificationFactory.CreateQualification(dtoWithCode);
+        var qualification = QualificationFactory.CreateQualification(dtoWithCode); 
 
         await _repo.AddAsync(qualification);
         await _unitOfWork.CommitAsync();
 
-        var resultDto = QualificationFactory.CreateQualificationDto(qualification);
+        var resultDto = QualificationMapper.ToDto(qualification);
         _logger.LogInformation("Qualification created with ID: {Id}", resultDto.Id);
         return resultDto;
     }
@@ -114,7 +114,7 @@ public class QualificationService : IQualificationService
 
         await _unitOfWork.CommitAsync();
 
-        var updatedDto = QualificationFactory.CreateQualificationDto(qualification);
+        var updatedDto = QualificationMapper.ToDto(qualification);
         _logger.LogInformation("Qualification with ID: {Id} updated successfully.", id.Value);
         return updatedDto;
     }

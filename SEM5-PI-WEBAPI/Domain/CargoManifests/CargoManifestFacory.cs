@@ -21,32 +21,4 @@ public class CargoManifestFactory
             email
         );
     }
-
-    public static CargoManifestDto CreateCargoManifestDto(
-        CargoManifest manifest,
-        List<CargoManifestEntryDto> entryDtos)
-    {
-        return new CargoManifestDto(
-            manifest.Id.AsGuid(),
-            manifest.Code,
-            manifest.Type,
-            manifest.CreatedAt,
-            manifest.SubmittedBy.Address,
-            entryDtos
-        );
-    }
-
-    public static List<CargoManifestDto> CreateCargoManifestDtoList(
-        List<CargoManifest> manifests,
-        Dictionary<Guid, List<CargoManifestEntryDto>> entriesByManifestId)
-    {
-        return manifests.Select(manifest =>
-        {
-            var entryDtos = entriesByManifestId.TryGetValue(manifest.Id.AsGuid(), out var entries)
-                ? entries
-                : new List<CargoManifestEntryDto>();
-
-            return CreateCargoManifestDto(manifest, entryDtos);
-        }).ToList();
-    }
 }
