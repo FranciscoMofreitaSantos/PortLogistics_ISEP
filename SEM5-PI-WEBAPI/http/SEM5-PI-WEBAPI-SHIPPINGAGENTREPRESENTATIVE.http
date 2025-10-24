@@ -1,5 +1,5 @@
 @portURL = http://10.9.21.87:5008
-
+#@portURL = http://localhost:5008
 ### --- SHIPPING AGENT ORGANIZATION ---
 
 ###
@@ -7,11 +7,11 @@ GET {{portURL}}/api/ShippingAgentRepresentative
 Accept: application/json
 
 ###
-GET {{portURL}}/api/ShippingAgentRepresentative/name/Alexandre
+GET {{portURL}}/api/ShippingAgentRepresentative/name/Alexandre Silva
 Accept: application/json
 
 ###
-GET {{portURL}}/api/ShippingAgentRepresentative/email/alexandre@gmail.com
+GET {{portURL}}/api/ShippingAgentRepresentative/email/alexandre.silva@gmail.com
 Accept: application/json
 
 ###
@@ -49,7 +49,7 @@ Accept: application/json
 }
 
 ### Update representative status by name (1)
-PATCH {{portURL}}/api/ShippingAgentRepresentative/update/Alexandre Silva
+PATCH {{portURL}}/api/ShippingAgentRepresentative/update/alexandre.silva@gmail.com
 Content-Type: application/json
 Accept: application/json
 
@@ -58,7 +58,7 @@ Accept: application/json
 }
 
 ### Update representative status by name (2)
-PATCH {{portURL}}/api/ShippingAgentRepresentative/update/Alexandre Silva
+PATCH {{portURL}}/api/ShippingAgentRepresentative/update/alexandre.silva@gmail.com
 Content-Type: application/json
 Accept: application/json
 
@@ -66,22 +66,22 @@ Accept: application/json
   "Status": "activated"
 }
 
-### Update representative status by email (1)
-PATCH {{portURL}}/api/ShippingAgentRepresentative/update/Alexandre Silva
+### Update representative email by email (1)
+PATCH {{portURL}}/api/ShippingAgentRepresentative/update/alexandre.silva@gmail.com
 Content-Type: application/json
 Accept: application/json
 
 {
-  "Email": "alexandre.silva@gmail.com"
+  "Email": {"Address": "alexandre2.silva@gmail.com"}
 }
 
-### Update representative status by email (2)
-PATCH {{portURL}}/api/ShippingAgentRepresentative/update/Beatriz Costa
+### Update representative email by email (1)
+PATCH {{portURL}}/api/ShippingAgentRepresentative/update/alexandre2.silva@gmail.com
 Content-Type: application/json
 Accept: application/json
 
 {
-  "Email": "beatriz.costa@gmail.com"
+  "Email": {"Address": "alexandre.silva@gmail.com"}
 }
 
 

@@ -145,24 +145,21 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (representative == null)
             throw new BusinessRuleValidationException($"No representative found with email {email}.");
 
-        if (!string.IsNullOrWhiteSpace(dto.Email))
+       if (dto.Email != null)
         {
             var emailExist = await _repo.GetByEmailAsync(dto.Email);
             if (emailExist != null)
-            {
                 throw new BusinessRuleValidationException($"An SAR with email address '{dto.Email}' already exists on DB.");
 
-            }else{
-                
-                representative.UpdateEmail(dto.Email);
-            }
-            
+            representative.UpdateEmail(dto.Email);
         }
 
-        if (dto.Status != null)
+        // Only update status if provided
+        if (dto.Status != null) 
             representative.UpdateStatus(dto.Status.ToString());
-    
-        if (dto.PhoneNumber != null)
+
+        // Only update phone number if provided
+        if (dto.PhoneNumber != null) 
             representative.UpdatePhoneNumber(dto.PhoneNumber);
 
         await _unitOfWork.CommitAsync();
