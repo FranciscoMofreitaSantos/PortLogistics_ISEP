@@ -185,10 +185,10 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
                 Email = new EmailAddress("new.email@example.com")
             };
 
-            _mockService.Setup(s => s.PatchByNameAsync(_sampleDto.Name, updatingDto))
+            _mockService.Setup(s => s.PatchByEmailAsync(_sampleDto.Email, updatingDto))
                         .ReturnsAsync(_sampleDto);
 
-            var result = await _controller.UpdateAsync(_sampleDto.Name, updatingDto);
+            var result = await _controller.UpdateAsync(_sampleDto.Email, updatingDto);
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var dto = Assert.IsType<ShippingAgentRepresentativeDto>(okResult.Value);
 
