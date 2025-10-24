@@ -101,6 +101,9 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         var idExist = await _repo.GetByCitizenIdAsync(dto.CitizenId);
         if (idExist != null) throw new BusinessRuleValidationException($"An SAR with citizen Id '{dto.CitizenId}' already exists on DB.");
        
+        var emailExist = await _repo.GetByEmailAsync(dto.Email);
+        if (emailExist != null) throw new BusinessRuleValidationException($"An SAR with email address '{dto.Email}' already exists on DB.");
+       
         
         if (!Enum.TryParse<Status>(dto.Status, true, out var status))
             throw new BusinessRuleValidationException($"Invalid status '{dto.Status}'. Must be 'activated' or 'deactivated'.");
@@ -142,16 +145,27 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
 
 
 
-     public async Task<ShippingAgentRepresentativeDto> PatchByNameAsync(string name, UpdatingShippingAgentRepresentativeDto dto)
+     public async Task<ShippingAgentRepresentativeDto> PatchByEmailAsync(EmailAddress email, UpdatingShippingAgentRepresentativeDto dto)
     {
 
-        var representative = await _repo.GetByNameAsync(name);
+        var representative = await _repo.GetByEmailAsync(email);
 
         if (representative == null)
-            throw new BusinessRuleValidationException($"No representative found with name {name}.");
+            throw new BusinessRuleValidationException($"No representative found with email {email}.");
 
         if (!string.IsNullOrWhiteSpace(dto.Email))
-            representative.UpdateEmail(dto.Email);
+        {
+            var emailExist = await _repo.GetByEmailAsync(dto.Email);
+            if (emailExist != null)
+            {
+                throw new BusinessRuleValidationException($"An SAR with email address '{dto.Email}' already exists on DB.");
+
+            }else{
+                
+                representative.UpdateEmail(dto.Email);
+            }
+            
+        }
 
         if (dto.Status != null)
             representative.UpdateStatus(dto.Status.ToString());

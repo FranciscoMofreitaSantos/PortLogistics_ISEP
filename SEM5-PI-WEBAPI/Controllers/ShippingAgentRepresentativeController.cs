@@ -115,17 +115,19 @@ public class ShippingAgentRepresentativeController : ControllerBase
         }
     }
 
-    [HttpPatch("update/{name}")]
-    public async Task<ActionResult<ShippingAgentRepresentativeDto>> UpdateAsync(string name, [FromBody] UpdatingShippingAgentRepresentativeDto? dto)
+    [HttpPatch("update/{email}")]
+    public async Task<ActionResult<ShippingAgentRepresentativeDto>> UpdateAsync(string email, [FromBody] UpdatingShippingAgentRepresentativeDto? dto)
     {
         if (dto == null) return BadRequest("No changes provided.");
-    
+
+        EmailAddress address = new EmailAddress(email);
+
         try
         {
-            _logger.LogInformation("API Request: Partial update for Shipping AgentRepresentative with name = {NAME}", name);
+            _logger.LogInformation("API Request: Partial update for Shipping AgentRepresentative with email = {EMAIL}", address);
 
-            var updatedDto = await _service.PatchByNameAsync(name, dto);
-            _logger.LogInformation("API Response (200): Representative with NAME = {NAME} patched successfully", name);
+            var updatedDto = await _service.PatchByEmailAsync(address, dto);
+            _logger.LogInformation("API Response (200): Representative with  email = {EMAIL} patched successfully", address);
             return Ok(updatedDto);
 
         }
