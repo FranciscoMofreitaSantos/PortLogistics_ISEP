@@ -1,5 +1,5 @@
+#@portURL = http://10.9.21.87:5008
 @portURL = http://localhost:5008
-
 ### --- SHIPPING AGENT ORGANIZATION ---
 
 ###
@@ -7,15 +7,15 @@ GET {{portURL}}/api/ShippingAgentOrganization
 Accept: application/json
 
 ###
-GET {{portURL}}/api/ShippingAgentOrganization/code/1234567890
+GET {{portURL}}/api/ShippingAgentOrganization/code/1112223334
 Accept: application/json
 
 ###
-GET {{portURL}}/api/ShippingAgentOrganization/legalname/Shipping Co.
+GET {{portURL}}/api/ShippingAgentOrganization/legalname/Atlantic Maritime Lines
 Accept: application/json
 
 ###
-GET {{portURL}}/api/ShippingAgentOrganization/taxnumber/PT123456789
+GET {{portURL}}/api/ShippingAgentOrganization/taxnumber/PT501223344
 Accept: application/json
 
 ###

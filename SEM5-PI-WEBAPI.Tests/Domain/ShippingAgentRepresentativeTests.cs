@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentOrganizations;
@@ -11,17 +12,19 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
 {
     public class ShippingAgentRepresentativeTests
     {
-        private readonly Nationality ValidNationality = Nationality.Portugal;
+         private readonly Nationality ValidNationality = Nationality.Portugal;
         private readonly CitizenId ValidCitizenId = new ("A78B776");
-        private readonly ShippingOrganizationCode ValidSAO = new ShippingOrganizationCode("1234567890");
+        private readonly ShippingOrganizationCode ValidSAO = new("AB123456"); // ✅ alphanumeric, <=10
         private readonly PhoneNumber ValidPhone = new PhoneNumber("+351914671555");
 
-        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Activated = SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated;
+        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Activated =
+            SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated;
 
-        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Deactivated = SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.deactivated;
+        private readonly SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status Deactivated =
+            SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.deactivated;
 
         private const string ValidName = "John Doe";
-        private const string ValidEmail = "john.doe@example.com";
+        private EmailAddress ValidEmail = new EmailAddress("john.doe@example.com");
 
         [Fact]
         public void CreateShippingAgentRepresentative_WithValidData_ShouldInitializeCorrectly()
@@ -58,7 +61,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
                     ValidName,
                     ValidCitizenId,
                     ValidNationality,
-                    invalidEmail,
+                    new EmailAddress(invalidEmail),
                     ValidPhone,
                     Activated,
                     ValidSAO)
@@ -69,10 +72,10 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         public void UpdateEmail_WithValidEmail_ShouldChangeEmail()
         {
             var rep = CreateValidRepresentative();
+            var newMail = new EmailAddress("new.email@example.com");
+            rep.UpdateEmail(newMail);
 
-            rep.UpdateEmail("new.email@example.com");
-
-            Assert.Equal("new.email@example.com", rep.Email);
+            Assert.Equal(newMail, rep.Email);
         }
 
         [Theory]
@@ -83,7 +86,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         {
             var rep = CreateValidRepresentative();
 
-            Assert.Throws<BusinessRuleValidationException>(() => rep.UpdateEmail(invalidEmail));
+            Assert.Throws<BusinessRuleValidationException>(() => rep.UpdateEmail(new EmailAddress(invalidEmail)));
         }
 
         [Fact]

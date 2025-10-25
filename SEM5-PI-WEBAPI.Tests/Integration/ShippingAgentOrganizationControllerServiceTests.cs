@@ -28,7 +28,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             {
                 new ShippingAgentOrganizationDto(
                     Guid.NewGuid(), 
-                    new ShippingOrganizationCode("1234567890"), 
+                    new ShippingOrganizationCode("AB12345678"), 
                     "LegalName1", 
                     "AltName1", 
                     "Address1", 
@@ -36,7 +36,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 ),
                 new ShippingAgentOrganizationDto(
                     Guid.NewGuid(), 
-                    new ShippingOrganizationCode("0987654321"), 
+                    new ShippingOrganizationCode("CD98765432"), 
                     "LegalName2", 
                     "AltName2", 
                     "Address2", 
@@ -70,7 +70,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         {
             var shippingAgentOrganization = new ShippingAgentOrganizationDto(
                 Guid.NewGuid(), 
-                new ShippingOrganizationCode("1234567890"), 
+                new ShippingOrganizationCode("ORG1234567"), 
                 "LegalName", 
                 "AltName", 
                 "Address", 
@@ -79,7 +79,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
 
             _serviceMock.Setup(s => s.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync(shippingAgentOrganization);
 
-            var result = await _controller.GetByCodeAsync("1234567890");
+            var result = await _controller.GetByCodeAsync("ORG1234567");
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var dto = Assert.IsType<ShippingAgentOrganizationDto>(ok.Value);
@@ -92,7 +92,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             _serviceMock.Setup(s => s.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>()))
                         .ThrowsAsync(new BusinessRuleValidationException("No Shipping Agent Organization Found"));
 
-            var result = await _controller.GetByCodeAsync("1234567890");
+            var result = await _controller.GetByCodeAsync("ORG1234567");
 
             var notFound = Assert.IsType<NotFoundObjectResult>(result.Result);
             Assert.Contains("No Shipping Agent Organization Found", notFound.Value!.ToString());
@@ -103,7 +103,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         {
             var shippingAgentOrganization = new ShippingAgentOrganizationDto(
                 Guid.NewGuid(), 
-                new ShippingOrganizationCode("1234567890"), 
+                new ShippingOrganizationCode("X9CDE12345"), 
                 "LegalName", 
                 "AltName", 
                 "Address", 
@@ -135,7 +135,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         public async Task Create_ShouldReturnCreated_WhenValidData()
         {
             var creatingDto = new CreatingShippingAgentOrganizationDto(
-                "1234567890", 
+                "ORG4567XYZ", 
                 "LegalName", 
                 "AltName", 
                 "Address", 
@@ -164,7 +164,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         public async Task Create_ShouldReturnBadRequest_WhenBusinessRuleViolationOccurs()
         {
             var creatingDto = new CreatingShippingAgentOrganizationDto(
-                "1234567890", 
+                "CODE1234AA", 
                 "LegalName", 
                 "AltName", 
                 "Address", 

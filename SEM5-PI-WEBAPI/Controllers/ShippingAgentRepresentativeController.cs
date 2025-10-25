@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.DTOs;
-
+using SEM5_PI_WEBAPI.Domain.ValueObjects;
 namespace SEM5_PI_WEBAPI.Controllers;
 
 [Route("api/[controller]")]
@@ -59,7 +59,7 @@ public class ShippingAgentRepresentativeController : ControllerBase
     }
 
     [HttpGet("email/{email}")]
-    public async Task<ActionResult<List<ShippingAgentRepresentativeDto>>> GetByEmailAsync(string email)
+    public async Task<ActionResult<ShippingAgentRepresentativeDto>> GetByEmailAsync(EmailAddress email)
     {
         try
         {
@@ -106,7 +106,7 @@ public class ShippingAgentRepresentativeController : ControllerBase
         try
         {
             var q = await _service.AddAsync(dto);
-
+            _logger.LogInformation("API Response (200): Representative with  email = {EMAIL} created successfully", dto.Email);
             return CreatedAtAction(nameof(GetGetById), new { id = q.Id }, q);
         }
         catch (BusinessRuleValidationException ex)
@@ -115,17 +115,19 @@ public class ShippingAgentRepresentativeController : ControllerBase
         }
     }
 
-    [HttpPatch("update/{name}")]
-    public async Task<ActionResult<ShippingAgentRepresentativeDto>> UpdateAsync(string name, [FromBody] UpdatingShippingAgentRepresentativeDto? dto)
+    [HttpPatch("update/{email}")]
+    public async Task<ActionResult<ShippingAgentRepresentativeDto>> UpdateAsync(string email, [FromBody] UpdatingShippingAgentRepresentativeDto? dto)
     {
         if (dto == null) return BadRequest("No changes provided.");
-    
+
+        EmailAddress address = new EmailAddress(email);
+
         try
         {
-            _logger.LogInformation("API Request: Partial update for Shipping AgentRepresentative with name = {NAME}", name);
+            _logger.LogInformation("API Request: Partial update for Shipping AgentRepresentative with email = {EMAIL}", address);
 
-            var updatedDto = await _service.PatchByNameAsync(name, dto);
-            _logger.LogInformation("API Response (200): Representative with NAME = {NAME} patched successfully", name);
+            var updatedDto = await _service.PatchByEmailAsync(address, dto);
+            _logger.LogInformation("API Response (200): Representative with  email = {EMAIL} patched successfully", address);
             return Ok(updatedDto);
 
         }

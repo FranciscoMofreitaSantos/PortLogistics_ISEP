@@ -11,6 +11,11 @@ namespace SEM5_PI_WEBAPI.Infraestructure.VVN
         {
             builder.HasKey(v => v.Id);
 
+            var utcConverter = new ValueConverter<DateTime, DateTime>(
+                v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+            );
+
             builder.OwnsOne(v => v.Code, code =>
             {
                 code.Property(c => c.Code)
@@ -22,6 +27,8 @@ namespace SEM5_PI_WEBAPI.Infraestructure.VVN
             {
                 eta.Property(e => e.Value)
                     .HasColumnName("EstimatedTimeArrival")
+                    .HasColumnType("timestamp with time zone")
+                    .HasConversion(utcConverter)
                     .IsRequired();
             });
 
@@ -29,25 +36,45 @@ namespace SEM5_PI_WEBAPI.Infraestructure.VVN
             {
                 etd.Property(e => e.Value)
                     .HasColumnName("EstimatedTimeDeparture")
+                    .HasColumnType("timestamp with time zone")
+                    .HasConversion(utcConverter)
                     .IsRequired();
             });
 
             builder.OwnsOne(v => v.ActualTimeArrival, ata =>
             {
                 ata.Property(e => e.Value)
-                    .HasColumnName("ActualTimeArrival");
+                    .HasColumnName("ActualTimeArrival")
+                    .HasColumnType("timestamp with time zone")
+                    .HasConversion(utcConverter)
+                    .IsRequired(false);
             });
 
             builder.OwnsOne(v => v.ActualTimeDeparture, atd =>
             {
                 atd.Property(e => e.Value)
-                    .HasColumnName("ActualTimeDeparture");
+                    .HasColumnName("ActualTimeDeparture")
+                    .HasColumnType("timestamp with time zone")
+                    .HasConversion(utcConverter)
+                    .IsRequired(false);
             });
 
             builder.OwnsOne(v => v.AcceptenceDate, acc =>
             {
                 acc.Property(e => e.Value)
-                    .HasColumnName("AcceptanceDate");
+                    .HasColumnName("AcceptanceDate")
+                    .HasColumnType("timestamp with time zone")
+                    .HasConversion(utcConverter)
+                    .IsRequired(false);
+            });
+
+            builder.OwnsOne(v => v.SubmittedDate, sub =>
+            {
+                sub.Property(e => e.Value)
+                    .HasColumnName("SubmittedDate")
+                    .HasColumnType("timestamp with time zone")
+                    .HasConversion(utcConverter)
+                    .IsRequired(false);
             });
 
             builder.OwnsOne(v => v.VesselImo, imo =>
@@ -57,7 +84,6 @@ namespace SEM5_PI_WEBAPI.Infraestructure.VVN
                     .IsRequired();
             });
 
-            
             builder.OwnsOne(v => v.Dock, dock =>
             {
                 dock.Property(d => d.Value)
@@ -68,14 +94,16 @@ namespace SEM5_PI_WEBAPI.Infraestructure.VVN
             builder.Property(v => v.Volume)
                 .IsRequired();
 
+            // === STATUS (ENUM ↔ STRING) ===
             var statusConverter = new ValueConverter<Status, string>(
                 v => v.ToString(),
                 v => new Status(Enum.Parse<VvnStatus>(v.Replace("Status: ", "")), null));
-            
+
             builder.Property(v => v.Status)
                 .HasConversion(statusConverter)
                 .IsRequired();
 
+            // === RELAÇÕES ===
             builder.HasOne(v => v.CrewManifest)
                 .WithMany()
                 .HasForeignKey("CrewManifestId")

@@ -23,8 +23,8 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task GetAll_ShouldReturnAllOrganizations()
         {
-            var code1 = new ShippingOrganizationCode("0000000001");
-            var code2 = new ShippingOrganizationCode("0000000002");
+            var code1 = new ShippingOrganizationCode("AB123456");
+            var code2 = new ShippingOrganizationCode("ZX987654");
             var orgs = new List<ShippingAgentOrganization>
             {
                 new ShippingAgentOrganization(code1, "Legal One", "Alt One", "Addr One", new TaxNumber("PT000000001")),
@@ -43,7 +43,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task GetById_ShouldReturnOrganization_WhenExists()
         {
-            var org = new ShippingAgentOrganization(new ShippingOrganizationCode("0000000003"), "Legal Three", "Alt Three", "Addr Three", new TaxNumber("PT000000003"));
+            var org = new ShippingAgentOrganization(new ShippingOrganizationCode("SA12345X"), "Legal Three", "Alt Three", "Addr Three", new TaxNumber("PT000000003"));
             _repoMock.Setup(r => r.GetByIdAsync(org.Id)).ReturnsAsync(org);
 
             var result = await _service.GetByIdAsync(org.Id);
@@ -66,7 +66,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task Create_ShouldReturnCreatedOrganization_WhenValid()
         {
-            var dto = new CreatingShippingAgentOrganizationDto("0000000004", "Legal Four", "Alt Four", "Addr Four", "PT000000004");
+            var dto = new CreatingShippingAgentOrganizationDto("AG1234567", "Legal Four", "Alt Four", "Addr Four", "PT000000004");
 
             _repoMock.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync((ShippingAgentOrganization)null);
             _repoMock.Setup(r => r.GetByTaxNumberAsync(It.IsAny<TaxNumber>())).ReturnsAsync((ShippingAgentOrganization)null);
@@ -85,7 +85,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task Create_ShouldThrow_WhenCodeExists()
         {
-            var dto = new CreatingShippingAgentOrganizationDto("0000000005", "Legal Five", "Alt Five", "Addr Five", "PT000000005");
+            var dto = new CreatingShippingAgentOrganizationDto("CD99999", "Legal Five", "Alt Five", "Addr Five", "PT000000005");
             var existing = new ShippingAgentOrganization(new ShippingOrganizationCode(dto.ShippingOrganizationCode), "Legal X", "Alt X", "Addr X", new TaxNumber("PT999999999"));
 
             _repoMock.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync(existing);
@@ -96,8 +96,8 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task Create_ShouldThrow_WhenTaxNumberExists()
         {
-            var dto = new CreatingShippingAgentOrganizationDto("0000000006", "Legal Six", "Alt Six", "Addr Six", "PT000000006");
-            var existing = new ShippingAgentOrganization(new ShippingOrganizationCode("9999999999"), "Legal X", "Alt X", "Addr X", new TaxNumber(dto.Taxnumber));
+            var dto = new CreatingShippingAgentOrganizationDto("ZX12345", "Legal Six", "Alt Six", "Addr Six", "PT000000006");
+            var existing = new ShippingAgentOrganization(new ShippingOrganizationCode("AB99999"), "Legal X", "Alt X", "Addr X", new TaxNumber(dto.Taxnumber));
 
             _repoMock.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync((ShippingAgentOrganization)null);
             _repoMock.Setup(r => r.GetByTaxNumberAsync(It.IsAny<TaxNumber>())).ReturnsAsync(existing);
@@ -108,8 +108,8 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task Create_ShouldThrow_WhenLegalNameExists()
         {
-            var dto = new CreatingShippingAgentOrganizationDto("0000000007", "Legal Seven", "Alt Seven", "Addr Seven", "PT000000007");
-            var existing = new ShippingAgentOrganization(new ShippingOrganizationCode("0000000008"), dto.LegalName, "Alt X", "Addr X", new TaxNumber("PT000000008"));
+            var dto = new CreatingShippingAgentOrganizationDto("XY1234", "Legal Seven", "Alt Seven", "Addr Seven", "PT000000007");
+            var existing = new ShippingAgentOrganization(new ShippingOrganizationCode("CD1234"), dto.LegalName, "Alt X", "Addr X", new TaxNumber("PT000000008"));
 
             _repoMock.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync((ShippingAgentOrganization)null);
             _repoMock.Setup(r => r.GetByTaxNumberAsync(It.IsAny<TaxNumber>())).ReturnsAsync((ShippingAgentOrganization)null);
@@ -121,7 +121,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task GetByLegalName_ShouldReturnOrganization_WhenExists()
         {
-            var org = new ShippingAgentOrganization(new ShippingOrganizationCode("0000000008"), "Legal Eight", "Alt Eight", "Addr Eight", new TaxNumber("PT000000008"));
+            var org = new ShippingAgentOrganization(new ShippingOrganizationCode("LMN1234"), "Legal Eight", "Alt Eight", "Addr Eight", new TaxNumber("PT000000008"));
             _repoMock.Setup(r => r.GetByLegalNameAsync(org.LegalName)).ReturnsAsync(org);
 
             var result = await _service.GetByLegalNameAsync(org.LegalName);
@@ -133,7 +133,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task GetByCode_ShouldReturnOrganization_WhenExists()
         {
-            var code = new ShippingOrganizationCode("0000000009");
+            var code = new ShippingOrganizationCode("THPA1234");
             var org = new ShippingAgentOrganization(code, "Legal Nine", "Alt Nine", "Addr Nine", new TaxNumber("PT000000009"));
             _repoMock.Setup(r => r.GetByCodeAsync(org.ShippingOrganizationCode)).ReturnsAsync(org);
 
@@ -147,7 +147,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         public async Task GetByTaxNumber_ShouldReturnOrganization_WhenExists()
         {
             var tax = new TaxNumber("PT000000010");
-            var org = new ShippingAgentOrganization(new ShippingOrganizationCode("0000000010"), "Legal Ten", "Alt Ten", "Addr Ten", tax);
+            var org = new ShippingAgentOrganization(new ShippingOrganizationCode("VVN12345"), "Legal Ten", "Alt Ten", "Addr Ten", tax);
             _repoMock.Setup(r => r.GetByTaxNumberAsync(org.Taxnumber)).ReturnsAsync(org);
 
             var result = await _service.GetByTaxNumberAsync(org.Taxnumber);

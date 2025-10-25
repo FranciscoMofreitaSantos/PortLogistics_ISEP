@@ -27,10 +27,10 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             "John Doe",
             new CitizenId("AB123456"),
             Nationality.Portugal,
-            "john.doe@example.com",
+            new EmailAddress("john.doe@example.com"),
             new PhoneNumber("+351912345678"),
             Status.activated,
-            new ShippingOrganizationCode("1234567890"),
+            new ShippingOrganizationCode("AB1234567"),
             new List<VvnCode>()
         );
 
@@ -83,12 +83,11 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task GetByNameAsync_ShouldReturnOk_WhenRepresentativeExists()
         {
             _mockService.Setup(s => s.GetByNameAsync(It.IsAny<string>()))
-                        .ReturnsAsync(_sampleDto); // Single DTO
+                        .ReturnsAsync(_sampleDto); 
 
             var result = await _controller.GetByNameAsync(_sampleDto.Name);
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
 
-            // Wrap single DTO in list for test assertions
             var data = new List<ShippingAgentRepresentativeDto> { Assert.IsType<ShippingAgentRepresentativeDto>(okResult.Value) };
 
             Assert.Single(data);
@@ -108,7 +107,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         [Fact]
         public async Task GetByEmailAsync_ShouldReturnOk_WhenRepresentativeExists()
         {
-            _mockService.Setup(s => s.GetByEmailAsync(It.IsAny<string>()))
+            _mockService.Setup(s => s.GetByEmailAsync(It.IsAny<EmailAddress>()))
                         .ReturnsAsync(_sampleDto);
 
             var result = await _controller.GetByEmailAsync(_sampleDto.Email);
@@ -183,13 +182,13 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         {
             var updatingDto = new UpdatingShippingAgentRepresentativeDto
             {
-                Email = "new.email@example.com"
+                Email = new EmailAddress("new.email@example.com")
             };
 
-            _mockService.Setup(s => s.PatchByNameAsync(_sampleDto.Name, updatingDto))
+            _mockService.Setup(s => s.PatchByEmailAsync(_sampleDto.Email, updatingDto))
                         .ReturnsAsync(_sampleDto);
 
-            var result = await _controller.UpdateAsync(_sampleDto.Name, updatingDto);
+            var result = await _controller.UpdateAsync(_sampleDto.Email, updatingDto);
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var dto = Assert.IsType<ShippingAgentRepresentativeDto>(okResult.Value);
 

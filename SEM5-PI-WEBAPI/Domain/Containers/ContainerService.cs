@@ -30,7 +30,7 @@ public class ContainerService : IContainerService
         _logger.LogInformation("Business Domain: Found [{Count}] Containers in database.", listContainerInDb.Count);
 
         var listContainerDto = listContainerInDb
-            .Select(instance => ContainerFactory.CreateContainerDto(instance))
+            .Select(instance => ContainerMapper.ToDto(instance))
             .ToList();
             
         _logger.LogInformation("Business Domain: Returning [{Count}] Containers DTOs.", listContainerDto.Count);
@@ -49,7 +49,7 @@ public class ContainerService : IContainerService
        
         _logger.LogInformation("Business Domain: Container with ID = {Id} found successfully.", id.Value);
     
-        return ContainerFactory.CreateContainerDto(containerInDb);
+        return ContainerMapper.ToDto(containerInDb);
     }
     
     public async Task<ContainerDto> CreateAsync(CreatingContainerDto creatingContainerDto)
@@ -69,7 +69,7 @@ public class ContainerService : IContainerService
 
         _logger.LogInformation("Business Domain: Container Created Successfully with Iso Code [{ISO}] and System ID [{ID}].",createdContainer.ISOId, createdContainer.Id);
 
-        return ContainerFactory.CreateContainerDto(createdContainer);
+        return ContainerMapper.ToDto(createdContainer);
     }
 
     public async Task<ContainerDto> GetByIsoAsync(string id)
@@ -85,7 +85,7 @@ public class ContainerService : IContainerService
             
         _logger.LogInformation("Business Domain: Container with ISO Number = {Id} found successfully.", inId);
 
-        return ContainerFactory.CreateContainerDto(containerOnDb);
+        return ContainerMapper.ToDto(containerOnDb);
             
     }
 
@@ -112,7 +112,7 @@ public class ContainerService : IContainerService
 
         await _unitOfWork.CommitAsync();
 
-        return ContainerFactory.CreateContainerDto(container);
+        return ContainerMapper.ToDto(container);
     }
 
 

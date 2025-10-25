@@ -1,55 +1,47 @@
-using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
-namespace SEM5_PI_WEBAPI.Domain.ValueObjects;
-
-[Owned]
-public class ShippingOrganizationCode : IValueObject
+namespace SEM5_PI_WEBAPI.Domain.ValueObjects
 {
-    private const int ShippingOrganizationCodeLength = 10;
-
-    public string Value { get; private set; }
-
-    protected ShippingOrganizationCode() { }
-
-    public ShippingOrganizationCode(string shippingOrganizationCode)
+    public class ShippingOrganizationCode : IValueObject
     {
-        if (shippingOrganizationCode is null)
-            throw new BusinessRuleValidationException("ShippingOrganizationCode can't be empty. Must be 10 digits.");
-        
-        string normalized = shippingOrganizationCode.ToUpper().Trim();
-        this.Value = ValidateFormatShippingOrganizationCode(normalized);
+        public string Value { get; private set; }
+
+        public ShippingOrganizationCode(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new BusinessRuleValidationException(
+                    "ShippingOrganizationCode can't be empty. Must be at most 10 alphanumeric characters."
+                );
+
+            value = value.Trim().ToUpper();
+
+            if (value.Length > 10)
+                throw new BusinessRuleValidationException(
+                    "ShippingOrganizationCode must have at most 10 alphanumeric characters."
+                );
+
+            if (!Regex.IsMatch(value, "^[A-Z0-9]+$"))
+                throw new BusinessRuleValidationException(
+                    "ShippingOrganizationCode can only contain letters and digits."
+                );
+
+            Value = value;
+        }
+
+        public static ShippingOrganizationCode FromString(string value)
+        {
+            return new ShippingOrganizationCode(value);
+        }
+
+        public override string ToString() => Value;
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is not ShippingOrganizationCode other) return false;
+            return Value.Equals(other.Value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode() => Value.GetHashCode(StringComparison.OrdinalIgnoreCase);
     }
-
-    private string ValidateFormatShippingOrganizationCode(string shippingOrganizationCode)
-    {
-        if (string.IsNullOrWhiteSpace(shippingOrganizationCode))
-            throw new BusinessRuleValidationException("ShippingOrganizationCode can't be empty. Must be 10 digits.");
-
-        if (shippingOrganizationCode.Length != ShippingOrganizationCodeLength)
-            throw new BusinessRuleValidationException($"ShippingOrganizationCode must have exactly {ShippingOrganizationCodeLength} digits.");
-
-        if (!shippingOrganizationCode.All(char.IsDigit))
-            throw new BusinessRuleValidationException("ShippingOrganizationCode can only contain digits.");
-
-        return shippingOrganizationCode;
-    }
-
-    public static ShippingOrganizationCode FromString(string value)
-    {
-        return new ShippingOrganizationCode(value);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null || obj.GetType() != GetType())
-            return false;
-        
-        var other = (ShippingOrganizationCode)obj;
-        return Value == other.Value;
-    }
-
-    public override int GetHashCode() => Value.GetHashCode();
-
-    public override string ToString() => Value;
 }

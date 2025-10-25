@@ -24,7 +24,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
 
         private readonly ShippingAgentOrganizationDto _sampleDto = new(
             Guid.NewGuid(),
-            new ShippingOrganizationCode("1234567890"),
+            new ShippingOrganizationCode("AB1234567"),
             "Shipping Co.",
             "Shipping",
             "R. Dr. António Bernardino de Almeida 431, 4249-015 Porto",

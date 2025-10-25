@@ -29,7 +29,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         var list = await this._repo.GetAllAsync();
 
         List<ShippingAgentRepresentativeDto> listDto = list.ConvertAll<ShippingAgentRepresentativeDto>(q =>
-            new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality,q.Email,q.PhoneNumber,q.Status,q.SAO,q.Notifs));
+            ShippingAgentRepresentativeFactory.CreateDto(q));
 
         return listDto;
     }
@@ -41,7 +41,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (q == null)
             return null;
 
-        return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality,q.Email,q.PhoneNumber,q.Status,q.SAO,q.Notifs);
+        return ShippingAgentRepresentativeFactory.CreateDto(q);
     }
     
     public async Task<ShippingAgentRepresentativeDto> GetByNameAsync(string Name)
@@ -51,18 +51,18 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (q == null)
             return null;
 
-        return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality,q.Email,q.PhoneNumber,q.Status,q.SAO,q.Notifs);   
+        return ShippingAgentRepresentativeFactory.CreateDto(q);    
     }
 
-    public async Task<ShippingAgentRepresentativeDto> GetByEmailAsync(string Email)
+    public async Task<ShippingAgentRepresentativeDto> GetByEmailAsync(EmailAddress Email)
     {
         var q = await this._repo.GetByEmailAsync(Email);
 
         if (q == null)
             return null;
 
-        return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality, q.Email, q.PhoneNumber, q.Status, q.SAO, q.Notifs);
-    }
+        return ShippingAgentRepresentativeFactory.CreateDto(q);
+        }
     
      public async Task<ShippingAgentRepresentativeDto> GetByCitizenId(CitizenId cId)
     {
@@ -71,7 +71,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (q == null)
             return null;
 
-        return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality,q.Email,q.PhoneNumber,q.Status,q.SAO,q.Notifs);   
+        return ShippingAgentRepresentativeFactory.CreateDto(q);   
     }
 
     public async Task<ShippingAgentRepresentativeDto> GetByStatusAsync(Status Status)
@@ -81,7 +81,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (q == null)
             return null;
 
-        return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality, q.Email, q.PhoneNumber, q.Status, q.SAO, q.Notifs);
+        return ShippingAgentRepresentativeFactory.CreateDto(q);
     }
 
     public async Task<ShippingAgentRepresentativeDto> GetBySaoAsync(ShippingOrganizationCode Code)
@@ -91,7 +91,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (q == null)
             return null;
 
-        return new ShippingAgentRepresentativeDto(q.Id.AsGuid(), q.Name, q.CitizenId, q.Nationality, q.Email, q.PhoneNumber, q.Status, q.SAO, q.Notifs);
+        return ShippingAgentRepresentativeFactory.CreateDto(q);    
     }
 
     public async Task<ShippingAgentRepresentativeDto> AddAsync(CreatingShippingAgentRepresentativeDto dto)
@@ -100,6 +100,9 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         //verfica se já existe algum SAR com o Id de cidadão do SAR a ser criado
         var idExist = await _repo.GetByCitizenIdAsync(dto.CitizenId);
         if (idExist != null) throw new BusinessRuleValidationException($"An SAR with citizen Id '{dto.CitizenId}' already exists on DB.");
+       
+        var emailExist = await _repo.GetByEmailAsync(dto.Email);
+        if (emailExist != null) throw new BusinessRuleValidationException($"An SAR with email address '{dto.Email}' already exists on DB.");
        
         
         if (!Enum.TryParse<Status>(dto.Status, true, out var status))
@@ -113,7 +116,9 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         //verfica se já existe algum SAR associado ao SAO que se pretende associar ao SAR que se está a criar
         var saoTaken = await _repo.GetBySaoAsync(saoCode);
         if (saoTaken != null) throw new BusinessRuleValidationException($"A representative for SAO '{dto.Sao}' already exists on DB.");
-   
+
+        ShippingAgentRepresentativeFactory.CreateEntity(dto);
+
         var representative = new ShippingAgentRepresentative(
             dto.Name,
             dto.CitizenId,
@@ -126,51 +131,40 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
 
         await _repo.AddAsync(representative);
         await _unitOfWork.CommitAsync();
-
-        return new ShippingAgentRepresentativeDto(
-            representative.Id.AsGuid(),
-            representative.Name,
-            representative.CitizenId,
-            representative.Nationality,
-            representative.Email,
-            representative.PhoneNumber,
-            representative.Status,
-            representative.SAO,
-            representative.Notifs
-        );
+    
+        return ShippingAgentRepresentativeFactory.CreateDto(representative);
     }
 
 
 
-     public async Task<ShippingAgentRepresentativeDto> PatchByNameAsync(string name, UpdatingShippingAgentRepresentativeDto dto)
+     public async Task<ShippingAgentRepresentativeDto> PatchByEmailAsync(EmailAddress email, UpdatingShippingAgentRepresentativeDto dto)
     {
 
-        var representative = await _repo.GetByNameAsync(name);
+        var representative = await _repo.GetByEmailAsync(email);
 
         if (representative == null)
-            throw new BusinessRuleValidationException($"No representative found with name {name}.");
+            throw new BusinessRuleValidationException($"No representative found with email {email}.");
 
-        if (!string.IsNullOrWhiteSpace(dto.Email))
+       if (dto.Email != null)
+        {
+            var emailExist = await _repo.GetByEmailAsync(dto.Email);
+            if (emailExist != null)
+                throw new BusinessRuleValidationException($"An SAR with email address '{dto.Email}' already exists on DB.");
+
             representative.UpdateEmail(dto.Email);
+        }
 
-        if (dto.Status != null)
+        // Only update status if provided
+        if (dto.Status != null) 
             representative.UpdateStatus(dto.Status.ToString());
-    
-        if (dto.PhoneNumber != null)
+
+        // Only update phone number if provided
+        if (dto.PhoneNumber != null) 
             representative.UpdatePhoneNumber(dto.PhoneNumber);
 
         await _unitOfWork.CommitAsync();
 
-        return new ShippingAgentRepresentativeDto(
-            representative.Name,
-            representative.CitizenId,
-            representative.Nationality,
-            representative.Email,
-            representative.PhoneNumber,
-            representative.Status,
-            representative.SAO,
-            representative.Notifs
-        );
+        return ShippingAgentRepresentativeFactory.CreateDto(representative);
     }
      
      

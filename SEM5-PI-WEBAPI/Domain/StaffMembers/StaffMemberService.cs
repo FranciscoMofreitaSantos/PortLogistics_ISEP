@@ -2,6 +2,7 @@ using SEM5_PI_WEBAPI.Domain.Qualifications;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StaffMembers.DTOs;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
+
 namespace SEM5_PI_WEBAPI.Domain.StaffMembers;
 
 public class StaffMemberService : IStaffMemberService
@@ -28,11 +29,17 @@ public class StaffMemberService : IStaffMemberService
         _logger.LogInformation("Business Domain: Request to fetch all Staff Members.");
 
         var list = await _repo.GetAllAsync();
-        var dtos = await Task.WhenAll(list.Select(MapToDto));
+        var dtos = new List<StaffMemberDto>();
 
-        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members DTOs.", dtos.Length);
+        foreach (var staff in list)
+        {
+            var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);
+            dtos.Add(StaffMemberMapper.ToDto(staff, qualificationCodes));
+        }
 
-        return dtos.ToList();
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members DTOs.", dtos.Count);
+
+        return dtos;
     }
 
     public async Task<StaffMemberDto?> GetByIdAsync(StaffMemberId id)
@@ -46,7 +53,9 @@ public class StaffMemberService : IStaffMemberService
             return null;
         }
 
-        var dto = await MapToDto(staff);
+        var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);
+        var dto = StaffMemberMapper.ToDto(staff, qualificationCodes);
+
         _logger.LogInformation("Business Domain: Staff Member with ID = {Id} found and mapped successfully.", id.Value);
 
         return dto;
@@ -63,7 +72,9 @@ public class StaffMemberService : IStaffMemberService
             return null;
         }
 
-        var dto = await MapToDto(staff);
+        var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);
+        var dto = StaffMemberMapper.ToDto(staff, qualificationCodes);
+
         _logger.LogInformation("Business Domain: Staff Member with Mecanographic Number = {Mec} found and mapped successfully.", mec);
 
         return dto;
@@ -74,11 +85,17 @@ public class StaffMemberService : IStaffMemberService
         _logger.LogInformation("Business Domain: Request to fetch Staff Members with Name = {Name}", name);
 
         var staff = await _repo.GetByNameAsync(name);
-        var dtos = await Task.WhenAll(staff.Select(MapToDto));
+        var dtos = new List<StaffMemberDto>();
 
-        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Name = {Name}.", dtos.Length, name);
+        foreach (var s in staff)
+        {
+            var qualificationCodes = await GetQualificationCodesAsync(s.Qualifications);
+            dtos.Add(StaffMemberMapper.ToDto(s, qualificationCodes));
+        }
 
-        return dtos.ToList();
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Name = {Name}.", dtos.Count, name);
+
+        return dtos;
     }
 
     public async Task<List<StaffMemberDto>> GetByStatusAsync(bool status)
@@ -86,11 +103,17 @@ public class StaffMemberService : IStaffMemberService
         _logger.LogInformation("Business Domain: Request to fetch Staff Members with Status = {Status}", status);
 
         var staff = await _repo.GetByStatusAsync(status);
-        var dtos = await Task.WhenAll(staff.Select(MapToDto));
+        var dtos = new List<StaffMemberDto>();
 
-        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Status = {Status}.", dtos.Length, status);
+        foreach (var s in staff)
+        {
+            var qualificationCodes = await GetQualificationCodesAsync(s.Qualifications);
+            dtos.Add(StaffMemberMapper.ToDto(s, qualificationCodes));
+        }
 
-        return dtos.ToList();
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Status = {Status}.", dtos.Count, status);
+
+        return dtos;
     }
 
     public async Task<List<StaffMemberDto>> GetByQualificationsAsync(List<string> codes)
@@ -99,11 +122,17 @@ public class StaffMemberService : IStaffMemberService
 
         var ids = await GetQualificationIdsFromCodesAsync(codes);
         var staff = await _repo.GetByQualificationsAsync(ids);
-        var dtos = await Task.WhenAll(staff.Select(MapToDto));
+        var dtos = new List<StaffMemberDto>();
 
-        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Qualifications Codes: {Codes}.", dtos.Length, string.Join(',', codes));
+        foreach (var s in staff)
+        {
+            var qualificationCodes = await GetQualificationCodesAsync(s.Qualifications);
+            dtos.Add(StaffMemberMapper.ToDto(s, qualificationCodes));
+        }
 
-        return dtos.ToList();
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Qualifications Codes: {Codes}.", dtos.Count, string.Join(',', codes));
+
+        return dtos;
     }
 
     public async Task<List<StaffMemberDto>> GetByExactQualificationsAsync(List<string> codes)
@@ -112,11 +141,17 @@ public class StaffMemberService : IStaffMemberService
 
         var ids = await GetQualificationIdsFromCodesAsync(codes);
         var staff = await _repo.GetByExactQualificationsAsync(ids);
-        var dtos = await Task.WhenAll(staff.Select(MapToDto));
+        var dtos = new List<StaffMemberDto>();
 
-        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Exact Qualifications Codes: {Codes}.", dtos.Length, string.Join(',', codes));
+        foreach (var s in staff)
+        {
+            var qualificationCodes = await GetQualificationCodesAsync(s.Qualifications);
+            dtos.Add(StaffMemberMapper.ToDto(s, qualificationCodes));
+        }
 
-        return dtos.ToList();
+        _logger.LogInformation("Business Domain: Returning [{Count}] Staff Members with Exact Qualifications Codes: {Codes}.", dtos.Count, string.Join(',', codes));
+
+        return dtos;
     }
 
     public async Task<StaffMemberDto> AddAsync(CreatingStaffMemberDto dto)
@@ -145,7 +180,7 @@ public class StaffMemberService : IStaffMemberService
 
         _logger.LogInformation("Business Domain: Staff Member created successfully with Mecanographic Number = {MecNumber}", mecanographicNumber);
 
-        return StaffMemberFactory.CreateStaffMemberDto(staffMember, qualificationCodes);
+        return StaffMemberMapper.ToDto(staffMember, qualificationCodes);
     }
 
     public async Task<StaffMemberDto> UpdateAsync(UpdateStaffMemberDto updateDto)
@@ -219,7 +254,7 @@ public class StaffMemberService : IStaffMemberService
 
         _logger.LogInformation("Business Domain: Staff Member with Mecanographic Number = {MecNumber} updated successfully.", updateDto.MecNumber);
 
-        return StaffMemberFactory.CreateStaffMemberDto(staff, qualificationCodes);
+        return StaffMemberMapper.ToDto(staff, qualificationCodes);
     }
 
     public async Task<StaffMemberDto?> ToggleAsync(string mec)
@@ -240,7 +275,7 @@ public class StaffMemberService : IStaffMemberService
 
         _logger.LogInformation("Business Domain: Status toggled for Staff Member with Mecanographic Number = {MecNumber}", mec);
 
-        return StaffMemberFactory.CreateStaffMemberDto(staff, qualificationCodes);
+        return StaffMemberMapper.ToDto(staff, qualificationCodes);
     }
 
     private async Task EnsureNotRepeatedEmailAsync(Email email)
@@ -327,11 +362,5 @@ public class StaffMemberService : IStaffMemberService
         }
 
         return codes;
-    }
-
-    private async Task<StaffMemberDto> MapToDto(StaffMember staff)
-    {
-        var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);
-        return StaffMemberFactory.CreateStaffMemberDto(staff, qualificationCodes);
     }
 }

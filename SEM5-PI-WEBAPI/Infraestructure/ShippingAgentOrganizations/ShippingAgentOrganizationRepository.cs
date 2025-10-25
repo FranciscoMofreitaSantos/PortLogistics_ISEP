@@ -16,7 +16,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
         public async Task<ShippingAgentOrganization?> GetByCodeAsync(ShippingOrganizationCode code)
         {
             return await _context.ShippingAgentOrganization
-                .FirstOrDefaultAsync(x => x.ShippingOrganizationCode.Value.ToString().ToLower().Trim() == code.Value.ToString().ToLower().Trim());
+                .FirstOrDefaultAsync(x => x.ShippingOrganizationCode == code);
         }
         public async Task<ShippingAgentOrganization?> GetByLegalNameAsync(string legalName)
         {
@@ -26,13 +26,12 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
         public async Task<ShippingAgentOrganization?> GetByTaxNumberAsync(TaxNumber taxnumber)
         {
             return await _context.ShippingAgentOrganization
-                .FirstOrDefaultAsync(x => x.Taxnumber.Value.ToLower().Trim() == taxnumber.Value.ToLower().Trim());
+                .FirstOrDefaultAsync(x => x.Taxnumber == taxnumber);
         }
         
 
-        public async Task<List<ShippingAgentOrganization>> GetFilterAsync(string? shippingOrganizationCode,string? legalName,string? altName, string? address, TaxNumber? taxNumber, string? query)
+        public async Task<List<ShippingAgentOrganization>> GetFilterAsync(ShippingOrganizationCode? shippingOrganizationCode,string? legalName,string? altName, string? address, TaxNumber? taxNumber, string? query)
         {
-            var normalizedCode = shippingOrganizationCode?.Trim().ToLower();
             var normalizedLegalName = legalName?.Trim().ToLower();
             var normalizedAltName = altName?.Trim().ToLower();
             var normalizedAddress = address?.Trim().ToLower();
@@ -41,8 +40,8 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
 
             var queryable = _context.ShippingAgentOrganization.AsQueryable();
 
-            if (!string.IsNullOrEmpty(normalizedCode))
-                queryable = queryable.Where(v => v.ShippingOrganizationCode.ToString().ToLower().Contains(normalizedCode));
+            if (shippingOrganizationCode != null)
+                queryable = queryable.Where(v => v.ShippingOrganizationCode == shippingOrganizationCode);
 
             if (!string.IsNullOrEmpty(normalizedLegalName))
                 queryable = queryable.Where(v => v.LegalName.ToLower().Contains(normalizedLegalName));
@@ -53,16 +52,16 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentOrganizations
             if (!string.IsNullOrEmpty(normalizedAddress))
                 queryable = queryable.Where(v => v.Address.ToLower().Contains(normalizedAddress));
 
-            if (!string.IsNullOrEmpty(normalizedTaxNumber))
-                queryable = queryable.Where(v => v.Taxnumber.Value.ToLower().Contains(normalizedTaxNumber));
+            if (taxNumber != null)
+                queryable = queryable.Where(v => v.Taxnumber == taxNumber);
 
             if (!string.IsNullOrEmpty(normalizedQuery))
                 queryable = queryable.Where(v =>
-                    v.ShippingOrganizationCode.ToString().ToLower().Contains(normalizedQuery) ||
+                    v.ShippingOrganizationCode == shippingOrganizationCode ||
                     v.LegalName.ToLower().Contains(normalizedQuery) ||
                     v.AltName.ToLower().Contains(normalizedQuery) ||
                     v.Address.ToLower().Contains(normalizedQuery) ||
-                    v.Taxnumber.Value.ToLower().Contains(normalizedQuery));
+                    v.Taxnumber == taxNumber);
 
             return await queryable.ToListAsync();
         }

@@ -15,22 +15,4 @@ public class CrewMemberFactory
             citizenId
         );
     }
-
-    public static CrewMemberDto CreateCrewMemberDto(CrewMember crewMember)
-    {
-        return new CrewMemberDto(
-            crewMember.Id.AsGuid(),
-            crewMember.Name,
-            crewMember.Role,
-            crewMember.Nationality,
-            crewMember.CitizenId.ToString()
-        );
-    }
-
-    public static List<CrewMemberDto> CreateCrewMemberDtoList(List<CrewMember> crewMembers)
-    {
-        return crewMembers?
-            .Select(CreateCrewMemberDto)
-            .ToList() ?? new List<CrewMemberDto>();
-    }
 }

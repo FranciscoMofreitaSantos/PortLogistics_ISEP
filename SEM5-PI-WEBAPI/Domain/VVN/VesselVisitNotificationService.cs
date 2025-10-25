@@ -92,10 +92,12 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             CheckNeededPeople(loadingCargoManifest, crewManifest);
 
         var emailSar = new EmailAddress(dto.EmailSar);
-        var shippingAgentRepresentative = await _shippingAgentRepresentativeRepository.GetByEmailAsync(emailSar.ToString());
+        var shippingAgentRepresentative = await _shippingAgentRepresentativeRepository.GetByEmailAsync(emailSar);
 
-        if (shippingAgentRepresentative == null) throw new BusinessRuleValidationException("Invalid request: Shipping Agent Representative associated to VVN does not exist on DB.");
-        
+        if (shippingAgentRepresentative == null)
+            throw new BusinessRuleValidationException(
+                "Invalid request: Shipping Agent Representative associated to VVN does not exist on DB.");
+
         var newVesselVisitNotification = VesselVisitNotificationFactory.CreateVesselVisitNotification(
             vvnCode,
             dto.EstimatedTimeArrival,
@@ -107,16 +109,17 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             unloadingCargoManifest,
             vesselImo
         );
-        
+
         shippingAgentRepresentative.AddNotification(newVesselVisitNotification.Code);
 
         await _repo.AddAsync(newVesselVisitNotification);
         await _unitOfWork.CommitAsync();
-        
 
-        _logger.LogInformation("Business Domain: VVN successfully created with ID = {Id}", newVesselVisitNotification.Id.Value);
 
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(newVesselVisitNotification);
+        _logger.LogInformation("Business Domain: VVN successfully created with ID = {Id}",
+            newVesselVisitNotification.Id.Value);
+
+        return VesselVisitNotificationMapper.ToDto(newVesselVisitNotification);
     }
 
     public async Task<VesselVisitNotificationDto> GetByIdAsync(VesselVisitNotificationId id)
@@ -128,7 +131,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
 
         _logger.LogInformation("Business Domain: VVN with ID = {Id} found successfully.", id.Value);
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+        return VesselVisitNotificationMapper.ToDto(vvnInDb);
     }
 
     public async Task<VesselVisitNotificationDto> AcceptVvnAsync(VvnCode code)
@@ -140,8 +143,6 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with Code = {code}");
-
-        vvnInDb.Accept();
         var tasks = new List<EntityTask>();
         var dock = await BasicDockAttributionAlgorithm(vvnInDb.VesselImo);
         vvnInDb.UpdateDock(dock);
@@ -159,12 +160,13 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         }
 
         vvnInDb.SetTasks(tasks);
+        vvnInDb.Accept();
 
         await _unitOfWork.CommitAsync();
 
         _logger.LogInformation("VVN with Code = {code} Accepted successfully.", code.ToString());
 
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+        return VesselVisitNotificationMapper.ToDto(vvnInDb);
     }
 
     public async Task<VesselVisitNotificationDto> MarkAsPendingAsync(RejectVesselVisitNotificationDto dto)
@@ -185,7 +187,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             dto.VvnCode,
             dto.Reason);
 
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+        return VesselVisitNotificationMapper.ToDto(vvnInDb);
     }
 
 
@@ -204,7 +206,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
         _logger.LogInformation("VVN with ID = {Id} withdrew successfully.", id.Value);
 
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+        return VesselVisitNotificationMapper.ToDto(vvnInDb);
     }
 
     public async Task<VesselVisitNotificationDto> WithdrawByCodeAsync(VvnCode code)
@@ -222,7 +224,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
         _logger.LogInformation("VVN with Code = {code} withdrew successfully.", code.Code);
 
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+        return VesselVisitNotificationMapper.ToDto(vvnInDb);
     }
 
     public async Task<VesselVisitNotificationDto> SubmitByCodeAsync(VvnCode code)
@@ -240,7 +242,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
         _logger.LogInformation("VVN with Code = {code} submitted successfully.", code.Code);
 
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+        return VesselVisitNotificationMapper.ToDto(vvnInDb);
     }
 
     public async Task<VesselVisitNotificationDto> SubmitByIdAsync(VesselVisitNotificationId id)
@@ -258,7 +260,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
         _logger.LogInformation("VVN with ID = {Id} submitted successfully.", id.Value);
 
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+        return VesselVisitNotificationMapper.ToDto(vvnInDb);
     }
 
 
@@ -322,7 +324,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
 
         _logger.LogInformation("VVN with ID = {Id} updated successfully.", id.Value);
 
-        return VesselVisitNotificationFactory.CreateVesselVisitNotificationDto(vvnInDb);
+        return VesselVisitNotificationMapper.ToDto(vvnInDb);
     }
 
 
@@ -379,7 +381,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             _logger.LogInformation("After ETD filter: {Count} VVNs remain.", listVvnFiltered.Count);
         }
 
-        var result = VesselVisitNotificationFactory.CreateLitsVvnDtosFromList(listVvnFiltered);
+        var result = VesselVisitNotificationMapper.ToDtoList(listVvnFiltered);
         _logger.LogInformation("Finished filtering. Total VVNs returned: {Count}", result.Count);
 
         return result;
@@ -431,7 +433,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             _logger.LogInformation("After ETD filter: {Count} VVNs remain.", listVvnFiltered.Count);
         }
 
-        var result = VesselVisitNotificationFactory.CreateLitsVvnDtosFromList(listVvnFiltered);
+        var result = VesselVisitNotificationMapper.ToDtoList(listVvnFiltered);
         _logger.LogInformation("Withdrawn VVN filtering completed. Total results: {Count}", result.Count);
 
         return result;
@@ -490,7 +492,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             _logger.LogInformation("After submit date: {SUBM}", listVvnFiltered.Count);
         }
 
-        var result = VesselVisitNotificationFactory.CreateLitsVvnDtosFromList(listVvnFiltered);
+        var result = VesselVisitNotificationMapper.ToDtoList(listVvnFiltered);
         _logger.LogInformation("Submitted VVN filtering completed. Total results: {Count}", result.Count);
 
         return result;
@@ -555,7 +557,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             _logger.LogInformation("After accepted date: {ACPT}", listVvnFiltered.Count);
         }
 
-        var result = VesselVisitNotificationFactory.CreateLitsVvnDtosFromList(listVvnFiltered);
+        var result = VesselVisitNotificationMapper.ToDtoList(listVvnFiltered);
         _logger.LogInformation("Accepted VVN filtering completed. Total results: {Count}", result.Count);
 
         return result;
@@ -574,16 +576,17 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         if (!DateTime.TryParse(acceptedDate, out var parsedDate))
         {
             _logger.LogWarning("Invalid Accepted Date format received: {ACPT}", acceptedDate);
-            throw new BusinessRuleValidationException(
-                $"Invalid Accepted Date format: {acceptedDate}");
+            throw new BusinessRuleValidationException($"Invalid Accepted Date format: {acceptedDate}");
         }
 
         var filterClockTime = new ClockTime(parsedDate);
         _logger.LogInformation("Filtering VVNs by Accepted Date near {Date}", filterClockTime.Value);
 
         var filtered = vvnList
-            .Where(v => v.AcceptenceDate != null &&
-                        Math.Abs((v.AcceptenceDate.Value - filterClockTime.Value).TotalHours) <= 1)
+            .Where(v =>
+                v.AcceptenceDate?.Value != null &&
+                filterClockTime.Value != null &&
+                Math.Abs(((DateTime)v.AcceptenceDate.Value - (DateTime)filterClockTime.Value).TotalHours) <= 1)
             .ToList();
 
         _logger.LogInformation("Accepted Date filter result: {Count}/{Total} VVNs matched.", filtered.Count,
@@ -603,22 +606,24 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         if (!DateTime.TryParse(submittedDate, out var parsedDate))
         {
             _logger.LogWarning("Invalid Submitted Date format received: {SBMT}", submittedDate);
-            throw new BusinessRuleValidationException(
-                $"Invalid Submitted Date format: {submittedDate}");
+            throw new BusinessRuleValidationException($"Invalid Submitted Date format: {submittedDate}");
         }
 
         var filterClockTime = new ClockTime(parsedDate);
         _logger.LogInformation("Filtering VVNs by Submitted Date near {Date}", filterClockTime.Value);
 
         var filtered = vvnList
-            .Where(v => v.SubmittedDate != null &&
-                        Math.Abs((v.SubmittedDate.Value - filterClockTime.Value).TotalHours) <= 1)
+            .Where(v =>
+                v.SubmittedDate?.Value != null &&
+                filterClockTime.Value != null &&
+                Math.Abs(((DateTime)v.SubmittedDate.Value - (DateTime)filterClockTime.Value).TotalHours) <= 1)
             .ToList();
 
         _logger.LogInformation("Submitted Date filter result: {Count}/{Total} VVNs matched.", filtered.Count,
             vvnList.Count);
         return filtered;
     }
+
 
     private List<VesselVisitNotification> GetVvnsFilterByEstimatedTimeDeparture(
         List<VesselVisitNotification> vvnList, string estimatedTimeDeparture)
@@ -640,8 +645,11 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         _logger.LogInformation("Filtering VVNs by ETD near {Date}", filterClockTime.Value);
 
         var filtered = vvnList
-            .Where(v => v.EstimatedTimeDeparture != null &&
-                        Math.Abs((v.EstimatedTimeDeparture.Value - filterClockTime.Value).TotalHours) <= 1)
+            .Where(v => v.EstimatedTimeDeparture?.Value != null &&
+                        filterClockTime.Value != null &&
+                        Math.Abs(
+                            ((DateTime)v.EstimatedTimeDeparture.Value - (DateTime)filterClockTime.Value).TotalHours) <=
+                        1)
             .ToList();
 
         _logger.LogInformation("ETD filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
@@ -667,8 +675,10 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         _logger.LogInformation("Filtering VVNs by ETA near {Date}", filterClockTime.Value);
 
         var filtered = vvnList
-            .Where(v => v.EstimatedTimeArrival != null &&
-                        Math.Abs((v.EstimatedTimeArrival.Value - filterClockTime.Value).TotalHours) <= 1)
+            .Where(v =>
+                v.EstimatedTimeArrival?.Value != null &&
+                filterClockTime.Value != null &&
+                Math.Abs(((DateTime)v.EstimatedTimeArrival.Value - (DateTime)filterClockTime.Value).TotalHours) <= 1)
             .ToList();
 
         _logger.LogInformation("ETA filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
@@ -938,8 +948,8 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         var vessel = await _vesselRepository.GetByImoNumberAsync(imo);
         if (vessel == null)
             throw new BusinessRuleValidationException("Vessel with provided imo not found");
-
         var possibleDocks = await _dockRepository.GetAllDocksForVesselType(vessel.VesselTypeId);
+
         var availableDocks = possibleDocks.Where(d => d.Status.Equals(DockStatus.Available)).ToList();
         if (availableDocks.IsNullOrEmpty())
             throw new BusinessRuleValidationException(
