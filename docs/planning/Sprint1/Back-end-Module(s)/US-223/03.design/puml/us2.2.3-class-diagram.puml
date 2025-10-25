@@ -96,8 +96,11 @@ package "DTOs" {
   }
 
   class DockFactory {
-    + EntityDock RegisterDock(RegisterDockDto)
-    + DockDto RegisterDockDto(EntityDock)
+    + RegisterDock(RegisterDockDto) : EntityDock
+  }
+
+  class DockMapper {
+    + RegisterDockDto(EntityDock) : DockDto
   }
 }
 
@@ -141,7 +144,7 @@ package "Infrastructure" {
     + AddAsync(EntityDock)
     + GetAllAsync()
     + GetByIdAsync(DockId)
-    + SetUnavailable(DockCode): bool
+    + SetUnavailable(DockCode) : bool
   }
 
   class DockRepository {
@@ -194,21 +197,26 @@ EntityDock ..> DockStatus
 
 DockService ..|> IDockService
 DockService --> IDockRepository
-DockService --> IUnitOfWork
-DockService --> DockFactory
-DockService --> ILoggerT
 DockService --> IVesselTypeRepository
 DockService --> IPhysicalResourceRepository
+DockService --> IUnitOfWork
+DockService --> ILoggerT
+DockService --> DockFactory
+DockService --> DockMapper
 DockService --> RegisterDockDto
+DockService --> UpdateDockDto
 
 DockRepository --> EntityDock
 
 DockFactory --> EntityDock
-DockFactory --> DockDto
 DockFactory --> RegisterDockDto
+
+DockMapper --> DockDto
+DockMapper --> EntityDock
 
 DockController --> DockService
 DockController --> ILoggerT
 DockController --> RegisterDockDto
+DockController --> UpdateDockDto
 
 @enduml

@@ -2,8 +2,6 @@
 skinparam monochrome true
 skinparam shadowing false
 hide footbox
-' mostra activations automaticamente ao receber chamadas
-' (vamos usar activate/deactivate para controlo explícito)
 
 actor Officer
 participant "DockController" as C
@@ -12,6 +10,7 @@ participant "IDockRepository\n(DockRepository)" as R
 participant "IVesselTypeRepository" as VTR
 participant "IPhysicalResourceRepository" as PRR
 participant "DockFactory" as F
+participant "DockMapper" as M
 participant "IUnitOfWork" as UoW
 
 == Create Dock ==
@@ -55,10 +54,10 @@ activate UoW
 UoW --> S : committed
 deactivate UoW
 
-S -> F : RegisterDockDto(EntityDock)
-activate F
-F --> S : DockDto
-deactivate F
+S -> M : RegisterDockDto(EntityDock)
+activate M
+M --> S : DockDto
+deactivate M
 
 S --> C : DockDto
 deactivate S
@@ -99,10 +98,10 @@ activate UoW
 UoW --> S : committed
 deactivate UoW
 
-S -> F : RegisterDockDto(dock)
-activate F
-F --> S : DockDto
-deactivate F
+S -> M : RegisterDockDto(dock)
+activate M
+M --> S : DockDto
+deactivate M
 
 S --> C : DockDto
 deactivate S
@@ -120,10 +119,10 @@ activate R
 R --> S : List<EntityDock>
 deactivate R
 
-S -> F : Map to DockDto (list)
-activate F
-F --> S : List<DockDto>
-deactivate F
+S -> M : Map to DockDto (list)
+activate M
+M --> S : List<DockDto>
+deactivate M
 
 S --> C : List<DockDto>
 deactivate S
