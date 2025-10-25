@@ -1,5 +1,5 @@
-#@portURL = http://10.9.21.87:5008
-@portURL = http://localhost:5008
+@portURL = http://10.9.21.87:5008
+#@portURL = http://localhost:5008
 
 
 
@@ -28,7 +28,7 @@ Accept: application/json
 # ============ GET BY MECANOGRAPHIC NUMBER ============
 
 ### Get by Mec Number - Valid
-GET {{portURL}}/api/StaffMembers/mec/1250001
+GET {{portURL}}/api/StaffMembers/mec/1250006
 Accept: application/json
 
 ### Get by Mec Number - Not Found

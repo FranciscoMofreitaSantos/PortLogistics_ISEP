@@ -6,6 +6,7 @@
 bin/
 obj/
 Migrations/
+publish/
 
 # Logs
 SEM5-PI-WEBAPI/Logs

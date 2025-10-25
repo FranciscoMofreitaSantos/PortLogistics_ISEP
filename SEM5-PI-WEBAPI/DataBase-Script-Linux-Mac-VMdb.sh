@@ -1,16 +1,16 @@
 #!/bin/bash
-echo "🧨 Resetting PostgreSQL database (safe mode, no superuser needed)..."
+echo "Resetting PostgreSQL database (safe mode, no superuser needed)..."
 
 # Connection details
-DB_HOST="10.9.21.87"
+DB_HOST="vs453.dei.isep.ipp.pt"
 DB_PORT="5432"
-DB_NAME="ThPA"
-DB_USER="makeitsimple_user"
-DB_PASS="3dj03"
+DB_NAME="sem5pi_db"
+DB_USER="postgres"
+DB_PASS="2jyErozGHiZJ"
 
 export PGPASSWORD=$DB_PASS
 
-echo "🗑️ Cleaning schema 'public' (removing all tables, views, sequences)..."
+echo "Cleaning schema 'public' (removing all tables, views, sequences)..."
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "
 DO \$\$ 
 DECLARE 
@@ -32,16 +32,16 @@ END
 \$\$;
 "
 
-echo "🧹 Removing old EF Core migrations..."
+echo "Removing old EF Core migrations..."
 rm -rf Migrations/
 
-echo "📦 Creating new EF Core migration..."
+echo "Creating new EF Core migration..."
 dotnet ef migrations add Initial
 
-echo "🛠️ Applying migration to clean database..."
+echo "Applying migration to clean database..."
 dotnet ef database update --connection "Host=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS"
 
-echo "🔍 Verifying created tables..."
+echo "Verifying created tables..."
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\dt"
 
-echo "✅ Database fully cleaned and rebuilt!"
+echo "Database fully cleaned and rebuilt!"
