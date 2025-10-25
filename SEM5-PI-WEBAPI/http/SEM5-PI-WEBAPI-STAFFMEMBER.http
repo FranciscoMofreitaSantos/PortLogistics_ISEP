@@ -1,86 +1,469 @@
-@portURL = http://10.9.21.87:5008
+#@portURL = http://10.9.21.87:5008
+@portURL = http://localhost:5008
 
-### --- STAFF MEMBERS ---
 
-### --- Get All
+
+### ============ GET ALL ============
+-
+### Get All Staff Members
 GET {{portURL}}/api/StaffMembers
 Accept: application/json
 
-### --- Get by qualification (at least one of the list)
+
+### ============ GET BY ID ============
+-
+### Get by ID - Valid
+GET {{portURL}}/api/StaffMembers/8977010e-da0b-467d-aea3-3627e7180a2f
+Accept: application/json
+
+### Get by ID - Not Found
+GET {{portURL}}/api/StaffMembers/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+### Get by ID - Invalid GUID
+GET {{portURL}}/api/StaffMembers/invalid-guid
+Accept: application/json
+
+
+# ============ GET BY MECANOGRAPHIC NUMBER ============
+
+### Get by Mec Number - Valid
+GET {{portURL}}/api/StaffMembers/mec/1250001
+Accept: application/json
+
+### Get by Mec Number - Not Found
+GET {{portURL}}/api/StaffMembers/mec/1999982
+Accept: application/json
+
+
+# ============ GET BY NAME ============
+
+### Get by Name - Full Match
+GET {{portURL}}/api/StaffMembers/name/Paulo Mendes
+Accept: application/json
+
+### Get by Name - Partial Match
+GET {{portURL}}/api/StaffMembers/name/Paulo
+Accept: application/json
+
+### Get by Name - Not Found
+GET {{portURL}}/api/StaffMembers/name/NonExistentName
+Accept: application/json
+
+
+# ============ GET BY STATUS ============
+
+### Get Active Staff
+GET {{portURL}}/api/StaffMembers/status/true
+Accept: application/json
+
+### Get Inactive Staff
+GET {{portURL}}/api/StaffMembers/status/false
+Accept: application/json
+
+
+### ============ GET BY QUALIFICATIONS (ANY) ============
+
+### By Qualifications - Single
+
 GET {{portURL}}/api/StaffMembers/by-qualifications
 Content-Type: application/json
 Accept: application/json
 
 {
-  "qualificationsCodes": [
-    "TRK-001"
-  ]
+  "qualificationsCodes": ["TRK-001"]
 }
 
-### --- Get by exact qualifications
+### By Qualifications - Multiple
+GET {{portURL}}/api/StaffMembers/by-qualifications
+Content-Type: application/json
+Accept: application/json
+
+{
+  "qualificationsCodes": ["TRK-001", "FLK-001"]
+}
+
+### By Qualifications - Empty List
+GET {{portURL}}/api/StaffMembers/by-qualifications
+Content-Type: application/json
+Accept: application/json
+
+{
+  "qualificationsCodes": []
+}
+
+### By Qualifications - Invalid Code
+GET {{portURL}}/api/StaffMembers/by-qualifications
+Content-Type: application/json
+Accept: application/json
+
+{
+  "qualificationsCodes": ["INVALID-CODE"]
+}
+
+
+### ============ GET BY EXACT QUALIFICATIONS ============
+
+### By Exact Qualifications - Single
 GET {{portURL}}/api/StaffMembers/by-exact-qualifications
 Content-Type: application/json
 Accept: application/json
 
 {
-  "qualificationsCodes": [
-    "TRK-001", "FLK-001"
-  ]
+  "qualificationsCodes": ["TRK-001"]
+}
+
+### By Exact Qualifications - Multiple
+GET {{portURL}}/api/StaffMembers/by-exact-qualifications
+Content-Type: application/json
+Accept: application/json
+
+{
+  "qualificationsCodes": ["TRK-001", "FLK-001"]
+}
+
+### By Exact Qualifications - Empty List
+GET {{portURL}}/api/StaffMembers/by-exact-qualifications
+Content-Type: application/json
+Accept: application/json
+
+{
+  "qualificationsCodes": []
+}
+
+### By Exact Qualifications - Invalid Code
+GET {{portURL}}/api/StaffMembers/by-exact-qualifications
+Content-Type: application/json
+Accept: application/json
+
+{
+  "qualificationsCodes": ["INVALID-CODE"]
 }
 
 
-### --- Get by database id
-GET {{portURL}}/api/StaffMembers/8977010e-da0b-467d-aea3-3627e7180a2f
-Accept: application/json
+### ============ CREATE ============
 
-### --- Get by mec number
-GET {{portURL}}/api/StaffMembers/mec/1250001
-Accept: application/json
-
-### --- Get by Name
-GET {{portURL}}/api/StaffMembers/name/Paulo Mendes
-Accept: application/json
-
-### --- Get by status
-GET {{portURL}}/api/StaffMembers/status/true
-Accept: application/json
-
-### 
+### Create - With Qualifications
 POST {{portURL}}/api/StaffMembers
 Content-Type: application/json
 Accept: application/json
 
 {
   "shortName": "Paulo Mendes",
-  "email": "mendy@gmail.com" ,
-  "phone": "+351912345678" ,
-  "schedule": 
-    { 
-      "shift": "Morning",
-      "daysOfWeek": "0011111"
-    },
+  "email": "paulo.mendes@example.com",
+  "phone": "+351912345678",
+  "schedule": {
+    "shift": "Morning",
+    "daysOfWeek": "0011111"
+  },
   "isActive": true,
   "qualificationCodes": ["TRK-001", "VTC-001"]
 }
 
+### Create - Without Qualifications
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
 
-###
+{
+  "shortName": "Maria Silva",
+  "email": "maria.silva@example.com",
+  "phone": "+351923456789",
+  "schedule": {
+    "shift": "Afternoon",
+    "daysOfWeek": "1111100"
+  },
+  "isActive": true,
+  "qualificationCodes": []
+}
+
+### Create - Repeated Email
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Another Person",
+  "email": "paulo.mendes@example.com",
+  "phone": "+351934567890",
+  "schedule": {
+    "shift": "Morning",
+    "daysOfWeek": "1111111"
+  },
+  "isActive": true,
+  "qualificationCodes": []
+}
+
+### Create - Repeated Phone
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Another Person",
+  "email": "unique.email@example.com",
+  "phone": "+351912345678",
+  "schedule": {
+    "shift": "Morning",
+    "daysOfWeek": "1111111"
+  },
+  "isActive": true,
+  "qualificationCodes": []
+}
+
+### Create - Invalid Qualification
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Test Person",
+  "email": "test.person@example.com",
+  "phone": "+351945678901",
+  "schedule": {
+    "shift": "Night",
+    "daysOfWeek": "0000011"
+  },
+  "isActive": true,
+  "qualificationCodes": ["INVALID-CODE"]
+}
+
+### Create - Missing Fields
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Incomplete Person"
+}
+
+### Create - Invalid Email
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Invalid Email",
+  "email": "not-an-email",
+  "phone": "+351956789012",
+  "schedule": {
+    "shift": "Morning",
+    "daysOfWeek": "1111111"
+  },
+  "isActive": true,
+  "qualificationCodes": []
+}
+
+### Create - Invalid Phone
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Invalid Phone",
+  "email": "valid.email@example.com",
+  "phone": "123",
+  "schedule": {
+    "shift": "Morning",
+    "daysOfWeek": "1111111"
+  },
+  "isActive": true,
+  "qualificationCodes": []
+}
+
+### Create - Invalid Schedule
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Invalid Schedule",
+  "email": "schedule.test@example.com",
+  "phone": "+351967890123",
+  "schedule": {
+    "shift": "InvalidShift",
+    "daysOfWeek": "123"
+  },
+  "isActive": true,
+  "qualificationCodes": []
+}
+
+### Create - ShortName Too Long
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "This Name Is Way Too Long For The Field",
+  "email": "toolong@example.com",
+  "phone": "+351911111111",
+  "schedule": {
+    "shift": "Morning",
+    "daysOfWeek": "1111111"
+  },
+  "isActive": true,
+  "qualificationCodes": []
+}
+
+### Create - Invalid DaysOfWeek
+POST {{portURL}}/api/StaffMembers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "shortName": "Test Person",
+  "email": "daystest@example.com",
+  "phone": "+351922222222",
+  "schedule": {
+    "shift": "Morning",
+    "daysOfWeek": "12345"
+  },
+  "isActive": true,
+  "qualificationCodes": []
+}
+
+
+### ============ UPDATE ============
+
+### Update - Email and Schedule
 PUT {{portURL}}/api/StaffMembers/update
 Content-Type: application/json
 Accept: application/json
 
 {
-  "MecNumber": "1250001",
-  "Email": "mendy_updated@gmail.com",
-  "Schedule": {
-    "Shift": "Morning",
-    "DaysOfWeek": "1010101"
-  },
+  "mecNumber": "1250001",
+  "email": "paulo.updated@example.com",
+  "schedule": {
+    "shift": "Afternoon",
+    "daysOfWeek": "1010101"
+  }
+}
+
+### Update - ShortName
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "shortName": "Paulo M."
+}
+
+### Update - Phone
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "phone": "+351998877665"
+}
+
+### Update - IsActive
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "isActive": false
+}
+
+### Update - Replace Qualifications
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "qualificationCodes": ["STS-001"],
+  "addQualifications": false
+}
+
+### Update - Add Qualifications
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "qualificationCodes": ["FLK-001"],
+  "addQualifications": true
+}
+
+### Update - Remove All Qualifications
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
   "qualificationCodes": [],
-  "addQualifications" : "false"
+  "addQualifications": false
+}
+
+### Update - Not Found
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "9999999",
+  "email": "test@example.com"
+}
+
+### Update - Repeated Email
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "email": "existing.email@example.com"
+}
+
+### Update - Repeated Phone
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "phone": "+351999999999"
+}
+
+### Update - Invalid Qualification
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "qualificationCodes": ["INVALID-CODE"],
+  "addQualifications": true
+}
+
+### Update - Missing AddQualifications Flag
+PUT {{portURL}}/api/StaffMembers/update
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mecNumber": "1250001",
+  "qualificationCodes": ["TRK-001"]
 }
 
 
-###
+### ============ TOGGLE STATUS ============
+
+### Toggle - Active to Inactive
 PUT {{portURL}}/api/StaffMembers/toggle/1250001
+Accept: application/json
+
+### Toggle - Inactive to Active
+PUT {{portURL}}/api/StaffMembers/toggle/1250001
+Accept: application/json
+
+### Toggle - Not Found
+PUT {{portURL}}/api/StaffMembers/toggle/9999999
 Accept: application/json

@@ -50,7 +50,7 @@ public class StaffMemberService : IStaffMemberService
         if (staff == null)
         {
             _logger.LogWarning("Business Domain: No Staff Member found with ID = {Id}", id.Value);
-            return null;
+            throw new BusinessRuleValidationException($"No Staff Member found with ID = {id.Value}");
         }
 
         var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);
@@ -69,7 +69,7 @@ public class StaffMemberService : IStaffMemberService
         if (staff == null)
         {
             _logger.LogWarning("Business Domain: No Staff Member found with Mecanographic Number = {Mec}", mec);
-            return null;
+            throw new BusinessRuleValidationException($"No Staff Member found with code = {mec}");
         }
 
         var qualificationCodes = await GetQualificationCodesAsync(staff.Qualifications);
@@ -85,6 +85,9 @@ public class StaffMemberService : IStaffMemberService
         _logger.LogInformation("Business Domain: Request to fetch Staff Members with Name = {Name}", name);
 
         var staff = await _repo.GetByNameAsync(name);
+        if (staff == null)
+        {
+            throw new BusinessRuleValidationException($"No Staff Member found with name = {name}");        }
         var dtos = new List<StaffMemberDto>();
 
         foreach (var s in staff)

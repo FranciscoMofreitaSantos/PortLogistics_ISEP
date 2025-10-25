@@ -31,6 +31,13 @@ public class StaffMember : Entity<StaffMemberId>, IAggregateRoot
         IEnumerable<QualificationId>? qualifications = null)
     {
         Id = new StaffMemberId(Guid.NewGuid());
+        
+        if (string.IsNullOrWhiteSpace(shortName))
+            throw new BusinessRuleValidationException("ShortName cannot be empty.");
+        
+        if(shortName.Length > _maxLengthShortName)
+            throw new BusinessRuleValidationException("ShortName must have at most 20 characters.");
+        
         ShortName = shortName;
         MecanographicNumber = mecanographicNumber;
         Email = email ?? throw new BusinessRuleValidationException("Email is required.");

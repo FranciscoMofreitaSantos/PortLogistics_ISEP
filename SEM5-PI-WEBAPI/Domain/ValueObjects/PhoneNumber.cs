@@ -18,10 +18,10 @@ public class PhoneNumber : IValueObject
     public PhoneNumber(string number)
     {
         if (string.IsNullOrWhiteSpace(number))
-            throw new ArgumentException("Phone number cannot be empty.");
+            throw new BusinessRuleValidationException("Phone number cannot be empty.");
 
         if (!PhoneRegex.IsMatch(number))
-            throw new ArgumentException("Invalid phone number format.");
+            throw new BusinessRuleValidationException("Invalid phone number format.");
 
         Number = number;
     }

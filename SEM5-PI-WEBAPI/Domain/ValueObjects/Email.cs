@@ -16,10 +16,10 @@ public class Email : IValueObject
     public Email(string address)
     {
         if (string.IsNullOrWhiteSpace(address))
-            throw new ArgumentException("Email cannot be empty.");
+            throw new BusinessRuleValidationException("Email cannot be empty.");
 
         if (!EmailRegex.IsMatch(address))
-            throw new ArgumentException("Invalid email format.");
+            throw new BusinessRuleValidationException("Invalid email format.");
 
         Address = address;
     }
