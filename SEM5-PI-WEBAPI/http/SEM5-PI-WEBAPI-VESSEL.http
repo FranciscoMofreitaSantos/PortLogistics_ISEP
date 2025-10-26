@@ -9,7 +9,7 @@ Accept: application/json
 
 ###
 # 2. GET by Id - valid 
-GET {{portURL}}/api/vessel/id/106b1813-31fd-405a-acdb-546baa42da5e
+GET {{portURL}}/api/vessel/id/48b5c5a9-e1a4-41d3-bc93-a6c0a0015f31
 Accept: application/json
 
 ###
