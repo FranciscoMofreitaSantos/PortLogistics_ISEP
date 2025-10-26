@@ -1,4 +1,5 @@
-@portURL = http://10.9.23.188
+@portURL = http://localhost:5008
+//@portURL = http://10.9.23.188
 
 ### --- DOCK ---
 
@@ -7,7 +8,7 @@ GET {{portURL}}/api/Dock
 Accept: application/json
 
 ### Get by Id
-GET {{portURL}}/api/Dock/id/0a7671cf-ff93-42e6-95b3-d00946d63273
+GET {{portURL}}/api/Dock/id/092a810d-e18e-4b5f-bed7-57022b7ffc10
 Accept: application/json
 
 ### Get by Code
@@ -15,19 +16,15 @@ GET {{portURL}}/api/Dock/code/DK-0001
 Accept: application/json
 
 ### Get by PhysicalResourceCode
-GET {{portURL}}/api/Dock/physical-code/RSTAC-0001
-Accept: application/json
-
-### Get all Dock codes tenho q ver
-GET {{portURL}}/api/Dock/codes
+GET {{portURL}}/api/Dock/physical-code/STSCR-0001
 Accept: application/json
 
 ### Get by VesselType
-GET {{portURL}}/api/Dock/vesseltype/54a29674-de89-4a74-b47e-ce7338f43831
+GET {{portURL}}/api/Dock/vesseltype/f9389848-6bcf-4350-8c2b-1e37d95a64da
 Accept: application/json
 
 ### Filter
-GET {{portURL}}/api/Dock/filter?code=DK-0001&vesselTypeId=b928c0c9-90c8-4e41-9a6d-59ec1ffef048&location=Terminal&query=DK
+GET {{portURL}}/api/Dock/filter?code=DK-0001&location=Terminal&query=DK
 Accept: application/json
 
 ### Get by Location
@@ -40,15 +37,13 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "code": "DK-0001",
-  "physicalResourceCodes": ["ABC-1234", "XYZ-5678"],
+  "code": "DK-0102",
+  "PhysicalResourceCodes": [],
   "location": "Terminal Norte A-3",
   "lengthM": 350.0,
   "depthM": 15.5,
   "maxDraftM": 14.8,
-  "allowedVesselTypeIds": [
-    "54a29674-de89-4a74-b47e-ce7338f43831"
-  ]
+  "allowedVesselTypeNames": ["Panamax"]
 }
 
 ### Patch
@@ -61,6 +56,6 @@ Accept: application/json
   "depthM": 16.0,
   "physicalResourceCodes": ["ABC-1234", "LMN-0001"],
   "allowedVesselTypeIds": [
-    "54a29674-de89-4a74-b47e-ce7338f43831"
+    "cfcb725b-a005-4869-b7ab-dded0d0299b8"
   ]
 }
