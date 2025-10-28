@@ -46,44 +46,102 @@ functional system by **January 2026**.
 Throughout the project development period, the distribution of *tasks / requirements / features* by the team members
 will be tracked in GitHub Issues and documented in the following way:
 
-| Task                                                                                                         | Sprint A            | Sprint B | Sprint C |
-|--------------------------------------------------------------------------------------------------------------|---------------------|----------|----------|
-| [Glossary](./global-artifacts/01.requirements-engineering/glossary.md)                                       | 1230444             |          |          |
-| [Use Case Diagram (UCD)](./global-artifacts/01.requirements-engineering/use-case-diagram.md)                 | 1231274             |          |          |
-| [Supplementary Specification](./global-artifacts/01.requirements-engineering/supplementary-specification.md) | 1231274             |          |          |
-| [Domain Model (DDD)](./domain-model/LAPR5_project.svg)                                                       | All team members    |          |          |
-| [Readme.md](../../README.md)                                                                                 | 1231274 & 1230564   |          |          |
-| [Planning.md](./planning.md)                                                                                 | 1231274             |          |          |
-| [Others documentations]()                                                                                    | 1231274 & 1230564   |          |          |
+| Task                            | Sprint A          | Sprint B | Sprint C |
+|---------------------------------|-------------------|----------|----------|
+| [Domain Model (DDD)]()          | All team members  |          |          |
+| [Glossary]()                    | 1230444           |          |          |
+| [Others documentations]()       | 1231274 & 1230564 |          |          |
+| [Planning.md]()                 | 1231274           |          |          |
+| [Readme.md]()                   | 1231274 & 1230564 |          |          |
+| [Supplementary Specification]() | 1231274           |          |          |
+| [Use Case Diagram (UCD)]()      | 1231274           |          |          |
+|                                 |                   |          |          |
+| [US 3.6.1]()                    | All Members       |          |          |
+| [US 3.6.2]()                    | All Members       |          |          |
+
+| Task - US'S Front-end Module(s) | Sprint A | Sprint B          | Sprint C |
+|--------------------------------|----------|-------------------|----------|
+| [US-3.1.1]()                   |          | 1231274 & 1230564 |          |
+| [US-3.1.2]()                   |          | 1231274 & 1230564 |          |
+| [US-3.1.3]()                   |          | 1231274 & 1230564 |          |
+| [US-3.1.4]()                   |          | 1231274 & 1230564 |          |
+| [US-3.1.4 -> US-2.2.2]()       |          | 1231274           |          |
+| [US-3.1.4 -> US-2.2.3]()       |          | 1230444           |          |
+| [US-3.1.4 -> US-2.2.4]()       |          | 1231274           |          |
+| [US-3.1.4 -> US-2.2.5]()       |          | 1211225           |          |
+| [US-3.1.4 -> US-2.2.7]()       |          | 1231274 & 1230564 |          |
+| [US-3.1.4 -> US-2.2.8]()       |          | 1231274 & 1230564 |          |
+| [US-3.1.4 -> US-2.2.9]()       |          | 1231274 & 1230564 |          |
+| [US-3.1.4 -> US-2.2.10]()      |          | 1231274 & 1230564 |          |
+| [US-3.1.4 -> US-2.2.12]()      |          | 1211225           |          |
 
 
-| Task - US'S Back-end Module(s)                      | Sprint A            | Sprint B | Sprint C |
-|-----------------------------------------------------|---------------------|----------|----------|
-| [US-2.2.1](./Sprint1/Back-end-Module(s)/US-2.2.1)   | 1231274 & 1230444   |          |          |
-| [US-2.2.2](./Sprint1/Back-end-Module(s)/US-2.2.2)   | 1231274             |          |          |
-| [US-2.2.3](./Sprint1/Back-end-Module(s)/US-2.2.3)   | 1230444             |          |          |
-| [US-2.2.5](./Sprint1/Back-end-Module(s)/US-2.2.5)   | 1211225             |          |          |
-| [US-2.2.6](./Sprint1/Back-end-Module(s)/US-2.2.6)   | 1211225             |          |          |
-| [US-2.2.7](./Sprint1/Back-end-Module(s)/US-2.2.7)   | All Members         |          |          |
-| [US-2.2.8](./Sprint1/Back-end-Module(s)/US-2.2.8)   | All Members         |          |          |
-| [US-2.2.9](./Sprint1/Back-end-Module(s)/US-2.2.9)   | All Members         |          |          |
-| [US-2.2.10](./Sprint1/Back-end-Module(s)/US-2.2.10) | All Members         |          |          |
-| [US-2.2.11](./Sprint1/Back-end-Module(s)/US-2.2.11) | 1230564             |          |          |
-| [US-2.2.12](./Sprint1/Back-end-Module(s)/US-2.2.12) | 1230839             |          |          |
-| [US-2.2.13](./Sprint1/Back-end-Module(s)/US-2.2.13) | 1230839 & 1230564   |          |          |
+| Task - US'S Back-end Module(s)                      | Sprint A          | Sprint B                    | Sprint C |
+|-----------------------------------------------------|-------------------|-----------------------------|----------|
+| [US-2.2.1](./Sprint1/Back-end-Module(s)/US-2.2.1)   | 1231274 & 1230444 |                             |          |
+| [US-2.2.2](./Sprint1/Back-end-Module(s)/US-2.2.2)   | 1231274           |                             |          |
+| [US-2.2.3](./Sprint1/Back-end-Module(s)/US-2.2.3)   | 1230444           |                             |          |
+| [US-2.2.5](./Sprint1/Back-end-Module(s)/US-2.2.5)   | 1211225           |                             |          |
+| [US-2.2.6](./Sprint1/Back-end-Module(s)/US-2.2.6)   | 1211225           |                             |          |
+| [US-2.2.7](./Sprint1/Back-end-Module(s)/US-2.2.7)   | All Members       |                             |          |
+| [US-2.2.8](./Sprint1/Back-end-Module(s)/US-2.2.8)   | All Members       |                             |          |
+| [US-2.2.9](./Sprint1/Back-end-Module(s)/US-2.2.9)   | All Members       |                             |          |
+| [US-2.2.10](./Sprint1/Back-end-Module(s)/US-2.2.10) | All Members       |                             |          |
+| [US-2.2.11](./Sprint1/Back-end-Module(s)/US-2.2.11) | 1230564           |                             |          |
+| [US-2.2.12](./Sprint1/Back-end-Module(s)/US-2.2.12) | 1230839           |                             |          |
+| [US-2.2.13](./Sprint1/Back-end-Module(s)/US-2.2.13) | 1230839 & 1230564 |                             |          |
+|                                                     |                   |                             |          |
+| [US-3.2.1]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.2.2]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.2.3]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.2.4]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.2.5]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.2.6]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+|                                                     |                   |                             |          |
+| [US-3.4.1]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.4.2]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.4.3]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.4.4]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.4.5]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+|                                                     |                   |                             |          |
+| [US-3.5.1]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.5.2]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.5.3]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.5.4]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.5.5]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.5.6]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.5.7]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
+| [US-3.5.8]()                                        |                   | 1231274 & 1230564 & 1230839 |          |
 
 
+| Task - US'S Project Client Analysis                    | Sprint A    | Sprint B    | Sprint C |
+|--------------------------------------------------------|-------------|-------------|----------|
+| [US-2.3.1](./Sprint1/Project-Client-Analysis/US-2.3.1) | All Members |             |          |
+| [US-2.3.2](./Sprint1/Project-Client-Analysis/US-2.3.2) | All Members |             |          |
+| [US-2.3.3](./Sprint1/Project-Client-Analysis/US-2.3.3) | All Members |             |          |
+| [US-2.3.4](./Sprint1/Project-Client-Analysis/US-2.3.4) | All Members |             |          |
+| [US-2.3.5](./Sprint1/Project-Client-Analysis/US-2.3.5) | All Members |             |          |
+| [US-2.3.6](./Sprint1/Project-Client-Analysis/US-2.3.6) | All Members |             |          |
+| [US-2.3.7](./Sprint1/Project-Client-Analysis/US-2.3.7) | All Members |             |          |
+| [US-3.7.1]()                                           |             | All Members |          |
+| [US-3.7.2]()                                           |             | All Members |          |
+| [US-3.7.3]()                                           |             | All Members |          |
+| [US-3.7.4]()                                           |             | All Members |          |
+| [US-3.7.5]()                                           |             | All Members |          |
+| [US-3.7.6]()                                           |             | All Members |          |
+| [US-3.7.7]()                                           |             | All Members |          |
+| [US-3.7.8]()                                           |             | All Members |          |
+| [US-3.7.9]()                                           |             | All Members |          |
 
 
-| Task - US'S Project Client Analysis                    | Sprint A       | Sprint B | Sprint C |
-|--------------------------------------------------------|----------------|----------|----------|
-| [US-2.3.1](./Sprint1/Project-Client-Analysis/US-2.3.1) | All Members    |          |          |
-| [US-2.3.2](./Sprint1/Project-Client-Analysis/US-2.3.2) | All Members    |          |          |
-| [US-2.3.3](./Sprint1/Project-Client-Analysis/US-2.3.3) | All Members    |          |          |
-| [US-2.3.4](./Sprint1/Project-Client-Analysis/US-2.3.4) | All Members    |          |          |
-| [US-2.3.5](./Sprint1/Project-Client-Analysis/US-2.3.5) | All Members    |          |          |
-| [US-2.3.6](./Sprint1/Project-Client-Analysis/US-2.3.6) | All Members    |          |          |
-| [US-2.3.7](./Sprint1/Project-Client-Analysis/US-2.3.7) | All Members    |          |          |
+| Task - US'S Project 3D Model | Sprint B                    | Sprint C |
+|------------------------------|-----------------------------|----------|
+| [US-3.3.1]()                 | 1231274 & 1230564 & 1230839 |          |
+| [US-3.3.2]()                 | 1231274 & 1230564 & 1230839 |          |
+| [US-3.3.3]()                 | 1231274 & 1230564 & 1230839 |          |
+| [US-3.3.4]()                 | 1231274 & 1230564 & 1230839 |          |
+| [US-3.3.5]()                 | 1231274 & 1230564 & 1230839 |          |
+| [US-3.3.6]()                 | 1231274 & 1230564 & 1230839 |          |
 
 # Scope of Work Distribution
 
@@ -108,7 +166,7 @@ rules):
 | Sprint   | Duration               | Deadline     | Participating UCs                        |
 |----------|------------------------|--------------|------------------------------------------|
 | Sprint A | Sept 15 – Oct 26, 2025 | Oct 26, 2025 | LAPR5, ARQSI, GESTA                      |
-| Sprint B | Oct 26 – Nov xx, 2025  | Nov xx, 2025 | LAPR5, ARQSI, GESTA, IARTI, ASIST, SGRAI |
+| Sprint B | Oct 26 – Nov 23, 2025  | Nov 23, 2025 | LAPR5, ARQSI, GESTA, IARTI, ASIST, SGRAI |
 | Sprint C | Nov xx – Jan yy, 2026  | Jan yy, 2026 | LAPR5, ARQSI, GESTA, IARTI, ASIST, SGRA  |
 
 ---
@@ -134,7 +192,16 @@ rules):
     * Glossary, FURPS+, and UML diagrams stored in `docs/`.
 
 ---
+### **Sprint B: Foundations and Domain Model Setup**
 
+* **Duration**: Oct 26 – Nov 23, 2025
+* **Focus**: 
+
+### **Deliverables**
+
+
+
+---
 ## Scrum Process
 
 ### 1. Weekly Meetings
