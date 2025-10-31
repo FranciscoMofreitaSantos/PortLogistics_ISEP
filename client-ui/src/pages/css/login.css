@@ -1,46 +1,79 @@
-.login-container {
-    max-width: 480px;
-    margin: 100px auto;
-    padding: 32px;
-    background: var(--card-bg, #0d182b);
-    color: white;
-    border-radius: 12px;
-    box-shadow: 0px 4px 20px rgba(0,0,0,0.25);
-    text-align: center;
+/* Background */
+.login-bg {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #001d3d, #000814);
+  background-size: cover;
 }
 
-.login-container h2 {
-    font-size: 26px;
-    margin-bottom: 10px;
+/* Glass card */
+.login-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  padding: 36px;
+  width: 420px;
+  max-width: 90%;
+  border-radius: 18px;
+  text-align: center;
+  color: #e9ecef;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+  animation: fadeIn 2s ease;
 }
 
-.login-container p {
-    opacity: 0.9;
-    margin-bottom: 20px;
+.login-card h2 {
+  font-size: 26px;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
-.login-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.login-card p {
+  opacity: 0.85;
+  margin-bottom: 20px;
+  font-size: 15px;
 }
 
-.login-buttons button {
-    padding: 12px 16px;
-    background: #1a73e8;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    color: white;
+/* Role buttons */
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
-.login-buttons button:hover {
-    background: #165bb9;
+.role-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 14px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.hint {
-    margin-top: 18px;
-    font-size: 13px;
-    opacity: 0.7;
+.role-btn:hover {
+  background: var(--btn-color);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.icon {
+  font-size: 18px;
+}
+
+/* Footer info */
+.login-footer {
+  margin-top: 20px;
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+/* Anim */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(300px); }
+  to { opacity: 1; transform: translateY(0); }
 }

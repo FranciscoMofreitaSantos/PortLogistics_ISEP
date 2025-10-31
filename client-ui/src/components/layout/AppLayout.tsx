@@ -1,5 +1,5 @@
 import { Outlet, Link } from "react-router-dom";
-import { FaShip, FaSun, FaMoon, FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import { FaShip, FaSun, FaMoon, FaBars, FaTimes, FaUserCircle,FaSignOutAlt } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Nav from "./Nav";
@@ -10,7 +10,7 @@ export default function AppLayout() {
     const [dark, setDark] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const { i18n } = useTranslation();
-    const user = useAppStore((s) => s.user); // ✅ Ler user p/ mostrar ícone certo
+    const user = useAppStore((s) => s.user); 
 
     // Alternar tema (escuro/claro)
     const toggleTheme = () => {
@@ -59,16 +59,21 @@ export default function AppLayout() {
                             title={dark ? "Modo claro" : "Modo escuro"}
                         >
                             {dark ? (
-                                <FaSun size={22} className="theme-icon rotate" />
+                                <FaSun size={20} className="theme-icon rotate" />
                             ) : (
-                                <FaMoon size={22} className="theme-icon" />
+                                <FaMoon size={20} className="theme-icon" />
                             )}
                         </button>
 
                         {/* Login icon */}
                         <Link to={user ? "/logout" : "/login"} title={user ? "Sair" : "Login"}>
-                            <FaUserCircle size={26} className="login-icon" />
+                            {user ? (
+                                <FaSignOutAlt size={22} className="logout-icon" />
+                            ) : (
+                                <FaUserCircle size={22} className="login-icon" />
+                            )}
                         </Link>
+
 
                         <button className="menu-btn" onClick={toggleMenu} title="Menu">
                             {menuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
