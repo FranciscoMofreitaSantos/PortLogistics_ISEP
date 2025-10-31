@@ -1,0 +1,146 @@
+/* === HOME PAGE STYLES === */
+
+/* --- HERO SECTION --- */
+.hero {
+    position: relative;
+    background-image: url("https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+    color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 80px 40px;
+    box-shadow: 0 4px 20px var(--shadow);
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.hero-content {
+    position: relative;
+    max-width: 800px;
+    z-index: 1;
+}
+
+.hero h2 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.hero button {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s;
+}
+
+.hero button:hover {
+    background-color: #0c57b1;
+    transform: translateY(-2px);
+}
+
+/* --- ABOUT SECTION --- */
+.about {
+    margin-top: 60px;
+    text-align: center;
+}
+
+.about h3 {
+    color: var(--header-bg);
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.about p {
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+/* --- FEATURES GRID --- */
+.features {
+    margin-top: 60px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    align-items: stretch; /* garante que todas crescem igualmente */
+}
+
+
+/* Wrapper da card (controlado pelo AOS) */
+.feature-card {
+    position: relative;
+    z-index: 0;
+    will-change: transform, opacity;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Conteúdo interno da card (onde o hover atua) */
+.card-inner {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 28px;
+    box-shadow: 0 2px 8px var(--shadow);
+    text-align: center;
+
+    /* === alinhamento flex para centralizar tudo === */
+    display: flex;
+    flex-direction: column;
+    align-items: center;       /* centraliza horizontalmente */
+    justify-content: center;   /* centraliza verticalmente */
+
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.4s ease;
+    will-change: transform, box-shadow;
+}
+
+
+
+/* Efeito hover — cresce e flutua */
+.feature-card:hover .card-inner {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 6px 18px var(--shadow);
+    z-index: 1;
+}
+
+/* Ícones e texto das cards */
+.feature-card h4 {
+    color: var(--header-bg);
+    margin-top: 12px;
+    font-size: 1.2rem;
+}
+
+/* --- CALLOUT --- */
+.callout {
+    background-color: var(--header-bg);
+    color: white;
+    text-align: center;
+    border-radius: 30px;
+    padding: 50px 20px;
+    margin: 150px auto 6px auto; /* mais afastada das cards */
+    max-width: 1000px; /* largura máxima elegante */
+    box-shadow: 0 6px 18px var(--shadow);
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 1.5;
+}
+

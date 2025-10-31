@@ -1,0 +1,16 @@
+{
+  "welcomeTitle": "Welcome to the ThPA Port Management Platform ⚓",
+  "welcomeText": "Empowering the digital transformation of Thessaloniki Port. Manage vessels, docks, and resources efficiently through an integrated and secure system.",
+  "accessButton": "Access the Platform",
+  "aboutTitle": "About ThPA S.A.",
+  "aboutText": "The Thessaloniki Port Authority (ThPA S.A.) is one of the leading ports in Southeastern Europe. Our system streamlines operations, communication, and efficiency in logistics.",
+  "vesselTitle": "Vessel Visit Notifications",
+  "vesselText": "Manage vessel arrivals and departures, ensuring timely dock assignments.",
+  "storageTitle": "Storage Area Control",
+  "storageText": "Monitor and allocate storage efficiently to avoid congestion.",
+  "resourcesTitle": "Resource & Dock Management",
+  "resourcesText": "Oversee cranes, staff, and docks in real time with full control.",
+  "rolesTitle": "Multi-role Access",
+  "rolesText": "Designed for agents, operators, and admins with role-based security.",
+  "bannerText": "Connecting Sea and Technology 🌊"
+}

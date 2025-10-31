@@ -1,0 +1,16 @@
+{
+  "welcomeTitle": "Bem-vindo à Plataforma de Gestão Portuária da ThPA ⚓",
+  "welcomeText": "Potencie a transformação digital do Porto de Thessaloniki. Gere navios, docas e recursos de forma eficiente e integrada.",
+  "accessButton": "Aceder à Plataforma",
+  "aboutTitle": "Sobre a ThPA S.A.",
+  "aboutText": "A Autoridade Portuária de Thessaloniki (ThPA S.A.) é um dos principais portos do Sudeste da Europa. O nosso Sistema de Gestão Portuária melhora as operações, a comunicação e a eficiência logística.",
+  "vesselTitle": "Notificações de Navios",
+  "vesselText": "Gira chegadas e partidas de navios, com atribuição automática de docas.",
+  "storageTitle": "Gestão de Áreas de Armazenamento",
+  "storageText": "Controle e distribua cargas de forma eficiente, evitando congestionamento.",
+  "resourcesTitle": "Gestão de Recursos e Docas",
+  "resourcesText": "Supervisione guindastes, equipas e docas em tempo real.",
+  "rolesTitle": "Acesso por Funções",
+  "rolesText": "Sistema preparado para agentes, operadores e administradores.",
+  "bannerText": "A ligar o Mar e a Tecnologia 🌊"
+}
