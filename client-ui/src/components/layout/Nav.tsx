@@ -1,47 +1,34 @@
 import { Link } from "react-router-dom";
 import { useAppStore } from "../../app/store";
-
-interface MenuItem {
-    label: string;
-    path: string;
-}
+import { Roles } from "../../app/types";
 
 export default function Nav() {
     const user = useAppStore((s) => s.user);
 
-    // array de items com tipagem
-    const menuItems: MenuItem[] = [{ label: "Início", path: "/" }];
+    const baseMenu = [{ label: "Início", path: "/" }];
 
-    // adiciona opções se o user existir
-    if (user) {
-        menuItems.push(
-            { label: "VVNs", path: "/vvn" },
-            { label: "Storage Areas", path: "/storage-areas" }
-        );
-    }
+    const privateMenu = user ? [
+        { label: "VVNs", path: "/vvn" },
+        { label: "Storage Areas", path: "/storage-areas" },
+    ] : [];
 
-    // adiciona opções de admin
-    if (user?.roles?.includes("Admin")) {
-        menuItems.push({ label: "Admin", path: "/admin" });
-    }
+    const adminMenu = user?.roles.includes(Roles.Administrator)
+        ? [{ label: "Admin", path: "/admin" }]
+        : [];
+
+    const menu = [...baseMenu, ...privateMenu, ...adminMenu];
 
     return (
         <nav className="nav">
             <ul>
-                {menuItems.map((item) => (
-                    <li key={item.path}>
-                        <Link to={item.path}>{item.label}</Link>
-                    </li>
+                {menu.map((i) => (
+                    <li key={i.path}><Link to={i.path}>{i.label}</Link></li>
                 ))}
 
                 {!user ? (
-                    <li>
-                        <Link to="/login">Login</Link>
-                    </li>
+                    <li><Link to="/login">Login</Link></li>
                 ) : (
-                    <li>
-                        <Link to="/logout">Sair</Link>
-                    </li>
+                    <li><Link to="/logout">Sair</Link></li>
                 )}
             </ul>
         </nav>

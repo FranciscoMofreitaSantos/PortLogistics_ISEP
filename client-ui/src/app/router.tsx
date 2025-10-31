@@ -4,6 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import { RequireAuth, RequireRole } from "../hooks/useAuthGuard";
+import { Roles } from "../app/types";
 
 export const router = createBrowserRouter([
     {
@@ -12,14 +13,12 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <Home /> },
 
-            // Rotas protegidas (auth)
             {
                 element: <RequireAuth />,
                 children: [
-                    // exemplo de rota por role
                     {
                         path: "admin",
-                        element: <RequireRole roles={["Admin", "Manager"]} />,
+                        element: <RequireRole roles={[Roles.Administrator]} />,
                         children: [
                             { index: true, element: <div>Admin Dashboard</div> },
                         ],
