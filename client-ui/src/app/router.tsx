@@ -4,7 +4,8 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Logout from "../pages/Logout"; 
 import NotFound from "../pages/NotFound";
-import { RequireAuth, RequireRole } from "../hooks/useAuthGuard";
+import Forbidden from "../pages/Forbidden";
+import { RequireAuth, RequireRole, RequireGuest } from "../hooks/useAuthGuard";
 import { Roles } from "../app/types";
 
 export const router = createBrowserRouter([
@@ -24,14 +25,20 @@ export const router = createBrowserRouter([
                             { index: true, element: <div>Admin Dashboard</div> },
                         ],
                     },
-                    { path: "forbidden", element: <div>Acesso negado</div> },
+                    { path: "forbidden", element: <Forbidden/> },
                 ],
             },
 
             { path: "*", element: <NotFound /> },
         ],
     },
-    { path: "/login", element: <Login /> },
-    { path: "/logout", element: <Logout /> },
+    {
+        path: "/login",
+        element: (
+            <RequireGuest>
+                <Login />
+            </RequireGuest>
+        ),
+    },    { path: "/logout", element: <Logout /> },
 
 ]);
