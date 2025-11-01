@@ -11,7 +11,7 @@ export async function getVesselTypesByID(id: string): Promise<VesselType> {
     return res.data;
 }
 
-export async function getVesselTypesByName(name: string): Promise<VesselType[]> {
+export async function getVesselTypesByName(name: string): Promise<VesselType> {
     const res = await api.get(`/api/VesselType/name/${name}`);
     return res.data;
 }

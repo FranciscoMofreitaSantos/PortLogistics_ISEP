@@ -44,7 +44,7 @@ export default function VesselTypeList() {
         }
         load();
     }, [t]);
-
+    
     const executeSearch = async () => {
         if (!searchValue.trim()) {
             setFiltered(items);
@@ -74,9 +74,9 @@ export default function VesselTypeList() {
 
             if (searchMode === "name") {
                 const data = await getVesselTypesByName(searchValue);
-                setFiltered(data);
+                setFiltered([data]);
                 toast.dismiss("loading-global");
-                notifySuccess(t("vesselTypes.loadSuccess", { count: data.length }));
+                notifySuccess(t("vesselTypes.loadSuccess", { count: 1 }));
             }
         } catch {
             toast.dismiss("loading-global");
@@ -120,16 +120,34 @@ export default function VesselTypeList() {
             </div>
 
             <div className="vt-search-box">
-                <input
-                    placeholder={t("vesselTypes.searchPlaceholder")}
-                    className="vt-search"
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                />
+                <div className="vt-search-wrapper">
+                    <input
+                        placeholder={t("vesselTypes.searchPlaceholder")}
+                        className="vt-search"
+                        value={searchValue}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setSearchValue(value);
+                            if (value === "") setFiltered(items);
+                        }}
+                        onKeyDown={(e) => e.key === "Enter" && executeSearch()}
+                    />
+
+                    {searchValue !== "" && (
+                        <button className="vt-clear-input" onClick={() => {
+                            setSearchValue("");
+                            setFiltered(items);
+                        }}>
+                            ✕
+                        </button>
+                    )}
+                </div>
+
                 <button className="vt-search-btn" onClick={executeSearch} title="Search">
-                    🔎
+                    ↵
                 </button>
             </div>
+
 
             {loading ? null : filtered.length === 0 ? (
                 <p>{t("vesselTypes.empty")}</p>

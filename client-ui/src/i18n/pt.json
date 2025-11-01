@@ -67,9 +67,10 @@
     "empty": "Nenhum tipo de navio encontrado...",
     "add": "Adicionar",
     "loading": "A carregar tipos de navio...",
-    "loadSuccess": "{{count}} tipos de navio carregados ✅",
-    "loadError": "Falha ao carregar tipos de navio ❌",
+    "loadSuccess": "{{count}} tipos de navio carregados.",
+    "loadError": "Falha ao carregar tipos de navio.",
     "details": {
+      "name": "Nome",
       "description": "Descrição",
       "bays": "Bays",
       "rows": "Linhas",

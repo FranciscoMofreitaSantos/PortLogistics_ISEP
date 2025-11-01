@@ -65,9 +65,10 @@
     "empty": "No vessel types found...",
     "add": "Add",
     "loading": "Loading vessel types...",
-    "loadSuccess": "Loaded {{count}} vessel types ✅",
-    "loadError": "Failed to load vessel types ❌",
+    "loadSuccess": "Loaded {{count}} vessel types.",
+    "loadError": "Failed to load vessel types.",
     "details": {
+      "name": "Name",
       "description": "Description",
       "bays": "Bays",
       "rows": "Rows",
