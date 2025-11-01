@@ -3,57 +3,68 @@ import { useAppStore } from "../app/store";
 import { Roles, type Role } from "../app/types";
 import "./css/login.css";
 import { FaUserShield, FaUserTie, FaUserCog, FaUsers, FaEye } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const setUser = useAppStore((s) => s.setUser);
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    const setUser = useAppStore((s) => s.setUser);
 
-  function loginAs(roleList: Role[]) {
-    localStorage.setItem("access_token", "dev-token");
+    async function loginAs(roleList: Role[]) {
+        const loadingId = toast.loading(t("auth.loading"));
 
-    setUser({
-      id: "dev-user",
-      name: "Dev User",
-      roles: roleList,
-    });
+        try {
+            await new Promise((res) => setTimeout(res, 900)); // simulate API
 
-    navigate("/");
-  }
+            localStorage.setItem("access_token", "dev-token");
+            setUser({
+                id: "dev-user",
+                name: "Dev User",
+                roles: roleList,
+            });
 
-  const roles = [
-    { icon: <FaUserShield />, label: "Administrador", role: Roles.Administrator, color: "#e63946" },
-    { icon: <FaUserTie />, label: "Port Authority Officer", role: Roles.PortAuthorityOfficer, color: "#4361ee" },
-    { icon: <FaUserCog />, label: "Logistics Operator", role: Roles.LogisticsOperator, color: "#f3722c" },
-    { icon: <FaUsers />, label: "Shipping Agent Representative", role: Roles.ShippingAgentRepresentative, color: "#2a9d8f" },
-    { icon: <FaEye />, label: "Viewer", role: Roles.Viewer, color: "#6c757d" },
-  ];
+            toast.dismiss(loadingId);
+            toast.success(t("auth.success"));
+            navigate("/");
+        } catch {
+            toast.dismiss(loadingId);
+            toast.error(t("auth.error"));
+        }
+    }
 
-  return (
-    <div className="login-bg">
-      <div className="login-card">
-        <h2>Bem-vindo ao Sistema ThPA</h2>
-        <p>Selecione o perfil para entrar no portal:</p>
+    const roles = [
+        { icon: <FaUserShield />, label: t("roles.administrator"), role: Roles.Administrator, color: "#e63946" },
+        { icon: <FaUserTie />, label: t("roles.officer"), role: Roles.PortAuthorityOfficer, color: "#4361ee" },
+        { icon: <FaUserCog />, label: t("roles.operator"), role: Roles.LogisticsOperator, color: "#f3722c" },
+        { icon: <FaUsers />, label: t("roles.agent"), role: Roles.ShippingAgentRepresentative, color: "#2a9d8f" },
+        { icon: <FaEye />, label: t("roles.viewer"), role: Roles.Viewer, color: "#6c757d" }
+    ];
 
-        <div className="role-grid">
-          {roles.map((r) => (
-            <button
-              key={r.role}
-              className="role-btn"
-              style={{ "--btn-color": r.color } as any}
-              onClick={() => loginAs([r.role])}
-            >
-              <span className="icon">{r.icon}</span>
-              {r.label}
-            </button>
-          ))}
+    return (
+        <div className="login-bg">
+            <div className="login-card">
+                <h2>{t("login.title")}</h2>
+                <p>{t("login.subtitle")}</p>
+
+                <div className="role-grid">
+                    {roles.map((r) => (
+                        <button
+                            key={r.role}
+                            className="role-btn"
+                            style={{ "--btn-color": r.color } as any}
+                            onClick={() => loginAs([r.role])}
+                        >
+                            <span className="icon">{r.icon}</span>
+                            {r.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="login-footer">
+                    <small>{t("login.devNotice")}</small>
+                </div>
+            </div>
         </div>
-
-        <div className="login-footer">
-          <small>
-            Modo desenvolvimento — autenticação real (OAuth/JWT) será ativada mais tarde
-          </small>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

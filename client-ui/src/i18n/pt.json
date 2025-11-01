@@ -12,5 +12,51 @@
   "resourcesText": "Supervisione guindastes, equipas e docas em tempo real.",
   "rolesTitle": "Acesso por Funções",
   "rolesText": "Sistema preparado para agentes, operadores e administradores.",
-  "bannerText": "A ligar o Mar e a Tecnologia 🌊"
+  "bannerText": "A ligar o Mar e a Tecnologia 🌊",
+  
+  "login": {
+    "title": "Bem-vindo ao Sistema ThPA ⚓",
+    "subtitle": "Selecione o perfil para entrar no portal:",
+    "devNotice": "Modo desenvolvimento — autenticação real (OAuth/JWT) será ativada mais tarde"
+  },
+  "roles": {
+    "administrator": "Administrador",
+    "officer": "Port Authority Officer",
+    "operator": "Operador Logístico",
+    "agent": "Representante de Agência Marítima",
+    "viewer": "Visualizador"
+  },
+  "auth": {
+    "loading": "A autenticar...",
+    "success": "Sessão iniciada com sucesso ✅",
+    "error": "Falha ao autenticar ❌"
+  },
+  "logout": {
+    "title": "A terminar sessão...",
+    "subtitle": "Por favor aguarde um momento",
+    "success": "Sessão terminada 👋"
+  },
+
+  "notFound": {
+    "title": "404 — Página não encontrada",
+    "text": "O recurso que procuras não existe."
+  },
+  "forbidden": {
+    "title": "403 — Acesso Negado",
+    "text": "Não possui permissões para visualizar esta página.",
+    "back": "Voltar ao início"
+  },
+  "menu": {
+    "home": "Início",
+    "vvn": "VVNs",
+    "storage": "Áreas de Armazenamento",
+    "admin": "Administração",
+    "login": "Entrar",
+    "logout": "Sair"
+  },
+  "layout": {
+    "light": "Modo claro",
+    "dark": "Modo escuro"
+  }
+
 }

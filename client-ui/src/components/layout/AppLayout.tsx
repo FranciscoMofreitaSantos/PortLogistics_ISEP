@@ -1,5 +1,5 @@
 import { Outlet, Link } from "react-router-dom";
-import { FaShip, FaSun, FaMoon, FaBars, FaTimes, FaUserCircle,FaSignOutAlt } from "react-icons/fa";
+import { FaShip, FaSun, FaMoon, FaBars, FaTimes, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Nav from "./Nav";
@@ -9,10 +9,9 @@ import { useAppStore } from "../../app/store";
 export default function AppLayout() {
     const [dark, setDark] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const { i18n } = useTranslation();
-    const user = useAppStore((s) => s.user); 
+    const { i18n, t } = useTranslation();
+    const user = useAppStore((s) => s.user);
 
-    // Alternar tema (escuro/claro)
     const toggleTheme = () => {
         const newTheme = dark ? "light" : "dark";
         document.documentElement.setAttribute("data-theme", newTheme);
@@ -21,13 +20,11 @@ export default function AppLayout() {
 
     const toggleMenu = () => setMenuOpen(!menuOpen);
 
-    // Alternar idioma (PT ↔ EN)
     const changeLang = () => {
         const newLang = i18n.language === "en" ? "pt" : "en";
         i18n.changeLanguage(newLang);
     };
 
-    // Efeito shrink header
     useEffect(() => {
         const header = document.querySelector(".header");
         const handleScroll = () => {
@@ -49,14 +46,17 @@ export default function AppLayout() {
                     </div>
 
                     <div className="header-right">
-            <span className="lang-switch" onClick={changeLang}>
+
+                        {/* Lang Switch */}
+                        <span className="lang-switch" onClick={changeLang}>
               {i18n.language === "en" ? "EN | PT" : "PT | EN"}
             </span>
 
+                        {/* Theme Switch */}
                         <button
                             onClick={toggleTheme}
                             className="theme-btn"
-                            title={dark ? "Modo claro" : "Modo escuro"}
+                            title={dark ? t("layout.light") : t("layout.dark")}
                         >
                             {dark ? (
                                 <FaSun size={20} className="theme-icon rotate" />
@@ -65,8 +65,8 @@ export default function AppLayout() {
                             )}
                         </button>
 
-                        {/* Login icon */}
-                        <Link to={user ? "/logout" : "/login"} title={user ? "Sair" : "Login"}>
+                        {/* Login / Logout Icon */}
+                        <Link to={user ? "/logout" : "/login"} title={user ? t("menu.logout") : t("menu.login")}>
                             {user ? (
                                 <FaSignOutAlt size={22} className="logout-icon" />
                             ) : (
@@ -74,7 +74,7 @@ export default function AppLayout() {
                             )}
                         </Link>
 
-
+                        {/* Mobile Menu */}
                         <button className="menu-btn" onClick={toggleMenu} title="Menu">
                             {menuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
                         </button>
@@ -85,13 +85,13 @@ export default function AppLayout() {
             {/* SIDEBAR */}
             <aside className={`sidebar ${menuOpen ? "open" : ""}`}>
                 <div onClick={toggleMenu}>
-                    <Nav /> 
+                    <Nav />
                 </div>
             </aside>
 
             {menuOpen && <div className="overlay" onClick={toggleMenu}></div>}
 
-            {/* MAIN CONTENT */}
+            {/* MAIN */}
             <main className="content">
                 <Outlet />
             </main>

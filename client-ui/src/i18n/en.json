@@ -12,5 +12,51 @@
   "resourcesText": "Oversee cranes, staff, and docks in real time with full control.",
   "rolesTitle": "Multi-role Access",
   "rolesText": "Designed for agents, operators, and admins with role-based security.",
-  "bannerText": "Connecting Sea and Technology 🌊"
+  "bannerText": "Connecting Sea and Technology 🌊",
+  
+  "login": {
+    "title": "Welcome to the ThPA System ⚓",
+    "subtitle": "Select a profile to access the portal:",
+    "devNotice": "Development mode — real authentication (OAuth/JWT) will be enabled later"
+  },
+  "roles": {
+    "administrator": "Administrator",
+    "officer": "Port Authority Officer",
+    "operator": "Logistics Operator",
+    "agent": "Shipping Agent Representative",
+    "viewer": "Viewer"
+  },
+  "auth": {
+    "loading": "Authenticating...",
+    "success": "Session started successfully ✅",
+    "error": "Authentication failed ❌"
+  },
+  "logout": {
+    "title": "Logging out...",
+    "subtitle": "Please wait a moment",
+    "success": "Session ended 👋"
+  },
+  "notFound": {
+    "title": "404 — Page not found",
+    "text": "The resource you're looking for doesn't exist."
+  },
+  "forbidden": {
+    "title": "403 — Access Denied",
+    "text": "You do not have permission to view this page.",
+    "back": "Back to home"
+  },
+  "menu": {
+    "home": "Home",
+    "vvn": "VVNs",
+    "storage": "Storage Areas",
+    "admin": "Administration",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "layout": {
+    "light": "Light mode",
+    "dark": "Dark mode"
+  }
+
 }
+

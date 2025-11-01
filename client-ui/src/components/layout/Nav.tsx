@@ -1,19 +1,21 @@
 import { Link } from "react-router-dom";
 import { useAppStore } from "../../app/store";
 import { Roles } from "../../app/types";
+import { useTranslation } from "react-i18next";
 
 export default function Nav() {
+    const { t } = useTranslation();
     const user = useAppStore((s) => s.user);
 
-    const baseMenu = [{ label: "Início", path: "/" }];
+    const baseMenu = [{ label: t("menu.home"), path: "/" }];
 
     const privateMenu = user ? [
-        { label: "VVNs", path: "/vvn" },
-        { label: "Storage Areas", path: "/storage-areas" },
+        { label: t("menu.vvn"), path: "/vvn" },
+        { label: t("menu.storage"), path: "/storage-areas" },
     ] : [];
 
     const adminMenu = user?.roles.includes(Roles.Administrator)
-        ? [{ label: "Admin", path: "/admin" }]
+        ? [{ label: t("menu.admin"), path: "/admin" }]
         : [];
 
     const menu = [...baseMenu, ...privateMenu, ...adminMenu];
@@ -26,9 +28,9 @@ export default function Nav() {
                 ))}
 
                 {!user ? (
-                    <li><Link to="/login">Login</Link></li>
+                    <li><Link to="/login">{t("menu.login")}</Link></li>
                 ) : (
-                    <li><Link to="/logout">Sair</Link></li>
+                    <li><Link to="/logout">{t("menu.logout")}</Link></li>
                 )}
             </ul>
         </nav>
