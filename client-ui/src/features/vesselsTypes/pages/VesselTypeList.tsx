@@ -1,72 +1,96 @@
 import { useEffect, useState } from "react";
 import { getVesselTypes } from "../services/vesselTypeService";
 import type { VesselType } from "../types/vesselType";
-import { notifyError } from "../../../utils/notify";
-import { Link } from "react-router-dom";
-import { FaPlus, FaShip, FaSearch, FaFolderOpen } from "react-icons/fa";
-import "../style/vesseltypelist.css"
+import { notifyError, notifyLoading, notifySuccess } from "../../../utils/notify";
+import "../style/vesselTypeList.css";
+import { FaShip, FaTimes } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
+const debounce = (fn: Function, delay = 450) => {
+    let timer: number;
+    return (...args: any[]) => {
+        clearTimeout(timer);
+        timer = window.setTimeout(() => fn(...args), delay);
+    };
+};
+
 export default function VesselTypeList() {
     const [items, setItems] = useState<VesselType[]>([]);
+    const [filtered, setFiltered] = useState<VesselType[]>([]);
+    const [selected, setSelected] = useState<VesselType | null>(null);
     const [loading, setLoading] = useState(true);
-    const [query, setQuery] = useState("");
+    const [, setQuery] = useState("");
 
-    useEffect(() => {
-        async function load() {
-            try {
-                const data = await getVesselTypes();
-                setItems(data);
-            } catch {
-                notifyError("❌ Failed to load vessel types");
-            } finally {
-                setLoading(false);
-            }
+    const navigate = useNavigate();
+
+useEffect(() => {
+    async function load() {
+        notifyLoading("Loading vessel types...");
+
+        try {
+            const data = await getVesselTypes();
+            setItems(data);
+            setFiltered(data);
+
+            toast.dismiss("loading-global");
+            notifySuccess(`Loaded ${data.length} vessel types`);
+        } catch {
+            toast.dismiss("loading-global");
+            notifyError("Failed to load vessel types");
+        } finally {
+            setLoading(false);
         }
-        load();
-    }, []);
+    }
 
-    const filtered = items.filter(v =>
-        v.name.toLowerCase().includes(query.toLowerCase()) ||
-        v.description.toLowerCase().includes(query.toLowerCase())
-    );
+    load();
+}, []);
+
+
+    const handleSearch = debounce((val: string) => {
+        setQuery(val);
+        const q = val.toLowerCase();
+        setFiltered(
+            items.filter(v =>
+                v.name.toLowerCase().includes(q) ||
+                v.description.toLowerCase().includes(q)
+            )
+        );
+    });
 
     return (
-        <div className="vt-container">
+        <div className="vt-page">
 
-            {/* Floating button */}
-            <Link to="/vessel-types/create" className="vt-btn-add">
-                <FaPlus />
-                <span>Add Type</span>
-            </Link>
+            {selected && <div className="vt-overlay"></div>}
 
-            {/* KPI */}
-            <div className="vt-header">
-                <div className="vt-title-block">
-                    <FaShip className="vt-icon" />
-                    <div>
-                        <h2>Vessel Types</h2>
-                        <p>{items.length} registered vessel types</p>
-                    </div>
+            <div className="vt-title-area">
+                <div className="vt-title-box">
+                    <h2 className="vt-title">
+                        <FaShip className="vt-icon" /> Vessel Types
+                    </h2>
+                    <p className="vt-sub">{items.length} registered types</p>
                 </div>
 
-                <div className="vt-search-box">
-                    <FaSearch className="vt-search-icon"/>
-                    <input
-                        type="text"
-                        placeholder="Search vessel type..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                    />
-                </div>
+                <button
+                    className="vt-create-btn-top"
+                    onClick={() => navigate("/vessel-types/create")}
+                >
+                    + Add
+                </button>
             </div>
 
-            {/* List */}
+            <div className="vt-search-box">
+                <input
+                    placeholder="Search vessel type..."
+                    className="vt-search"
+                    onChange={(e) => handleSearch(e.target.value)}
+                />
+            </div>
+
             {loading ? (
-                <div className="vt-loading">Loading vessel types...</div>
+                null
             ) : filtered.length === 0 ? (
-                <div className="vt-empty">
-                    <FaFolderOpen className="vt-empty-icon" />
-                    <p>No vessel types found</p>
-                </div>
+                <p>No vessel types found...</p>
             ) : (
                 <div className="vt-table-wrapper">
                     <table className="vt-table">
@@ -77,22 +101,42 @@ export default function VesselTypeList() {
                             <th>Bays</th>
                             <th>Rows</th>
                             <th>Tiers</th>
-                            <th>Capacity (TEU)</th>
+                            <th>Capacity</th>
                         </tr>
                         </thead>
                         <tbody>
                         {filtered.map(v => (
-                            <tr key={v.id}>
-                                <td>{v.name}</td>
+                            <tr key={v.id} className="vt-row" onClick={() => setSelected(v)}>
+                                <td><span className="vt-badge">{v.name}</span></td>
                                 <td>{v.description}</td>
                                 <td>{v.maxBays}</td>
                                 <td>{v.maxRows}</td>
                                 <td>{v.maxTiers}</td>
-                                <td>{v.capacity}</td>
+                                <td>{v.capacity} TEU</td>
                             </tr>
                         ))}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {selected && (
+                <div className="vt-slide">
+                    <button className="vt-slide-close" onClick={() => setSelected(null)}>
+                        <FaTimes />
+                    </button>
+
+                    <h3>{selected.name}</h3>
+                    <p><strong>Description:</strong> {selected.description}</p>
+                    <p><strong>Bays:</strong> {selected.maxBays}</p>
+                    <p><strong>Rows:</strong> {selected.maxRows}</p>
+                    <p><strong>Tiers:</strong> {selected.maxTiers}</p>
+                    <p><strong>Capacity:</strong> {selected.capacity} TEU</p>
+
+                    <div className="vt-slide-actions">
+                        <button className="vt-btn-edit">Edit</button>
+                        <button className="vt-btn-delete">Delete</button>
+                    </div>
                 </div>
             )}
         </div>
