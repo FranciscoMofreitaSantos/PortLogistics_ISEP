@@ -78,6 +78,8 @@ namespace SEM5_PI_WEBAPI
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            
+            app.UseCors("AllowSPA");
 
             app.UseMiddleware<RequestLogsMiddleware>();
 
@@ -88,6 +90,22 @@ namespace SEM5_PI_WEBAPI
 
         private void ConfigureMyServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSPA", builder =>
+                    builder
+                        .WithOrigins(
+                            "http://localhost:5173",     // Vite local
+                            "http://localhost:3000",     // React default
+                            "http://10.9.23.188",        // IP VM
+                            "http://10.9.23.188:5173"    // IP VM + Vite
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                );
+            });
+
             services.AddTransient<IUnitOfWork, UnitOfWork>();
 
             services.AddTransient<IQualificationRepository, QualificationRepository>();

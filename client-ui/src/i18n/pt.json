@@ -50,10 +50,12 @@
     "home": "Início",
     "vvn": "VVNs",
     "storage": "Áreas de Armazenamento",
+    "vesselTypes": "Tipos de Navio",
     "admin": "Administração",
     "login": "Entrar",
     "logout": "Sair"
   },
+
   "layout": {
     "light": "Modo claro",
     "dark": "Modo escuro"
