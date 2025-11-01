@@ -6,6 +6,17 @@ export async function getVesselTypes(): Promise<VesselType[]> {
     return res.data;
 }
 
+export async function getVesselTypesByID(id: string): Promise<VesselType> {
+    const res = await api.get(`/api/VesselType/id/${id}`);
+    return res.data;
+}
+
+export async function getVesselTypesByName(name: string): Promise<VesselType[]> {
+    const res = await api.get(`/api/VesselType/name/${name}`);
+    return res.data;
+}
+
+
 export async function createVesselType(data: CreateVesselTypeRequest): Promise<VesselType> {
     const res = await api.post("/api/VesselType", data);
     return res.data;
