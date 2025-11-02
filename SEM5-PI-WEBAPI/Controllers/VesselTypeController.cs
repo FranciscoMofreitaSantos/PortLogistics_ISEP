@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs;
+using SEM5_PI_WEBAPI.utils;
 
 namespace SEM5_PI_WEBAPI.Controllers
 {
@@ -12,9 +13,9 @@ namespace SEM5_PI_WEBAPI.Controllers
         
         private readonly IVesselTypeService _service;
         private readonly ILogger<VesselTypeController> _logger;
-        private readonly ResponsesToFrontend _refrontend;
+        private readonly IResponsesToFrontend _refrontend;
 
-        public VesselTypeController(IVesselTypeService service,ILogger<VesselTypeController> logger,ResponsesToFrontend refrontend)
+        public VesselTypeController(IVesselTypeService service,ILogger<VesselTypeController> logger,IResponsesToFrontend refrontend)
         {
             _service = service;
             _logger = logger;
