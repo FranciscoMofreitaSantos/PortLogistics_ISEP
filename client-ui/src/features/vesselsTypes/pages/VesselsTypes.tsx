@@ -10,7 +10,7 @@ import {
 
 import type { VesselType } from "../types/vesselType";
 
-import { notifyError, notifyLoading, notifySuccess } from "../../../utils/notify";
+import {notifySuccess } from "../../../utils/notify";
 import "../style/vesselTypeList.css";
 
 import { FaShip, FaTimes } from "react-icons/fa";
@@ -22,7 +22,6 @@ export default function VesselTypeList() {
     const [filtered, setFiltered] = useState<VesselType[]>([]);
     const [selected, setSelected] = useState<VesselType | null>(null);
     const [loading, setLoading] = useState(true);
-
     const [editModel, setEditModel] = useState<VesselType | null>(null);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -31,36 +30,45 @@ export default function VesselTypeList() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [maxBays, setMaxBays] = useState<number>(0);
-    const [maxRows, setMaxRows] = useState<number>(0);
-    const [maxTiers, setMaxTiers] = useState<number>(0);
-
+    const [maxBays, setMaxBays] = useState<number>(10);
+    const [maxRows, setMaxRows] = useState<number>(10);
+    const [maxTiers, setMaxTiers] = useState<number>(10);
     const [searchMode, setSearchMode] = useState<"local" | "id" | "name">("local");
     const [searchValue, setSearchValue] = useState("");
-
     const { t } = useTranslation();
 
-    useEffect(() => {
-        async function load() {
-            notifyLoading(t("vesselTypes.loading"));
 
-            try {
-                const data = await getVesselTypes();
+    const MIN_LOADING_TIME = 800;
+
+    async function runWithLoading<T>(promise: Promise<T>, loadingText: string) {
+        const id = toast.loading(loadingText);
+        const start = Date.now();
+
+        try {
+            const result = await promise;
+            return result;
+        } finally {
+            const elapsed = Date.now() - start;
+            if (elapsed < MIN_LOADING_TIME) {
+                await new Promise(res => setTimeout(res, MIN_LOADING_TIME - elapsed));
+            }
+            toast.dismiss(id);
+        }
+    }
+
+
+
+
+    useEffect(() => {
+        runWithLoading(getVesselTypes(), t("vesselTypes.loading"))
+            .then(data => {
                 setItems(data);
                 setFiltered(data);
-
-                toast.dismiss("loading-global");
                 notifySuccess(t("vesselTypes.loadSuccess", { count: data.length }));
-            } catch {
-                toast.dismiss("loading-global");
-                notifyError(t("vesselTypes.loadError"));
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        load();
+            })
+            .finally(() => setLoading(false));
     }, [t]);
+
 
     const executeSearch = async () => {
         if (!searchValue.trim()) {
@@ -68,39 +76,48 @@ export default function VesselTypeList() {
             return;
         }
 
+        // --- Validate GUID when searching by ID ---
+        if (searchMode === "id") {
+            const guidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+            if (!guidRegex.test(searchValue)) {
+                toast.error("Invalid ID format. Please enter a valid GUID.");
+                return;
+            }
+        }
+
+        // Local search
         if (searchMode === "local") {
             const q = searchValue.toLowerCase();
-            setFiltered(
-                items.filter(
-                    (v) =>
-                        v.name.toLowerCase().includes(q) ||
-                        v.description.toLowerCase().includes(q)
-                )
+            const results = items.filter(v =>
+                v.name.toLowerCase().includes(q) ||
+                v.description?.toLowerCase().includes(q)
             );
+
+            setFiltered(results);
+            toast.success(t("vesselTypes.loadSuccess", { count: results.length }));
             return;
         }
 
-        notifyLoading(t("vesselTypes.loading"));
+        // Remote search
+        const result = await runWithLoading(
+            searchMode === "id"
+                ? getVesselTypesByID(searchValue)
+                : getVesselTypesByName(searchValue),
+            t("vesselTypes.loading")
+        ).catch(() => null);
 
-        try {
-            if (searchMode === "id") {
-                const data = await getVesselTypesByID(searchValue);
-                setFiltered([data]);
-            }
-
-            if (searchMode === "name") {
-                const data = await getVesselTypesByName(searchValue);
-                setFiltered([data]);
-            }
-
-            toast.dismiss("loading-global");
-            notifySuccess(t("vesselTypes.loadSuccess", { count: filtered.length }));
-        } catch {
-            toast.dismiss("loading-global");
+        if (!result) {
             setFiltered([]);
-            notifyError(t("vesselTypes.loadError"));
+            return;
         }
+
+        setFiltered([result]);
+        toast.success(t("vesselTypes.loadSuccess", { count: 1 }));
     };
+
+
+
 
     const openEdit = () => {
         if (!selected) return;
@@ -119,39 +136,22 @@ export default function VesselTypeList() {
     const saveEdit = async () => {
         if (!editModel) return;
 
-        notifyLoading("Saving...");
+        const updated = await runWithLoading(
+            updateVesselType(editModel.id!, editModel),
+            "Saving..."
+        ).catch(() => null);
 
-        try {
-            const updated = await updateVesselType(editModel.id!, editModel);
+        if (!updated) return;
 
-            toast.dismiss("loading-global");
+        toast.success(`Vessel updated: ${updated.name}`);
 
-            toast.success(
-                <div style={{ fontSize: "14px" }}>
-                    <strong>Vessel updated</strong><br />
-                    {updated.name} — {updated.capacity} TEU
-                </div>
-            );
-
-            const data = await getVesselTypes();
-            setItems(data);
-            setFiltered(data);
-
-            closeEdit();
-            setSelected(updated);
-
-        } catch (err: any) {
-            toast.dismiss("loading-global");
-
-            const backendMessage =
-                err?.response?.data?.message ||
-                err?.response?.data?.error ||
-                JSON.stringify(err?.response?.data) ||
-                "Failed to update";
-
-            notifyError(backendMessage);
-        }
+        const data = await getVesselTypes();
+        setItems(data); setFiltered(data);
+        closeEdit();
+        setSelected(updated);
     };
+
+
 
     const openDelete = () => setIsDeleteOpen(true);
     const closeDelete = () => setIsDeleteOpen(false);
@@ -159,81 +159,68 @@ export default function VesselTypeList() {
     const confirmDelete = async () => {
         if (!selected) return;
 
-        notifyLoading("Deleting...");
+        const idToDelete = selected.id;
+        const nameToDelete = selected.name;
 
-        try {
-            await deleteVesselType(selected.id);
-            toast.dismiss("loading-global");
-            notifySuccess(`Deleted ${selected.name}`);
+        setIsDeleteOpen(false);
+        setSelected(null);
 
-            const data = await getVesselTypes();
-            setItems(data);
-            setFiltered(data);
+        const success = await runWithLoading(
+            deleteVesselType(idToDelete),
+            t("vesselTypes.loading")
+        ).catch(() => null);
 
-            setSelected(null);
-            closeDelete();
-        } catch (err: any) {
-            toast.dismiss("loading-global");
+        if (!success) return;
 
-            const backendMessage =
-                err?.response?.data?.message ||
-                err?.response?.data?.error ||
-                JSON.stringify(err?.response?.data) ||
-                "Failed to delete";
+        toast.success(`${t("vesselTypes.deleted")} ${nameToDelete}`);
 
-            notifyError(backendMessage);
-        }
+        const data = await getVesselTypes();
+        setItems(data);
+        setFiltered(data);
     };
 
+    
     // === CREATE HANDLER ===
     const handleCreate = async () => {
-        if (!name.trim()) return toast.error(t("vesselTypes.errors.nameRequired"));
+        if (!name.trim())
+            return toast.error(t("vesselTypes.errors.nameRequired"));
+
         if (maxBays <= 0 || maxRows <= 0 || maxTiers <= 0)
             return toast.error(t("vesselTypes.errors.invalidStructure"));
 
-        toast.loading(t("vesselTypes.loading"));
+        const payload = {
+            name,
+            description: description.trim() === "" ? null : description,
+            maxBays,
+            maxRows,
+            maxTiers
+        };
 
-        try {
-            await createVesselType({
-                name,
-                description,
-                maxBays,
-                maxRows,
-                maxTiers,
-            });
+        const created = await runWithLoading(
+            createVesselType(payload),
+            t("vesselTypes.loading")
+        ).catch(() => null);
 
-            toast.dismiss();
-            toast.success(t("vesselTypes.created"));
+        if (!created) return; // erro já tratado no interceptor
 
-            const data = await getVesselTypes();
-            setItems(data);
-            setFiltered(data);
+        toast.success(t("vesselTypes.created"));
 
-            // Close modal & reset fields
-            setIsCreateOpen(false);
-            setName("");
-            setDescription("");
-            setMaxBays(0);
-            setMaxRows(0);
-            setMaxTiers(0);
+        const data = await getVesselTypes();
+        setItems(data);
+        setFiltered(data);
 
-        } catch (err: any) {
-            toast.dismiss();
+        setIsCreateOpen(false);
 
-            const error = err?.response?.data;
-
-            // Try to extract the message from ProblemDetails or fallback
-            const msg =
-                error?.detail ||
-                error?.message || // caso algum endpoint ainda use
-                error?.title ||
-                (typeof error === "string" ? error : null) ||
-                "Error creating vessel type";
-
-            toast.error(msg);
-        }
-
+        // Reset form
+        setName("");
+        setDescription("");
+        setMaxBays(0);
+        setMaxRows(0);
+        setMaxTiers(0);
     };
+
+
+
 
     return (
         <div className="vt-page">
@@ -388,33 +375,30 @@ export default function VesselTypeList() {
                         <label>{t("vesselTypes.details.bays")}</label>
                         <input
                             type="number"
+                            min={1}
                             className="vt-input"
                             value={editModel.maxBays}
-                            onChange={(e) => setEditModel({ ...editModel, maxBays: Number(e.target.value) })}
+                            onChange={(e) => setEditModel({ ...editModel, maxBays: Math.max(1,Number(e.target.value)) })}
                         />
 
                         <label>{t("vesselTypes.details.rows")}</label>
                         <input
                             type="number"
+                            min={1}
                             className="vt-input"
                             value={editModel.maxRows}
-                            onChange={(e) => setEditModel({ ...editModel, maxRows: Number(e.target.value) })}
+                            onChange={(e) => setEditModel({ ...editModel, maxRows: Math.max(1,Number(e.target.value)) })}
                         />
 
                         <label>{t("vesselTypes.details.tiers")}</label>
                         <input
                             type="number"
+                            min={1}
                             className="vt-input"
                             value={editModel.maxTiers}
-                            onChange={(e) => setEditModel({ ...editModel, maxTiers: Number(e.target.value) })}
+                            onChange={(e) => setEditModel({ ...editModel, maxTiers: Math.max(1,Number(e.target.value)) })}
                         />
-
-                        <label>{t("vesselTypes.details.capacity")}</label>
-                        <input
-                            className="vt-input"
-                            value={editModel.capacity}
-                            readOnly
-                        />
+                        
 
                         <div className="vt-modal-actions">
                             <button className="vt-btn-cancel" onClick={closeEdit}>{t("vesselTypes.cancel")}</button>
@@ -436,7 +420,7 @@ export default function VesselTypeList() {
 
                         <div className="vt-modal-actions">
                             <button className="vt-btn-cancel" onClick={closeDelete}>{t("vesselTypes.cancel")}</button>
-                            <button className="vt-btn-delete" onClick={confirmDelete}>{t("vesselTypes.delete")}</button>
+                            <button className="vt-btn-delete" onClick={() => confirmDelete()}>{t("vesselTypes.delete")}</button>
                         </div>
                     </div>
                 </div>
@@ -454,14 +438,14 @@ export default function VesselTypeList() {
                         <label>{t("vesselTypes.details.description")}</label>
                         <input className="vt-input" value={description} onChange={(e) => setDescription(e.target.value)} />
 
-                        <label>{t("vesselTypes.details.bays")}</label>
-                        <input type="number" className="vt-input" value={maxBays} onChange={(e) => setMaxBays(Number(e.target.value))} />
+                        <label>{t("vesselTypes.details.bays")} *</label>
+                        <input type="number" min={1} className="vt-input" value={maxBays} onChange={(e) => setMaxBays(Math.max(1,Number(e.target.value)))} />
 
-                        <label>{t("vesselTypes.details.rows")}</label>
-                        <input type="number" className="vt-input" value={maxRows} onChange={(e) => setMaxRows(Number(e.target.value))} />
+                        <label>{t("vesselTypes.details.rows")} *</label>
+                        <input type="number" min={1} className="vt-input" value={maxRows} onChange={(e) => setMaxRows(Math.max(1,Number(e.target.value)))} />
 
-                        <label>{t("vesselTypes.details.tiers")}</label>
-                        <input type="number" className="vt-input" value={maxTiers} onChange={(e) => setMaxTiers(Number(e.target.value))} />
+                        <label>{t("vesselTypes.details.tiers")} *</label>
+                        <input type="number" min={1} className="vt-input" value={maxTiers} onChange={(e) => setMaxTiers(Math.max(1,Number(e.target.value)))} />
 
                         <div className="vt-modal-actions">
                             <button className="vt-btn-cancel" onClick={() => setIsCreateOpen(false)}>

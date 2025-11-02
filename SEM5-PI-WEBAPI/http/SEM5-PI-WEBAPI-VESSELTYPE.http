@@ -14,7 +14,7 @@ Accept: application/json
 
 ###
 # 3. GET by Id - inválido / inexistente
-GET {{portURL}}/api/VesselType/id/00000000-0000-0000-0000-000000000000
+GET {{portURL}}/api/VesselType/id/Panamaxxassaaa
 Accept: application/json
 
 ###

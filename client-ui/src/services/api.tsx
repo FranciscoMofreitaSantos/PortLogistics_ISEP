@@ -1,10 +1,27 @@
-// src/api.ts
 import axios from "axios";
 import { notifyError } from "../utils/notify";
 
+function extractApiError(error: any): string {
+    const data = error?.response?.data;
+
+    // Falha de rede / servidor offline
+    if (!error.response)
+        return "Servidor indisponível. Verifique a ligação.";
+
+    // ProblemDetails (.NET default)
+    if (data?.detail) return data.detail;
+    if (data?.title) return data.title;
+
+    // Custom backend message
+    if (data?.message) return data.message;
+
+    // Axios / fallback
+    return error?.message || "Erro inesperado ao comunicar com o servidor.";
+}
+
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5008",
-    timeout: 15000,
+    timeout: 20000, // 20 segundos
     headers: { "Content-Type": "application/json" },
 });
 
@@ -18,34 +35,35 @@ api.interceptors.request.use((config) => {
 // === RESPONSE INTERCEPTOR ===
 api.interceptors.response.use(
     (res) => res,
-    async (error) => {
+    (error) => {
         const status = error?.response?.status;
+        const message = extractApiError(error);
 
-        // Mensagem padrão amigável
-        const message =
-            error?.response?.data?.message ||
-            error?.response?.statusText ||
-            "Erro de comunicação com o servidor";
+        switch (status) {
+            case 400:
+                notifyError(message || "Pedido inválido.");
+                break;
 
-        // eedback visual amigável
-        notifyError(message);
+            case 401:
+                notifyError("Sessão expirada. Faça login novamente.");
+                localStorage.removeItem("access_token");
+                window.dispatchEvent(new Event("sessionExpired"));
+                break;
 
-        // 401 → Sessão expirada
-        if (status === 401) {
-            console.warn("[Auth] Sessão expirada 🚨");
-            localStorage.removeItem("access_token");
-            window.dispatchEvent(new Event("sessionExpired"));
-            // opcional: redirecionar
-            // window.location.href = "/login";
-        }
+            case 403:
+                notifyError(message || "Acesso negado.");
+                break;
 
-        // 403 → Acesso negado
-        if (status === 403) {
-            console.warn("[Auth] Acesso negado (403) ❌");
-        }
+            case 404:
+                notifyError(message || "Recurso não encontrado.");
+                break;
 
-        if (!error.response) {
-            console.error("[Network] Falha de conexão ao servidor API 🌐");
+            case 500:
+                notifyError("Erro interno do servidor.");
+                break;
+
+            default:
+                notifyError(message);
         }
 
         return Promise.reject(error);

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json.Converters;
+using SEM5_PI_WEBAPI.Controllers;
 using SEM5_PI_WEBAPI.Domain.CargoManifests;
 using SEM5_PI_WEBAPI.Domain.CargoManifests.CargoManifestEntries;
 using SEM5_PI_WEBAPI.Domain.Containers;
@@ -153,6 +154,9 @@ namespace SEM5_PI_WEBAPI
             services.AddTransient<ITaskRepository,TaskRepository>();
             
             services.AddTransient<Bootstrap>();
+            
+            services.AddScoped<ResponsesToFrontend>();
+
         }
     }
 }

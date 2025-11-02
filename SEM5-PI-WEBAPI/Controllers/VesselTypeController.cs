@@ -12,13 +12,17 @@ namespace SEM5_PI_WEBAPI.Controllers
         
         private readonly IVesselTypeService _service;
         private readonly ILogger<VesselTypeController> _logger;
+        private readonly ResponsesToFrontend _refrontend;
 
-        public VesselTypeController(IVesselTypeService service,ILogger<VesselTypeController> logger)
+        public VesselTypeController(IVesselTypeService service,ILogger<VesselTypeController> logger,ResponsesToFrontend refrontend)
         {
             _service = service;
             _logger = logger;
+            _refrontend = refrontend;
         }
-
+        
+        
+        
         [HttpGet]
         public async Task<ActionResult<List<VesselTypeDto>>> GetAll()
         {
@@ -34,7 +38,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             catch (BusinessRuleValidationException e)
             {
                 _logger.LogWarning("API Response (404): No Vessels Types found on DataBase");
-                return NotFound(e.Message);
+                return _refrontend.ProblemResponse("Not Found", e.Message, 404);
             }
         }
 
@@ -49,10 +53,10 @@ namespace SEM5_PI_WEBAPI.Controllers
                 _logger.LogWarning("API Response (200): Vessel Type with ID = {Id} -> FOUND", id);
                 return Ok(vesselTypeDto);
             }
-            catch (BusinessRuleValidationException ex)
+            catch (BusinessRuleValidationException e)
             {
                 _logger.LogWarning("API Error (404): Vessel Type with ID = {Id} -> NOT FOUND", id);
-                return NotFound(ex.Message);
+                return _refrontend.ProblemResponse("Not Found", e.Message, 404);
             }
         }
 
@@ -67,10 +71,10 @@ namespace SEM5_PI_WEBAPI.Controllers
                 _logger.LogWarning("API Response (200): Vessel Type with Name = {Name} -> FOUND", name);
                 return Ok(vesselTypeDto);
             }
-            catch (BusinessRuleValidationException ex)
+            catch (BusinessRuleValidationException e)
             {
                 _logger.LogWarning("API Error (404): Vessel Type with Name = {Id} -> NOT FOUND", name);
-                return NotFound(ex.Message);
+                return _refrontend.ProblemResponse("Not Found", e.Message, 404);
             }
         }
         
@@ -85,10 +89,10 @@ namespace SEM5_PI_WEBAPI.Controllers
                 _logger.LogWarning("API Response (200): Vessel/s Type/s with requested Description where found: {@vesselTypeDto}",listVesselTypeDto);
                 return Ok(listVesselTypeDto);
             }
-            catch (BusinessRuleValidationException ex)
+            catch (BusinessRuleValidationException e)
             {
                 _logger.LogWarning("API Error (404): Vessel/s Type/s with Description = {Description} -> NOT FOUND", description);
-                return NotFound(ex.Message);
+                return _refrontend.ProblemResponse("Not Found", e.Message, 404);
             }
         }
 
@@ -106,12 +110,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             catch (BusinessRuleValidationException e)
             {
                 _logger.LogWarning("API Error (404): {Message}", e.Message);
-                return BadRequest(new ProblemDetails
-                {
-                    Title = "Validation Error",
-                    Detail = e.Message,
-                    Status = StatusCodes.Status400BadRequest
-                });
+                return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
             }
         }
 
@@ -133,7 +132,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             catch (BusinessRuleValidationException e)
             {
                 _logger.LogWarning("API Response (404): No Vessel/s Type/s matched filters.");
-                return NotFound(e.Message);
+                return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
             }
             
         }
@@ -166,10 +165,10 @@ namespace SEM5_PI_WEBAPI.Controllers
                 _logger.LogInformation("API Response (200): Vessel Type with ID = {Id} deleted successfully.", id);
                 return Ok($"Vessel Type with ID = {id} deleted successfully.");
             }
-            catch (BusinessRuleValidationException ex)
+            catch (BusinessRuleValidationException e)
             {
                 _logger.LogWarning("API Error (404): Vessel Type with ID = {Id} -> NOT FOUND", id);
-                return NotFound(ex.Message);
+                return _refrontend.ProblemResponse("Not Found", e.Message, 404);
             }
         }
 

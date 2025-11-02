@@ -16,7 +16,6 @@ export async function getVesselTypesByName(name: string): Promise<VesselType> {
     return res.data;
 }
 
-
 export async function createVesselType(data: CreateVesselTypeRequest): Promise<VesselType> {
     const res = await api.post("/api/VesselType", data);
     return res.data;
@@ -27,6 +26,8 @@ export async function updateVesselType(id: string, data: UpdateVesselTypeRequest
     return res.data;
 }
 
-export async function deleteVesselType(id: string): Promise<void> {
+export async function deleteVesselType(id: string): Promise<boolean> {
     await api.delete(`/api/VesselType/${id}`);
+    return true;
 }
+
