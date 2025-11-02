@@ -4,6 +4,7 @@ using SEM5_PI_WEBAPI.Domain.Vessels;
 using SEM5_PI_WEBAPI.Domain.Vessels.DTOs;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes.DTOs;
+using SEM5_PI_WEBAPI.utils;
 
 namespace SEM5_PI_WEBAPI.Controllers;
 
@@ -14,12 +15,14 @@ public class VesselController : ControllerBase
     
     private readonly ILogger<VesselController> _logger;
     private readonly IVesselService _service;
+    private readonly IResponsesToFrontend _refrontend;
 
 
-    public VesselController(IVesselService service, ILogger<VesselController> logger)
+    public VesselController(IVesselService service, ILogger<VesselController> logger, IResponsesToFrontend refrontend)
     {
         _service = service;
         _logger = logger;
+        _refrontend = refrontend;
     }
 
     [HttpGet]
@@ -36,7 +39,7 @@ public class VesselController : ControllerBase
         catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Response (404): No Vessels found on DataBase");
-            return NotFound(e.Message);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
         
     }
@@ -53,10 +56,10 @@ public class VesselController : ControllerBase
             _logger.LogWarning("API Response (200): Vessel with ID = {Id} -> FOUND", id);
             return Ok(vesselDto);
         }
-        catch (BusinessRuleValidationException ex)
+        catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Response (404): Vessel with ID = {Id} -> NOT FOUND", id);
-            return NotFound(ex.Message);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
     
@@ -74,8 +77,8 @@ public class VesselController : ControllerBase
         }
         catch (BusinessRuleValidationException e)
         {
-            _logger.LogWarning("API Error (404): {Message}", e.Message);
-            return BadRequest(e.Message);
+            _logger.LogWarning("API Error (400): {Message}", e.Message);
+            return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
         }
     }
 
@@ -96,7 +99,7 @@ public class VesselController : ControllerBase
         catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Response (404): {Message}", e.Message);
-            return NotFound(e.Message);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
     
@@ -117,7 +120,7 @@ public class VesselController : ControllerBase
         catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Response (404): {Message}", e.Message);
-            return NotFound(e.Message);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
 
@@ -138,7 +141,7 @@ public class VesselController : ControllerBase
         catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Response (404): {Message}", e.Message);
-            return NotFound(e.Message);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
 
@@ -158,7 +161,7 @@ public class VesselController : ControllerBase
         catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Response (404): {Message}", e.Message);
-            return NotFound(e.Message);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
     
@@ -179,7 +182,7 @@ public class VesselController : ControllerBase
         catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Error (400): {Message}", e.Message);
-            return BadRequest(e.Message);
+            return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
         }
     }
 

@@ -279,12 +279,13 @@
 
 .vt-slide-actions {
     display: flex;
+    flex-direction: column;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 .vt-btn-edit {
-    flex: 1;
+    width: 100% ;
     padding: 8px;
     border-radius: 8px;
     border: none;
@@ -295,6 +296,9 @@
     font-size: 14px;
     transition: .2s ease;
 }
+
+
+
 
 .vt-btn-edit:hover {
     transform: scale(1.04);

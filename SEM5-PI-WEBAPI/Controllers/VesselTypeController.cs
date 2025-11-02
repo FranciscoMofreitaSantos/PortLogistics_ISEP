@@ -110,7 +110,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             }
             catch (BusinessRuleValidationException e)
             {
-                _logger.LogWarning("API Error (404): {Message}", e.Message);
+                _logger.LogWarning("API Error (400): {Message}", e.Message);
                 return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
             }
         }
@@ -148,10 +148,10 @@ namespace SEM5_PI_WEBAPI.Controllers
                 _logger.LogInformation("API Response (200): Vessel Type with ID = {Id} updated successfully.", id);
                 return Ok(updatedVesselType);
             }
-            catch (BusinessRuleValidationException ex)
+            catch (BusinessRuleValidationException e)
             {
-                _logger.LogWarning("API Response (400): Update failed for Vessel Type with ID = {Id}. Reason: {Message}", id, ex.Message);
-                return BadRequest(ex.Message);
+                _logger.LogWarning("API Response (400): Update failed for Vessel Type with ID = {Id}. Reason: {Message}", id, e.Message);
+                return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
             }
         }
         

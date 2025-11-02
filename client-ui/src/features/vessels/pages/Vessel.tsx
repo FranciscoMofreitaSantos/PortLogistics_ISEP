@@ -16,6 +16,7 @@ import type { VesselType } from "../../vesselsTypes/types/vesselType";
 import type { Vessel, CreateVesselRequest, UpdateVesselRequest } from "../types/vessel";
 
 import "../style/vesselspage.css";
+import {useTranslation} from "react-i18next";
 
 
 export default function Vessel() {
@@ -41,12 +42,14 @@ export default function Vessel() {
         owner: "",
         vesselTypeName: ""
     });
+    const { t } = useTranslation();
 
-    const imoRegex = /^IMO?\s?\d{7}$/i; // Aceita "IMO1234567" ou "1234567"
+    const imoRegex = /^\d{7}$/;
     const val = (x: any) => (typeof x === "string" ? x : x?.value);
 
     // ====== Loading helper (igual ao vesselType) ======
-    const MIN_LOADING_TIME = 800;
+    const MIN_LOADING_TIME = 500;
+    
     async function runWithLoading<T>(promise: Promise<T>, text: string) {
         const id = toast.loading(text);
         const start = Date.now();
@@ -86,41 +89,66 @@ export default function Vessel() {
 
     // ====== Search ======
     async function executeSearch() {
-        if (!searchValue.trim()) return setFiltered(items);
+        if (!searchValue.trim()) {
+            setFiltered(items);
+            return;
+        }
+
         const q = searchValue.toLowerCase();
 
         if (searchMode === "local") {
-            return setFiltered(
-                items.filter(v =>
-                    v.name.toLowerCase().includes(q) ||
-                    v.owner.toLowerCase().includes(q) ||
-                    val(v.imoNumber)?.toLowerCase().includes(q)
-                )
+            const results = items.filter(v =>
+                v.name.toLowerCase().includes(q) ||
+                v.owner.toLowerCase().includes(q) ||
+                val(v.imoNumber)?.toLowerCase().includes(q)
             );
+
+            setFiltered(results);
+            toast.success(t("vesselTypes.loadSuccess", { count: results.length }));
+            return;
         }
 
-        try {
-            let result;
-            switch (searchMode) {
-                case "imo":
-                    if (!imoRegex.test(searchValue)) return toast.error("Invalid IMO (e.g. IMO1234567)");
-                    result = await getVesselByIMO(searchValue);
-                    setFiltered([result]);
-                    break;
-                case "id":
-                    result = await getVesselById(searchValue);
-                    setFiltered([result]);
-                    break;
-                case "owner":
-                    result = await getVesselByOwner(searchValue);
-                    setFiltered(result);
-                    break;
+        // Validate GUID
+        if (searchMode === "id") {
+            const guidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+            if (!guidRegex.test(searchValue)) {
+                toast.error("Invalid ID format. Please enter a valid GUID.");
+                return;
             }
-        } catch {
-            toast.error("No vessel found.");
-            setFiltered([]);
         }
+
+        // Validate IMO
+        if (searchMode === "imo") {
+            if (!imoRegex.test(searchValue)) {
+                toast.error("Invalid IMO (only 7 digits)");
+                return;
+            }
+        }
+
+        // Wrap single object APIs so they return arrays
+        let apiPromise: Promise<Vessel[]>;
+
+        if (searchMode === "imo") {
+            apiPromise = getVesselByIMO(searchValue).then(v => [v]);
+        } else if (searchMode === "id") {
+            apiPromise = getVesselById(searchValue).then(v => [v]);
+        } else {
+            apiPromise = getVesselByOwner(searchValue); // Already returns Vessel[]
+        }
+
+        const result = await runWithLoading(apiPromise, t("vesselTypes.loading"))
+            .catch(() => null);
+
+        if (!result || result.length === 0) {
+            setFiltered([]);
+            return;
+        }
+
+        setFiltered(result);
+        toast.success(t("vesselTypes.loadSuccess", { count: result.length }));
     }
+
+
 
     // ====== Create ======
     async function handleCreate() {
