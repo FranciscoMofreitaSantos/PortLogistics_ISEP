@@ -17,6 +17,7 @@ import type { Vessel, CreateVesselRequest, UpdateVesselRequest } from "../types/
 
 import "../style/vesselspage.css";
 
+
 export default function Vessel() {
     const [items, setItems] = useState<Vessel[]>([]);
     const [filtered, setFiltered] = useState<Vessel[]>([]);
@@ -24,8 +25,12 @@ export default function Vessel() {
 
     const [vesselTypes, setVesselTypes] = useState<VesselType[]>([]);
     const [selected, setSelected] = useState<Vessel | null>(null);
+
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
+
+    const [editIMO, setEditIMO] = useState<string | null>(null);
+    const [editData, setEditData] = useState<UpdateVesselRequest>({});
 
     const [searchMode, setSearchMode] = useState<"local" | "imo" | "id" | "owner">("local");
     const [searchValue, setSearchValue] = useState("");
@@ -37,11 +42,25 @@ export default function Vessel() {
         vesselTypeName: ""
     });
 
-    const [editData, setEditData] = useState<UpdateVesselRequest>({});
-
-    const imoRegex = /^IMO\d{7}$/i;
+    const imoRegex = /^IMO?\s?\d{7}$/i; // Aceita "IMO1234567" ou "1234567"
     const val = (x: any) => (typeof x === "string" ? x : x?.value);
 
+    // ====== Loading helper (igual ao vesselType) ======
+    const MIN_LOADING_TIME = 800;
+    async function runWithLoading<T>(promise: Promise<T>, text: string) {
+        const id = toast.loading(text);
+        const start = Date.now();
+        try {
+            return await promise;
+        } finally {
+            const elapsed = Date.now() - start;
+            if (elapsed < MIN_LOADING_TIME)
+                await new Promise(res => setTimeout(res, MIN_LOADING_TIME - elapsed));
+            toast.dismiss(id);
+        }
+    }
+
+    // ====== Load data ======
     useEffect(() => {
         load();
         loadTypes();
@@ -62,9 +81,10 @@ export default function Vessel() {
     function getVesselTypeNameById(vesselTypeId: any) {
         const id = vesselTypeId?.value ?? vesselTypeId;
         const type = vesselTypes.find(t => t.id === id);
-        return type?.name ?? "Unknown Type";
+        return type?.name ?? "Unknown";
     }
 
+    // ====== Search ======
     async function executeSearch() {
         if (!searchValue.trim()) return setFiltered(items);
         const q = searchValue.toLowerCase();
@@ -80,16 +100,20 @@ export default function Vessel() {
         }
 
         try {
+            let result;
             switch (searchMode) {
                 case "imo":
-                    if (!imoRegex.test(searchValue)) return toast.error("Invalid IMO (Ex: IMO1234567)");
-                    setFiltered([await getVesselByIMO(searchValue)]);
+                    if (!imoRegex.test(searchValue)) return toast.error("Invalid IMO (e.g. IMO1234567)");
+                    result = await getVesselByIMO(searchValue);
+                    setFiltered([result]);
                     break;
                 case "id":
-                    setFiltered([await getVesselById(searchValue)]);
+                    result = await getVesselById(searchValue);
+                    setFiltered([result]);
                     break;
                 case "owner":
-                    setFiltered(await getVesselByOwner(searchValue));
+                    result = await getVesselByOwner(searchValue);
+                    setFiltered(result);
                     break;
             }
         } catch {
@@ -98,22 +122,39 @@ export default function Vessel() {
         }
     }
 
+    // ====== Create ======
     async function handleCreate() {
-        if (!imoRegex.test(form.imoNumber)) return toast.error("Invalid IMO");
+        if (!imoRegex.test(form.imoNumber))
+            return toast.error("Invalid IMO number");
+
         if (!form.name.trim() || !form.owner.trim() || !form.vesselTypeName.trim())
             return toast.error("Fill all fields");
 
-        await createVessel(form);
+        await runWithLoading(createVessel(form), "Creating vessel...");
         toast.success("Vessel created!");
         setIsCreateOpen(false);
         load();
     }
 
+    // ====== Edit ======
     async function handleSaveEdit() {
-        if (!selected) return;
-        await patchVesselByIMO(val(selected.imoNumber), editData);
+        if (!editIMO) return toast.error("Missing vessel reference");
+
+        const payload: UpdateVesselRequest = {};
+        if (editData.name?.trim()) payload.name = editData.name.trim();
+        if (editData.owner?.trim()) payload.owner = editData.owner.trim();
+
+        if (!payload.name && !payload.owner)
+            return toast.error("Nothing to update");
+
+        await runWithLoading(
+            patchVesselByIMO(editIMO, payload),
+            "Updating vessel..."
+        );
+
         toast.success("Vessel updated!");
         setIsEditOpen(false);
+        setEditIMO(null);
         load();
     }
 
@@ -147,7 +188,7 @@ export default function Vessel() {
                 ))}
             </div>
 
-            {/* SEARCH BOX */}
+            {/* SEARCH */}
             <div className="vt-search-box">
                 <div className="vt-search-wrapper">
                     <input
@@ -171,7 +212,7 @@ export default function Vessel() {
                 </button>
             </div>
 
-            {/* CARD GRID */}
+            {/* CARDS */}
             <div className="vt-card-grid">
                 {!loading && filtered.map(v => (
                     <div key={v.id} className="vt-card" onClick={() => setSelected(v)}>
@@ -179,7 +220,6 @@ export default function Vessel() {
                             <span className="vt-card-title">{v.name}</span>
                             <span className="vt-badge">{val(v.imoNumber)}</span>
                         </div>
-
                         <div className="vt-card-body">
                             <div className="vt-row-item">
                                 <span className="vt-label">Owner</span>
@@ -196,7 +236,7 @@ export default function Vessel() {
                 ))}
             </div>
 
-            {/* ✅ SLIDE PANEL = igual ao VesselType */}
+            {/* SLIDE PANEL */}
             {selected && (
                 <div className="vt-slide">
                     <button className="vt-slide-close" onClick={closeSlide}>
@@ -214,6 +254,7 @@ export default function Vessel() {
                             className="vt-btn-edit"
                             onClick={() => {
                                 setEditData({ name: selected.name, owner: selected.owner });
+                                setEditIMO(val(selected.imoNumber));
                                 setIsEditOpen(true);
                                 setSelected(null);
                             }}
@@ -245,7 +286,7 @@ export default function Vessel() {
                         <label>IMO Number *</label>
                         <input
                             className="vt-input"
-                            placeholder="example: IMO1234567"
+                            placeholder="IMO1234567"
                             value={form.imoNumber}
                             onChange={e => setForm({ ...form, imoNumber: e.target.value })}
                         />
@@ -253,7 +294,6 @@ export default function Vessel() {
                         <label>Vessel Name *</label>
                         <input
                             className="vt-input"
-                            placeholder="Vessel name"
                             value={form.name}
                             onChange={e => setForm({ ...form, name: e.target.value })}
                         />
@@ -261,14 +301,13 @@ export default function Vessel() {
                         <label>Owner *</label>
                         <input
                             className="vt-input"
-                            placeholder="Owner / Shipping Company"
                             value={form.owner}
                             onChange={e => setForm({ ...form, owner: e.target.value })}
                         />
 
                         <label>Vessel Type *</label>
                         <select
-                            className="vt-input"
+                            className="vt-input vt-input--vesseltype"
                             value={form.vesselTypeName}
                             onChange={e => setForm({ ...form, vesselTypeName: e.target.value })}
                         >
@@ -286,9 +325,7 @@ export default function Vessel() {
                 </div>
             )}
 
-
             {/* EDIT MODAL */}
-            {/* EDIT MODAL (with labels) */}
             {isEditOpen && (
                 <div className="vt-modal-overlay">
                     <div className="vt-modal">
@@ -297,7 +334,6 @@ export default function Vessel() {
                         <label>Vessel Name *</label>
                         <input
                             className="vt-input"
-                            placeholder="Vessel name"
                             value={editData.name || ""}
                             onChange={e => setEditData({ ...editData, name: e.target.value })}
                         />
@@ -305,7 +341,6 @@ export default function Vessel() {
                         <label>Owner *</label>
                         <input
                             className="vt-input"
-                            placeholder="Owner / Shipping Company"
                             value={editData.owner || ""}
                             onChange={e => setEditData({ ...editData, owner: e.target.value })}
                         />
@@ -317,8 +352,6 @@ export default function Vessel() {
                     </div>
                 </div>
             )}
-
-
         </div>
     );
 }

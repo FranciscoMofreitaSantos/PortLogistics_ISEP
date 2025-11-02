@@ -57,7 +57,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "imoNumber": "IMO 9872339",
+  "imoNumber": "9872339",
   "name": "Ever Given",
   "owner": "Evergreen Marine",
   "vesselTypeName": "Panamax Plus"
