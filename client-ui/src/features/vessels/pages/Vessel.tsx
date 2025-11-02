@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaShip, FaSearch, FaPlus, FaTimes, FaEdit } from "react-icons/fa";
+import { FaShip, FaSearch, FaPlus, FaTimes } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 import {
@@ -23,12 +23,12 @@ export default function Vessel() {
     const [loading, setLoading] = useState(true);
 
     const [vesselTypes, setVesselTypes] = useState<VesselType[]>([]);
-    const [searchMode, setSearchMode] = useState<"local" | "imo" | "id" | "owner">("local");
-    const [searchValue, setSearchValue] = useState("");
-
     const [selected, setSelected] = useState<Vessel | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
+
+    const [searchMode, setSearchMode] = useState<"local" | "imo" | "id" | "owner">("local");
+    const [searchValue, setSearchValue] = useState("");
 
     const [form, setForm] = useState<CreateVesselRequest>({
         imoNumber: "",
@@ -82,7 +82,7 @@ export default function Vessel() {
         try {
             switch (searchMode) {
                 case "imo":
-                    if (!imoRegex.test(searchValue)) return toast.error("IMO inválido (Ex: IMO1234567)");
+                    if (!imoRegex.test(searchValue)) return toast.error("Invalid IMO (Ex: IMO1234567)");
                     setFiltered([await getVesselByIMO(searchValue)]);
                     break;
                 case "id":
@@ -93,18 +93,18 @@ export default function Vessel() {
                     break;
             }
         } catch {
-            toast.error("Nenhum navio encontrado.");
+            toast.error("No vessel found.");
             setFiltered([]);
         }
     }
 
     async function handleCreate() {
-        if (!imoRegex.test(form.imoNumber)) return toast.error("Formato IMO inválido");
+        if (!imoRegex.test(form.imoNumber)) return toast.error("Invalid IMO");
         if (!form.name.trim() || !form.owner.trim() || !form.vesselTypeName.trim())
-            return toast.error("Preencha todos os campos");
+            return toast.error("Fill all fields");
 
         await createVessel(form);
-        toast.success("Navio criado!");
+        toast.success("Vessel created!");
         setIsCreateOpen(false);
         load();
     }
@@ -112,13 +112,16 @@ export default function Vessel() {
     async function handleSaveEdit() {
         if (!selected) return;
         await patchVesselByIMO(val(selected.imoNumber), editData);
-        toast.success("Navio atualizado!");
+        toast.success("Vessel updated!");
         setIsEditOpen(false);
         load();
     }
 
+    const closeSlide = () => setSelected(null);
+
     return (
         <div className="vt-page">
+            {selected && <div className="vt-overlay" onClick={closeSlide} />}
 
             {/* HEADER */}
             <div className="vt-title-area">
@@ -144,7 +147,7 @@ export default function Vessel() {
                 ))}
             </div>
 
-            {/* SEARCH BAR */}
+            {/* SEARCH BOX */}
             <div className="vt-search-box">
                 <div className="vt-search-wrapper">
                     <input
@@ -193,13 +196,15 @@ export default function Vessel() {
                 ))}
             </div>
 
-            {/* SLIDE PANEL */}
+            {/* ✅ SLIDE PANEL = igual ao VesselType */}
             {selected && (
                 <div className="vt-slide">
-                    <button className="vt-slide-close" onClick={() => setSelected(null)}>
+                    <button className="vt-slide-close" onClick={closeSlide}>
                         <FaTimes />
                     </button>
+
                     <h3>{selected.name}</h3>
+
                     <p><strong>IMO:</strong> {val(selected.imoNumber)}</p>
                     <p><strong>Owner:</strong> {selected.owner}</p>
                     <p><strong>Type:</strong> {getVesselTypeNameById(selected.vesselTypeId)}</p>
@@ -213,20 +218,19 @@ export default function Vessel() {
                                 setSelected(null);
                             }}
                         >
-                            <FaEdit /> Edit
+                            Edit
                         </button>
 
                         <button
-                            className="vt-btn-secondary-info"
+                            className="vt-btn-edit"
                             onClick={() => {
                                 const id = typeof selected.vesselTypeId === "string"
                                     ? selected.vesselTypeId
                                     : selected.vesselTypeId.value;
-
                                 window.location.href = `/vessel-types?id=${id}`;
                             }}
                         >
-                            View Vessel Type Info
+                            View Type
                         </button>
                     </div>
                 </div>
@@ -238,33 +242,41 @@ export default function Vessel() {
                     <div className="vt-modal">
                         <h3>Add Vessel</h3>
 
-                        {Object.entries(form).map(([k, v]) => {
-                            if (k === "vesselTypeName") {
-                                return (
-                                    <select
-                                        key={k}
-                                        className="vt-input"
-                                        value={v}
-                                        onChange={e => setForm({ ...form, vesselTypeName: e.target.value })}
-                                    >
-                                        <option value="">Select Vessel Type</option>
-                                        {vesselTypes.map(t => (
-                                            <option key={t.id} value={t.name}>{t.name}</option>
-                                        ))}
-                                    </select>
-                                );
-                            }
+                        <label>IMO Number *</label>
+                        <input
+                            className="vt-input"
+                            placeholder="example: IMO1234567"
+                            value={form.imoNumber}
+                            onChange={e => setForm({ ...form, imoNumber: e.target.value })}
+                        />
 
-                            return (
-                                <input
-                                    key={k}
-                                    placeholder={k}
-                                    className="vt-input"
-                                    value={v}
-                                    onChange={e => setForm({ ...form, [k]: e.target.value })}
-                                />
-                            );
-                        })}
+                        <label>Vessel Name *</label>
+                        <input
+                            className="vt-input"
+                            placeholder="Vessel name"
+                            value={form.name}
+                            onChange={e => setForm({ ...form, name: e.target.value })}
+                        />
+
+                        <label>Owner *</label>
+                        <input
+                            className="vt-input"
+                            placeholder="Owner / Shipping Company"
+                            value={form.owner}
+                            onChange={e => setForm({ ...form, owner: e.target.value })}
+                        />
+
+                        <label>Vessel Type *</label>
+                        <select
+                            className="vt-input"
+                            value={form.vesselTypeName}
+                            onChange={e => setForm({ ...form, vesselTypeName: e.target.value })}
+                        >
+                            <option value="">Select Vessel Type</option>
+                            {vesselTypes.map(t => (
+                                <option key={t.id} value={t.name}>{t.name}</option>
+                            ))}
+                        </select>
 
                         <div className="vt-modal-actions">
                             <button className="vt-btn-cancel" onClick={() => setIsCreateOpen(false)}>Cancel</button>
@@ -274,21 +286,29 @@ export default function Vessel() {
                 </div>
             )}
 
+
             {/* EDIT MODAL */}
+            {/* EDIT MODAL (with labels) */}
             {isEditOpen && (
                 <div className="vt-modal-overlay">
                     <div className="vt-modal">
                         <h3>Edit Vessel</h3>
 
-                        {Object.entries(editData).map(([k, v]) => (
-                            <input
-                                key={k}
-                                placeholder={k}
-                                className="vt-input"
-                                value={v}
-                                onChange={e => setEditData({ ...editData, [k]: e.target.value })}
-                            />
-                        ))}
+                        <label>Vessel Name *</label>
+                        <input
+                            className="vt-input"
+                            placeholder="Vessel name"
+                            value={editData.name || ""}
+                            onChange={e => setEditData({ ...editData, name: e.target.value })}
+                        />
+
+                        <label>Owner *</label>
+                        <input
+                            className="vt-input"
+                            placeholder="Owner / Shipping Company"
+                            value={editData.owner || ""}
+                            onChange={e => setEditData({ ...editData, owner: e.target.value })}
+                        />
 
                         <div className="vt-modal-actions">
                             <button className="vt-btn-cancel" onClick={() => setIsEditOpen(false)}>Cancel</button>
@@ -297,6 +317,7 @@ export default function Vessel() {
                     </div>
                 </div>
             )}
+
 
         </div>
     );
