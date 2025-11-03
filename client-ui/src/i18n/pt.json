@@ -168,6 +168,73 @@
     }
   },
 
+  "storageAreas": {
+    "create": {
+      "title": "Nova Storage Area",
+
+      "generalInfo": "Informação Geral",
+      "resourcesDocks": "Recursos & Docks",
+
+      "name": "Nome",
+      "name_PH": "Ex.: Yard A1",
+
+      "description": "Descrição",
+      "description_PH": "Notas / observações",
+
+      "type": "Tipo",
+      "yard": "Yard",
+      "warehouse": "Armazém",
+
+      "bays": "Bays",
+      "rows": "Linhas",
+      "tiers": "Níveis",
+
+      "addResource": "Adicionar Recurso",
+      "resource_PH": "Ex.: RTG-01",
+      "noResources": "Nenhum recurso adicionado",
+
+      "dockDistance": "Dock + Distância",
+      "dock_PH": "Dock (D01)",
+      "distance_PH": "Distância",
+      "noDistance": "Nenhuma distância adicionada",
+
+      "btnAdd": "Adicionar",
+      "btnCreate": "Criar Storage Area",
+      "btnCancel": "Cancelar",
+      "btnBack": "Voltar",
+
+      "toast": {
+        "nameRequired": "Nome obrigatório",
+        "distanceRequired": "Adiciona pelo menos uma distância a uma Dock",
+        "invalidDistance": "A distância tem de ser maior ou igual a 0"
+      }
+    },
+    "list": {
+      "title": "Áreas de Armazenamento",
+      "registered": "{{count}} áreas registadas",
+
+      "searchPlaceholder": "Pesquisar…",
+      "noResults": "Sem resultados.",
+      "selectOne": "Seleciona uma Storage Area…",
+
+      "type": "Tipo",
+      "capacity": "Capacidade",
+      "dimensions": "Dimensões",
+      "description": "Descrição",
+      "physical": "Recursos Físicos",
+      "docks": "Docks",
+      "viewDistances": "Ver distâncias",
+
+      "tiersMap": "Mapa de Ocupação",
+      "tiersNote": "Render sequencial (bay→row→tier) com base na capacidade — não representa posições reais.",
+
+      "distancesTitle": "Distâncias aos Docks — {{name}}",
+      "noDistances": "Sem distâncias registadas",
+
+      "loading": "A carregar storage areas...",
+      "loaded": "{{count}} storage areas carregadas."
+    }
+  },
 
 
 

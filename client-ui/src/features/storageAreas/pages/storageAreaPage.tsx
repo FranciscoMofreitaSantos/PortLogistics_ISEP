@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import "../style/storageAreaStyle.css";
 import * as storageAreaService from "../service/storageAreaService";
 import type { StorageAreaDto } from "../type/storageAreaType";
+import { useTranslation } from "react-i18next";
 
 /* Helpers */
 function formatPct(num: number, den: number) {
@@ -36,6 +37,7 @@ const GUID_RE =
     /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
 
 export default function StorageAreaPage() {
+    const { t } = useTranslation();
     const nav = useNavigate();
 
     /* State */
@@ -55,14 +57,14 @@ export default function StorageAreaPage() {
                 const data = await storageAreaService.getAllStorageAreas();
                 setItems(data);
                 if (data.length) setSelected(data[0]);
-                toast.success(`Carregadas ${data.length} storage areas.`);
+                toast.success(t("storageAreas.list.loaded", { count: data.length }));
             } catch (e: any) {
-                toast.error(e?.response?.data ?? "Erro a carregar storage areas.");
+                toast.error(e?.response?.data ?? t("storageAreas.list.loading"));
             } finally {
                 setLoading(false);
             }
         })();
-    }, []);
+    }, [t]);
 
     /* Derived */
     const filtered = useMemo(() => {
@@ -91,18 +93,21 @@ export default function StorageAreaPage() {
 
     /* Handlers */
     function goToCreate() {
-        nav("/storage-areas/new"); // rota da página dedicada
+        nav("/storage-areas/new");
     }
 
     return (
         <div className="sa-wrapper">
+
             {/* HEADER */}
             <div className="vt-title-area" style={{ marginBottom: "20px" }}>
                 <div>
                     <h2 className="vt-title">
-                        <FaShip /> Storage Areas
+                        <FaShip /> {t("storageAreas.list.title")}
                     </h2>
-                    <p className="vt-sub">{filtered.length} áreas registadas</p>
+                    <p className="vt-sub">
+                        {t("storageAreas.list.registered", { count: filtered.length })}
+                    </p>
                 </div>
 
                 <div style={{ display: "flex", gap: "12px" }}>
@@ -111,25 +116,28 @@ export default function StorageAreaPage() {
                         <input
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Pesquisar…"
+                            placeholder={t("storageAreas.list.searchPlaceholder") ?? ""}
                         />
                     </div>
 
                     <button className="vt-create-btn-top" onClick={goToCreate}>
-                        <FaPlus /> Nova
+                        <FaPlus /> {t("storageAreas.create.btnAdd") ?? "New"}
                     </button>
                 </div>
             </div>
 
-            {/* LISTA HORIZONTAL + MAIN ABAIXO */}
+            {/* LIST + MAIN */}
             <div className="sa-content-vertical">
-                {/* Lista horizontal (scroll-snap) */}
+
+                {/* Horizontal list */}
                 <div className="sa-strip">
                     <div className="sa-strip-inner">
                         {loading ? (
                             Array.from({ length: 4 }).map((_, i) => <div className="sa-strip-skeleton" key={i} />)
                         ) : filtered.length === 0 ? (
-                            <div className="sa-empty" style={{ padding: 10 }}>Sem resultados.</div>
+                            <div className="sa-empty" style={{ padding: 10 }}>
+                                {t("storageAreas.list.noResults")}
+                            </div>
                         ) : (
                             filtered.map((x) => {
                                 const active = selected?.id === x.id;
@@ -153,21 +161,21 @@ export default function StorageAreaPage() {
                     </div>
                 </div>
 
-                {/* Painel principal */}
+                {/* MAIN */}
                 <main className="sa-main">
                     {!selected ? (
-                        <div className="sa-empty">Seleciona uma Storage Area…</div>
+                        <div className="sa-empty">{t("storageAreas.list.selectOne")}</div>
                     ) : (
                         <>
-                            {/* KPI GRID */}
+                            {/* KPIs */}
                             <section className="sa-kpis sa-kpis--extended">
                                 <div className="sa-card">
-                                    <div className="sa-card-title">Tipo</div>
+                                    <div className="sa-card-title">{t("storageAreas.list.type")}</div>
                                     <div className="sa-card-value">{selected.type}</div>
                                 </div>
 
                                 <div className="sa-card">
-                                    <div className="sa-card-title">Capacidade</div>
+                                    <div className="sa-card-title">{t("storageAreas.list.capacity")}</div>
                                     <div className="sa-card-value">
                                         {selected.currentCapacityTeu}/{selected.maxCapacityTeu} TEU
                                     </div>
@@ -180,19 +188,19 @@ export default function StorageAreaPage() {
                                 </div>
 
                                 <div className="sa-card">
-                                    <div className="sa-card-title">Dimensões</div>
+                                    <div className="sa-card-title">{t("storageAreas.list.dimensions")}</div>
                                     <div className="sa-card-value">
                                         {selected.maxBays} Bays · {selected.maxRows} Rows · {selected.maxTiers} Tiers
                                     </div>
                                 </div>
 
                                 <div className="sa-card sa-card--desc">
-                                    <div className="sa-card-title">Descrição</div>
-                                    <p className="sa-desc">{selected.description || "Sem descrição."}</p>
+                                    <div className="sa-card-title">{t("storageAreas.list.description")}</div>
+                                    <p className="sa-desc">{selected.description || "-"}</p>
                                 </div>
 
                                 <div className="sa-card sa-card--resources">
-                                    <div className="sa-card-title">Recursos Físicos</div>
+                                    <div className="sa-card-title">{t("storageAreas.list.physical")}</div>
                                     <div className="sa-chips">
                                         {selected.physicalResources.length === 0 ? (
                                             <span className="sa-empty">–</span>
@@ -205,23 +213,21 @@ export default function StorageAreaPage() {
                                 </div>
 
                                 <div className="sa-card sa-card--button">
-                                    <div className="sa-card-title">Docks</div>
+                                    <div className="sa-card-title">{t("storageAreas.list.docks")}</div>
                                     <button
                                         className="sa-btn sa-btn-primary sa-btn-full"
                                         onClick={() => setIsDistancesOpen(true)}
                                     >
-                                        Ver distâncias
+                                        {t("storageAreas.list.viewDistances")}
                                     </button>
                                 </div>
                             </section>
 
-                            {/* Visualização tiers */}
+                            {/* Occupancy Map */}
                             <section className="sa-visual">
                                 <div className="sa-visual-header">
-                                    <h2>Mapa de Ocupação (aproximação)</h2>
-                                    <span className="sa-note">
-                    Render sequencial (bay→row→tier) com base na capacidade atual — não representa posições reais.
-                  </span>
+                                    <h2>{t("storageAreas.list.tiersMap")}</h2>
+                                    <span className="sa-note">{t("storageAreas.list.tiersNote")}</span>
                                 </div>
 
                                 <div className="sa-slices-grid">
@@ -233,14 +239,16 @@ export default function StorageAreaPage() {
                                             <div className="sa-grid-wrap">
                                                 <div
                                                     className="sa-grid fit"
-                                                    style={{ ["--cols" as any]: String(selected.maxBays), ["--gap" as any]: "4px" }}
+                                                    style={{
+                                                        ["--cols" as any]: String(selected.maxBays),
+                                                        ["--gap" as any]: "4px"
+                                                    }}
                                                 >
                                                     {grid.map((row, r) =>
                                                         row.map((cell, b) => (
                                                             <div
                                                                 key={`c-${t}-${r}-${b}`}
                                                                 className={classNames("sa-cell", cell && "filled")}
-                                                                title={`Tier ${t + 1} • Row ${r + 1} • Bay ${b + 1} — ${cell ? "ocupado" : "livre"}`}
                                                             />
                                                         ))
                                                     )}
@@ -255,25 +263,27 @@ export default function StorageAreaPage() {
                 </main>
             </div>
 
-            {/* POPUP Distâncias */}
+            {/* DISTANCES MODAL */}
             {isDistancesOpen && selected && (
                 <div className="sa-modal-backdrop" onClick={() => setIsDistancesOpen(false)}>
                     <div className="sa-dock-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" aria-hidden="true" />
-                            <h3 className="sa-dock-title">Distâncias aos Docks — {selected.name}</h3>
+                            <div className="sa-dock-spacer" />
+                            <h3 className="sa-dock-title">
+                                {t("storageAreas.list.distancesTitle", { name: selected.name })}
+                            </h3>
                             <button
                                 className="sa-icon-btn sa-dock-close"
                                 onClick={() => setIsDistancesOpen(false)}
-                                aria-label="Fechar"
-                                title="Fechar"
                             >
                                 <FaTimes />
                             </button>
                         </div>
 
                         {selected.distancesToDocks.length === 0 ? (
-                            <div className="sa-empty" style={{ padding: 12 }}>Sem distâncias registadas.</div>
+                            <div className="sa-empty" style={{ padding: 12 }}>
+                                {t("storageAreas.list.noDistances")}
+                            </div>
                         ) : (
                             <div className="sa-dock-body">
                                 {(() => {

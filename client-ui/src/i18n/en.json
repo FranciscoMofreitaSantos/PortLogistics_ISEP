@@ -168,8 +168,77 @@
     }
   },
 
+  "storageAreas": {
+    "create": {
+      "title": "New Storage Area",
 
+      "generalInfo": "General Information",
+      "resourcesDocks": "Resources & Docks",
 
+      "name": "Name",
+      "name_PH": "Ex.: Yard A1",
+
+      "description": "Description",
+      "description_PH": "Notes / observations",
+
+      "type": "Type",
+      "yard": "Yard",
+      "warehouse": "Warehouse",
+
+      "bays": "Bays",
+      "rows": "Rows",
+      "tiers": "Tiers",
+
+      "addResource": "Add Resource",
+      "resource_PH": "Ex.: RTG-01",
+      "noResources": "No resources added",
+
+      "dockDistance": "Dock + Distance",
+      "dock_PH": "Dock (D01)",
+      "distance_PH": "Distance",
+      "noDistance": "No distance added",
+
+      "btnAdd": "Add",
+      "btnCreate": "Create Storage Area",
+      "btnCancel": "Cancel",
+      "btnBack": "Back",
+
+      "toast": {
+        "nameRequired": "Name is required",
+        "distanceRequired": "Add at least one dock distance",
+        "invalidDistance": "Distance must be greater or equal to 0"
+      }
+    },
+    "list": {
+      "title": "Storage Areas",
+      "registered": "{{count}} registered storage areas",
+
+      "searchPlaceholder": "Search…",
+      "noResults": "No results.",
+      "selectOne": "Select a Storage Area…",
+
+      "type": "Type",
+      "capacity": "Capacity",
+      "dimensions": "Dimensions",
+      "description": "Description",
+      "physical": "Physical Resources",
+      "docks": "Docks",
+      "viewDistances": "View distances",
+
+      "tiersMap": "Occupancy Map",
+      "tiersNote": "Sequential render (bay→row→tier) based on current capacity — not real coordinates.",
+
+      "distancesTitle": "Distances to Docks — {{name}}",
+      "noDistances": "No distances registered",
+
+      "loading": "Loading storage areas...",
+      "loaded": "Loaded {{count}} storage areas."
+    }
+  },
+
+  
+  
+  
 "qualifications": {
     "title": "Qualifications",
     "count": "{{count}} qualifications registered",
