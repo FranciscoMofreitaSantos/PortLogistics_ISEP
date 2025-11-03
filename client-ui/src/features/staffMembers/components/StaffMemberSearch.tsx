@@ -283,7 +283,9 @@ export default function StaffMemberSearch({
                 <div className="staff-qualifications-selector">
                     <h3>{t("staffMembers.selectQualificationsTitle")}</h3>
                     <p className="staff-qualifications-description">
-                        {t("staffMembers.selectQualificationsDescription")}
+                        {t("staffMembers.selectQualificationsDescription1")}
+                        <br/>
+                        {t("staffMembers.selectQualificationsDescription2")}
                     </p>
 
                     {loadingQualifications ? (

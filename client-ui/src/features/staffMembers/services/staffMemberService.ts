@@ -25,17 +25,15 @@ export async function getStaffMembersByStatus(status: boolean): Promise<StaffMem
 
 export async function getStaffMembersByQualifications(qualifications: string[]): Promise<StaffMember[]> {
     const params = new URLSearchParams();
-    qualifications.forEach(code => params.append('codes', code));
-
-    const res = await api.get(`/api/StaffMembers/by-qualifications?${params.toString()}`);
+    qualifications.forEach(q => params.append("codes", q));
+    const res = await api.get(`/api/StaffMembers/by-qualifications`, { params });
     return res.data;
 }
 
 export async function getStaffMembersByExactQualifications(qualifications: string[]): Promise<StaffMember[]> {
     const params = new URLSearchParams();
-    qualifications.forEach(code => params.append('codes', code));
-
-    const res = await api.get(`/api/StaffMembers/by-exact-qualifications?${params.toString()}`);
+    qualifications.forEach(q => params.append("codes", q));
+    const res = await api.get(`/api/StaffMembers/by-exact-qualifications`, { params });
     return res.data;
 }
 

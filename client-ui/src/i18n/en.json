@@ -228,24 +228,46 @@
   "staffMembers": {
     "title": "Staff Members",
     "count": "{{count}} staff members",
-    "add": "Add Member",
+    "add": "Add",
     "loading": "Loading staff members...",
     "loadSuccess": "Successfully loaded {{count}} staff members.",
     "empty": "No staff members found.",
     "detailsTitle": "Details",
     "edit" : "Edit",
     "toggle": "Toggle status",
+    "showAll": "Show all",
+    "searchByMecNumber": "Mecanographic Number",
+    "searchByName": "Name",
+    "searchByStatus": "Status",
+    "searchByQualifications": "Qualifications",
+    "statusInactive" : "Inactive",
+    "statusActive" : "Active",
+    "viewDetails" : "Details",
+    "searchMecNumberPlaceholder": "Search by Mecanographic Number",
+    "searchNamePlaceholder": "Search by Name",
+    "searchPartialQualifications" : "Partial filter",
+    "searchExactQualifications" : "Total filter",
+    "selectQualificationsTitle" : "Select qualifications",
+    "selectQualificationsDescription1" : "Partial filter - all staff with at least one of the selected qualifications",
+    "selectQualificationsDescription2" : "Total filter - staff with the exact selected qualifications",
+    "searchResultTitle" : "Results",
+    "selectedQualifications" : "Selected qualifications",
+    "toggling" : "Updating...",
+    "search" : "Search",
+
     "details": {
       "name": "Name",
       "email": "Email",
       "mecNumber": "Mecanographic Number",
       "phone": "Phone",
-      "schedule": "Schedule"
+      "schedule": "Schedule",
+      "qualifications": "Qualifications"
     }
   },
   "shiftType": {
     "Morning": "Morning",
     "Evening": "Afternoon",
+    "Afternoon": "Afternoon",
     "Night": "Night",
     "NonStop": "Non Stop"
   },
