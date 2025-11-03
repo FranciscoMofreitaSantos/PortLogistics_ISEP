@@ -69,7 +69,12 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         _taskRepository = taskRepository;
     }
 
-
+    private async Task FillStoragesAreas(EntityContainer entryContainer, StorageAreaId entryStorageAreaId, int entryRow, int entryBay, int entryTier)
+    {
+        var storageAreaInDb = await _storageAreaRepository.GetByIdAsync(entryStorageAreaId);
+        storageAreaInDb.PlaceContainer(entryContainer.ISOId,entryBay,entryRow,entryTier);
+    }
+    
     public async Task<VesselVisitNotificationDto> AddAsync(CreatingVesselVisitNotificationDto dto)
     {
         if (dto == null)
@@ -81,6 +86,16 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         var unloadingCargoManifest = await CreateCargoManifestAsync(dto.UnloadingCargoManifest);
         var crewManifest = await CreateCrewManifestAsync(dto.CrewManifest);
         await _unitOfWork.CommitAsync();
+
+        if (unloadingCargoManifest?.ContainerEntries != null)
+        {
+            foreach (var entry in unloadingCargoManifest.ContainerEntries)
+            {
+                await FillStoragesAreas(entry.Container, entry.StorageAreaId, entry.Row, entry.Bay, entry.Tier);
+            }
+
+            await _unitOfWork.CommitAsync();
+        }
 
         var vesselImo = await CheckForVesselInDb(dto.VesselImo);
         var vvnCode = await GenerateNextVvnCodeAsync();
@@ -877,7 +892,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             throw new BusinessRuleValidationException("CargoManifest must contain at least one entry.");
 
         var entries = new List<CargoManifestEntry>();
-
+        var typeUnloading = dto.Type == CargoManifestType.Unloading;
         foreach (var entryDto in dto.Entries)
         {
             var container = await CreateContainerAsync(entryDto.Container);

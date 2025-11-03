@@ -24,8 +24,8 @@
       "type": "Unloading",
       "createdBy": "Agent02@gmail.com",
       "entries": [
-        {"bay": 1, "row": 2, "tier": 3, "storageAreaName": "Warehouse A", "container": {"isoCode": "BBCU5100617", "description": "Automotive parts", "type": "General", "weightKg": 7000}},
-        {"bay": 4, "row": 3, "tier": 5, "storageAreaName": "Yard B", "container": {"isoCode": "CSQU3054383", "description": "Furniture Related", "type": "General", "weightKg": 12000}}
+        {"bay": 1, "row": 2, "tier": 2, "storageAreaName": "Warehouse B", "container": {"isoCode": "BBCU5100617", "description": "Automotive parts", "type": "General", "weightKg": 7000}},
+        {"bay": 4, "row": 3, "tier": 1, "storageAreaName": "Warehouse B", "container": {"isoCode": "CSQU3054383", "description": "Furniture Related", "type": "General", "weightKg": 12000}}
       ]
     },
     "vesselImo": "IMO 9823455",
@@ -80,9 +80,9 @@
       "type": "Unloading",
       "createdBy": "Agent06@gmail.com",
       "entries": [
-        {"bay": 1, "row": 3, "tier": 1, "storageAreaName": "Yard A", "container": {"isoCode": "CSIU4400699", "description": "Furniture components", "type": "General", "weightKg": 8700}},
-        {"bay": 4, "row": 2, "tier": 4, "storageAreaName": "Warehouse B", "container": {"isoCode": "MSCU6639870", "description": "Packaged foods", "type": "General", "weightKg": 7300}},
-        {"bay": 5, "row": 5, "tier": 2, "storageAreaName": "Yard C", "container": {"isoCode": "BBCU5100617", "description": "Steel beams", "type": "Oversized", "weightKg": 22100}}
+        {"bay": 1, "row": 3, "tier": 1, "storageAreaName": "Warehouse B", "container": {"isoCode": "CSIU4400699", "description": "Furniture components", "type": "General", "weightKg": 8700}},
+        {"bay": 4, "row": 2, "tier": 2, "storageAreaName": "Warehouse B", "container": {"isoCode": "MSCU6639870", "description": "Packaged foods", "type": "General", "weightKg": 7300}},
+        {"bay": 5, "row": 4, "tier": 2, "storageAreaName": "Warehouse B", "container": {"isoCode": "BBCU5100617", "description": "Steel beams", "type": "Oversized", "weightKg": 22100}}
       ]
     },
     "vesselImo": "IMO 9456783",

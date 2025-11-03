@@ -102,3 +102,197 @@
     .sa-strip-inner{ grid-auto-columns:85%; }
     .sa-dock-modal{ width:96vw; }
 }
+
+/* ================================
+   POPUP DO CONTENTOR
+================================ */
+.sa-container-modal {
+    background: var(--card-bg);
+    width: 620px;
+    max-width: 92vw;
+    border: 1px solid var(--shadow);
+    border-radius: 14px;
+    padding: 22px 26px;
+    animation: saZoomIn .25s ease;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.25);
+}
+
+/* fade + zoom */
+@keyframes saZoomIn {
+    from { transform: scale(.85) translateY(12px); opacity:0; }
+    to { transform: scale(1) translateY(0); opacity:1; }
+}
+
+/* tabela bonita key/value */
+.sa-container-details {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px 14px;
+    margin-top: 6px;
+    font-size: 15px;
+    padding-bottom: 10px;
+}
+
+.sa-kv span {
+    font-weight: 600;
+    opacity: .7;
+}
+
+.sa-kv strong {
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* tag para type & status */
+.sa-tag-chip {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Paletas */
+.sa-chip-general { background: rgba(0,172,255,.15); color:#00aaff; }
+.sa-chip-reefer { background: rgba(56,189,248,.18); color:#0ea5e9; }
+.sa-chip-electronic { background: rgba(168,85,247,.18); color:#a855f7; }
+.sa-chip-hazmat { background: rgba(239,68,68,.18); color:#ef4444; }
+.sa-chip-oversized { background: rgba(245,158,11,.18); color:#f59e0b; }
+
+.sa-chip-full { background: rgba(34,197,94,.18); color:#22c55e; }
+.sa-chip-empty { background: rgba(148,163,184,.26); color:#94a3b8; }
+.sa-chip-damaged { background: rgba(239,68,68,.25); color:#ef4444; }
+.sa-chip-reserved { background: rgba(248,113,113,.2); color:#f87171; }
+.sa-chip-intransit { background: rgba(14,165,233,.22); color:#0ea5e9; }
+
+/* botão fechar animação */
+.sa-dock-close:hover {
+    background: rgba(0,0,0,.10);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* ================================
+   CELL CLICK ANIMATION
+================================ */
+.sa-cell.clicked {
+    animation: cellPulse 0.35s ease;
+    box-shadow: 0 0 0 4px rgba(0,172,255,.35), 0 0 14px rgba(0,172,255,.45);
+}
+
+@keyframes cellPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+/* MODAL MODERNO */
+.sa-modal-body-modern {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 4px 0;
+}
+
+.sa-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+}
+
+.sa-info-card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--shadow);
+    padding: 12px 14px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: .25s ease;
+}
+
+:root[data-theme='dark'] .sa-info-card {
+    background: rgba(255,255,255,.06);
+}
+
+.sa-info-card span {
+    font-size: 12px;
+    opacity: .7;
+    font-weight: 600;
+}
+
+.sa-info-card strong {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+/* Loading Spinner */
+.sa-spinner-lg {
+    width: 38px;
+    height: 38px;
+    border: 4px solid rgba(0,0,0,.15);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    margin: 30px auto;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error */
+.sa-modal-error {
+    text-align: center;
+    padding: 14px;
+    background: rgba(255,0,0,.12);
+    border: 1px solid rgba(255,0,0,.3);
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* HOVER CÉLULA — destaque + pointer */
+.sa-cell {
+    cursor: pointer;
+    transition: .2s cubic-bezier(.2,.8,.4,1);
+}
+
+.sa-cell:hover {
+    transform: scale(1.12);
+    box-shadow: 0 0 10px rgba(0,172,255,.5);
+    border-color: var(--accent);
+}
+
+
+.sa-cell.filled {
+    position: relative;
+}
+
+.sa-cell.filled::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid var(--accent);
+    opacity: .6;
+    animation: radarPing 1.2s infinite;
+}
+
+@keyframes radarPing {
+    0% { transform: scale(.6); opacity: .7; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* DEFAULT (LIGHT MODE) — já está assim */
+.sa-cell.filled::after {
+    border: 2px solid var(--accent);
+}
+
+/* DARK MODE — muda para cor neon */
+:root[data-theme='dark'] .sa-cell.filled::after {
+    border-color: #00eaff; /* neon cyan */
+}
+

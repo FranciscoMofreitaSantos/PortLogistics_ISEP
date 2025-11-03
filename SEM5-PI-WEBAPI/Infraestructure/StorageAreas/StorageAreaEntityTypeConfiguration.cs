@@ -56,6 +56,38 @@ public class StorageAreaEntityTypeConfiguration : IEntityTypeConfiguration<Stora
         });
 
 
+        builder.OwnsMany(sa => sa.Slots, nav =>
+        {
+            nav.ToTable("StorageAreaSlots");
+
+            nav.WithOwner().HasForeignKey("StorageAreaId");
+
+            nav.Property(s => s.Id)
+                .HasConversion(
+                    v => v.Value,                          // VO → Guid
+                    v => new StorageAreaSlotId(v)          // Guid → VO
+                )
+                .ValueGeneratedNever();
+
+            nav.Property(s => s.StorageAreaId)
+                .HasConversion(
+                    v => v.Value,
+                    v => new StorageAreaId(v)
+                );
+
+            nav.HasKey(s => s.Id);
+
+            nav.Property(s => s.Bay).IsRequired();
+            nav.Property(s => s.Row).IsRequired();
+            nav.Property(s => s.Tier).IsRequired();
+
+            nav.Property(s => s.ContainerIsoCode)
+                .HasColumnName("ContainerISO")
+                .IsRequired(false);
+        });
+
+
+        
         builder.Ignore(b => b.MaxCapacityTeu);
         builder.Ignore("_grid");
         builder.HasIndex(b => b.Name).IsUnique();

@@ -1,3 +1,5 @@
+using SEM5_PI_WEBAPI.Domain.Containers;
+using SEM5_PI_WEBAPI.Domain.Containers.DTOs;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
@@ -12,15 +14,17 @@ public class StorageAreaService: IStorageAreaService
     private readonly ILogger<StorageAreaService> _logger;
     private readonly IStorageAreaRepository _storageAreaRepository;
     private readonly IPhysicalResourceRepository _physicalResourceRepository;
+    private readonly IContainerRepository _containerRepository;
     private readonly IDockRepository  _dockRepository;
 
     public StorageAreaService(IUnitOfWork unitOfWork, ILogger<StorageAreaService> logger, 
-        IStorageAreaRepository storageAreaRepository, IPhysicalResourceRepository physicalResourceRepository, IDockRepository dockRepository)
+        IStorageAreaRepository storageAreaRepository, IPhysicalResourceRepository physicalResourceRepository, IDockRepository dockRepository,IContainerRepository containerRepository)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _storageAreaRepository = storageAreaRepository;
         _physicalResourceRepository = physicalResourceRepository;
+        _containerRepository = containerRepository;
         _dockRepository = dockRepository;
     }
 
@@ -183,6 +187,17 @@ public class StorageAreaService: IStorageAreaService
         }
 
         return new StorageAreaGridDto(storageArea.MaxBays, storageArea.MaxRows, storageArea.MaxTiers, slots);
+    }
+
+    public async Task<ContainerDto> GetContainerAsync(StorageAreaId id,int bay,int row, int tier)
+    {
+        var storageArea = await _storageAreaRepository.GetByIdAsync(id) ?? throw new BusinessRuleValidationException($"Storage Area with ID {id.Value} not found.");
+
+        var isoNumber = storageArea.FindContainer(bay, row, tier) ?? throw new BusinessRuleValidationException($"No container is located on [{bay}, {row}, {tier}] for storage area {storageArea.Name}.");
+
+        var conatianerOnDb = await _containerRepository.GetByIsoNumberAsync(isoNumber) ?? throw new BusinessRuleValidationException($"No container found in DB with ISO number {isoNumber}.");
+
+        return ContainerMapper.ToDto(conatianerOnDb);
     }
 
 }

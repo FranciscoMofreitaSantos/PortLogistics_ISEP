@@ -34,8 +34,10 @@ public class StorageArea : Entity<StorageAreaId>, IAggregateRoot
 
     private readonly List<StorageAreaDockDistance> _distancesToDocks = new();
     public IReadOnlyCollection<StorageAreaDockDistance> DistancesToDocks => _distancesToDocks.AsReadOnly();
-
-    private Iso6346Code?[,,] _grid; 
+    
+    
+    private readonly List<StorageAreaSlot> _slots = new();
+    public IReadOnlyCollection<StorageAreaSlot> Slots => _slots.AsReadOnly();
 
     protected StorageArea() { }
 
@@ -54,16 +56,8 @@ public class StorageArea : Entity<StorageAreaId>, IAggregateRoot
         PhysicalResources = physicalResources?.ToList() ?? new List<PhysicalResourceCode>();
         CurrentCapacityTeu = 0;
 
-        _grid = new Iso6346Code[MaxBays, MaxRows, MaxTiers];
         this.Id = new StorageAreaId(Guid.NewGuid());
-    }
-    
-    private void EnsureGridInitialized()
-    {
-        if (_grid == null)
-        {
-            _grid = new Iso6346Code[MaxBays, MaxRows, MaxTiers];
-        }
+        
     }
     
     public void ChangeDescription(string description) => SetDescription(description);
@@ -75,48 +69,73 @@ public class StorageArea : Entity<StorageAreaId>, IAggregateRoot
         
     public void ChangeMaxTiers(int updatedMaxTiers)=> SetMaxTiers(updatedMaxTiers);
 
+    
+    private StorageAreaSlot GetOrCreateSlot(int bay, int row, int tier)
+    {
+        var slot = _slots.FirstOrDefault(s => s.Bay == bay && s.Row == row && s.Tier == tier);
+    
+        if (slot == null)
+        {
+            slot = new StorageAreaSlot(this.Id, bay, row, tier);
+            _slots.Add(slot);
+        }
+
+        return slot;
+    }
+
 
     public void PlaceContainer(Iso6346Code containerIso, int bay, int row, int tier)
     {
-        EnsureGridInitialized();
-        
         if (bay < 0 || bay >= MaxBays ||
             row < 0 || row >= MaxRows ||
             tier < 0 || tier >= MaxTiers)
-            throw new BusinessRuleValidationException("Invalid Bay/Row/Tier position.");
+            throw new BusinessRuleValidationException($"Invalid Bay/Row/Tier [{bay}|{row}|{tier}] position for storage area [{Name}] -> {MaxBays}|{MaxRows}|{MaxTiers}.");
 
-        if (_grid[bay, row, tier] != null)
-            throw new BusinessRuleValidationException("This slot is already occupied.");
+        var slot = GetOrCreateSlot(bay, row, tier);
 
-        if (CurrentCapacityTeu >= MaxCapacityTeu)
-            throw new BusinessRuleValidationException("The Storage Area is FULL.");
+        if (!slot.IsEmpty())
+            throw new BusinessRuleValidationException($"Slot [{bay}|{row}|{tier}] is already occupied on storage area [{Name}].");
 
-        _grid[bay, row, tier] = containerIso;
+        slot.AssignContainer(containerIso);
         CurrentCapacityTeu++;
     }
 
+
     public void RemoveContainer(int bay, int row, int tier)
     {
-        EnsureGridInitialized();
-        
-        if (_grid[bay, row, tier] == null)
-            throw new BusinessRuleValidationException("No container found in this slot.");
+        var slot = _slots.SingleOrDefault(s => s.Bay == bay && s.Row == row && s.Tier == tier)
+                   ?? throw new BusinessRuleValidationException($"No container found in Slot [{bay}|{row}|{tier}] for  storage area [{Name}].");
 
-        _grid[bay, row, tier] = null;
+        slot.RemoveContainer();
         CurrentCapacityTeu--;
+
+        if (slot.IsEmpty())
+            _slots.Remove(slot);
+
     }
+
+
 
     public Iso6346Code? FindContainer(int bay, int row, int tier)
     {
-        EnsureGridInitialized();
-
+        // validar limites
         if (bay < 0 || bay >= MaxBays ||
             row < 0 || row >= MaxRows ||
             tier < 0 || tier >= MaxTiers)
-            throw new BusinessRuleValidationException("Invalid Bay/Row/Tier position.");
+            throw new BusinessRuleValidationException($"Invalid Bay/Row/Tier [{bay}|{row}|{tier}] position for storage area [{Name}] -> {MaxBays}|{MaxRows}|{MaxTiers}.");
 
-        return _grid[bay, row, tier];
+        var slot = _slots.FirstOrDefault(s =>
+            s.Bay == bay && s.Row == row && s.Tier == tier);
+
+        // Se o slot não existe, nunca teve contentor
+        if (slot == null)
+            return null;
+
+        // Se existe, verifica se está vazio
+        return slot.ContainerIsoCode is null ? null : new Iso6346Code(slot.ContainerIsoCode);
     }
+
+
 
     public void AssignDock(DockCode dock, float distance)
     {

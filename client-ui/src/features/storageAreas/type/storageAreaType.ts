@@ -43,3 +43,17 @@ export interface StorageAreaGridDto {
     maxTiers: number;
     slots: StorageSlotDto[]; // só ocupados têm iso
 }
+
+
+
+export type ContainerType = "General" | "Reefer" | "Electronic" | "Hazmat"| "Oversized";
+export type ContainerStatus = "Empty" | "Full" | "Reserved" | "Damaged"| "InTransit";
+
+export interface ContainerDto {
+    id: string;
+    isoNumber: string;
+    description: string;
+    containerType: ContainerType;
+    containerStatus: string;
+    weight: number;
+}

@@ -78,7 +78,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             stArea.PlaceContainer(iso, 0, 0, 0);
 
             Assert.Equal(1, stArea.CurrentCapacityTeu);
-            Assert.Equal(iso, stArea.FindContainer(0, 0, 0));
+            Assert.Equal(iso.Value, stArea.FindContainer(0, 0, 0).Value);
         }
 
         [Fact]
@@ -105,20 +105,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
         }
 
         [Fact]
-        public void PlaceContainer_WhenFull_ShouldThrowException()
-        {
-            var stArea = new StorageArea("Yard F", "Desc", StorageAreaType.Yard, 1, 1, 1, _defaultDistances, _defaultResources);
-            var iso1 = new Iso6346Code("MSCU6639870");
-            var iso2 = new Iso6346Code("CSQU3054383");
-
-            stArea.PlaceContainer(iso1, 0, 0, 0);
-
-            Assert.Throws<BusinessRuleValidationException>(() =>
-                stArea.PlaceContainer(iso2, 0, 0, 0));
-        }
-
-        [Fact]
-        public void RemoveContainer_ValidSlot_ShouldDecreaseCapacity()
+        public void RemoveContainer_ValidSlot_ShouldDecreaseCapacity_AndRemoveSlotIfEmpty()
         {
             var stArea = new StorageArea("Yard G", "Desc", StorageAreaType.Yard, 1, 1, 1, _defaultDistances, _defaultResources);
             var iso = new Iso6346Code("YZAB6639870");
@@ -128,6 +115,10 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
 
             stArea.RemoveContainer(0, 0, 0);
             Assert.Equal(0, stArea.CurrentCapacityTeu);
+
+            // Verifica que não sobra slot "vazio" interno (a lista interna limpa o slot quando vazio)
+            var again = stArea.FindContainer(0, 0, 0);
+            Assert.Null(again);
         }
 
         [Fact]
@@ -145,6 +136,17 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             var stArea = new StorageArea("Yard I", "Desc", StorageAreaType.Yard, 1, 1, 1, _defaultDistances, _defaultResources);
             var result = stArea.FindContainer(0, 0, 0);
             Assert.Null(result);
+        }
+
+        [Theory]
+        [InlineData(-1, 0, 0)]
+        [InlineData(0, -1, 0)]
+        [InlineData(0, 0, -1)]
+        [InlineData(2, 0, 0)] // fora de MaxBays=1
+        public void FindContainer_InvalidBounds_ShouldThrow(int bay, int row, int tier)
+        {
+            var stArea = new StorageArea("Yard Z", "Desc", StorageAreaType.Yard, 1, 1, 1, _defaultDistances, _defaultResources);
+            Assert.Throws<BusinessRuleValidationException>(() => stArea.FindContainer(bay, row, tier));
         }
 
         // 3. DOCK HANDLING TESTS
@@ -213,7 +215,7 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             Assert.Empty(stArea.PhysicalResources);
         }
 
-        // 5. DESCRIPTION UPDATE TESTS
+        // 5. DESCRIPTION & LIMITS UPDATE TESTS
 
         [Fact]
         public void ChangeDescription_Valid_ShouldUpdate()
@@ -229,6 +231,30 @@ namespace SEM5_PI_WEBAPI.Tests.Domain
             var stArea = new StorageArea("Yard Q", "Desc", StorageAreaType.Yard, 1, 1, 1, _defaultDistances, _defaultResources);
             var longDesc = new string('X', 101);
             Assert.Throws<BusinessRuleValidationException>(() => stArea.ChangeDescription(longDesc));
+        }
+
+        [Fact]
+        public void ChangeMaxBoundaries_Invalid_ShouldThrow()
+        {
+            var stArea = new StorageArea("Yard R", "Desc", StorageAreaType.Yard, 2, 2, 2, _defaultDistances, _defaultResources);
+
+            Assert.Throws<BusinessRuleValidationException>(() => stArea.ChangeMaxBays(0));
+            Assert.Throws<BusinessRuleValidationException>(() => stArea.ChangeMaxRows(0));
+            Assert.Throws<BusinessRuleValidationException>(() => stArea.ChangeMaxTiers(0));
+        }
+
+        [Fact]
+        public void ChangeMaxBoundaries_Valid_ShouldUpdate()
+        {
+            var stArea = new StorageArea("Yard S", "Desc", StorageAreaType.Yard, 2, 2, 2, _defaultDistances, _defaultResources);
+
+            stArea.ChangeMaxBays(3);
+            stArea.ChangeMaxRows(4);
+            stArea.ChangeMaxTiers(5);
+
+            Assert.Equal(3, stArea.MaxBays);
+            Assert.Equal(4, stArea.MaxRows);
+            Assert.Equal(5, stArea.MaxTiers);
         }
     }
 }

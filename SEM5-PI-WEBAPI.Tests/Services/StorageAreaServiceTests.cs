@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Moq;
+using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.Shared;
@@ -7,6 +8,9 @@ using SEM5_PI_WEBAPI.Domain.StorageAreas;
 using SEM5_PI_WEBAPI.Domain.StorageAreas.DTOs;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VesselsTypes;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SEM5_PI_WEBAPI.Tests.Services
 {
@@ -16,6 +20,7 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         private readonly Mock<IStorageAreaRepository> _storageAreaRepoMock = new();
         private readonly Mock<IPhysicalResourceRepository> _physicalRepoMock = new();
         private readonly Mock<IDockRepository> _dockRepoMock = new();
+        private readonly Mock<IContainerRepository> _containerRepoMock = new();
         private readonly Mock<ILogger<StorageAreaService>> _loggerMock = new();
 
         private readonly StorageAreaService _service;
@@ -27,7 +32,8 @@ namespace SEM5_PI_WEBAPI.Tests.Services
                 _loggerMock.Object,
                 _storageAreaRepoMock.Object,
                 _physicalRepoMock.Object,
-                _dockRepoMock.Object
+                _dockRepoMock.Object,
+                _containerRepoMock.Object
             );
         }
 
@@ -47,7 +53,6 @@ namespace SEM5_PI_WEBAPI.Tests.Services
             _storageAreaRepoMock.Setup(r => r.GetByNameAsync(dto.Name))
                 .ReturnsAsync((StorageArea)null);
 
-            // Mock de todos os docks do sistema
             _dockRepoMock.Setup(r => r.GetAllAsync())
                 .ReturnsAsync(new List<EntityDock>
                 {
@@ -61,24 +66,9 @@ namespace SEM5_PI_WEBAPI.Tests.Services
                     )
                 });
 
-            _dockRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<DockCode>()))
-                .ReturnsAsync((DockCode code) => new EntityDock(
-                    code,
-                    new List<PhysicalResourceCode> { new("CRN-0001") },
-                    "Main Dock",
-                    200, 15, 12,
-                    new List<VesselTypeId> { new(Guid.NewGuid()) },
-                    DockStatus.Available
-                ));
-
             _physicalRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<PhysicalResourceCode>()))
                 .ReturnsAsync((PhysicalResourceCode code) => new EntityPhysicalResource(
-                    code,
-                    "Crane A",
-                    100, 10,
-                    PhysicalResourceType.MCrane,
-                    null
-                ));
+                    code, "Crane A", 100, 10, PhysicalResourceType.MCrane, null));
 
             _storageAreaRepoMock.Setup(r => r.AddAsync(It.IsAny<StorageArea>()))
                 .ReturnsAsync((StorageArea s) => s);
@@ -122,14 +112,13 @@ namespace SEM5_PI_WEBAPI.Tests.Services
         [Fact]
         public async Task CreateAsync_ShouldThrow_WhenDockDoesNotExist()
         {
-            // Arrange
             var dto = new CreatingStorageAreaDto(
                 "DockFail",
                 "Invalid dock test",
                 StorageAreaType.Yard,
                 5, 5, 5,
                 new List<StorageAreaDockDistanceDto> { new("DK-9999", 2.5f) },
-                new List<string> { "CRN-0001" } 
+                new List<string> { "CRN-0001" }
             );
 
             _storageAreaRepoMock.Setup(r => r.GetByNameAsync(dto.Name))
@@ -157,14 +146,9 @@ namespace SEM5_PI_WEBAPI.Tests.Services
                     )
                 });
 
-            // Act & Assert
-            var ex = await Assert.ThrowsAsync<SEM5_PI_WEBAPI.Domain.Shared.BusinessRuleValidationException>(
-                () => _service.CreateAsync(dto)
-            );
-
+            var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.CreateAsync(dto));
             Assert.Contains("Dock code 'DK-9999' does not exist", ex.Message);
         }
-
 
         [Fact]
         public async Task CreateAsync_ShouldThrow_WhenPhysicalResourceDoesNotExist()
@@ -192,16 +176,6 @@ namespace SEM5_PI_WEBAPI.Tests.Services
                         DockStatus.Available
                     )
                 });
-
-            _dockRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<DockCode>()))
-                .ReturnsAsync(new EntityDock(
-                    new DockCode("DK-0001"),
-                    new List<PhysicalResourceCode> { new("CRN-0001") },
-                    "Dock A",
-                    100, 12, 10,
-                    new List<VesselTypeId> { new(Guid.NewGuid()) },
-                    DockStatus.Available
-                ));
 
             _physicalRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<PhysicalResourceCode>()))
                 .ReturnsAsync((EntityPhysicalResource)null);
@@ -305,6 +279,61 @@ namespace SEM5_PI_WEBAPI.Tests.Services
 
             var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.GetPhysicalResourcesAsync("Invalid", null));
             Assert.Contains("not found", ex.Message);
+        }
+
+        [Fact]
+        public async Task GetGridAsync_ReturnsSlots_ForPlacedContainer()
+        {
+            var id = new StorageAreaId(Guid.NewGuid());
+            var sa = new StorageArea("GridYard", "Desc", StorageAreaType.Yard, 3, 3, 3, new List<StorageAreaDockDistance>(), new List<PhysicalResourceCode>());
+            // coloca um contentor numa posição válida
+            sa.PlaceContainer(new Iso6346Code("BBCU5100617"), 1, 1, 1);
+
+            _storageAreaRepoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(sa);
+
+            var grid = await _service.GetGridAsync(id);
+
+            Assert.Equal(3, grid.MaxBays);
+            Assert.Equal(3, grid.MaxRows);
+            Assert.Equal(3, grid.MaxTiers);
+            Assert.Single(grid.Slots);
+            Assert.Equal("BBCU5100617", grid.Slots[0].Iso);
+        }
+
+        [Fact]
+        public async Task GetContainerAsync_ShouldThrow_WhenStorageAreaNotFound()
+        {
+            var id = new StorageAreaId(Guid.NewGuid());
+            _storageAreaRepoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((StorageArea)null);
+
+            var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.GetContainerAsync(id, 0, 0, 0));
+            Assert.Contains("Storage Area with ID", ex.Message);
+        }
+
+        [Fact]
+        public async Task GetContainerAsync_ShouldThrow_WhenSlotEmpty()
+        {
+            var id = new StorageAreaId(Guid.NewGuid());
+            var sa = new StorageArea("EmptyYard", "Desc", StorageAreaType.Yard, 2, 2, 2, new List<StorageAreaDockDistance>(), new List<PhysicalResourceCode>());
+
+            _storageAreaRepoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(sa);
+
+            var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.GetContainerAsync(id, 0, 0, 0));
+            Assert.Contains("No container is located on [0, 0, 0]", ex.Message);
+        }
+
+        [Fact]
+        public async Task GetContainerAsync_ShouldThrow_WhenContainerNotFoundInDb()
+        {
+            var id = new StorageAreaId(Guid.NewGuid());
+            var sa = new StorageArea("YardC", "Desc", StorageAreaType.Yard, 2, 2, 2, new List<StorageAreaDockDistance>(), new List<PhysicalResourceCode>());
+            sa.PlaceContainer(new Iso6346Code("BBCU5100617"), 0, 0, 0);
+
+            _storageAreaRepoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(sa);
+            _containerRepoMock.Setup(r => r.GetByIsoNumberAsync(new Iso6346Code("BBCU5100617"))).ReturnsAsync((SEM5_PI_WEBAPI.Domain.Containers.EntityContainer)null);
+
+            var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.GetContainerAsync(id, 0, 0, 0));
+            Assert.Contains("No container found in DB with ISO number", ex.Message);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SEM5_PI_WEBAPI.Domain.Containers.DTOs;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.StorageAreas;
 using SEM5_PI_WEBAPI.Domain.StorageAreas.DTOs;
@@ -167,6 +168,23 @@ public class StorageAreasController : ControllerBase
         catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Response (404): Grid not found for {Id}. {Message}", id, e.Message);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
+        }
+    }
+
+    [HttpGet("{id:guid}/container")]
+    public async Task<ActionResult<ContainerDto>> GetContainerInPositionX(Guid id,[FromQuery]int bay,[FromQuery]int row, [FromQuery]int tier)
+    {
+        _logger.LogInformation("API Request: Get container in [{bay}{row}{tier}] information for Storage Area Id = {Id}", id,bay,row,tier);
+        try
+        {
+            var grid = await _service.GetContainerAsync(new StorageAreaId(id),bay,row,tier);
+            _logger.LogInformation("API Response (200): Container in [{bay}{row}{tier}] information returned for Storage Area Id = {Id}", id,bay,row,tier);
+            return Ok(grid);
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Response (404): Container in  [{bay}{row}{tier}] not found for SA {Id}. {Message}", id,bay,row,tier, e.Message);
             return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
