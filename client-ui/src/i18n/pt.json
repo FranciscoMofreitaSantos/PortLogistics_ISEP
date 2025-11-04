@@ -54,9 +54,9 @@
   "menu": {
     "home": "Início",
     "vvn": "VVNs",
-    "storage": "Áreas de Armazenamento",
     "vesselTypes": "Tipos de Navio",
     "vessels": "Navios",
+    "storageArea": "Áreas de Armazenamento",
     "admin": "Administração",
     "qualifications": "Qualificações",
     "dashboard": "Dashboard",
@@ -171,38 +171,29 @@
   "storageAreas": {
     "create": {
       "title": "Nova Storage Area",
-
       "generalInfo": "Informação Geral",
       "resourcesDocks": "Recursos & Docks",
-
       "name": "Nome",
       "name_PH": "Ex.: Yard A1",
-
       "description": "Descrição",
       "description_PH": "Notas / observações",
-
       "type": "Tipo",
       "yard": "Yard",
       "warehouse": "Armazém",
-
       "bays": "Bays",
       "rows": "Linhas",
       "tiers": "Níveis",
-
       "addResource": "Adicionar Recurso",
       "resource_PH": "Ex.: RTG-01",
       "noResources": "Nenhum recurso adicionado",
-
       "dockDistance": "Dock + Distância",
       "dock_PH": "Dock (D01)",
       "distance_PH": "Distância",
       "noDistance": "Nenhuma distância adicionada",
-
       "btnAdd": "Adicionar",
       "btnCreate": "Criar Storage Area",
       "btnCancel": "Cancelar",
       "btnBack": "Voltar",
-
       "toast": {
         "nameRequired": "Nome obrigatório",
         "distanceRequired": "Adiciona pelo menos uma distância a uma Dock",
@@ -212,11 +203,9 @@
     "list": {
       "title": "Áreas de Armazenamento",
       "registered": "{{count}} áreas registadas",
-
       "searchPlaceholder": "Pesquisar…",
       "noResults": "Sem resultados.",
       "selectOne": "Seleciona uma Storage Area…",
-
       "type": "Tipo",
       "capacity": "Capacidade",
       "dimensions": "Dimensões",
@@ -224,15 +213,82 @@
       "physical": "Recursos Físicos",
       "docks": "Docks",
       "viewDistances": "Ver distâncias",
-
       "tiersMap": "Mapa de Ocupação",
       "tiersNote": "Render sequencial (bay→row→tier) com base na capacidade — não representa posições reais.",
-
       "distancesTitle": "Distâncias aos Docks — {{name}}",
       "noDistances": "Sem distâncias registadas",
-
       "loading": "A carregar storage areas...",
       "loaded": "{{count}} storage areas carregadas."
+    },
+    "modal": {
+      "close": "Fechar",
+      "container": {
+        "title": "Contentor — Bay {{bay}} • Linha {{row}} • Nível {{tier}}",
+        "titleFallback": "Detalhes do Contentor",
+        "loading": "A carregar contentor…",
+        "error": "Erro ao carregar o contentor.",
+        "noData": "Sem dados",
+        "isoNumber": "Número ISO",
+        "description": "Descrição",
+        "type": "Tipo",
+        "status": "Estado",
+        "weight": "Peso",
+        "weight_unit": "{{value}} kg"
+      },
+      "docks": {
+        "title": "Distâncias aos Docks — {{name}}",
+        "noDistances": "Sem distâncias registadas"
+      }
+    },
+    "errors": {
+      "generic": "Ocorreu um erro.",
+      "loadList": "Erro ao carregar a lista.",
+      "loadGrid": "Erro ao carregar o mapa de ocupação.",
+      "loadContainer": "Erro ao carregar o contentor."
+    },
+    "buttons": {
+      "new": "Novo",
+      "add": "Adicionar",
+      "create": "Criar",
+      "cancel": "Cancelar",
+      "back": "Voltar",
+      "close": "Fechar",
+      "view": "Ver"
+    },
+    "enums": {
+      "types": {
+        "yard": "Yard",
+        "warehouse": "Armazém"
+      },
+      "containerStatus": {
+        "available": "Disponível",
+        "occupied": "Ocupado",
+        "reserved": "Reservado",
+        "hold": "Retido",
+        "damaged": "Danificado",
+        "blocked": "Bloqueado",
+        "unknown": "Desconhecido"
+      },
+      "containerType": {
+        "dry": "Seco",
+        "reefer": "Frigorífico",
+        "open_top": "Topo aberto",
+        "tank": "Tanque",
+        "flat_rack": "Flat rack",
+        "high_cube": "High cube",
+        "unknown": "Desconhecido"
+      }
+    },
+    "format": {
+      "tier": "Nível {{value}}",
+      "bay": "Bay {{value}}",
+      "row": "Linha {{value}}",
+      "teu": "{{current}}/{{max}} TEU",
+      "pct": "{{value}}%"
+    },
+    "toast": {
+      "listLoaded": "{{count}} storage areas carregadas.",
+      "listLoadingError": "Erro ao carregar storage areas."
     }
   },
 

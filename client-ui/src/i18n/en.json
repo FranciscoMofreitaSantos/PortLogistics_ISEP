@@ -54,10 +54,10 @@
   "menu": {
     "home": "Home",
     "vvn": "VVNs",
-    "storage": "Storage Areas",
     "vesselTypes": "Vessel Types",
     "vessels": "Vessels",
     "admin": "Admin",
+    "storageArea": "Storage Areas",
     "qualifications": "Qualifications",
     "dashboard": "Dashboard",
     "login": "Login",
@@ -167,56 +167,45 @@
       "type": "Type"
     }
   },
-
+  
   "storageAreas": {
     "create": {
       "title": "New Storage Area",
-
       "generalInfo": "General Information",
       "resourcesDocks": "Resources & Docks",
-
       "name": "Name",
-      "name_PH": "Ex.: Yard A1",
-
+      "name_PH": "e.g., Yard A1",
       "description": "Description",
-      "description_PH": "Notes / observations",
-
+      "description_PH": "Notes / remarks",
       "type": "Type",
       "yard": "Yard",
       "warehouse": "Warehouse",
-
       "bays": "Bays",
       "rows": "Rows",
       "tiers": "Tiers",
-
       "addResource": "Add Resource",
-      "resource_PH": "Ex.: RTG-01",
+      "resource_PH": "e.g., RTG-01",
       "noResources": "No resources added",
-
       "dockDistance": "Dock + Distance",
       "dock_PH": "Dock (D01)",
       "distance_PH": "Distance",
       "noDistance": "No distance added",
-
       "btnAdd": "Add",
       "btnCreate": "Create Storage Area",
       "btnCancel": "Cancel",
       "btnBack": "Back",
-
       "toast": {
         "nameRequired": "Name is required",
-        "distanceRequired": "Add at least one dock distance",
-        "invalidDistance": "Distance must be greater or equal to 0"
+        "distanceRequired": "Add at least one distance to a Dock",
+        "invalidDistance": "Distance must be greater than or equal to 0"
       }
     },
     "list": {
       "title": "Storage Areas",
-      "registered": "{{count}} registered storage areas",
-
+      "registered": "{{count}} areas registered",
       "searchPlaceholder": "Search…",
       "noResults": "No results.",
       "selectOne": "Select a Storage Area…",
-
       "type": "Type",
       "capacity": "Capacity",
       "dimensions": "Dimensions",
@@ -224,21 +213,88 @@
       "physical": "Physical Resources",
       "docks": "Docks",
       "viewDistances": "View distances",
-
       "tiersMap": "Occupancy Map",
-      "tiersNote": "Sequential render (bay→row→tier) based on current capacity — not real coordinates.",
-
-      "distancesTitle": "Distances to Docks — {{name}}",
-      "noDistances": "No distances registered",
-
+      "tiersNote": "Sequential render (bay→row→tier) based on capacity — does not represent real positions.",
+      "distancesTitle": "Dock Distances — {{name}}",
+      "noDistances": "No distances recorded",
       "loading": "Loading storage areas...",
-      "loaded": "Loaded {{count}} storage areas."
+      "loaded": "{{count}} storage areas loaded."
+    },
+    "modal": {
+      "close": "Close",
+      "container": {
+        "title": "Container — Bay {{bay}} • Row {{row}} • Tier {{tier}}",
+        "titleFallback": "Container Details",
+        "loading": "Loading container…",
+        "error": "Error loading container.",
+        "noData": "No data",
+        "isoNumber": "ISO Number",
+        "description": "Description",
+        "type": "Type",
+        "status": "Status",
+        "weight": "Weight",
+        "weight_unit": "{{value}} kg"
+      },
+      "docks": {
+        "title": "Dock Distances — {{name}}",
+        "noDistances": "No distances recorded"
+      }
+    },
+    "errors": {
+      "generic": "An error occurred.",
+      "loadList": "Error loading list.",
+      "loadGrid": "Error loading occupancy map.",
+      "loadContainer": "Error loading container."
+    },
+    "buttons": {
+      "new": "New",
+      "add": "Add",
+      "create": "Create",
+      "cancel": "Cancel",
+      "back": "Back",
+      "close": "Close",
+      "view": "View"
+    },
+    "enums": {
+      "types": {
+        "yard": "Yard",
+        "warehouse": "Warehouse"
+      },
+      "containerStatus": {
+        "available": "Available",
+        "occupied": "Occupied",
+        "reserved": "Reserved",
+        "hold": "On hold",
+        "damaged": "Damaged",
+        "blocked": "Blocked",
+        "unknown": "Unknown"
+      },
+      "containerType": {
+        "dry": "Dry",
+        "reefer": "Reefer",
+        "open_top": "Open top",
+        "tank": "Tank",
+        "flat_rack": "Flat rack",
+        "high_cube": "High cube",
+        "unknown": "Unknown"
+      }
+    },
+    "format": {
+      "tier": "Tier {{value}}",
+      "bay": "Bay {{value}}",
+      "row": "Row {{value}}",
+      "teu": "{{current}}/{{max}} TEU",
+      "pct": "{{value}}%"
+    },
+    "toast": {
+      "listLoaded": "{{count}} storage areas loaded.",
+      "listLoadingError": "Error loading storage areas."
     }
   },
 
-  
-  
-  
+
+
+
 "qualifications": {
     "title": "Qualifications",
     "count": "{{count}} qualifications registered",

@@ -11,7 +11,6 @@ export default function Nav() {
 
     const privateMenu = user ? [
         { label: t("menu.vvn"), path: "/vvn" },
-        { label: t("menu.storage"), path: "/storage-areas" },
     ] : [];
 
     const adminMenu = user?.roles.includes(Roles.Administrator)
