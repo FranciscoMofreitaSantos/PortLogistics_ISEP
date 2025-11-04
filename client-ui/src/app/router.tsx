@@ -26,37 +26,10 @@ export const router = createBrowserRouter([
             {
                 element: <RequireAuth />,
                 children: [
-                    {
-                        path: "logistics-dashboard",
-                        element: <RequireRole roles={[Roles.LogisticsOperator]} />,
-                        children: [
-                            { index: true, element: <LogisticsOperatorDashboard /> }
-                        ]
-                    },
-                    {
-                        path: "qualifications",
-                        element: <RequireRole roles={[Roles.LogisticsOperator]} />,
-                        children: [
-                            { index: true, element: <Qualification /> }
-                        ]
-                    },
-                    {
-                        path: "staff-members",
-                        element: <RequireRole roles={[Roles.LogisticsOperator]} />,
-                        children: [
-                            { index: true, element: <StaffMember /> }
-                        ]
-                    },
-
-                    {
-                        path: "physical-resources",
-                        element: <RequireRole roles={[Roles.LogisticsOperator]} />,
-                        children: [
-                            { index: true, element: <PhysicalResource/> }
-                        ]
-                    },
-
-
+                    {path: "logistics-dashboard", element: <RequireRole roles={[Roles.LogisticsOperator]} />, children: [{ index: true, element: <LogisticsOperatorDashboard /> }]},
+                    { path: "qualifications", element: <RequireRole roles={[Roles.LogisticsOperator]} />, children: [{ index: true, element: <Qualification /> }]},
+                    { path: "staff-members", element: <RequireRole roles={[Roles.LogisticsOperator]} />, children: [{ index: true, element: <StaffMember /> }]},
+                    { path: "physical-resources", element: <RequireRole roles={[Roles.LogisticsOperator]} />, children: [{ index: true, element: <PhysicalResource/> }]},
                     { path: "storage-areas", element: <RequireRole roles={[Roles.Administrator]} />, children: [{index: true, element: <StorageArea />}, {path: "new", element: <StorageAreaCreate />}]},
                     { path: "vessel-types", element: <RequireRole roles={[Roles.Administrator]} />, children: [{index: true, element: <VesselsTypes />}]},
                     { path: "vessels", element: <RequireRole roles={[Roles.Administrator]} />, children: [{index: true, element: <Vessels />}]},
@@ -64,7 +37,6 @@ export const router = createBrowserRouter([
                     { path: "forbidden", element: <Forbidden/> },
                 ],
             },
-
             { path: "*", element: <NotFound /> },
         ],
     },

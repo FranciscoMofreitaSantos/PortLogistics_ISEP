@@ -195,6 +195,7 @@
       "btnCancel": "Cancel",
       "btnBack": "Back",
       "toast": {
+        "creatingStorageArea": "Creating Storage Area...",
         "nameRequired": "Name is required",
         "distanceRequired": "Add at least one distance to a Dock",
         "invalidDistance": "Distance must be greater than or equal to 0"

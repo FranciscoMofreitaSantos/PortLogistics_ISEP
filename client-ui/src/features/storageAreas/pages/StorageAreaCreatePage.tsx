@@ -43,19 +43,12 @@ export default function StorageAreaCreatePage() {
             return;
         }
 
-        setForm(f => ({
-            ...f,
-            physicalResources: [...f.physicalResources, v]
-        }));
+        setForm(f => ({...f, physicalResources: [...f.physicalResources, v]}));
 
         setNewRes("");
     };
 
-    const remRes = (v: string) =>
-        setForm(f => ({
-            ...f,
-            physicalResources: f.physicalResources.filter(x => x !== v)
-        }));
+    const remRes = (v: string) => setForm(f => ({...f, physicalResources: f.physicalResources.filter(x => x !== v)}));
 
     const addDock = () => {
         const code = newDock.trim().toUpperCase();
@@ -73,20 +66,12 @@ export default function StorageAreaCreatePage() {
         }
 
         const entry: StorageAreaDockDistance = { dockCode: code, distance: dist };
-        setForm(f => ({
-            ...f,
-            distancesToDocks: [...f.distancesToDocks, entry]
-        }));
-
+        setForm(f => ({...f, distancesToDocks: [...f.distancesToDocks, entry]}));
         setNewDock("");
         setNewDist("");
     };
 
-    const remDock = (code: string) =>
-        setForm(f => ({
-            ...f,
-            distancesToDocks: f.distancesToDocks.filter(d => d.dockCode !== code)
-        }));
+    const remDock = (code: string) => setForm(f => ({...f, distancesToDocks: f.distancesToDocks.filter(d => d.dockCode !== code)}));
     
     const MIN_LOADING_TIME = 500;
 
@@ -116,7 +101,7 @@ export default function StorageAreaCreatePage() {
             return;
         }
 
-        const created = await runWithLoading(storageAreaService.createStorageArea(form),"Creating Storage Area").catch(() => null);
+        const created = await runWithLoading(storageAreaService.createStorageArea(form),t("storageAreas.create.toast.creatingStorageArea")).catch(() => null);
        
         if (!created) return;
         
