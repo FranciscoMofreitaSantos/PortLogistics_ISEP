@@ -15,7 +15,8 @@ function formatPct(num: number, den: number) {
 function classNames(...xs: (string | false | null | undefined)[]) {
     return xs.filter(Boolean).join(" ");
 }
-const GUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+const GUID_RE =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
 
 export default function StorageAreaPage() {
     const { t } = useTranslation();
@@ -46,10 +47,15 @@ export default function StorageAreaPage() {
         setCellPos({ bay, row, tier });
 
         try {
-            const data = await storageAreaService.getContainerAtPosition(selected.id, bay, row, tier);
+            const data = await storageAreaService.getContainerAtPosition(
+                selected.id,
+                bay,
+                row,
+                tier
+            );
             setCellInfo(data);
         } catch (e: any) {
-            setCellError(e?.response?.data ?? "Error loading container.");
+            setCellError(e?.response?.data ?? t("storageAreas.modal.container.error"));
         } finally {
             setCellLoading(false);
         }
@@ -65,7 +71,7 @@ export default function StorageAreaPage() {
                 if (data.length) setSelected(data[0]);
                 toast.success(t("storageAreas.list.loaded", { count: data.length }));
             } catch (e: any) {
-                toast.error(e?.response?.data ?? t("storageAreas.list.loading"));
+                toast.error(e?.response?.data ?? t("storageAreas.toast.listLoadingError"));
             } finally {
                 setLoading(false);
             }
@@ -74,26 +80,30 @@ export default function StorageAreaPage() {
 
     /* BUILD grid from backend */
     async function loadGrid(area: StorageAreaDto) {
-        const g = await storageAreaService.getStorageAreaGrid(area.id);
-        setGrid(g);
+        try {
+            const g = await storageAreaService.getStorageAreaGrid(area.id);
+            setGrid(g);
 
-        const generatedSlices: boolean[][][] = [];
+            const generatedSlices: boolean[][][] = [];
 
-        for (let t = 0; t < g.maxTiers; t++) {
-            const tier: boolean[][] = [];
-            for (let r = 0; r < g.maxRows; r++) {
-                const row: boolean[] = [];
-                for (let b = 0; b < g.maxBays; b++) {
-                    const occ = g.slots.some(
-                        s => s.tier === t && s.row === r && s.bay === b && s.iso !== null
-                    );
-                    row.push(occ);
+            for (let tIdx = 0; tIdx < g.maxTiers; tIdx++) {
+                const tier: boolean[][] = [];
+                for (let r = 0; r < g.maxRows; r++) {
+                    const row: boolean[] = [];
+                    for (let b = 0; b < g.maxBays; b++) {
+                        const occ = g.slots.some(
+                            (s) => s.tier === tIdx && s.row === r && s.bay === b && s.iso !== null
+                        );
+                        row.push(occ);
+                    }
+                    tier.push(row);
                 }
-                tier.push(row);
+                generatedSlices.push(tier);
             }
-            generatedSlices.push(tier);
+            setSlices(generatedSlices);
+        } catch {
+            toast.error(t("storageAreas.errors.loadGrid"));
         }
-        setSlices(generatedSlices);
     }
 
     useEffect(() => {
@@ -128,12 +138,15 @@ export default function StorageAreaPage() {
     /* RENDER */
     return (
         <div className="sa-wrapper">
-
             {/* HEADER */}
             <div className="vt-title-area" style={{ marginBottom: "20px" }}>
                 <div>
-                    <h2 className="vt-title"><FaShip /> {t("storageAreas.list.title")}</h2>
-                    <p className="vt-sub">{t("storageAreas.list.registered", { count: filtered.length })}</p>
+                    <h2 className="vt-title">
+                        <FaShip /> {t("storageAreas.list.title")}
+                    </h2>
+                    <p className="vt-sub">
+                        {t("storageAreas.list.registered", { count: filtered.length })}
+                    </p>
                 </div>
 
                 <div style={{ display: "flex", gap: "12px" }}>
@@ -147,19 +160,20 @@ export default function StorageAreaPage() {
                     </div>
 
                     <button className="vt-create-btn-top" onClick={goToCreate}>
-                        <FaPlus /> {t("storageAreas.create.btnAdd") ?? "New"}
+                        <FaPlus /> {t("storageAreas.create.btnAdd") || t("storageAreas.buttons.new")}
                     </button>
                 </div>
             </div>
 
             {/* LIST + MAIN */}
             <div className="sa-content-vertical">
-
                 {/* LIST */}
                 <div className="sa-strip">
                     <div className="sa-strip-inner">
                         {loading ? (
-                            Array.from({ length: 4 }).map((_, i) => <div className="sa-strip-skeleton" key={i} />)
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <div className="sa-strip-skeleton" key={i} />
+                            ))
                         ) : filtered.length === 0 ? (
                             <div className="sa-empty" style={{ padding: 10 }}>
                                 {t("storageAreas.list.noResults")}
@@ -197,18 +211,23 @@ export default function StorageAreaPage() {
                             <section className="sa-kpis sa-kpis--extended">
                                 <div className="sa-card">
                                     <div className="sa-card-title">{t("storageAreas.list.type")}</div>
-                                    <div className="sa-card-value">{selected.type}</div>
+                                    <div className="sa-card-value">{xlateType(selected.type, t)}</div>
                                 </div>
 
                                 <div className="sa-card">
                                     <div className="sa-card-title">{t("storageAreas.list.capacity")}</div>
                                     <div className="sa-card-value">
-                                        {selected.currentCapacityTeu}/{selected.maxCapacityTeu} TEU
+                                        {t("storageAreas.format.teu", {
+                                            current: selected.currentCapacityTeu,
+                                            max: selected.maxCapacityTeu
+                                        })}
                                     </div>
                                     <div className="sa-progress">
                                         <div className="sa-progress-fill" style={{ width: `${capacityPct}%` }} />
                                     </div>
-                                    <div className="sa-progress-label">{formatPct(selected.currentCapacityTeu, selected.maxCapacityTeu)}</div>
+                                    <div className="sa-progress-label">
+                                        {formatPct(selected.currentCapacityTeu, selected.maxCapacityTeu)}
+                                    </div>
                                 </div>
 
                                 <div className="sa-card">
@@ -230,7 +249,9 @@ export default function StorageAreaPage() {
                                             <span className="sa-empty">–</span>
                                         ) : (
                                             selected.physicalResources.map((r) => (
-                                                <span className="sa-chip" key={r}>{r}</span>
+                                                <span className="sa-chip" key={r}>
+                          {r}
+                        </span>
                                             ))
                                         )}
                                     </div>
@@ -238,8 +259,10 @@ export default function StorageAreaPage() {
 
                                 <div className="sa-card sa-card--button">
                                     <div className="sa-card-title">{t("storageAreas.list.docks")}</div>
-                                    <button className="sa-btn sa-btn-primary sa-btn-full"
-                                            onClick={() => setIsDistancesOpen(true)}>
+                                    <button
+                                        className="sa-btn sa-btn-primary sa-btn-full"
+                                        onClick={() => setIsDistancesOpen(true)}
+                                    >
                                         {t("storageAreas.list.viewDistances")}
                                     </button>
                                 </div>
@@ -253,21 +276,39 @@ export default function StorageAreaPage() {
                                 </div>
 
                                 <div className="sa-slices-grid">
-                                    {slices.map((grid, t) => (
-                                        <div className="sa-slice" key={`tier-${t}`}>
-                                            <div className="sa-slice-head"><span className="sa-tag">Tier {t}</span></div>
+                                    {slices.map((grid, tIdx) => (
+                                        <div className="sa-slice" key={`tier-${tIdx}`}>
+                                            <div className="sa-slice-head">
+                        <span className="sa-tag">
+                          {t("storageAreas.format.tier", { value: tIdx })}
+                        </span>
+                                            </div>
                                             <div className="sa-grid-wrap">
                                                 <div
                                                     className="sa-grid fit"
-                                                    style={{ ["--cols" as any]: String(selected.maxBays), ["--gap" as any]: "4px" }}
+                                                    style={
+                                                        {
+                                                            ["--cols" as any]: String(selected.maxBays),
+                                                            ["--gap" as any]: "4px"
+                                                        } as React.CSSProperties
+                                                    }
                                                 >
                                                     {grid.map((row, r) =>
                                                         row.map((cell, b) => (
                                                             <div
-                                                                key={`c-${t}-${r}-${b}`}
+                                                                key={`c-${tIdx}-${r}-${b}`}
                                                                 className={classNames("sa-cell", cell && "filled")}
-                                                                onClick={() => { if (cell) openCellModal(b, r, t); }}
-                                                                title={cell ? `Bay ${b} • Row ${r} • Tier ${t}` : undefined}
+                                                                onClick={() => {
+                                                                    if (cell) openCellModal(b, r, tIdx);
+                                                                }}
+                                                                title={
+                                                                    cell
+                                                                        ? `${t("storageAreas.format.bay", { value: b })} • ${t(
+                                                                            "storageAreas.format.row",
+                                                                            { value: r }
+                                                                        )} • ${t("storageAreas.format.tier", { value: tIdx })}`
+                                                                        : undefined
+                                                                }
                                                                 role="button"
                                                             />
                                                         ))
@@ -289,26 +330,45 @@ export default function StorageAreaPage() {
                     <div className="sa-dock-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("storageAreas.list.distancesTitle", { name: selected.name })}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setIsDistancesOpen(false)}><FaTimes /></button>
+                            <h3 className="sa-dock-title">
+                                {t("storageAreas.list.distancesTitle", { name: selected.name })}
+                            </h3>
+                            <button
+                                className="sa-icon-btn sa-dock-close"
+                                onClick={() => setIsDistancesOpen(false)}
+                                aria-label={t("storageAreas.modal.close") || "Close"}
+                            >
+                                <FaTimes />
+                            </button>
                         </div>
 
                         <div className="sa-dock-body">
-                            {selected.distancesToDocks.map((d, i) => {
-                                const max = Math.max(...selected.distancesToDocks.map(x => x.distance || 0), 1);
-                                const pct = Math.max(8, Math.round(((d.distance || 0) / max) * 100));
+                            {selected.distancesToDocks.length === 0 ? (
+                                <div className="sa-empty">{t("storageAreas.list.noDistances")}</div>
+                            ) : (
+                                selected.distancesToDocks.map((d, i) => {
+                                    const max = Math.max(
+                                        ...selected.distancesToDocks.map((x) => x.distance || 0),
+                                        1
+                                    );
+                                    const pct = Math.max(8, Math.round(((d.distance || 0) / max) * 100));
 
-                                return (
-                                    <div className="sa-dock-row" key={d.dockCode} style={{ ["--delay" as any]: `${i * 60}ms` }}>
-                                        <div className="sa-dock-label">{d.dockCode}</div>
-                                        <div className="sa-dock-bar">
-                                            <div className="sa-dock-fill" style={{ width: `${pct}%` }}>
-                                                <span className="sa-dock-value">{d.distance}</span>
+                                    return (
+                                        <div
+                                            className="sa-dock-row"
+                                            key={d.dockCode}
+                                            style={{ ["--delay" as any]: `${i * 60}ms` }}
+                                        >
+                                            <div className="sa-dock-label">{d.dockCode}</div>
+                                            <div className="sa-dock-bar">
+                                                <div className="sa-dock-fill" style={{ width: `${pct}%` }}>
+                                                    <span className="sa-dock-value">{d.distance}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
                 </div>
@@ -321,55 +381,93 @@ export default function StorageAreaPage() {
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
                             <h3 className="sa-dock-title">
-                                {cellPos ? `Container @ Bay ${cellPos.bay} • Row ${cellPos.row} • Tier ${cellPos.tier}` : "Container Details"}
+                                {cellPos
+                                    ? t("storageAreas.modal.container.title", {
+                                        bay: cellPos.bay,
+                                        row: cellPos.row,
+                                        tier: cellPos.tier
+                                    })
+                                    : t("storageAreas.modal.container.titleFallback")}
                             </h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setIsCellOpen(false)}>
+                            <button
+                                className="sa-icon-btn sa-dock-close"
+                                onClick={() => setIsCellOpen(false)}
+                                aria-label={t("storageAreas.modal.close") || "Close"}
+                            >
                                 <FaTimes />
                             </button>
                         </div>
 
                         <div className="sa-modal-body-modern">
-                            {cellLoading && <div className="sa-spinner-lg"></div>}
+                            {cellLoading && (
+                                <div
+                                    className="sa-spinner-lg"
+                                    aria-label={t("storageAreas.modal.container.loading") || "Loading"}
+                                />
+                            )}
 
                             {cellError && (
-                                <div className="sa-modal-error">
-                                    ⚠️ {cellError}
-                                </div>
+                                <div className="sa-modal-error">⚠️ {cellError}</div>
                             )}
 
                             {!cellLoading && !cellError && cellInfo && (
                                 <div className="sa-info-grid">
                                     <div className="sa-info-card">
-                                        <span>ISO Number</span>
+                                        <span>{t("storageAreas.modal.container.isoNumber")}</span>
                                         <strong>{cellInfo.isoNumber}</strong>
                                     </div>
                                     <div className="sa-info-card">
-                                        <span>Description</span>
+                                        <span>{t("storageAreas.modal.container.description")}</span>
                                         <strong>{cellInfo.description}</strong>
                                     </div>
                                     <div className="sa-info-card">
-                                        <span>Type</span>
-                                        <strong className="sa-tag-chip sa-chip-general">{cellInfo.containerType}</strong>
+                                        <span>{t("storageAreas.modal.container.type")}</span>
+                                        <strong className="sa-tag-chip sa-chip-general">
+                                            {cellInfo.containerType}
+                                        </strong>
                                     </div>
                                     <div className="sa-info-card">
-                                        <span>Status</span>
-                                        <strong className={`sa-tag-chip sa-chip-${cellInfo.containerStatus?.toLowerCase()}`}>{cellInfo.containerStatus}</strong>
+                                        <span>{t("storageAreas.modal.container.status")}</span>
+                                        <strong
+                                            className={`sa-tag-chip sa-chip-${(cellInfo.containerStatus || "unknown")
+                                                .toLowerCase()
+                                                .replace(/\s+/g, "-")}`}
+                                        >
+                                            {cellInfo.containerStatus}
+                                        </strong>
                                     </div>
                                     <div className="sa-info-card">
-                                        <span>Weight</span>
-                                        <strong>{cellInfo.weight} kg</strong>
+                                        <span>{t("storageAreas.modal.container.weight")}</span>
+                                        <strong>
+                                            {t("storageAreas.modal.container.weight_unit", {
+                                                value: cellInfo.weight
+                                            })}
+                                        </strong>
                                     </div>
                                 </div>
                             )}
 
                             {!cellLoading && !cellError && !cellInfo && (
-                                <div className="sa-modal-error">No data</div>
+                                <div className="sa-modal-error">
+                                    {t("storageAreas.modal.container.noData")}
+                                </div>
                             )}
                         </div>
-
                     </div>
                 </div>
             )}
         </div>
     );
+}
+
+/** Translate backend type if needed (keeps original if no mapping) */
+function xlateType(type: string, t: (k: string, o?: any) => string) {
+    const key = type.toLowerCase();
+    // when backend sends "Yard"/"Warehouse" we keep it;
+    // if it sends canonical keys, we map.
+    const map: Record<string, string> = {
+        yard: t("storageAreas.enums.types.yard"),
+        warehouse: t("storageAreas.enums.types.warehouse")
+    };
+    return map[key] || type;
 }
