@@ -5,6 +5,7 @@ using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Domain.VVN;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs;
 using SEM5_PI_WEBAPI.Domain.VVN.DTOs.GetByStatus;
+using SEM5_PI_WEBAPI.utils;
 
 namespace SEM5_PI_WEBAPI.Controllers;
 
@@ -14,13 +15,17 @@ public class VesselVisitNotificationController : ControllerBase
 {
     private readonly IVesselVisitNotificationService _service;
     private readonly ILogger<VesselVisitNotificationController> _logger;
+    private readonly IResponsesToFrontend _refrontend;
+
 
     public VesselVisitNotificationController(
         IVesselVisitNotificationService service,
-        ILogger<VesselVisitNotificationController> logger)
+        ILogger<VesselVisitNotificationController> logger,
+        IResponsesToFrontend refrontend)
     {
         _service = service;
         _logger = logger;
+        _refrontend = refrontend;
     }
 
     //[Authorize(Roles = "ShippingAgentRepresentative")]
@@ -34,12 +39,12 @@ public class VesselVisitNotificationController : ControllerBase
         {
             var vvnDto = await _service.AddAsync(dto);
             _logger.LogInformation("API Response (201): VVN created with ID = {Id}", vvnDto.Id);
-            return CreatedAtAction(nameof(GetById), new { id = vvnDto.Id }, vvnDto);
+            return Ok(vvnDto);
         }
         catch (BusinessRuleValidationException e)
         {
             _logger.LogWarning("API Error (400): {Message}", e.Message);
-            return BadRequest(e.Message);
+            return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
         }
     }
 
@@ -54,10 +59,10 @@ public class VesselVisitNotificationController : ControllerBase
             _logger.LogInformation("API Response (200): VVN with ID = {Id} -> FOUND", id);
             return Ok(vvnDto);
         }
-        catch (BusinessRuleValidationException ex)
+        catch (BusinessRuleValidationException e)
         {
-            _logger.LogWarning("API Error (404): VVN with ID = {Id} -> NOT FOUND. {Msg}", id, ex.Message);
-            return NotFound(ex.Message);
+            _logger.LogWarning("API Error (404): VVN with ID = {Id} -> NOT FOUND. {Msg}", id, e.Message);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
 
@@ -72,11 +77,14 @@ public class VesselVisitNotificationController : ControllerBase
             var vvnDto = await _service.WithdrawByIdAsync(new VesselVisitNotificationId(id));
             return Ok(vvnDto);
         }
-        catch (BusinessRuleValidationException ex) { return BadRequest(ex.Message); }
+        catch (BusinessRuleValidationException e)
+        {
+            return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error withdrawing VVN with ID = {Id}", id);
-            return StatusCode(500, "An unexpected error occurred while withdrawing the VVN.");
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
         }
     }
 
@@ -90,11 +98,14 @@ public class VesselVisitNotificationController : ControllerBase
             var vvnDto = await _service.WithdrawByCodeAsync(new VvnCode(code));
             return Ok(vvnDto);
         }
-        catch (BusinessRuleValidationException ex) { return BadRequest(ex.Message); }
-        catch (Exception ex)
+        catch (BusinessRuleValidationException e)
         {
-            _logger.LogError(ex, "Unexpected error withdrawing VVN with Code = {code}", code);
-            return StatusCode(500, "An unexpected error occurred while withdrawing the VVN.");
+            return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unexpected error withdrawing VVN with Code = {code}", code);
+            return _refrontend.ProblemResponse("Unexpected Error", e.Message, 500);
         }
     }
 
@@ -108,11 +119,14 @@ public class VesselVisitNotificationController : ControllerBase
             var vvnDto = await _service.SubmitByCodeAsync(new VvnCode(code));
             return Ok(vvnDto);
         }
-        catch (BusinessRuleValidationException ex) { return BadRequest(ex.Message); }
+        catch (BusinessRuleValidationException e)
+        {
+            return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error submitting VVN with Code = {code}", code);
-            return StatusCode(500, "An unexpected error occurred while submitting the VVN.");
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
         }
     }
 
@@ -126,11 +140,14 @@ public class VesselVisitNotificationController : ControllerBase
             var vvnDto = await _service.SubmitByIdAsync(new VesselVisitNotificationId(id));
             return Ok(vvnDto);
         }
-        catch (BusinessRuleValidationException ex) { return BadRequest(ex.Message); }
+        catch (BusinessRuleValidationException e)
+        {
+            return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error submitting VVN with id = {id}", id);
-            return StatusCode(500, "An unexpected error occurred while submitting the VVN.");
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
         }
     }
 
@@ -146,11 +163,14 @@ public class VesselVisitNotificationController : ControllerBase
             var updatedVvn = await _service.UpdateAsync(new VesselVisitNotificationId(id), dto);
             return Ok(updatedVvn);
         }
-        catch (BusinessRuleValidationException ex) { return BadRequest(ex.Message); }
+        catch (BusinessRuleValidationException ex)
+        {
+            return _refrontend.ProblemResponse("Validation Error", ex.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error updating VVN with ID = {Id}", id);
-            return StatusCode(500, "An unexpected error occurred while updating the VVN.");
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
         }
     }
 
@@ -165,11 +185,14 @@ public class VesselVisitNotificationController : ControllerBase
             var vvnDto = await _service.AcceptVvnAsync(new VvnCode(vvn.Code));
             return Ok(vvnDto);
         }
-        catch (BusinessRuleValidationException ex) { return BadRequest(ex.Message); }
+        catch (BusinessRuleValidationException ex)
+        {
+            return _refrontend.ProblemResponse("Validation Error", ex.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error accepting VVN with id = {id}", id);
-            return StatusCode(500, "An unexpected error occurred while accepting the VVN.");
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
         }
     }
 
@@ -184,11 +207,14 @@ public class VesselVisitNotificationController : ControllerBase
             var vvnDto = await _service.MarkAsPendingAsync(dto);
             return Ok(vvnDto);
         }
-        catch (BusinessRuleValidationException ex) { return BadRequest(ex.Message); }
+        catch (BusinessRuleValidationException ex)
+        {
+            return _refrontend.ProblemResponse("Validation Error", ex.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error rejecting VVN with code = {code}", dto.VvnCode);
-            return StatusCode(500, "An unexpected error occurred while rejecting the VVN.");
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
         }
     }
 
@@ -215,8 +241,14 @@ public class VesselVisitNotificationController : ControllerBase
                 .GetInProgressPendingInformationVvnsByShippingAgentRepresentativeIdFiltersAsync(idSarWhoImAm, dto);
             return Ok(vvDtoList);
         }
-        catch (BusinessRuleValidationException ex) { return NotFound(ex.Message); }
-        catch (Exception) { return StatusCode(500, "An unexpected error occurred while fetching VVNs."); }
+        catch (BusinessRuleValidationException ex)
+        {
+            return _refrontend.ProblemResponse("Not Found", ex.Message, 404);
+        }
+        catch (Exception ex)
+        {
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
+        }
     }
 
     
@@ -242,8 +274,14 @@ public class VesselVisitNotificationController : ControllerBase
                 .GetWithdrawnVvnsByShippingAgentRepresentativeIdFiltersAsync(idSarWhoImAm, dto);
             return Ok(vvns);
         }
-        catch (BusinessRuleValidationException ex) { return NotFound(ex.Message); }
-        catch (Exception) { return StatusCode(500, "An unexpected error occurred while retrieving withdrawn VVNs."); }
+        catch (BusinessRuleValidationException ex)
+        {
+            return _refrontend.ProblemResponse("Not Found", ex.Message, 404);
+        }
+        catch (Exception ex)
+        {
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
+        }
     }
 
 
@@ -272,8 +310,14 @@ public class VesselVisitNotificationController : ControllerBase
                 .GetSubmittedVvnsByShippingAgentRepresentativeIdFiltersAsync(idSarWhoImAm, dto);
             return Ok(vvns);
         }
-        catch (BusinessRuleValidationException ex) { return NotFound(ex.Message); }
-        catch (Exception) { return StatusCode(500, "An unexpected error occurred while retrieving submitted VVNs."); }
+        catch (BusinessRuleValidationException ex)
+        {
+            return _refrontend.ProblemResponse("Not Found", ex.Message, 404);
+        }
+        catch (Exception ex)
+        {
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
+        }
     }
 
 
@@ -304,16 +348,17 @@ public class VesselVisitNotificationController : ControllerBase
                 .GetAcceptedVvnsByShippingAgentRepresentativeIdFiltersAsync(idSarWhoImAm, dto);
             return Ok(vvns);
         }
-        catch (BusinessRuleValidationException ex) { return NotFound(ex.Message); }
-        catch (Exception) { return StatusCode(500, "An unexpected error occurred while retrieving accepted VVNs."); }
+        catch (BusinessRuleValidationException ex)
+        {
+            return _refrontend.ProblemResponse("Not Found", ex.Message, 404);
+        }
+        catch (Exception ex)
+        {
+            return _refrontend.ProblemResponse("Unexpected Error", ex.Message, 500);
+        }
     }
 
     // ===== ADMIN (ALL) =====
-    // Estes 4 endpoints correspondem exatamente ao que o teu FE chama:
-    // /api/VesselVisitNotification/all/inProgress-pendingInformation
-    // /api/VesselVisitNotification/all/withDrawn
-    // /api/VesselVisitNotification/all/submitted
-    // /api/VesselVisitNotification/all/accepted
 
     [HttpGet("all/inProgress-pendingInformation")]
     public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetAllInProgressPendingAsync(

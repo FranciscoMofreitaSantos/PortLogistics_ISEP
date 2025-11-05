@@ -8,7 +8,7 @@ using SEM5_PI_WEBAPI.utils;
 
 namespace SEM5_PI_WEBAPI.Controllers;
 
-[Authorize(Roles = "PortAuthorityOfficer")]
+//[Authorize(Roles = "PortAuthorityOfficer")]
 [ApiController]
 [Route("api/[controller]")]
 public class StorageAreasController : ControllerBase
