@@ -448,7 +448,7 @@
     "createButton": "Criar Novo Recurso",
     "searchPlaceholder": "Pesquisar por código...",
     "noResourcesFound": "Nenhum recurso físico encontrado.",
-    "createModalTitle": "Criar Novo Recurso Físico",
+    "createModalTitle": "Novo Recurso",
     "editModalTitle": "Editar Recurso: {{code}}",
     "table": {
       "code": "Código",
@@ -456,6 +456,12 @@
       "type": "Tipo",
       "status": "Estado",
       "actions": "Ações"
+    },
+    "steps": {
+      "type": "Etapa 1: Tipo de Recurso",
+      "details": "Etapa 2: Detalhes",
+      "assignment": "Etapa 3: Atribuição",
+      "selectTypePrompt": "Que tipo de recurso pretende criar?"
     },
     "form": {
       "description": "Descrição",
@@ -465,7 +471,22 @@
       "qualification": "Qualificação",
       "selectOption": "Selecione uma opção...",
       "selectOptionNone": "Nenhuma",
-      "none": "N/A"
+      "none": "N/A",
+      "minutes": "min",
+      "descriptionPlaceholder": "Ex: Grua de Cais #3 (Secção Norte)",
+      "capacityPlaceholder": "Ex: 5000 (kg)",
+      "setupTimePlaceholder": "Ex: 30 (minutos)",
+      "opcional": "Opcional"
+    },
+    "status": {
+      "Available": "Disponível",
+      "Unavailable": "Indisponível",
+      "UnderMaintenance": "Em Manutenção"
+    },
+    "stats": {
+      "total": "Recursos\u00A0Totais",
+      "available": "Disponíveis",
+      "maintenance": "Em\u00A0Manutenção"
     },
     "types": {
       "STSCrane": "Grua de Cais (STS)",
@@ -481,6 +502,15 @@
     "details": {
       "title": "Detalhes do Recurso: {{code}}"
     },
+    "searchBy": {
+      "title": "Filtrar por...",
+      "all": "Mostrar Todos",
+      "code": "Código",
+      "description": "Descrição",
+      "type": "Tipo de Recurso",
+      "status": "Estado",
+      "errorEmpty": "O campo de pesquisa não pode estar vazio"
+    },
     "actions": {
       "search": "Pesquisar",
       "clear": "Limpar",
@@ -493,7 +523,9 @@
       "deactivate": "Desativar",
       "activate": "Ativar",
       "save": "Guardar",
-      "saving": "A guardar..."
+      "saving": "A guardar...",
+      "next": "Seguinte",
+      "back": "Anterior"
     },
     "confirm": {
       "deactivate": "Tem a certeza que deseja desativar este recurso?",
@@ -509,11 +541,12 @@
       "loadAll": "Erro ao carregar recursos.",
       "search": "Erro ao pesquisar recurso.",
       "loadQualifications": "Erro ao carregar qualificações.",
-      "descriptionRequired": "A descrição é obrigatória.",
+      "descriptionRequired": "A descrição é obrigatória para continuar.",
       "createFailed": "Falha ao criar recurso.",
       "updateFailed": "Falha ao atualizar recurso.",
       "deactivateFailed": "Falha ao desativar recurso.",
-      "activateFailed": "Falha ao reativar recurso."
+      "activateFailed": "Falha ao reativar recurso.",
+      "loadQualificationDetails": "Nome da qualif. indisponível"
     }
   }
 }

@@ -451,7 +451,7 @@
     "createButton": "Create New Resource",
     "searchPlaceholder": "Search by code...",
     "noResourcesFound": "No physical resources found.",
-    "createModalTitle": "Create New Physical Resource",
+    "createModalTitle": "New Resource",
     "editModalTitle": "Edit Resource: {{code}}",
     "table": {
       "code": "Code",
@@ -468,7 +468,22 @@
       "qualification": "Qualification",
       "selectOption": "Select an option...",
       "selectOptionNone": "None",
-      "none": "N/A"
+      "none": "N/A",
+      "minutes": "min",
+      "descriptionPlaceholder": "Ex: Quay Crane #3 (North Section)",
+      "capacityPlaceholder": "Ex: 5000 (kg)",
+      "setupTimePlaceholder": "Ex: 30 (minutes)",
+      "opcional": "Optional"
+    },
+    "status": {
+      "Available": "Available",
+      "Unavailable": "Unavailable",
+      "UnderMaintenance": "Under Maintenance"
+    },
+    "stats": {
+      "total": "Total Resources",
+      "available": "Available",
+      "maintenance": "Under Maintenance"
     },
     "types": {
       "STSCrane": "Ship-to-Shore Crane (STS)",
@@ -484,6 +499,15 @@
     "details": {
       "title": "Resource Details: {{code}}"
     },
+    "searchBy": {
+      "title": "Filter by...",
+      "all": "Show All",
+      "code": "Code",
+      "description": "Description",
+      "type": "Resource Type",
+      "status": "Status",
+      "errorEmpty": "The search field cannot be empty"
+    },
     "actions": {
       "search": "Search",
       "clear": "Clear",
@@ -496,7 +520,9 @@
       "deactivate": "Deactivate",
       "activate": "Activate",
       "save": "Save",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "next": "Next",
+      "back": "Back"
     },
     "confirm": {
       "deactivate": "Are you sure you want to deactivate this resource?",
@@ -512,11 +538,12 @@
       "loadAll": "Error loading resources.",
       "search": "Error searching for resource.",
       "loadQualifications": "Error loading qualifications.",
-      "descriptionRequired": "Description is required.",
+      "descriptionRequired": "Description is required to continue.",
       "createFailed": "Failed to create resource.",
       "updateFailed": "Failed to update resource.",
       "deactivateFailed": "Failed to deactivate resource.",
-      "activateFailed": "Failed to reactivate resource."
+      "activateFailed": "Failed to reactivate resource.",
+      "loadQualificationDetails": "Qualif. name unavailable"
     }
   }
 }
