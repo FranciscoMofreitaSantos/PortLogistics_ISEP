@@ -1,17 +1,32 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-//import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { updatePhysicalResource } from "../services/physicalResourceService";
 import { getQualifications } from "../../qualifications/services/qualificationService";
 import type { Qualification } from "../../qualifications/types/qualification";
 import type { PhysicalResource, UpdatePhysicalResource } from "../types/physicalResource";
+import { PhysicalResourceType } from "../types/physicalResource";
 import "../style/physicalResource.css";
+
+const getResourceIcon = (type: PhysicalResourceType | string) => {
+    switch (type) {
+        case PhysicalResourceType.STSCrane: return "🏗️";
+        case PhysicalResourceType.YGCrane: return "🏢";
+        case PhysicalResourceType.MCrane: return "🦾";
+        case PhysicalResourceType.Truck: return "🚚";
+        case PhysicalResourceType.Forklift: return "🍴";
+        case PhysicalResourceType.RStacker: return "📦";
+        case PhysicalResourceType.SCarrier: return "🔄";
+        case PhysicalResourceType.TugBoat: return "🚤";
+        default: return "⚙️";
+    }
+};
 
 interface PhysicalResourceEditModalProps {
     isOpen: boolean;
     onClose: () => void;
     onUpdated: (updatedResource: PhysicalResource) => void;
-    resource: PhysicalResource; // O recurso que estamos a editar
+    resource: PhysicalResource;
 }
 
 function PhysicalResourceEditModal({ isOpen, onClose, onUpdated, resource }: PhysicalResourceEditModalProps) {
@@ -21,7 +36,6 @@ function PhysicalResourceEditModal({ isOpen, onClose, onUpdated, resource }: Phy
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
-    // Pré-popular o formulário quando o modal abre
     useEffect(() => {
         if (isOpen && resource) {
             setFormData({
@@ -31,23 +45,19 @@ function PhysicalResourceEditModal({ isOpen, onClose, onUpdated, resource }: Phy
                 qualificationId: resource.qualificationID || undefined,
             });
             setError(null);
-        }
-    }, [isOpen, resource]);
 
-    // Buscar qualificações quando o modal abre
-    useEffect(() => {
-        if (isOpen) {
             const fetchQualifications = async () => {
                 try {
                     const data = await getQualifications();
                     setQualifications(data);
                 } catch (err) {
-                    //toast.error(t("physicalResource.errors.loadQualifications"));
+                    toast.error(t("physicalResource.errors.loadQualifications"));
                 }
             };
             fetchQualifications();
         }
-    }, [isOpen, t]);
+    }, [isOpen, resource, t]);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -71,13 +81,20 @@ function PhysicalResourceEditModal({ isOpen, onClose, onUpdated, resource }: Phy
                 throw new Error(t("physicalResource.errors.descriptionRequired"));
             }
 
-            const updatedResource = await updatePhysicalResource(resource.id, formData);
-            //toast.success(t("physicalResource.success.updated"));
-            onUpdated(updatedResource); // Passa o recurso atualizado para o pai
+            const dto: UpdatePhysicalResource = {
+                description: formData.description,
+                operationalCapacity: formData.operationalCapacity,
+                setupTime: formData.setupTime,
+                qualificationId: formData.qualificationId,
+            }
+
+            const updatedResource = await updatePhysicalResource(resource.id, dto);
+            toast.success(t("physicalResource.success.updated"));
+            onUpdated(updatedResource);
         } catch (err) {
             const error = err as Error;
             setError(error);
-            //toast.error(error.message || t("physicalResource.errors.updateFailed"));
+            toast.error(error.message || t("physicalResource.errors.updateFailed"));
         } finally {
             setIsLoading(false);
         }
@@ -89,80 +106,121 @@ function PhysicalResourceEditModal({ isOpen, onClose, onUpdated, resource }: Phy
 
     return (
         <div className="pr-modal-overlay">
-            <div className="pr-modal-content">
-                <h2>{t("physicalResource.editModalTitle", { code: resource.code.value })}</h2>
+            {}
+            <form onSubmit={handleSubmit} className="pr-details-modal-content">
 
-                <form onSubmit={handleSubmit} className="pr-form">
-                    {/* Description */}
-                    <div className="pr-form-group">
-                        <label htmlFor="description">{t("physicalResource.form.description")}</label>
-                        <input
-                            type="text"
-                            id="description"
-                            name="description"
-                            value={formData.description || ""}
-                            onChange={handleChange}
-                            required
-                        />
+                {}
+                <div className="pr-details-hero">
+                    <div className="hero-icon-wrapper">
+                        {getResourceIcon(resource.physicalResourceType)}
+                    </div>
+                    <div className="hero-text">
+                        <h2>{t("physicalResource.editModalTitle", { code: resource.code.value })}</h2>
+                        {}
+                        <p className="details-description">{t(`physicalResource.types.${resource.physicalResourceType}`)}</p>
+                    </div>
+                </div>
+
+                {}
+                <div className="pr-details-grid pr-edit-grid">
+
+                    {}
+                    <div className="info-card editable-card">
+                        <div className="info-card-header">
+                            <span>📝</span> {t("physicalResource.form.description")}
+                        </div>
+                        <div className="info-card-body-editable">
+                            <input
+                                type="text"
+                                id="description"
+                                name="description"
+                                className="info-card-input"
+                                value={formData.description || ""}
+                                onChange={handleChange}
+                                placeholder={t("physicalResource.form.descriptionPlaceholder")}
+                                required
+                            />
+                        </div>
                     </div>
 
-                    {/* Operational Capacity */}
-                    <div className="pr-form-group">
-                        <label htmlFor="operationalCapacity">{t("physicalResource.form.operationalCapacity")}</label>
-                        <input
-                            type="number"
-                            id="operationalCapacity"
-                            name="operationalCapacity"
-                            value={formData.operationalCapacity ?? ""}
-                            onChange={handleChange}
-                            min="0"
-                        />
+                    {}
+                    <div className="info-card editable-card">
+                        <div className="info-card-header">
+                            <span>🎓</span> {t("physicalResource.form.qualification")}
+                        </div>
+                        <div className="info-card-body-editable">
+                            <select
+                                id="qualificationId"
+                                name="qualificationId"
+                                className="info-card-input"
+                                value={formData.qualificationId ?? ""}
+                                onChange={handleChange}
+                            >
+                                <option value="">{t("physicalResource.form.selectOptionNone")}</option>
+                                {qualifications.map((q) => (
+                                    <option key={q.id} value={q.id}>
+                                        {q.name} ({q.code})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
-                    {/* Setup Time */}
-                    <div className="pr-form-group">
-                        <label htmlFor="setupTime">{t("physicalResource.form.setupTime")}</label>
-                        <input
-                            type="number"
-                            id="setupTime"
-                            name="setupTime"
-                            value={formData.setupTime ?? ""}
-                            onChange={handleChange}
-                            min="0"
-                        />
+                    {}
+                    <div className="info-card editable-card">
+                        <div className="info-card-header">
+                            <span>⚙️</span> {t("physicalResource.form.operationalCapacity")}
+                        </div>
+                        <div className="info-card-body-editable">
+                            <input
+                                type="number"
+                                id="operationalCapacity"
+                                name="operationalCapacity"
+                                className="info-card-input"
+                                value={formData.operationalCapacity ?? ""}
+                                onChange={handleChange}
+                                placeholder={t("physicalResource.form.capacityPlaceholder")}
+                                min="0"
+                            />
+                        </div>
                     </div>
 
-                    {/* Qualification ID */}
-                    <div className="pr-form-group">
-                        <label htmlFor="qualificationId">{t("physicalResource.form.qualification")}</label>
-                        <select
-                            id="qualificationId"
-                            name="qualificationId" // Corresponde ao DTO 'UpdatingPhysicalResource'
-                            value={formData.qualificationId ?? ""}
-                            onChange={handleChange}
-                        >
-                            <option value="">{t("physicalResource.form.selectOptionNone")}</option>
-                            {qualifications.map((q) => (
-                                // No update, enviamos o ID (Guid) da qualificação
-                                <option key={q.id} value={q.id}>
-                                    {q.name} ({q.code})
-                                </option>
-                            ))}
-                        </select>
+                    {}
+                    <div className="info-card editable-card">
+                        <div className="info-card-header">
+                            <span>⏱️</span> {t("physicalResource.form.setupTime")}
+                        </div>
+                        <div className="info-card-body-editable">
+                            <input
+                                type="number"
+                                id="setupTime"
+                                name="setupTime"
+                                className="info-card-input"
+                                value={formData.setupTime ?? ""}
+                                onChange={handleChange}
+                                placeholder={t("physicalResource.form.setupTimePlaceholder")}
+                                min="0"
+                            />
+                        </div>
                     </div>
+                </div>
 
-                    {error && <p className="pr-error-message">{error.message}</p>}
-
-                    <div className="pr-modal-actions">
-                        <button type="button" onClick={onClose} className="pr-cancel-button" disabled={isLoading}>
-                            {t("physicalResource.actions.cancel")}
-                        </button>
-                        <button type="submit" className="pr-submit-button" disabled={isLoading}>
-                            {isLoading ? t("physicalResource.actions.saving") : t("physicalResource.actions.save")}
-                        </button>
+                {error && (
+                    <div className="pr-edit-error-bar">
+                        <p className="pr-error-message">{error.message}</p>
                     </div>
-                </form>
-            </div>
+                )}
+
+                {}
+                <div className="pr-modal-actions">
+                    <button type="button" onClick={onClose} className="pr-cancel-button" disabled={isLoading}>
+                        {t("physicalResource.actions.cancel")}
+                    </button>
+                    <button type="submit" className="pr-submit-button" disabled={isLoading}>
+                        {isLoading ? t("physicalResource.actions.saving") : t("physicalResource.actions.save")}
+                    </button>
+                </div>
+            </form>
         </div>
     );
 }
