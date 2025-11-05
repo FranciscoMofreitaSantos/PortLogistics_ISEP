@@ -1,6 +1,6 @@
 // src/features/vvn/pages/VvnListPage.tsx
 import { useEffect, useMemo, useState } from "react";
-import { FaShip, FaPlus, FaPaperPlane, FaArrowRotateLeft } from "react-icons/fa6";
+import { FaShip, FaPlus, FaPaperPlane, FaArrowRotateLeft, FaPen } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import vvnService from "../service/vvnService";
@@ -27,6 +27,17 @@ const GUID_RE =
     /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
 
 /* ========== Helpers ========== */
+function isoToLocalInput(s?: string | null): string {
+    if (!s) return "";
+    const d = new Date(s);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+}
+
 function shortDT(s?: string | null) {
     if (!s) return "-";
     const d = new Date(s);
@@ -50,6 +61,67 @@ function isoString(x: Iso6346Code | string | undefined | null) {
     if (typeof x === "string") return x;
     return (x as any).value || (x as any).Value || "-";
 }
+
+type AnyJson = Record<string, any>;
+
+function dtLocalToIso(s: string): string {
+    // "YYYY-MM-DDTHH:mm" -> "YYYY-MM-DDTHH:mm:00"
+    if (!s) return "";
+    return s.length === 16 ? `${s}:00` : s;
+}
+
+async function readJsonFile(f: File | null): Promise<AnyJson | null> {
+    if (!f) return null;
+    const text = await f.text();
+    try {
+        return JSON.parse(text);
+    } catch {
+        toast.error(`JSON ${f.name}`);
+        return null;
+    }
+}
+
+function downloadTemplate(filename: string, obj: AnyJson) {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ===== TEMPLATES =====
+const crewTemplate: AnyJson = {
+    totalCrew: 12,
+    captainName: "John Smith",
+    crewMembers: [
+        { name: "Alice", role: "Captain", nationality: "Portugal", citizenId: "A12345" },
+        { name: "Bob", role: "ChiefOfficer", nationality: "Spain", citizenId: "B98765" }
+    ]
+};
+
+const cargoTemplateLoading: AnyJson = {
+    type: "Loading",
+    createdBy: "agent@example.com",
+    entries: [
+        {
+            bay: 1, row: 0, tier: 0, storageAreaName: "Warehouse B",
+            container: { isoCode: "MSCU6639870", description: "Electronics Loading", type: "General", weightKg: 9000 }
+        }
+    ]
+};
+
+const cargoTemplateUnloading: AnyJson = {
+    type: "Unloading",
+    createdBy: "agent@example.com",
+    entries: [
+        {
+            bay: 0, row: 0, tier: 0, storageAreaName: "Yard A",
+            container: { isoCode: "CSQU3054383", description: "Furniture Loading", type: "General", weightKg: 12000 }
+        }
+    ]
+};
 
 /* ====== AUTH PLACEHOLDERS ====== */
 function isAdminLocalStorage(): boolean {
@@ -100,7 +172,7 @@ export default function VvnListPage() {
     // contagens header
     const [counts, setCounts] = useState({ inprogress: 0, submitted: 0, accepted: 0, withdrawn: 0 });
 
-    // modais (reject/update – úteis para futuro)
+    // modais (reject/update)
     const [rejectOpen, setRejectOpen] = useState(false);
     const [rejectMsg, setRejectMsg] = useState("");
     const [updOpen, setUpdOpen] = useState(false);
@@ -113,6 +185,29 @@ export default function VvnListPage() {
     const [unloadOpen, setUnloadOpen] = useState(false);
     const [tasksOpen, setTasksOpen] = useState(false);
 
+    // === CREATE MODAL STATE ===
+    const [createOpen, setCreateOpen] = useState(false);
+    const [cEta, setCEta] = useState<string>("");        // input type="datetime-local"
+    const [cEtd, setCEtd] = useState<string>("");
+    const [cVolume, setCVolume] = useState<string>("");
+    const [cDocuments, setCDocuments] = useState<string>("");
+    const [cVesselImo, setCVesselImo] = useState<string>("");
+    const [cEmailSar, setCEmailSar] = useState<string>("");
+
+    const [fileCrew, setFileCrew] = useState<File | null>(null);
+    const [fileLoad, setFileLoad] = useState<File | null>(null);
+    const [fileUnload, setFileUnload] = useState<File | null>(null);
+
+    // UPDATE MODAL STATE (completo)
+    const [updEta, setUpdEta] = useState<string>("");
+    const [updEtd, setUpdEtd] = useState<string>("");
+    const [updImo, setUpdImo] = useState<string>("");
+
+    // ficheiros JSON opcionais
+    const [updCrewFile, setUpdCrewFile] = useState<File | null>(null);
+    const [updLoadFile, setUpdLoadFile] = useState<File | null>(null);
+    const [updUnloadFile, setUpdUnloadFile] = useState<File | null>(null);
+
     // se NÃO fores admin, tentar descobrir SAR; se fores admin, limpar sarId para evitar ramo SAR
     useEffect(() => {
         if (admin) {
@@ -121,12 +216,12 @@ export default function VvnListPage() {
         }
         const id = getCurrentSarId();
         setSarId(id);
-        if (!id) toast("SAR ID não definido (placeholder).", { icon: "⚠️" });
+        // evitamos hardcode de idioma: se faltar sarId, não tostar mensagem específica
     }, [admin]);
 
     const MIN_LOADING_TIME = 500;
-    async function runWithLoading<T>(promise: Promise<T>) {
-        const id = toast.loading(t("common.loading") as string);
+    async function runWithLoading<T>(promise: Promise<T>, loadingText: string) {
+        const id = toast.loading(loadingText);
         const start = Date.now();
         try {
             return await promise;
@@ -211,7 +306,7 @@ export default function VvnListPage() {
 
             setVvns(data);
             setSelected(data[0] ?? null);
-            toast.success((t("vvn.toast.loaded") as string));
+            toast.success(t("vvn.toast.loaded") as string);
         } catch (e: any) {
             toast.error(e?.response?.data ?? (t("vvn.toast.loadError") as string));
         } finally {
@@ -264,14 +359,75 @@ export default function VvnListPage() {
     const filtered = useMemo(() => vvns, [vvns]);
 
     // === AÇÕES ===
+    function openUpdate() {
+        if (!selected) return;
+        setUpdEta(isoToLocalInput(selected.estimatedTimeArrival));
+        setUpdEtd(isoToLocalInput(selected.estimatedTimeDeparture));
+        setUpdVolume(selected.volume != null ? String(selected.volume) : "");
+        setUpdDock(selected.dock ?? "");
+        setUpdImo(selected.vesselImo ?? "");
+
+        // limpa ficheiros
+        setUpdCrewFile(null);
+        setUpdLoadFile(null);
+        setUpdUnloadFile(null);
+
+        setUpdOpen(true);
+    }
+
+    async function doCreate() {
+        // validações básicas
+        if (!cEta || !cEtd) return toast.error(t("vvn.validation.etaEtdRequired"));
+        if (!cVolume || Number.isNaN(Number(cVolume))) return toast.error(t("vvn.validation.volumeInvalid"));
+        const IMO_RE = /^IMO\s?\d{7}$/i;
+        if (!IMO_RE.test(cVesselImo.trim())) return toast.error(t("vvn.validation.imoInvalid"));
+        if (!cEmailSar.trim()) return toast.error(t("vvn.validation.sarEmailRequired"));
+
+        // Crew Manifest obrigatório
+        if (!fileCrew) return toast.error(t("vvn.validation.crewRequired"));
+
+        const [crewJson, loadJson, unloadJson] = await Promise.all([
+            readJsonFile(fileCrew),
+            readJsonFile(fileLoad),
+            readJsonFile(fileUnload),
+        ]);
+
+        if (!crewJson) return; // já houve toast no readJsonFile
+
+        const dto = {
+            estimatedTimeArrival: dtLocalToIso(cEta),
+            estimatedTimeDeparture: dtLocalToIso(cEtd),
+            volume: Number(cVolume),
+            documents: cDocuments?.trim() || null,
+            crewManifest: crewJson,                 // obrigatório
+            loadingCargoManifest: loadJson || null, // opcional
+            unloadingCargoManifest: unloadJson || null, // opcional
+            vesselImo: cVesselImo.trim(),
+            emailSar: cEmailSar.trim(),
+        };
+
+        await runWithLoading(vvnService.createVvn(dto), t("vvn.loading.creating") as string);
+        toast.success(t("vvn.toast.loaded") as string);
+        setCreateOpen(false);
+
+        // limpar campos
+        setCEta(""); setCEtd(""); setCVolume(""); setCDocuments("");
+        setCVesselImo(""); setCEmailSar("");
+        setFileCrew(null); setFileLoad(null); setFileUnload(null);
+
+        // refresh
+        load();
+        loadCounts();
+    }
+
     async function doSubmit(v: VesselVisitNotificationDto) {
-        await runWithLoading(vvnService.submitById(v.id));
+        await runWithLoading(vvnService.submitById(v.id), t("vvn.loading.submitting") as string);
         toast.success(t("vvn.toast.submitSuccess") as string);
         load();
         loadCounts();
     }
     async function doWithdraw(v: VesselVisitNotificationDto) {
-        await runWithLoading(vvnService.withdrawById(v.id));
+        await runWithLoading(vvnService.withdrawById(v.id), t("vvn.loading.withdrawing") as string);
         toast.success(t("vvn.toast.withdrawSuccess") as string);
         load();
         loadCounts();
@@ -284,7 +440,7 @@ export default function VvnListPage() {
             return;
         }
         const dto: RejectVesselVisitNotificationDto = { vvnCode: selected.code, reason: rejectMsg.trim() };
-        await runWithLoading(vvnService.rejectByCode(dto));
+        await runWithLoading(vvnService.rejectByCode(dto), t("vvn.loading.rejecting") as string);
         setRejectOpen(false);
         setRejectMsg("");
         toast.success(t("vvn.toast.rejectSuccess") as string);
@@ -294,14 +450,47 @@ export default function VvnListPage() {
 
     async function doUpdate() {
         if (!selected) return;
+
         const dto: UpdateVesselVisitNotificationDto = {
-            volume: updVolume === "" ? undefined : Number(updVolume),
-            dock: updDock.trim() || undefined,
+            documents: null, // nunca enviar documentos no UPDATE
         };
-        await runWithLoading(vvnService.updateVvn(selected.id, dto));
+
+        if (updEta) dto.estimatedTimeArrival = dtLocalToIso(updEta);
+        if (updEtd) dto.estimatedTimeDeparture = dtLocalToIso(updEtd);
+
+        if (updVolume !== "") {
+            const v = Number(updVolume);
+            if (Number.isNaN(v) || v < 0) return toast.error(t("vvn.validation.volumeInvalid"));
+            dto.volume = v;
+        }
+
+        if (updDock.trim()) dto.dock = updDock.trim();
+
+        if (updImo.trim()) {
+            const IMO_RE = /^IMO\s?\d{7}$/i;
+            if (!IMO_RE.test(updImo.trim())) return toast.error(t("vvn.validation.imoInvalid"));
+            dto.imoNumber = updImo.trim().toUpperCase().replace(/\s+/, " ");
+        }
+
+        // ficheiros JSON opcionais
+        const [crewJson, loadJson, unloadJson] = await Promise.all([
+            readJsonFile(updCrewFile),
+            readJsonFile(updLoadFile),
+            readJsonFile(updUnloadFile),
+        ]);
+        if (updCrewFile && !crewJson) return;
+        if (updLoadFile && !loadJson) return;
+        if (updUnloadFile && !unloadJson) return;
+
+        if (crewJson) dto.crewManifest = crewJson;
+        if (loadJson) dto.loadingCargoManifest = loadJson;
+        if (unloadJson) dto.unloadingCargoManifest = unloadJson;
+
+        await runWithLoading(vvnService.updateVvn(selected.id, dto), t("vvn.loading.updating") as string);
         setUpdOpen(false);
         toast.success(t("vvn.toast.updateSuccess") as string);
         load();
+        loadCounts?.();
     }
 
     /* RENDER */
@@ -321,8 +510,8 @@ export default function VvnListPage() {
                     </div>
                 </div>
                 <div className="vvn-header-right">
-                    <button className="vt-create-btn-top" onClick={() => toast(t("vvn.new") as string)}>
-                        <FaPlus /> {t("vvn.new") || "Nova VVN"}
+                    <button className="vt-create-btn-top" onClick={() => setCreateOpen(true)}>
+                        <FaPlus /> {t("vvn.new")}
                     </button>
                 </div>
             </div>
@@ -386,7 +575,7 @@ export default function VvnListPage() {
                                         <span className={`vvn-status ${statusKey}`}>{v.status}</span>
                                     </div>
                                     <div className="vvn-item-sub">
-                                        IMO {v.vesselImo} · ETA {shortDT(v.estimatedTimeArrival)} · ETD {shortDT(v.estimatedTimeDeparture)}
+                                        {t("vvn.filters.imo")} {v.vesselImo} · {t("vvn.details.eta")} {shortDT(v.estimatedTimeArrival)} · {t("vvn.details.etd")} {shortDT(v.estimatedTimeDeparture)}
                                     </div>
                                 </button>
                             );
@@ -403,11 +592,11 @@ export default function VvnListPage() {
                                 <div>
                                     <h3 className="vvn-title">{selected.code}</h3>
                                     <div className="vvn-sub">
-                                        IMO {selected.vesselImo} • {t("vvn.details.status")}: <b>{selected.status}</b>
+                                        {t("vvn.filters.imo")} {selected.vesselImo} • {t("vvn.details.status")}: <b>{selected.status}</b>
                                     </div>
                                 </div>
 
-                                {/* BOTÕES: Submit / Withdraw (sem Accept) */}
+                                {/* BOTÕES: Submit / Withdraw / Update */}
                                 <div className="vvn-actions">
                                     {(() => {
                                         const s = (selected.status || "").toString().toLowerCase();
@@ -419,6 +608,13 @@ export default function VvnListPage() {
                                                 </button>
                                                 <button className="sa-btn sa-btn-danger" onClick={() => doWithdraw(selected)} title={t("vvn.actions.withdraw") as string}>
                                                     <FaArrowRotateLeft /> {t("vvn.actions.withdraw")}
+                                                </button>
+                                                <button
+                                                    className="sa-btn"
+                                                    onClick={openUpdate}
+                                                    title={t("common.update") as string}
+                                                >
+                                                    <FaPen /> {t("common.update")}
                                                 </button>
                                             </>
                                         ) : (
@@ -453,33 +649,33 @@ export default function VvnListPage() {
                                 <button className="vvn-tile is-crew" onClick={() => setCrewOpen(true)}>
                                     <span className="vvn-ico">🧑‍✈️</span>
                                     <span className="vvn-text">
-                    <b>{t("vvn.modals.crew.title")}</b>
-                    <span> {t("vvn.modals.crew.title").toString().includes("Crew") ? "view crew" : "ver tripulação"}</span>
-                  </span>
+                                        <b>{t("vvn.modals.crew.title")}</b>
+                                    <span> {t("vvn.modals.crew.title").toString().includes("Crew") ? "view crew" : "ver tripulação"}</span>
+                                  </span>
                                 </button>
 
                                 <button className="vvn-tile is-loading" onClick={() => setLoadOpen(true)}>
                                     <span className="vvn-ico">📦</span>
                                     <span className="vvn-text">
-                    <b>{t("vvn.modals.loading.title")}</b>
-                    <span> {t("vvn.modals.loading.empty").toString().includes("No") ? "loading containers" : "containers de embarque"}</span>
-                  </span>
+                                        <b>{t("vvn.modals.loading.title")}</b>
+                                    <span> {t("vvn.modals.loading.empty").toString().includes("No") ? "loading containers" : "containers de embarque"}</span>
+                                  </span>
                                 </button>
 
                                 <button className="vvn-tile is-unloading" onClick={() => setUnloadOpen(true)}>
                                     <span className="vvn-ico">📤</span>
                                     <span className="vvn-text">
-                    <b>{t("vvn.modals.unloading.title")}</b>
-                    <span> {t("vvn.modals.unloading.empty").toString().includes("No") ? "unloading" : "desembarque"}</span>
-                  </span>
+                                        <b>{t("vvn.modals.unloading.title")}</b>
+                                        <span> {t("vvn.modals.unloading.empty").toString().includes("No") ? "unloading" : "desembarque"}</span>
+                                    </span>
                                 </button>
 
                                 <button className="vvn-tile is-tasks" onClick={() => setTasksOpen(true)}>
                                     <span className="vvn-ico">✅</span>
                                     <span className="vvn-text">
-                    <b>{t("vvn.modals.tasks.title")}</b>
-                    <span> {t("vvn.modals.tasks.empty").toString().includes("No") ? "open" : "em aberto"}</span>
-                  </span>
+                                        <b>{t("vvn.modals.tasks.title")}</b>
+                                        <span> {t("vvn.modals.tasks.empty").toString().includes("No") ? "open" : "em aberto"}</span>
+                                    </span>
                                 </button>
                             </div>
                         </>
@@ -488,6 +684,73 @@ export default function VvnListPage() {
             </div>
 
             {/* ======= POPUPS ======= */}
+            {createOpen && (
+                <div className="sa-modal-backdrop" onClick={() => setCreateOpen(false)}>
+                    <div className="vvn-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="sa-dock-head">
+                            <div className="sa-dock-spacer" />
+                            <h3 className="sa-dock-title">➕ {t("vvn.new")}</h3>
+                            <button className="sa-icon-btn sa-dock-close" onClick={() => setCreateOpen(false)}>✖</button>
+                        </div>
+
+                        <div className="vvn-modal-body grid2">
+                            <div className="sa-field">
+                                <label>{t("vvn.details.eta")}</label>
+                                <input type="datetime-local" className="sa-input" value={cEta} onChange={e=>setCEta(e.target.value)} />
+                            </div>
+                            <div className="sa-field">
+                                <label>{t("vvn.details.etd")}</label>
+                                <input type="datetime-local" className="sa-input" value={cEtd} onChange={e=>setCEtd(e.target.value)} />
+                            </div>
+                            <div className="sa-field">
+                                <label>{t("vvn.details.volume")}</label>
+                                <input type="number" min={0} className="sa-input" value={cVolume} onChange={e=>setCVolume(e.target.value)} />
+                            </div>
+                            <div className="sa-field">
+                                <label>Documents</label>
+                                <input className="sa-input" value={cDocuments} onChange={e=>setCDocuments(e.target.value)} />
+                            </div>
+                            <div className="sa-field">
+                                <label>{t("vvn.filters.imo")}</label>
+                                <input className="sa-input" placeholder="IMO 9823455" value={cVesselImo} onChange={e=>setCVesselImo(e.target.value)} />
+                            </div>
+                            <div className="sa-field">
+                                <label>Email SAR</label>
+                                <input type="email" className="sa-input" placeholder="agent@example.com" value={cEmailSar} onChange={e=>setCEmailSar(e.target.value)} />
+                            </div>
+                        </div>
+
+                        <div className="vvn-modal-body">
+                            <div className="sa-field">
+                                <label>{t("vvn.modals.crew.title")} *</label>
+                                <input type="file" accept="application/json" onChange={e=>setFileCrew(e.target.files?.[0] ?? null)} />
+                                <button className="sa-btn sa-btn-ghost" onClick={()=>downloadTemplate("CrewManifest.template.json", crewTemplate)}>
+                                    {t("common.downloadTemplate")}
+                                </button>
+                            </div>
+                            <div className="sa-field">
+                                <label>{t("vvn.modals.loading.title")} (JSON)</label>
+                                <input type="file" accept="application/json" onChange={e=>setFileLoad(e.target.files?.[0] ?? null)} />
+                                <button className="sa-btn sa-btn-ghost" onClick={()=>downloadTemplate("LoadingCargoManifest.template.json", cargoTemplateLoading)}>
+                                    {t("common.downloadTemplate")}
+                                </button>
+                            </div>
+                            <div className="sa-field">
+                                <label>{t("vvn.modals.unloading.title")} (JSON)</label>
+                                <input type="file" accept="application/json" onChange={e=>setFileUnload(e.target.files?.[0] ?? null)} />
+                                <button className="sa-btn sa-btn-ghost" onClick={()=>downloadTemplate("UnloadingCargoManifest.template.json", cargoTemplateUnloading)}>
+                                    {t("common.downloadTemplate")}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="vvn-modal-actions">
+                            <button className="sa-btn sa-btn-cancel" onClick={()=>setCreateOpen(false)}>{t("common.cancel")}</button>
+                            <button className="sa-btn sa-btn-primary" onClick={doCreate}>{t("common.save")}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Crew Manifest */}
             {crewOpen && selected && (
@@ -650,7 +913,7 @@ export default function VvnListPage() {
                 </div>
             )}
 
-            {/* MODAIS EXTRA (Reject/Update) — opcionais */}
+            {/* MODAIS EXTRA (Reject/Update) */}
             {rejectOpen && (
                 <div className="sa-modal-backdrop" onClick={() => setRejectOpen(false)}>
                     <div className="vvn-modal" onClick={(e) => e.stopPropagation()}>
@@ -687,33 +950,87 @@ export default function VvnListPage() {
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
                             <h3 className="sa-dock-title">{t("vvn.modals.update.title")}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setUpdOpen(false)}>
-                                ✖
-                            </button>
+                            <button className="sa-icon-btn sa-dock-close" onClick={() => setUpdOpen(false)}>✖</button>
                         </div>
+
+                        {/* Campos simples */}
                         <div className="vvn-modal-body grid2">
                             <div className="sa-field">
-                                <label>{t("vvn.modals.update.volume")}</label>
-                                <input
-                                    className="sa-input"
-                                    type="number"
-                                    min={0}
-                                    value={updVolume}
-                                    onChange={(e) => setUpdVolume(e.target.value)}
-                                />
+                                <label>{t("vvn.details.eta")} ({t("common.optional") ?? "opcional"})</label>
+                                <input type="datetime-local" className="sa-input" value={updEta} onChange={(e)=>setUpdEta(e.target.value)} />
                             </div>
                             <div className="sa-field">
-                                <label>{t("vvn.modals.update.dock")}</label>
-                                <input className="sa-input" value={updDock} onChange={(e) => setUpdDock(e.target.value.toUpperCase())} />
+                                <label>{t("vvn.details.etd")} ({t("common.optional") ?? "opcional"})</label>
+                                <input type="datetime-local" className="sa-input" value={updEtd} onChange={(e)=>setUpdEtd(e.target.value)} />
+                            </div>
+                            <div className="sa-field">
+                                <label>{t("vvn.modals.update.volume")} ({t("common.optional") ?? "opcional"})</label>
+                                <input type="number" min={0} className="sa-input" value={updVolume} onChange={(e)=>setUpdVolume(e.target.value)} />
+                            </div>
+                            <div className="sa-field">
+                                <label>{t("vvn.modals.update.dock")} ({t("common.optional") ?? "opcional"})</label>
+                                <input className="sa-input" value={updDock} onChange={(e)=>setUpdDock(e.target.value.toUpperCase())} />
+                            </div>
+                            <div className="sa-field">
+                                <label>{t("vvn.filters.imo")} ({t("common.optional") ?? "opcional"})</label>
+                                <input className="sa-input" placeholder="IMO 1234567" value={updImo} onChange={(e)=>setUpdImo(e.target.value)} />
                             </div>
                         </div>
+
+                        {/* Manifests via ficheiro + templates */}
+                        <div className="vvn-modal-body">
+                            <div className="sa-field">
+                                <label>{t("vvn.modals.crew.title")} (JSON)</label>
+                                <input
+                                    type="file"
+                                    accept="application/json"
+                                    onChange={(e)=>setUpdCrewFile(e.target.files?.[0] ?? null)}
+                                />
+                                <button
+                                    type="button"
+                                    className="sa-btn sa-btn-ghost"
+                                    onClick={()=>downloadTemplate("CrewManifest.template.json", crewTemplate)}
+                                >
+                                    {t("common.downloadTemplate")}
+                                </button>
+                            </div>
+
+                            <div className="sa-field">
+                                <label>{t("vvn.modals.loading.title")} (JSON)</label>
+                                <input
+                                    type="file"
+                                    accept="application/json"
+                                    onChange={(e)=>setUpdLoadFile(e.target.files?.[0] ?? null)}
+                                />
+                                <button
+                                    type="button"
+                                    className="sa-btn sa-btn-ghost"
+                                    onClick={()=>downloadTemplate("LoadingCargoManifest.template.json", cargoTemplateLoading)}
+                                >
+                                    {t("common.downloadTemplate")}
+                                </button>
+                            </div>
+
+                            <div className="sa-field">
+                                <label>{t("vvn.modals.unloading.title")} (JSON)</label>
+                                <input
+                                    type="file"
+                                    accept="application/json"
+                                    onChange={(e)=>setUpdUnloadFile(e.target.files?.[0] ?? null)}
+                                />
+                                <button
+                                    type="button"
+                                    className="sa-btn sa-btn-ghost"
+                                    onClick={()=>downloadTemplate("UnloadingCargoManifest.template.json", cargoTemplateUnloading)}
+                                >
+                                    {t("common.downloadTemplate")}
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="vvn-modal-actions">
-                            <button className="sa-btn sa-btn-cancel" onClick={() => setUpdOpen(false)}>
-                                {t("common.cancel")}
-                            </button>
-                            <button className="sa-btn sa-btn-primary" onClick={doUpdate}>
-                                {t("common.save")}
-                            </button>
+                            <button className="sa-btn sa-btn-cancel" onClick={()=>setUpdOpen(false)}>{t("common.cancel")}</button>
+                            <button className="sa-btn sa-btn-primary" onClick={doUpdate}>{t("common.save")}</button>
                         </div>
                     </div>
                 </div>
