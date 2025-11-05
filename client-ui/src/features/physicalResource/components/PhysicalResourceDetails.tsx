@@ -12,12 +12,12 @@ import { getQualificationById } from "../../qualifications/services/qualificatio
 const getResourceIcon = (type: PhysicalResourceType | string) => {
     switch (type) {
         case PhysicalResourceType.STSCrane: return "🏗️";
-        case PhysicalResourceType.YGCrane: return "🏢";
-        case PhysicalResourceType.MCrane: return "🦾";
+        case PhysicalResourceType.YGCrane: return "🚧";
+        case PhysicalResourceType.MCrane: return "🚛";
         case PhysicalResourceType.Truck: return "🚚";
-        case PhysicalResourceType.Forklift: return "🍴";
-        case PhysicalResourceType.RStacker: return "📦";
-        case PhysicalResourceType.SCarrier: return "🔄";
+        case PhysicalResourceType.Forklift: return "🛺";
+        case PhysicalResourceType.RStacker: return "🚜";
+        case PhysicalResourceType.SCarrier: return "📦";
         case PhysicalResourceType.TugBoat: return "🚤";
         default: return "⚙️";
     }
@@ -197,10 +197,6 @@ function PhysicalResourceDetails({ resource, isOpen, onClose }: PhysicalResource
 
                     {}
                     <div className="pr-modal-actions">
-                        <button onClick={onClose} className="pr-cancel-button" disabled={isLoading}>
-                            {t("physicalResource.actions.close")}
-                        </button>
-
                         {isAvailable ? (
                             <button onClick={handleDeactivate} className="pr-deactivate-button" disabled={isLoading}>
                                 {t("physicalResource.actions.deactivate")}
@@ -210,6 +206,11 @@ function PhysicalResourceDetails({ resource, isOpen, onClose }: PhysicalResource
                                 {t("physicalResource.actions.activate")}
                             </button>
                         )}
+
+                        <button onClick={onClose} className="pr-cancel-button" disabled={isLoading}>
+                            {t("physicalResource.actions.close")}
+                        </button>
+
                     </div>
                 </div>
             </div>

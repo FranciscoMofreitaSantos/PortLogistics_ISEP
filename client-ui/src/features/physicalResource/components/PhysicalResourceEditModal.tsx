@@ -11,12 +11,12 @@ import "../style/physicalResource.css";
 const getResourceIcon = (type: PhysicalResourceType | string) => {
     switch (type) {
         case PhysicalResourceType.STSCrane: return "🏗️";
-        case PhysicalResourceType.YGCrane: return "🏢";
-        case PhysicalResourceType.MCrane: return "🦾";
+        case PhysicalResourceType.YGCrane: return "🚧";
+        case PhysicalResourceType.MCrane: return "🚛";
         case PhysicalResourceType.Truck: return "🚚";
-        case PhysicalResourceType.Forklift: return "🍴";
-        case PhysicalResourceType.RStacker: return "📦";
-        case PhysicalResourceType.SCarrier: return "🔄";
+        case PhysicalResourceType.Forklift: return "🛺";
+        case PhysicalResourceType.RStacker: return "🚜";
+        case PhysicalResourceType.SCarrier: return "📦";
         case PhysicalResourceType.TugBoat: return "🚤";
         default: return "⚙️";
     }
