@@ -1,11 +1,40 @@
-import {useEffect, useState} from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-//import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import type { PhysicalResource } from "../types/physicalResource";
-import { PhysicalResourceStatus } from "../types/physicalResource";
+import { PhysicalResourceType, PhysicalResourceStatus } from "../types/physicalResource";
 import { activatePhysicalResource, deactivatePhysicalResource } from "../services/physicalResourceService";
 import "../style/physicalResource.css";
 import PhysicalResourceEditModal from "./PhysicalResourceEditModal";
+import { getQualificationById } from "../../qualifications/services/qualificationService";
+
+
+const getResourceIcon = (type: PhysicalResourceType | string) => {
+    switch (type) {
+        case PhysicalResourceType.STSCrane: return "🏗️";
+        case PhysicalResourceType.YGCrane: return "🏢";
+        case PhysicalResourceType.MCrane: return "🦾";
+        case PhysicalResourceType.Truck: return "🚚";
+        case PhysicalResourceType.Forklift: return "🍴";
+        case PhysicalResourceType.RStacker: return "📦";
+        case PhysicalResourceType.SCarrier: return "🔄";
+        case PhysicalResourceType.TugBoat: return "🚤";
+        default: return "⚙️";
+    }
+};
+
+const getStatusClass = (status: PhysicalResourceStatus | string) => {
+    switch (status) {
+        case PhysicalResourceStatus.Available:
+            return "status-available";
+        case PhysicalResourceStatus.Unavailable:
+            return "status-unavailable";
+        case PhysicalResourceStatus.UnderMaintenance:
+            return "status-undermaintenance";
+        default:
+            return "";
+    }
+};
 
 interface PhysicalResourceDetailsProps {
     resource: PhysicalResource;
@@ -19,10 +48,24 @@ function PhysicalResourceDetails({ resource, isOpen, onClose }: PhysicalResource
     const [currentResource, setCurrentResource] = useState(resource);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    // Atualiza o 'currentResource' se a prop 'resource' mudar
+    const [qualificationName, setQualificationName] = useState<string | null>(null);
+    const [isQualifLoading, setIsQualifLoading] = useState(false);
+
     useEffect(() => {
-        setCurrentResource(resource);
-    }, [resource]);
+        if (isOpen && resource) {
+            setCurrentResource(resource);
+            setQualificationName(null);
+
+            if (resource.qualificationID) {
+                setIsQualifLoading(true);
+                getQualificationById(resource.qualificationID)
+                    .then(data => setQualificationName(data.name))
+                    .catch(() => setQualificationName(t("physicalResource.errors.loadQualificationDetails")))
+                    .finally(() => setIsQualifLoading(false));
+            }
+        }
+    }, [resource, isOpen, t]);
+
 
     const handleDeactivate = async () => {
         if (!window.confirm(t("physicalResource.confirm.deactivate"))) return;
@@ -30,11 +73,11 @@ function PhysicalResourceDetails({ resource, isOpen, onClose }: PhysicalResource
         setIsLoading(true);
         try {
             const updatedResource = await deactivatePhysicalResource(currentResource.id);
-            setCurrentResource(updatedResource); // Atualiza o estado local
-            //toast.success(t("physicalResource.success.deactivated"));
+            setCurrentResource(updatedResource);
+            toast.success(t("physicalResource.success.deactivated"));
             onClose();
         } catch (err) {
-            //toast.error(t("physicalResource.errors.deactivateFailed"));
+            toast.error(t("physicalResource.errors.deactivateFailed"));
         } finally {
             setIsLoading(false);
         }
@@ -46,19 +89,29 @@ function PhysicalResourceDetails({ resource, isOpen, onClose }: PhysicalResource
         setIsLoading(true);
         try {
             const updatedResource = await activatePhysicalResource(currentResource.id);
-            setCurrentResource(updatedResource); // Atualiza o estado local
-            //toast.success(t("physicalResource.success.activated"));
+            setCurrentResource(updatedResource);
+            toast.success(t("physicalResource.success.activated"));
             onClose();
         } catch (err) {
-            //toast.error(t("physicalResource.errors.activateFailed"));
+            toast.error(t("physicalResource.errors.activateFailed"));
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleResourceUpdated = (updatedResource: PhysicalResource) => {
-        setCurrentResource(updatedResource); // Atualiza a info mostrada nos detalhes
-        setIsEditModalOpen(false); // Fecha o modal de edição
+        setCurrentResource(updatedResource);
+        setIsEditModalOpen(false);
+        // Atualiza o nome da qualificação se tiver mudado
+        if (updatedResource.qualificationID) {
+            setIsQualifLoading(true);
+            getQualificationById(updatedResource.qualificationID)
+                .then(data => setQualificationName(data.name))
+                .catch(() => setQualificationName(t("physicalResource.errors.loadQualificationDetails")))
+                .finally(() => setIsQualifLoading(false));
+        } else {
+            setQualificationName(null);
+        }
     };
 
     if (!isOpen) {
@@ -68,38 +121,86 @@ function PhysicalResourceDetails({ resource, isOpen, onClose }: PhysicalResource
     const isAvailable = currentResource.physicalResourceStatus === PhysicalResourceStatus.Available;
 
     return (
-        <> {}
+        <>
             <div className="pr-modal-overlay">
-                <div className="pr-modal-content">
-                    {}
-                    <h2>{t("physicalResource.details.title", { code: currentResource.code.value })}</h2>
+                {}
+                <div className="pr-details-modal-content">
 
-                    <div className="pr-details-list">
-                        <p><strong>{t("physicalResource.table.code")}:</strong> {currentResource.code.value}</p>
-                        <p><strong>{t("physicalResource.table.description")}:</strong> {currentResource.description}</p>
-                        <p><strong>{t("physicalResource.table.type")}:</strong> {currentResource.physicalResourceType}</p>
-                        <p><strong>{t("physicalResource.table.status")}:</strong> {currentResource.physicalResourceStatus}</p>
-                        <p><strong>{t("physicalResource.form.operationalCapacity")}:</strong> {currentResource.operationalCapacity}</p>
-                        <p><strong>{t("physicalResource.form.setupTime")}:</strong> {currentResource.setupTime}</p>
-                        <p><strong>{t("physicalResource.form.qualification")}:</strong> {currentResource.qualificationID || t("common.none")}</p>
+                    {}
+                    <div className="pr-details-hero">
+                        <div className="hero-icon-wrapper">
+                            {getResourceIcon(currentResource.physicalResourceType)}
+                        </div>
+                        <div className="hero-text">
+                            <h2>{currentResource.code.value}</h2>
+                            <p className="details-description">{currentResource.description}</p>
+                        </div>
+                        <button
+                            className="pr-edit-button pr-edit-button-corner"
+                            disabled={isLoading}
+                            onClick={() => setIsEditModalOpen(true)}
+                            title={t("physicalResource.actions.edit")}
+                        >
+                            {t("physicalResource.actions.edit")}
+                        </button>
                     </div>
 
+                    {}
+                    <div className="pr-details-grid">
+                        {}
+                        <div className="info-card">
+                            <div className="info-card-header">
+                                <span>⚡</span> {t("physicalResource.table.status")}
+                            </div>
+                            <div className="info-card-body">
+                                <span className={`status-pill ${getStatusClass(currentResource.physicalResourceStatus)}`}>
+                                    {t(`physicalResource.status.${currentResource.physicalResourceStatus}`)}
+                                </span>
+                            </div>
+                        </div>
 
+                        {}
+                        <div className="info-card">
+                            <div className="info-card-header">
+                                <span>🎓</span> {t("physicalResource.form.qualification")}
+                            </div>
+                            <div className="info-card-body">
+                                <p className="info-card-main-text">
+                                    {isQualifLoading ? t("physicalResource.loading") : (qualificationName || t("physicalResource.form.none"))}
+                                </p>
+                            </div>
+                        </div>
+
+                        {}
+                        <div className="info-card">
+                            <div className="info-card-header">
+                                <span>⚙️</span> {t("physicalResource.form.operationalCapacity")}
+                            </div>
+                            <div className="info-card-body">
+                                <p className="info-card-main-text">{currentResource.operationalCapacity}</p>
+                            </div>
+                        </div>
+
+                        {}
+                        <div className="info-card">
+                            <div className="info-card-header">
+                                <span>⏱️</span> {t("physicalResource.form.setupTime")}
+                            </div>
+                            <div className="info-card-body">
+                                <p className="info-card-main-text">
+                                    {currentResource.setupTime}
+                                    <span className="info-card-unit">{t("physicalResource.form.minutes")}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {}
                     <div className="pr-modal-actions">
                         <button onClick={onClose} className="pr-cancel-button" disabled={isLoading}>
                             {t("physicalResource.actions.close")}
                         </button>
 
-                        {}
-                        <button
-                            className="pr-edit-button"
-                            disabled={isLoading}
-                            onClick={() => setIsEditModalOpen(true)} // Abre o modal de edição
-                        >
-                            {t("physicalResource.actions.edit")}
-                        </button>
-
-                        {}
                         {isAvailable ? (
                             <button onClick={handleDeactivate} className="pr-deactivate-button" disabled={isLoading}>
                                 {t("physicalResource.actions.deactivate")}
