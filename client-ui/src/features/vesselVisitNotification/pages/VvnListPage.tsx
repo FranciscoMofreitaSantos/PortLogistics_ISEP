@@ -506,11 +506,11 @@ export default function VvnListPage() {
                             <>
                                 <div className="vvn-def">
                                     <div>
-                                        <span>{t("vvn.modals.crew.captain")}</span>
+                                        <span>{t("vvn.modals.crew.captain")}<br/></span>
                                         <strong>{selected.crewManifest.captainName}</strong>
                                     </div>
                                     <div>
-                                        <span>{t("vvn.modals.crew.total")}</span>
+                                        <span>{t("vvn.modals.crew.total")}<br/></span>
                                         <strong>{selected.crewManifest.totalCrew}</strong>
                                     </div>
                                 </div>
@@ -559,19 +559,19 @@ export default function VvnListPage() {
                             <>
                                 <div className="vvn-def">
                                     <div>
-                                        <span>{t("vvn.modals.loading.code")}</span>
+                                        <span>{t("vvn.modals.loading.code")}<br/></span>
                                         <strong>{selected.loadingCargoManifest.code}</strong>
                                     </div>
                                     <div>
-                                        <span>{t("vvn.modals.loading.type")}</span>
+                                        <span>{t("vvn.modals.loading.type")}<br/></span>
                                         <strong>{selected.loadingCargoManifest.type}</strong>
                                     </div>
                                     <div>
-                                        <span>{t("vvn.modals.loading.created")}</span>
+                                        <span>{t("vvn.modals.loading.created")}<br/></span>
                                         <strong>{fmtDT(selected.loadingCargoManifest.createdAt)}</strong>
                                     </div>
                                     <div>
-                                        <span>{t("vvn.modals.loading.createdBy")}</span>
+                                        <span>{t("vvn.modals.loading.createdBy")}<br/></span>
                                         <strong>{selected.loadingCargoManifest.createdBy}</strong>
                                     </div>
                                 </div>
@@ -594,24 +594,24 @@ export default function VvnListPage() {
                             </button>
                         </div>
                         {!selected.unloadingCargoManifest ? (
-                            <div className="sa-empty">{t("vvn.modals.unloading.empty")}</div>
+                            <div className="sa-empty">{t("vvn.modals.unloading.empty")}<br/></div>
                         ) : (
                             <>
                                 <div className="vvn-def">
                                     <div>
-                                        <span>{t("vvn.modals.unloading.code")}</span>
+                                        <span>{t("vvn.modals.unloading.code")}<br/></span>
                                         <strong>{selected.unloadingCargoManifest.code}</strong>
                                     </div>
                                     <div>
-                                        <span>{t("vvn.modals.unloading.type")}</span>
+                                        <span>{t("vvn.modals.unloading.type")}<br/></span>
                                         <strong>{selected.unloadingCargoManifest.type}</strong>
                                     </div>
                                     <div>
-                                        <span>{t("vvn.modals.unloading.created")}</span>
+                                        <span>{t("vvn.modals.unloading.created")}<br/></span>
                                         <strong>{fmtDT(selected.unloadingCargoManifest.createdAt)}</strong>
                                     </div>
                                     <div>
-                                        <span>{t("vvn.modals.unloading.createdBy")}</span>
+                                        <span>{t("vvn.modals.unloading.createdBy")}<br/></span>
                                         <strong>{selected.unloadingCargoManifest.createdBy}</strong>
                                     </div>
                                 </div>
@@ -634,7 +634,7 @@ export default function VvnListPage() {
                             </button>
                         </div>
                         {!selected.tasks || selected.tasks.length === 0 ? (
-                            <div className="sa-empty">{t("vvn.modals.tasks.empty")}</div>
+                            <div className="sa-empty">{t("vvn.modals.tasks.empty")}<br/></div>
                         ) : (
                             <ul className="vvn-task-list">
                                 {selected.tasks.map((tk) => (

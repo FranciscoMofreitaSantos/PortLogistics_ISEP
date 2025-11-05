@@ -471,6 +471,8 @@
     background: var(--card-bg);
     border-radius: 10px;
     padding: 10px 12px;
+    text-align: center;
+    
 }
 .vvn-def span { font-size: 12px; opacity: .7; font-weight: 600; }
 .vvn-def strong { font-size: 16px; font-weight: 800; }
@@ -487,6 +489,7 @@
     overflow: hidden;
     background: var(--card-bg);
     color: var(--text);
+    
 }
 .vvn-table thead th {
     background: rgba(0,0,0,.04);
@@ -494,6 +497,8 @@
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: .3px;
+    text-align: center;
+
 }
 :root[data-theme='dark'] .vvn-table thead th {
     background: rgba(255,255,255,.06);
@@ -503,6 +508,8 @@
     border-bottom: 1px solid var(--shadow);
     text-align: left;
     font-size: 14px;
+    text-align: center;
+
 }
 .vvn-table tbody tr:hover { background: var(--hover); }
 
