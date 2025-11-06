@@ -1,17 +1,14 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { SceneData ,VesselDto} from "../types";
+import type { SceneData, VesselDto, ContainerDto } from "../types";
 import { makeDock } from "./objects/Dock";
 import { makeStorageArea } from "./objects/StorageArea";
 import { makeVesselPlaceholder, makeVesselNode } from "./objects/Vessel";
-import { makeContainer } from "./objects/Container";
+import { makeContainerPlaceholder,makeContainerNode } from "./objects/Container";
 import { makePhysicalResource } from "./objects/PhysicalResource";
-// @ts-ignore
-import { ASSETS_MODELS,ASSETS_TEXTURES } from "./utils/assets";
+import { ASSETS_MODELS /*, ASSETS_TEXTURES */ } from "./utils/assets";
 
 export type LayerVis = { docks: boolean; storage: boolean; vessels: boolean; containers: boolean; resources: boolean };
-
-
 
 export class PortScene {
     container: HTMLDivElement;
@@ -28,10 +25,10 @@ export class PortScene {
 
     pickables: THREE.Object3D[] = [];
     reqId = 0;
-    
+
     constructor(container: HTMLDivElement) {
         this.container = container;
-    
+
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.setSize(container.clientWidth, container.clientHeight);
@@ -39,29 +36,26 @@ export class PortScene {
 
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xf4f6fb);
-        
+
         this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 8000);
         this.camera.position.set(120, 120, 220);
-        
+
         // lights
         this.scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.85));
         const dir = new THREE.DirectionalLight(0xffffff, 0.8);
         dir.position.set(100, 200, 100);
         this.scene.add(dir);
 
-        
-        
-        
         // helpers
         this.scene.add(new THREE.GridHelper(2000, 200));
-        const axes = new THREE.AxesHelper(20); axes.position.set(0, 0.01, 0); this.scene.add(axes);
+        const axes = new THREE.AxesHelper(20);
+        axes.position.set(0, 0.01, 0);
+        this.scene.add(axes);
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.target.set(40, 0, 40);
 
-        
-        
         // groups
         this.gDocks.name = "docks";
         this.gStorage.name = "storage";
@@ -69,10 +63,9 @@ export class PortScene {
         this.gContainers.name = "containers";
         this.gResources.name = "resources";
         this.scene.add(this.gDocks, this.gStorage, this.gVessels, this.gContainers, this.gResources);
+        
+        this.gContainers.scale.set(7, 7, 7); // 30% maior
 
-        
-        
-        // events
         window.addEventListener("resize", this.onResize);
         this.loop();
     }
@@ -93,12 +86,9 @@ export class PortScene {
         this.gResources.visible = vis.resources;
     }
 
-    
-    
-    
     load(data: SceneData) {
         // limpar grupos & pickables
-        [this.gDocks, this.gStorage, this.gVessels, this.gContainers, this.gResources].forEach(g => {
+        [this.gDocks, this.gStorage, this.gVessels, this.gContainers, this.gResources].forEach((g) => {
             while (g.children.length) {
                 const c = g.children.pop()!;
                 if ((c as any).geometry) (c as any).geometry.dispose?.();
@@ -110,37 +100,40 @@ export class PortScene {
         this.pickables = [];
 
         // docks
-        data.docks.forEach(d => {
+        data.docks.forEach((d) => {
             const m = makeDock(d);
-            this.gDocks.add(m); this.pickables.push(m);
+            this.gDocks.add(m);
+            this.pickables.push(m);
         });
+
         // storage
-        data.storageAreas.forEach(sa => {
+        data.storageAreas.forEach((sa) => {
             const m = makeStorageArea(sa);
-            this.gStorage.add(m); this.pickables.push(m);
+            this.gStorage.add(m);
+            this.pickables.push(m);
         });
-        // vessels
-        data.vessels.forEach((v) => this.importVessel(v));
-        // containers
-        data.containers.forEach(c => {
-            const m = makeContainer(c);
-            this.gContainers.add(m); this.pickables.push(m);
-        });
+
+        // vessels & containers via import genérico
+        data.vessels.forEach((v) => { void this.importModel(v); });
+        data.containers.forEach((c) => { void this.importModel(c); });
+
         // resources
-        data.resources.forEach(r => {
+        data.resources.forEach((r) => {
             const m = makePhysicalResource(r);
-            this.gResources.add(m); this.pickables.push(m);
+            this.gResources.add(m);
+            this.pickables.push(m);
         });
 
         // auto-frame
         const box = new THREE.Box3();
-        this.pickables.forEach(o => box.expandByObject(o));
+        this.pickables.forEach((o) => box.expandByObject(o));
         if (!box.isEmpty()) {
             const size = new THREE.Vector3(), center = new THREE.Vector3();
-            box.getSize(size); box.getCenter(center);
+            box.getSize(size);
+            box.getCenter(center);
             const maxSize = Math.max(size.x, size.y, size.z);
-            const distance = maxSize * 1.5 / Math.tan((this.camera.fov * Math.PI) / 360);
-            const dir = new THREE.Vector3(1,1,1).normalize();
+            const distance = (maxSize * 1.5) / Math.tan((this.camera.fov * Math.PI) / 360);
+            const dir = new THREE.Vector3(1, 1, 1).normalize();
             this.controls.target.copy(center);
             this.camera.position.copy(center.clone().add(dir.multiplyScalar(distance)));
             this.camera.near = Math.max(0.1, maxSize / 1000);
@@ -149,16 +142,9 @@ export class PortScene {
         }
     }
 
-
-
-
-
     raycastAt = (ev: MouseEvent, onPick?: (u: any) => void) => {
         const rect = this.renderer.domElement.getBoundingClientRect();
-        const mouse = new THREE.Vector2(
-            ((ev.clientX - rect.left) / rect.width) * 2 - 1,
-            -((ev.clientY - rect.top) / rect.height) * 2 + 1
-        );
+        const mouse = new THREE.Vector2(((ev.clientX - rect.left) / rect.width) * 2 - 1, -((ev.clientY - rect.top) / rect.height) * 2 + 1);
         const raycaster = new THREE.Raycaster();
         raycaster.setFromCamera(mouse, this.camera);
 
@@ -188,7 +174,6 @@ export class PortScene {
     dispose() {
         cancelAnimationFrame(this.reqId);
         window.removeEventListener("resize", this.onResize);
-        // dispose scene
         this.scene.traverse((o) => {
             const m = o as THREE.Mesh;
             (m.geometry as any)?.dispose?.();
@@ -202,38 +187,68 @@ export class PortScene {
         }
     }
 
+    
+    
+    
+    // ---------- TYPE GUARDS (métodos, sem 'function') ----------
+    private isVessel(x: any): x is VesselDto {
+        return x && typeof x === "object" && "imoNumber" in x;
+    }
 
+    private isContainer(x: any): x is ContainerDto {
+        return x && typeof x === "object" && ("isoCode" in x || "iso6346" in x || "code" in x);
+    }
 
-    private async importVessel(v: VesselDto) {
-        // 1) placeholder
-        const ph = makeVesselPlaceholder(v);
-        this.gVessels.add(ph);
+    // ---------- Importador genérico ----------
+    private async importWith(makePlaceholder: () => THREE.Object3D, loadNode: () => Promise<THREE.Object3D>, group: THREE.Group) {
+        const ph = makePlaceholder();
+        group.add(ph);
         this.pickables.push(ph);
 
         try {
-            // 2) carrega GLB via makeVesselNode (usa o loader utilitário)
-            const node = await makeVesselNode(v, ASSETS_MODELS.vessels.boat,null /*, scaleMeters? */);
+            const node = await loadNode();
 
-            // 3) copia pose/userData do placeholder
-            node.position.copy(ph.position);
-            node.rotation.copy(ph.rotation);
-            node.userData = ph.userData;
+            node.position.copy((ph as any).position);
+            node.rotation.copy((ph as any).rotation);
+            node.userData = (ph as any).userData;
 
-            // 4) entra na cena e nos pickables
-            this.gVessels.add(node);
+            group.add(node);
             this.pickables.push(node);
 
-            // 5) remove e liberta o placeholder
-            this.gVessels.remove(ph);
-            (ph.geometry as any)?.dispose?.();
-            const pm = ph.material as THREE.Material | THREE.Material[] | undefined;
-            if (Array.isArray(pm)) pm.forEach(m => (m as any)?.dispose?.());
-            else (pm as any)?.dispose?.();
-
+            group.remove(ph);
+            (ph as any).traverse?.((o: any) => {
+                o.geometry?.dispose?.();
+                if (Array.isArray(o.material)) o.material.forEach((m: any) => m?.dispose?.());
+                else o.material?.dispose?.();
+            });
         } catch (e) {
-            console.warn("Falha a carregar modelo do navio:", e);
-            // mantém o placeholder para não “desaparecer”
+            console.warn("Falha a carregar modelo:", e);
+            // mantém placeholder
         }
+    }
+    
+
+// ---------- API única para Vessel | Container ----------
+    private async importModel(m: VesselDto | ContainerDto) {
+        if (this.isVessel(m)) {
+            await this.importWith(
+                () => makeVesselPlaceholder(m),
+                () => makeVesselNode(m, ASSETS_MODELS.vessels.vesseltugb, null),
+                this.gVessels
+            );
+            return;
+        }
+
+        if (this.isContainer(m)) {
+            await this.importWith(
+                () => makeContainerPlaceholder(m),
+                () => makeContainerNode(m, ASSETS_MODELS.containers.container, null),
+                this.gContainers
+            );
+            return;
+        }
+
+        console.warn("Tipo de modelo desconhecido:", m);
     }
 
 

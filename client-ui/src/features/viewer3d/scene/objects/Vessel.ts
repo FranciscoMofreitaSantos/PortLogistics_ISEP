@@ -38,18 +38,15 @@ export function makeVesselPlaceholder(v: VesselDto): THREE.Mesh {
 
 export async function makeVesselNode(v: VesselDto, assetPath: string, texturePath: string | null, scaleMeters = 1): Promise<THREE.Object3D> {
     const obj = await loadGLB(assetPath);
-    console.log("[Vessel]", {
-        rawLength: (v as any)?.lengthMeters,
-        typeOf: typeof (v as any)?.lengthMeters,
-        isFinite: Number.isFinite(Number((v as any)?.lengthMeters)),
-    });
 
+    // Escala pelo comprimento (opcional)
     const targetL = safeSize((v as any).lengthMeters, 20, 30);
     scaleToLengthX(obj, targetL);
     if (scaleMeters !== 1) obj.scale.multiplyScalar(scaleMeters);
 
-    try {
-        if(texturePath != null) {
+    // Materiais/texture (sem mexer em pose/userData)
+    if (texturePath) {
+        try {
             const tex = await new THREE.TextureLoader().loadAsync(texturePath);
             tex.colorSpace = THREE.SRGBColorSpace;
             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -59,14 +56,6 @@ export async function makeVesselNode(v: VesselDto, assetPath: string, texturePat
                 if (o.isMesh) {
                     o.castShadow = true;
                     o.receiveShadow = true;
-
-                    const hasUV =
-                        !!o.geometry?.attributes?.uv ||
-                        !!o.geometry?.attributes?.uv1 ||
-                        !!o.geometry?.attributes?.uv2;
-
-                    if (!hasUV) return; // sem UVs, não forces map (evita preto)
-
                     const mat = o.material;
                     if (Array.isArray(mat)) {
                         mat.forEach((m: any) => {
@@ -78,17 +67,10 @@ export async function makeVesselNode(v: VesselDto, assetPath: string, texturePat
                     }
                 }
             });
+        } catch (e) {
+            console.warn("Falha a carregar textura do navio:", e);
         }
-    } catch (e) {
-        console.warn("Falha a carregar textura do navio:", e);
     }
 
-
-    const H = safeSize((v.draftMeters ?? 7) + 5, 5, 12);
-    obj.position.set(finite(v.positionX, 0), H / 2, finite(v.positionZ, 0));
-    obj.rotation.y = Math.PI * 0.25;
-
-    obj.userData = { type: "Vessel", id: v.id, label: `${v.name} (${v.imoNumber})` };
     return obj;
 }
-

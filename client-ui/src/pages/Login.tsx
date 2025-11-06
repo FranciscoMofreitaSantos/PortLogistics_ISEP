@@ -20,7 +20,7 @@ export default function Login() {
             await new Promise((res) => setTimeout(res, 900)); // simulate API
 
             localStorage.setItem("access_token", "dev-token");
-            localStorage.setItem("sarId", "7882343c-09bf-4a74-a494-8f04c6209ef2");
+            localStorage.setItem("sarId", "cafa1ab4-5d2b-4b01-a5e4-c88bfb464266");
 
             console.log(localStorage.getItem("sarId"));
 
