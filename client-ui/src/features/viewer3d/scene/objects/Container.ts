@@ -21,7 +21,7 @@ function scaleToLengthX(obj: THREE.Object3D, targetL: number) {
     
         const x = Number(c.positionX) || 0;
         const y = (Number(c.positionY) || 0) + H / 2;
-        const z = Number(c.positionZ) || 100;
+        const z = Number(c.positionZ) || 70;
     
         mesh.position.set(x, y, z);
         mesh.rotation.y = Math.PI * 0.25;

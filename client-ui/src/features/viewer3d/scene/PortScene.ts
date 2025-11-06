@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { SceneData, VesselDto, ContainerDto } from "../types";
+import type { SceneData, VesselDto, ContainerDto,StorageAreaDto } from "../types";
 import { makeDock } from "./objects/Dock";
-import { makeStorageArea } from "./objects/StorageArea";
+import { makeStorageAreaPlaceholder, makeStorageAreaNode } from "./objects/StorageArea";
 import { makeVesselPlaceholder, makeVesselNode } from "./objects/Vessel";
 import { makeContainerPlaceholder,makeContainerNode } from "./objects/Container";
 import { makePhysicalResource } from "./objects/PhysicalResource";
@@ -64,7 +64,8 @@ export class PortScene {
         this.gResources.name = "resources";
         this.scene.add(this.gDocks, this.gStorage, this.gVessels, this.gContainers, this.gResources);
         
-        this.gContainers.scale.set(7, 7, 7); // 30% maior
+        this.gContainers.scale.set(10, 10, 10); // 1000% maior
+        //this.gStorage.scale.set(3, 3, 3); // 1000% maior
 
         window.addEventListener("resize", this.onResize);
         this.loop();
@@ -107,12 +108,7 @@ export class PortScene {
         });
 
         // storage
-        data.storageAreas.forEach((sa) => {
-            const m = makeStorageArea(sa);
-            this.gStorage.add(m);
-            this.pickables.push(m);
-        });
-
+        data.storageAreas.forEach((sa) => { this.importModel(sa); });
         // vessels & containers via import genérico
         data.vessels.forEach((v) => { void this.importModel(v); });
         data.containers.forEach((c) => { void this.importModel(c); });
@@ -199,6 +195,11 @@ export class PortScene {
         return x && typeof x === "object" && ("isoCode" in x || "iso6346" in x || "code" in x);
     }
 
+    private isStorageArea(x: any): x is StorageAreaDto {
+        return x && typeof x === "object" && ("widthM" in x || "maxBays" in x);
+    }
+
+
     // ---------- Importador genérico ----------
     private async importWith(makePlaceholder: () => THREE.Object3D, loadNode: () => Promise<THREE.Object3D>, group: THREE.Group) {
         const ph = makePlaceholder();
@@ -229,11 +230,11 @@ export class PortScene {
     
 
 // ---------- API única para Vessel | Container ----------
-    private async importModel(m: VesselDto | ContainerDto) {
+    private async importModel(m: VesselDto | ContainerDto | StorageAreaDto) {
         if (this.isVessel(m)) {
             await this.importWith(
                 () => makeVesselPlaceholder(m),
-                () => makeVesselNode(m, ASSETS_MODELS.vessels.vesseltugb, null),
+                () => makeVesselNode(m, ASSETS_MODELS.vessels.ship_ocean, null),
                 this.gVessels
             );
             return;
@@ -247,9 +248,17 @@ export class PortScene {
             );
             return;
         }
+        
+        if(this.isStorageArea(m)){
+            await this.importWith(
+                () => makeStorageAreaPlaceholder(m),
+                () => makeStorageAreaNode(m,ASSETS_MODELS.storageArea.wareHouser),          
+                this.gStorage
+            );
+            return;
+        }
 
         console.warn("Tipo de modelo desconhecido:", m);
     }
-
-
+    
 }
