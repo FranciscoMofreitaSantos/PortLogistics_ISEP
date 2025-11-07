@@ -22,7 +22,7 @@ public class User : Entity<UserId>, IAggregateRoot
         Name = name;
         Picture = picture;
         Role = null;
-        IsActive = true;
+        IsActive = false;
     }
 
     public void UpdateRole(Roles newRole)

@@ -20,7 +20,7 @@ export default function SyncUser() {
                     Email: user.email,
                     Name: user.name,
                     Picture: user.picture,
-                    IsActive: true,
+                    IsActive: false,
                     Role: null,
                 };
 
