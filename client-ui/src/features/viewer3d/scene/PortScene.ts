@@ -10,15 +10,11 @@ import { makePhysicalResource } from "./objects/PhysicalResource";
 import { makePortBase } from "./objects/PortBase";
 import { ASSETS_MODELS, ASSETS_TEXTURES } from "./utils/assets";
 
-import { computePortGrids, drawPortGridsDebug } from "./objects/portGrids";
+// (se precisares dos grids, mantém estes imports)
+// import { computePortGrids, drawPortGridsDebug } from "./objects/portGrids";
+import { addRoadPoles} from "./objects/roadLights";
 
-export type LayerVis = {
-    docks: boolean;
-    storage: boolean;
-    vessels: boolean;
-    containers: boolean;
-    resources: boolean;
-};
+export type LayerVis = { docks: boolean; storage: boolean; vessels: boolean; containers: boolean; resources: boolean; };
 
 export class PortScene {
     container: HTMLDivElement;
@@ -43,6 +39,8 @@ export class PortScene {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.setSize(container.clientWidth, container.clientHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(this.renderer.domElement);
 
         this.scene = new THREE.Scene();
@@ -51,11 +49,9 @@ export class PortScene {
         this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 8000);
         this.camera.position.set(180, 200, 420);
 
-        this.scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.85));
-        const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-        dir.position.set(200, 300, 120);
-        dir.castShadow = false;
-        this.scene.add(dir);
+        // luz ambiente bem de leve para não ficar tudo “full black”
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.1));
+        this.scene.add(new THREE.HemisphereLight(0xffffff, 0x404040, 0.25));
 
         const { group: base, layout } = makePortBase({
             width: 1200,
@@ -81,10 +77,23 @@ export class PortScene {
         (this.scene as any).__portLayout = layout;
         this.scene.add(this.gBase);
 
-        // === Grids e overlay de debug ===
-        const W = 1200, D = 1200, STEP = 10;
-        const grids = computePortGrids(W, D, STEP);
-        drawPortGridsDebug(this.scene, grids, 1);
+        // POSTES (sem luz real — só glow)
+        addRoadPoles(this.scene, layout, {
+            yGround: 0,
+            roadWidth: 12,
+            poleHeight: 7.5,
+            poleOffset: 1.4,   // <- antes 3.5
+            spacing: 22,
+            intensity: 0,
+            spawnGlow: false,
+            clearMargin: 1.2,  // <- antes 2.5
+        });
+
+
+
+        // === se quiseres voltar a visualizar as grelhas ===
+        // const grids = computePortGrids(1200, 1200, 10);
+        // drawPortGridsDebug(this.scene, grids, 1);
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
