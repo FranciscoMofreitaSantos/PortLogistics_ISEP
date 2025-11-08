@@ -18,6 +18,7 @@ import InactiveAccount from "../pages/InactiveAccount.tsx";
 import { RequireAuth, RequireRole, RequireApproved } from "../hooks/useAuthGuard";
 import { Roles } from "../app/types";
 import User from "../features/users/pages/User.tsx";
+import ActivateAccount from "../pages/ActivateAccount.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
             {
                 element: <RequireAuth />,
                 children: [
+                    { path: "activate", element: <ActivateAccount /> },
 
                     { path: "inactive", element: <InactiveAccount /> },
 

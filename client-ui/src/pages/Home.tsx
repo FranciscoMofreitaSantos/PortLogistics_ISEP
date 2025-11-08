@@ -14,6 +14,14 @@ export default function Home() {
     const user = useAppStore((s) => s.user);
 
     useEffect(() => {
+        const hasRefreshed = localStorage.getItem("hasRefreshedHome");
+        if (!hasRefreshed) {
+            localStorage.setItem("hasRefreshedHome", "true");
+            window.location.reload();
+        }
+    }, []);
+
+    useEffect(() => {
         AOS.init({ duration: 1000, once: true });
     }, []);
 
@@ -32,7 +40,6 @@ export default function Home() {
             navigate("/pending-approval");
             return;
         }
-
 
         switch (user.role) {
             case Roles.Administrator:
