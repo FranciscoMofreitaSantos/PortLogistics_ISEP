@@ -1,3 +1,4 @@
+// src/features/viewer3d/scene/objects/roadLights.ts
 import * as THREE from "three";
 import type { PortLayout } from "./PortBase";
 
@@ -6,10 +7,10 @@ export type RoadLightOpts = {
     yGround?: number;           // Y do topo do cais
     roadWidth?: number;         // largura da via (mesma de PortBase)
     poleHeight?: number;        // altura do poste
-    poleOffset?: number;        // afastamento lateral da via (m)
+    poleOffset?: number;        // afastamento lateral da via (m) — a partir da berma
     spacing?: number;           // espaçamento entre postes (m)
     intensity?: number;         // intensidade da luz (se quiseres ligar mais tarde)
-    spawnGlow?: boolean;        // desenhar a “bolinha” emissiva no topo
+    spawnGlow?: boolean;        // desenhar a “bolinha” emissiva no topo (se usares)
     clearMargin?: number;       // margem extra para evitar postes dentro da faixa
 };
 
@@ -19,7 +20,7 @@ const DEF: Required<RoadLightOpts> = {
     poleHeight: 7.5,
     poleOffset: 3.5,
     spacing: 22,
-    intensity: 0,        // 0 = sem luz, só postes + glow
+    intensity: 0,        // 0 = sem luz real, só poste/cabeça
     spawnGlow: true,
     clearMargin: 2.0,
 };
@@ -36,14 +37,13 @@ function makePoleWithHead(pos: THREE.Vector3, opts: Required<RoadLightOpts>): TH
     pole.position.set(pos.x, pos.y + opts.poleHeight / 2, pos.z);
     g.add(pole);
 
-    // Cabeça emissiva
+    // Cabeça emissiva (bolinha)
     const head = new THREE.Mesh(
         new THREE.SphereGeometry(0.24, 16, 12),
         new THREE.MeshBasicMaterial({ color: 0xfff6da })
     );
     head.position.set(pos.x, pos.y + opts.poleHeight, pos.z);
     g.add(head);
-
 
     // (opcional) SpotLight desligado por omissão — podes ligar depois
     if (opts.intensity > 0) {
@@ -112,13 +112,12 @@ export function addRoadPoles(scene: THREE.Scene, layout: PortLayout, user?: Road
 
     // ----- cortes/linhas principais do teu PortBase -----
     const W = layout.zoneC.size.w;
-    // @ts-ignore
-    const D = layout.zoneA.size.d + layout.zoneC.size.d; // total
     const xL = -W / 2, xR = +W / 2;
-    const zTop = layout.zoneC.rect.maxZ;           // topo da zona C
+
+    const zTop = layout.zoneC.rect.maxZ;           // topo da zona C (junto à água)
     const zMid = (layout.zoneC.rect.minZ + layout.zoneC.rect.maxZ) / 2;
     const zBot = layout.zoneC.rect.minZ;           // base da zona C (= 0)
-    const zAB  = -layout.zoneA.size.d / 2;         // linha A ↔ B  (= -D/4)
+    const zAB  = -layout.zoneA.size.d / 2;         // linha A ↔ B
 
     // estradas verticais (para fazer “clear” e p/ colocar a vertical do meio)
     const xCuts = [-W / 4, 0, +W / 4];
@@ -126,25 +125,28 @@ export function addRoadPoles(scene: THREE.Scene, layout: PortLayout, user?: Road
     const zCuts = [zTop, zMid, zBot, zAB];
 
     // ====== Horizontais da zona C ======
-    // Topo (zTop): lado interior ao cais → para -Z  => sideSign = -1
-    G.add(polesAlong(new THREE.Vector3(xL, o.yGround, zTop),
+    // TOPO (zTop): recuar um bocado para fora da faixa (apenas esta linha)
+    const oTop = { ...o, poleOffset: o.poleOffset + 4.0 }; 
+    G.add(polesAlong(
+        new THREE.Vector3(xL, o.yGround, zTop),
         new THREE.Vector3(xR, o.yGround, zTop),
+        -1, oTop, xCuts, zCuts
+    ));
+
+    // MEIO (zMid): dois lados
+    G.add(polesAlong(new THREE.Vector3(xL, o.yGround, zMid),
+        new THREE.Vector3(xR, o.yGround, zMid),
+        +1, o, xCuts, zCuts));
+    G.add(polesAlong(new THREE.Vector3(xL, o.yGround, zMid),
+        new THREE.Vector3(xR, o.yGround, zMid),
         -1, o, xCuts, zCuts));
 
-    // Meio (zMid): põe nos DOIS lados (mais “rua real”)
-    G.add(polesAlong(new THREE.Vector3(xL, o.yGround, zMid),
-        new THREE.Vector3(xR, o.yGround, zMid),
-        +1, o, xCuts, zCuts)); // lado +Z
-    G.add(polesAlong(new THREE.Vector3(xL, o.yGround, zMid),
-        new THREE.Vector3(xR, o.yGround, zMid),
-        -1, o, xCuts, zCuts)); // lado -Z
-
-    // Base (zBot=0): lado da zona A/B → para +Z  => sideSign = +1
+    // BASE (zBot=0): lado da zona A/B → para +Z  => sideSign = +1
     G.add(polesAlong(new THREE.Vector3(xL, o.yGround, zBot),
         new THREE.Vector3(xR, o.yGround, zBot),
         +1, o, xCuts, zCuts));
 
-    // ====== Horizontal A↔B (zAB) — dois lados também ======
+    // ====== Horizontal A↔B (zAB) — dois lados ======
     G.add(polesAlong(new THREE.Vector3(xL, o.yGround, zAB),
         new THREE.Vector3(xR, o.yGround, zAB),
         +1, o, xCuts, zCuts));
@@ -155,10 +157,6 @@ export function addRoadPoles(scene: THREE.Scene, layout: PortLayout, user?: Road
     // ====== Vertical do meio (x=0) — atravessa o cais todo ======
     const zMin = -layout.zoneA.size.d;     // -D/2
     const zMax = +layout.zoneC.size.d;     // +D/2
-    // Coloca postes nos dois lados da vertical para ficar simétrico
-    // “Direita” da vertical é para +X, “Esquerda” para -X.
-    // sideSign = +1 => desloca para “direita” (lado +X)
-    // sideSign = -1 => desloca para “esquerda” (lado -X)
     G.add(polesAlong(new THREE.Vector3(0, o.yGround, zMin),
         new THREE.Vector3(0, o.yGround, zMax),
         +1, o, xCuts, zCuts));

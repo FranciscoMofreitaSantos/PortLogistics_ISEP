@@ -1,20 +1,15 @@
+// src/features/viewer3d/scene/PortScene.ts
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { SceneData, VesselDto, ContainerDto, StorageAreaDto, DockDto } from "../types";
+import type { SceneData, ContainerDto } from "../types";
 
-import { makeStorageAreaPlaceholder, makeStorageAreaNode } from "./objects/StorageArea";
-import { makeVesselPlaceholder, makeVesselNode } from "./objects/Vessel";
-import { makeContainerPlaceholder, makeContainerNode } from "./objects/Container";
-import { makeDockPlaceholder, makeDockNode } from "./objects/Dock";
-import { makePhysicalResource } from "./objects/PhysicalResource";
 import { makePortBase } from "./objects/PortBase";
-import { ASSETS_MODELS, ASSETS_TEXTURES } from "./utils/assets";
+import { ASSETS_TEXTURES } from "./utils/assets";
+import { computePortGrids, drawPortGridsDebug } from "./objects/portGrids";
+import { makeContainerPlaceholder } from "./objects/Container";
+import { addRoadPoles } from "./objects/roadLights";
 
-// (se precisares dos grids, mantém estes imports)
-// import { computePortGrids, drawPortGridsDebug } from "./objects/portGrids";
-import { addRoadPoles} from "./objects/roadLights";
-
-export type LayerVis = { docks: boolean; storage: boolean; vessels: boolean; containers: boolean; resources: boolean; };
+export type LayerVis = { containers: boolean };
 
 export class PortScene {
     container: HTMLDivElement;
@@ -24,14 +19,12 @@ export class PortScene {
     controls: OrbitControls;
 
     gBase = new THREE.Group();
-    gDocks = new THREE.Group();
-    gStorage = new THREE.Group();
-    gVessels = new THREE.Group();
     gContainers = new THREE.Group();
-    gResources = new THREE.Group();
 
     pickables: THREE.Object3D[] = [];
     reqId = 0;
+
+    private _grids: ReturnType<typeof computePortGrids> | null = null;
 
     constructor(container: HTMLDivElement) {
         this.container = container;
@@ -46,13 +39,18 @@ export class PortScene {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x000000);
 
-        this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 8000);
+        this.camera = new THREE.PerspectiveCamera(
+            60,
+            container.clientWidth / container.clientHeight,
+            0.1,
+            8000
+        );
         this.camera.position.set(180, 200, 420);
 
-        // luz ambiente bem de leve para não ficar tudo “full black”
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.1));
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
         this.scene.add(new THREE.HemisphereLight(0xffffff, 0x404040, 0.25));
 
+        // === BASE DO PORTO ===
         const { group: base, layout } = makePortBase({
             width: 1200,
             depth: 1200,
@@ -63,108 +61,104 @@ export class PortScene {
             slabThickness: 18,
             waterGap: 10,
             waterThickness: 60,
-            showZones: true,
-            showGrid: false,
+            showZones: false,  // <- põe false se quiseres sem overlays
+            showGrid: true,   // <- põe false para desligar grelha técnica
             textures: {
                 paving: ASSETS_TEXTURES.port.paving.paving,
-                water:  ASSETS_TEXTURES.port.water.water,
-                road_vertical:   ASSETS_TEXTURES.port.road.road,
+                water: ASSETS_TEXTURES.port.water.water,
+                road_vertical: ASSETS_TEXTURES.port.road.road,
                 road_horizontal: ASSETS_TEXTURES.port.road.roadhorizontal,
             },
         });
-
         this.gBase = base;
-        (this.scene as any).__portLayout = layout;
         this.scene.add(this.gBase);
 
-        // POSTES (sem luz real — só glow)
+        // === FARÓIS (mantidos) ===
         addRoadPoles(this.scene, layout, {
             yGround: 0,
             roadWidth: 12,
             poleHeight: 7.5,
-            poleOffset: 1.4,   // <- antes 3.5
+            poleOffset: 1.4,
             spacing: 22,
             intensity: 0,
             spawnGlow: false,
-            clearMargin: 1.2,  // <- antes 2.5
+            clearMargin: 1.2,
         });
 
+        // === GRELHAS (A/B/C) ===
+        // Deriva W/D reais do layout para evitar hardcode:
+        const W = layout.zoneC.size.w;           // == width
+        const D = layout.zoneC.size.d * 2;       // zona C é metade superior → D/2, logo D = 2*C.d
+        this._grids = computePortGrids(W, D, 10);
+        drawPortGridsDebug(this.scene, this._grids, 0.06);
 
-
-        // === se quiseres voltar a visualizar as grelhas ===
-        // const grids = computePortGrids(1200, 1200, 10);
-        // drawPortGridsDebug(this.scene, grids, 1);
-
+        // === CÂMARA ===
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.target.set(0, 0, 0);
 
-        this.gDocks.name = "docks";
-        this.gStorage.name = "storage";
-        this.gVessels.name = "vessels";
+        // === GRUPO DE CONTENTORES ===
         this.gContainers.name = "containers";
-        this.gResources.name = "resources";
-        this.scene.add(this.gDocks, this.gStorage, this.gVessels, this.gContainers, this.gResources);
+        this.scene.add(this.gContainers);
 
         window.addEventListener("resize", this.onResize);
         this.loop();
     }
 
     onResize = () => {
-        const w = this.container.clientWidth;
-        const h = this.container.clientHeight;
+        const w = this.container.clientWidth,
+            h = this.container.clientHeight;
         this.camera.aspect = w / h;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(w, h);
     };
 
     setLayers(vis: LayerVis) {
-        this.gDocks.visible = vis.docks;
-        this.gStorage.visible = vis.storage;
-        this.gVessels.visible = vis.vessels;
         this.gContainers.visible = vis.containers;
-        this.gResources.visible = vis.resources;
     }
 
     load(data: SceneData) {
-        [this.gDocks, this.gStorage, this.gVessels, this.gContainers, this.gResources].forEach((g) => {
-            while (g.children.length) {
-                const c = g.children.pop()!;
-                (c as any).geometry?.dispose?.();
-                const mat = (c as any).material;
-                if (Array.isArray(mat)) mat.forEach((m: any) => m?.dispose?.());
-                else mat?.dispose?.();
-            }
-        });
+        // Limpa contentores
+        while (this.gContainers.children.length) {
+            const c: any = this.gContainers.children.pop();
+            c?.geometry?.dispose?.();
+            if (Array.isArray(c?.material)) c.material.forEach((m: any) => m?.dispose?.());
+            else c?.material?.dispose?.();
+        }
         this.pickables = [];
 
-        data.docks.forEach((d) => { void this.importModel(d); });
-        data.storageAreas.forEach((sa) => { void this.importModel(sa); });
-        data.vessels.forEach((v) => { void this.importModel(v); });
-        data.containers.forEach((c) => { void this.importModel(c); });
+        // Remapeia TODOS para A.2 (máx. 2 por célula com folga)
+        const a2 = this._grids?.A?.["A.2"];
+        if (a2) this.remapContainersToA2_Max2PerSlot(data.containers, a2);
 
-        data.resources.forEach((r) => {
-            const m = makePhysicalResource(r);
-            this.gResources.add(m);
-            this.pickables.push(m);
-        });
+        // Adiciona placeholders (escala 3×)
+        for (const c of data.containers) {
+            const mesh = makeContainerPlaceholder(c, 3);
 
+            this.gContainers.add(mesh);
+            this.pickables.push(mesh);
+        }
+
+        // Enquadrar câmara
         const box = new THREE.Box3();
         this.pickables.forEach((o) => box.expandByObject(o));
         if (!box.isEmpty()) {
-            const size = new THREE.Vector3(), center = new THREE.Vector3();
-            box.getSize(size); box.getCenter(center);
+            const size = new THREE.Vector3(),
+                center = new THREE.Vector3();
+            box.getSize(size);
+            box.getCenter(center);
             const maxSize = Math.max(size.x, size.y, size.z);
             const distance = (maxSize * 1.5) / Math.tan((this.camera.fov * Math.PI) / 360);
             const dir = new THREE.Vector3(1, 1, 1).normalize();
             this.controls.target.copy(center);
             this.camera.position.copy(center.clone().add(dir.multiplyScalar(distance)));
             this.camera.near = Math.max(0.1, maxSize / 1000);
-            this.camera.far  = Math.max(2000, distance * 10);
+            this.camera.far = Math.max(2000, distance * 10);
             this.camera.updateProjectionMatrix();
         }
     }
 
+    /** Click → devolve o userData do objeto selecionado */
     raycastAt = (ev: MouseEvent, onPick?: (u: any) => void) => {
         const rect = this.renderer.domElement.getBoundingClientRect();
         const mouse = new THREE.Vector2(
@@ -181,6 +175,74 @@ export class PortScene {
         while (obj && !obj.userData?.type) obj = obj.parent!;
         onPick?.(obj?.userData ?? { type: "Unknown" });
     };
+
+    /**
+     * A.2 com **no máximo 2 tiers por célula**.
+     * Usa stride em linhas/colunas para deixar ruas e margem de segurança.
+     */
+    private remapContainersToA2_Max2PerSlot(
+        items: ContainerDto[],
+        gridA2: {
+            rect: { minX: number; maxX: number; minZ: number; maxZ: number };
+            rows: number; cols: number;
+            cells: Array<{
+                minX: number; maxX: number; minZ: number; maxZ: number;
+                r: number; c: number; center: THREE.Vector3;
+            }>;
+        }
+    ) {
+        const SCALE = 3;
+        const ROAD_W = 12;
+
+        const L40 = 12.19 * SCALE;  // comprimento (X geom)
+        const W40 =  2.44 * SCALE;  // largura (Z geom)
+        const H    =  2.59 * SCALE;  // altura
+        const SAFE = 1.0;
+        const GAP_Y = 0.14;         // folga entre tiers
+
+        const rect = gridA2.rect;
+
+        const insetFromX0   = ROAD_W / 2 + W40 / 2 + SAFE;
+        const insetFromZTop = ROAD_W / 2 + L40 / 2 + SAFE;
+
+        const strideR = 3;
+        const strideC = 2;
+
+        const slots = gridA2.cells
+            .filter((cell) => {
+                const { r, c } = cell;
+                const cx = cell.center.x, cz = cell.center.z;
+
+                if (cx < rect.minX + insetFromX0) return false;
+                if (cx > rect.maxX - (W40 / 2 + SAFE)) return false;
+                if (cz < rect.minZ + (L40 / 2 + SAFE)) return false;
+                if (cz > rect.maxZ - insetFromZTop)   return false;
+
+                if (r < 1 || r >= gridA2.rows - 1) return false;
+                if (c < 1 || c >= gridA2.cols - 1) return false;
+
+                if (r % strideR !== 0) return false;
+                if (c % strideC !== 0) return false;
+
+                return true;
+            })
+            .sort((a, b) => (a.r - b.r) || (a.c - b.c));
+
+        if (!slots.length) return;
+
+        // 2 por slot (tier 0 e 1), com folga vertical
+        for (let i = 0; i < items.length; i++) {
+            const slotIndex = Math.floor(i / 2) % slots.length;
+            const tier = i % 2; // 0 ou 1
+            const cell = slots[slotIndex];
+            const c = items[i];
+
+            c.positionX = cell.center.x;
+            c.positionY = (H / 2) + tier * (H + GAP_Y);
+            c.positionZ = cell.center.z;
+            (c as any).rotationY = 0;
+        }
+    }
 
     loop = () => {
         this.controls.update();
@@ -202,48 +264,5 @@ export class PortScene {
         if (this.container.contains(this.renderer.domElement)) {
             this.container.removeChild(this.renderer.domElement);
         }
-    }
-
-    private async importWith(makePlaceholder: () => THREE.Object3D, loadNode: () => Promise<THREE.Object3D>, group: THREE.Group) {
-        const ph = makePlaceholder();
-        group.add(ph);
-        this.pickables.push(ph);
-        try {
-            const node = await loadNode();
-            node.position.copy((ph as any).position);
-            node.rotation.copy((ph as any).rotation);
-            node.userData = (ph as any).userData;
-            group.add(node);
-            this.pickables.push(node);
-            group.remove(ph);
-            (ph as any).traverse?.((o: any) => {
-                o.geometry?.dispose?.();
-                if (Array.isArray(o.material)) o.material.forEach((m: any) => m?.dispose?.());
-                else o.material?.dispose?.();
-            });
-        } catch (e) {
-            console.warn("Falha a carregar modelo:", e);
-        }
-    }
-
-    private isVessel(x: any): x is VesselDto { return x && typeof x === "object" && "imoNumber" in x; }
-    private isContainer(x: any): x is ContainerDto { return x && typeof x === "object" && ("isoCode" in x || "iso6346" in x || "code" in x); }
-    private isStorageArea(x: any): x is StorageAreaDto { return x && typeof x === "object" && ("widthM" in x || "maxBays" in x); }
-    private isDock(x: any): x is DockDto { return x && typeof x === "object" && ("code" in x) && ("lengthM" in x) && ("maxDraftM" in x); }
-
-    private async importModel(m: VesselDto | ContainerDto | StorageAreaDto | DockDto) {
-        if (this.isVessel(m)) {
-            await this.importWith(() => makeVesselPlaceholder(m), () => makeVesselNode(m, ASSETS_MODELS.vessels.ship_ocean, null), this.gVessels); return;
-        }
-        if (this.isContainer(m)) {
-            await this.importWith(() => makeContainerPlaceholder(m), () => makeContainerNode(m, ASSETS_MODELS.containers.container, null), this.gContainers); return;
-        }
-        if (this.isStorageArea(m)) {
-            await this.importWith(() => makeStorageAreaPlaceholder(m), () => makeStorageAreaNode(m, ASSETS_MODELS.storageArea.wareHouser), this.gStorage); return;
-        }
-        if (this.isDock(m)) {
-            await this.importWith(() => makeDockPlaceholder(m), () => makeDockNode(m, (ASSETS_MODELS as any).docks?.straight ?? ASSETS_MODELS.vessels.vessel), this.gDocks); return;
-        }
-        console.warn("Tipo de modelo desconhecido:", m);
     }
 }
