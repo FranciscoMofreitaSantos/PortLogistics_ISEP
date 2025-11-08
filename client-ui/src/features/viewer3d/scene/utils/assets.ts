@@ -14,8 +14,9 @@ export const ASSETS_MODELS = {
         containerShip: `${MODELS}/ships/Container_Ship.glb`,
     },
     containers: {
-        container: `${MODELS}/containers/realistics/Container.glb`,
-        container2: `${MODELS}/containers/realistics/Container2.glb`,
+        containerRealistic: `${MODELS}/containers/realistics/Container.glb`,
+        container: `${MODELS}/containers/Container.glb`,
+        container2: `${MODELS}/containers/Container2.glb`,
     },
     cranes: {
         mcCrane: `${MODELS}/physicalResources/cranes/MCrane.glb`,
