@@ -1,7 +1,7 @@
 // src/features/viewer3d/scene/PortScene.ts
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { SceneData, ContainerDto } from "../types";
+import type { SceneData, ContainerDto, VesselDto } from "../types";
 
 import { makePortBase } from "./objects/PortBase";
 import { ASSETS_TEXTURES } from "./utils/assets";
@@ -12,6 +12,7 @@ import { addRoadPoles } from "./objects/roadLights";
 import { makeStorageArea } from "./objects/StorageArea";
 import { makeContainerPlaceholder } from "./objects/Container";
 import { makeDock } from "./objects/Dock";
+import { makeVesselPlaceholder } from "./objects/Vessel";
 
 import { computeLayout } from "../services/layoutEngine";
 
@@ -20,7 +21,7 @@ export type LayerVis = Partial<{
     containers: boolean;
     storage: boolean;
     docks: boolean;
-    vessels: boolean;    // futuro
+    vessels: boolean;    
     resources: boolean;  // futuro
 }>;
 
@@ -36,6 +37,7 @@ export class PortScene {
     gContainers = new THREE.Group();
     gStorage = new THREE.Group();
     gDocks = new THREE.Group();
+    gVessels = new THREE.Group();
 
     pickables: THREE.Object3D[] = [];
     reqId = 0;
@@ -119,9 +121,11 @@ export class PortScene {
         this.gContainers.name = "containers";
         this.gStorage.name = "storage-areas";
         this.gDocks.name = "docks";
+        this.gVessels.name = "vessels";
         this.gBase.add(this.gContainers);
         this.gBase.add(this.gStorage);
         this.gBase.add(this.gDocks);
+        this.gBase.add(this.gVessels);
 
         window.addEventListener("resize", this.onResize);
         this.loop();
@@ -140,9 +144,7 @@ export class PortScene {
         if (vis.containers !== undefined) this.gContainers.visible = vis.containers;
         if (vis.storage    !== undefined) this.gStorage.visible    = vis.storage;
         if (vis.docks      !== undefined) this.gDocks.visible      = vis.docks;
-
-        // se adicionares grupos no futuro:
-        // if (vis.vessels   !== undefined) this.gVessels.visible   = vis.vessels;
+        if (vis.vessels   !== undefined) this.gVessels.visible   = vis.vessels;
         // if (vis.resources !== undefined) this.gResources.visible = vis.resources;
     }
 
@@ -153,24 +155,18 @@ export class PortScene {
        =========================================================== */
     load(data: SceneData) {
         // 1) limpar grupos
-        while (this.gContainers.children.length) {
-            const c: any = this.gContainers.children.pop();
-            c?.geometry?.dispose?.();
-            if (Array.isArray(c?.material)) c.material.forEach((m: any) => m?.dispose?.());
-            else c?.material?.dispose?.();
-        }
-        while (this.gStorage.children.length) {
-            const o: any = this.gStorage.children.pop();
-            o?.geometry?.dispose?.();
-            if (Array.isArray(o?.material)) o.material.forEach((m: any) => m?.dispose?.());
-            else o?.material?.dispose?.();
-        }
-        while (this.gDocks.children.length) {
-            const o: any = this.gDocks.children.pop();
-            o?.geometry?.dispose?.();
-            if (Array.isArray(o?.material)) o.material.forEach((m: any) => m?.dispose?.());
-            else o?.material?.dispose?.();
-        }
+        const disposeGroup = (g: THREE.Group) => {
+            while (g.children.length) {
+                const o: any = g.children.pop();
+                o?.geometry?.dispose?.();
+                if (Array.isArray(o?.material)) o.material.forEach((m: any) => m?.dispose?.());
+                else o?.material?.dispose?.();
+            }
+        };
+        disposeGroup(this.gContainers);
+        disposeGroup(this.gStorage);
+        disposeGroup(this.gDocks);
+        disposeGroup(this.gVessels);
         this.pickables = [];
 
         // 2) calcular layout (storage B, containers A.2, docks C)
@@ -198,6 +194,12 @@ export class PortScene {
             this.pickables.push(mesh);
         }
 
+        for (const v of layout.vessels as VesselDto[]) {
+            const mesh = makeVesselPlaceholder(v);
+            this.gVessels.add(mesh);
+            this.pickables.push(mesh);
+        }
+        
         // 4) fit de câmara ao conteúdo
         const box = new THREE.Box3();
         this.pickables.forEach((o) => box.expandByObject(o));
