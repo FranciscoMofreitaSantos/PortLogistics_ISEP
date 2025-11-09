@@ -5,7 +5,7 @@ import type { SceneData, ContainerDto, StorageAreaDto } from "../types";
 
 import { makePortBase } from "./objects/PortBase";
 import { ASSETS_TEXTURES } from "./utils/assets";
-// @ts-ignore – ficheiro local em JS/TS sem types
+// @ts-ignore
 import { computePortGrids, drawPortGridsDebug } from "./objects/portGrids";
 import { makeContainerPlaceholder } from "./objects/Container";
 import { addRoadPoles } from "./objects/roadLights";
@@ -40,7 +40,7 @@ export class PortScene {
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(this.renderer.domElement);
 
-        // === SCENE & LIGHTS ===
+        // === SCENE & CAMERA ===
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x000000);
 
@@ -91,7 +91,7 @@ export class PortScene {
         this._grids = computePortGrids(W, D, 10);
         drawPortGridsDebug(this.scene, this._grids, 0.06);
 
-        // === CÂMARA ===
+        // === CONTROLOS ===
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.target.set(0, 0, 0);
@@ -99,8 +99,8 @@ export class PortScene {
         // === GRUPOS ===
         this.gContainers.name = "containers";
         this.gStorage.name = "storage-areas";
-        this.gBase.add(this.gContainers); // containers também herdam transform da base
-        this.gBase.add(this.gStorage);    // IMPORTANTE: storages no mesmo parent da base
+        this.gBase.add(this.gContainers);
+        this.gBase.add(this.gStorage);
 
         window.addEventListener("resize", this.onResize);
         this.loop();
@@ -118,71 +118,90 @@ export class PortScene {
     }
 
     /* ======================================================================
-       LAYOUT SIMPLES: distribuir Storage Areas dentro da Zona B (B.1 → B.2)
-       ----------------------------------------------------------------------
-       Estratégia:
-       - "Row-major": varre em X (esquerda→direita) e quebra linha em Z quando
-         não cabe mais; quando enche B.1, continua em B.2.
-       - Respeita margin às bordas e gap entre peças.
+       LAYOUT UNIFORME EM B: máx. 10 em B.1 e 10 em B.2, todos com o MESMO tamanho
+       por zona, escolhendo rows×cols para ocupar a área com melhores distâncias.
        ====================================================================== */
 
-    private placeRectFillRowMajor(
+    /** Distribui até `maxCount` SAs num rect, todas com o MESMO (w,d). */
+    private placeUniformInRect(
         items: StorageAreaDto[],
         fromIdx: number,
         rect: { minX: number; maxX: number; minZ: number; maxZ: number },
-        margin = 4,
-        gap = 2
+        maxCount: number,
+        margin = 6,   // margem à borda
+        gap = 3       // espaço entre SAs
     ): number {
-        let i = fromIdx;
+        const total = Math.min(maxCount, Math.max(0, items.length - fromIdx));
+        if (total <= 0) return fromIdx;
 
-        let x = rect.minX + margin;
-        let z = rect.minZ + margin;
-        let rowMaxDepth = 0;
+        const rectW = rect.maxX - rect.minX;
+        const rectD = rect.maxZ - rect.minZ;
 
-        while (i < items.length) {
-            const sa = items[i] as any;
-            const w = Math.max(2, Number(sa.widthM)  || 10); // extensão em X
-            const d = Math.max(2, Number(sa.depthM)  || 10); // extensão em Z
-            const h = Math.max(1, Number(sa.heightM) ||  3); // extensão em Y
+        // escolher cols vs rows aproximando a razão de aspeto do rect
+        const aspect = rectW / Math.max(1e-6, rectD);
+        let cols = Math.max(1, Math.min(total, Math.round(Math.sqrt(total * aspect))));
+        let rows = Math.max(1, Math.ceil(total / cols));
 
-            // se não cabe nesta linha, nova linha (Z+)
-            if (x + w + margin > rect.maxX) {
-                x = rect.minX + margin;
-                z += rowMaxDepth + gap;
-                rowMaxDepth = 0;
-            }
+        // calcula tamanho uniforme que cabe com margens e gaps
+        const calcSize = (mg: number, gp: number) => ({
+            w: (rectW - 2 * mg - (cols - 1) * gp) / cols,
+            d: (rectD - 2 * mg - (rows - 1) * gp) / rows,
+        });
 
-            // se não cabe no rect (altura restante), para
-            if (z + d + margin > rect.maxZ) break;
+        let { w, d } = calcSize(margin, gap);
 
-            // centro do slot
-            const cx = x + w / 2;
-            const cz = z + d / 2;
+        // fallback se ficar negativo por margens/gaps demasiado grandes
+        if (w <= 0 || d <= 0) {
+            margin = 4; gap = 2;
+            ({ w, d } = calcSize(margin, gap));
+        }
+        if (w <= 0 || d <= 0) {
+            // último recurso: força 1 linha
+            cols = Math.max(1, total);
+            rows = 1;
+            ({ w, d } = calcSize(margin, gap));
+        }
+
+        // altura uniforme: usa a do objeto (ou 3)
+        const hDefault = 3;
+
+        for (let k = 0; k < total; k++) {
+            const idx = fromIdx + k;
+            const r = Math.floor(k / cols);
+            const c = k % cols;
+
+            const cx = rect.minX + margin + c * (w + gap) + w / 2;
+            const cz = rect.minZ + margin + r * (d + gap) + d / 2;
+
+            const sa = items[idx] as any;
+            const h = Math.max(1, Number(sa.heightM) || hDefault);
+
+            // override para uniformizar tamanhos na zona
+            sa.widthM = w;
+            sa.depthM = d;
+            sa.heightM = h;
 
             sa.positionX = cx;
             sa.positionY = h / 2;
             sa.positionZ = cz;
             (sa as any).rotationY = 0;
-
-            // avança
-            x += w + gap;
-            rowMaxDepth = Math.max(rowMaxDepth, d);
-            i++;
         }
 
-        return i;
+        return fromIdx + total;
     }
 
-    /** Preenche B.1 e depois B.2 com grelha simples. */
+    /** Máx. 10 em B.1, depois máx. 10 em B.2, com tamanhos uniformes por zona. */
     private placeStorageAreasInB(storage: StorageAreaDto[]) {
         if (!this._grids) return;
+
         const B1 = this._grids.B["B.1"].rect;
         const B2 = this._grids.B["B.2"].rect;
 
-        let idx = this.placeRectFillRowMajor(storage, 0, B1, 4, 2);
+        let idx = this.placeUniformInRect(storage, 0, B1, 10, 6, 3);
         if (idx < storage.length) {
-            this.placeRectFillRowMajor(storage, idx, B2, 4, 2);
+            idx = this.placeUniformInRect(storage, idx, B2, 10, 6, 3);
         }
+        // quaisquer restantes (se houver) ficam de fora por requisito (máx. 20 no total).
     }
 
     /* ===================== Containers: A.2 com máx. 2 tiers ===================== */
@@ -271,8 +290,8 @@ export class PortScene {
 
         // ======== STORAGE AREAS ========
         const storageCopy = data.storageAreas.map(sa => ({ ...sa }));
-        this.placeStorageAreasInB(storageCopy); // novo layout simples
-        for (const sa of storageCopy) {
+        this.placeStorageAreasInB(storageCopy);
+        for (const sa of storageCopy.slice(0, 20)) { // salvaguarda: só 10+10
             const m = makeStorageAreaPlaceholder(sa);
             if ((sa as any).rotationY != null) (m as any).rotation.y = Number((sa as any).rotationY) || 0;
             this.gStorage.add(m);
@@ -282,14 +301,13 @@ export class PortScene {
         // ======== CONTAINERS (A.2, máx. 2 tiers por célula) ========
         const a2 = this._grids?.A?.["A.2"];
         if (a2) this.remapContainersToA2_Max2PerSlot(data.containers, a2);
-
         for (const c of data.containers) {
             const mesh = makeContainerPlaceholder(c, 3);
             this.gContainers.add(mesh);
             this.pickables.push(mesh);
         }
 
-        // Enquadrar câmara aos pickables
+        // Enquadrar câmara
         const box = new THREE.Box3();
         this.pickables.forEach((o) => box.expandByObject(o));
         if (!box.isEmpty()) {
