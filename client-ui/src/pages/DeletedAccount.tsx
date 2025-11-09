@@ -9,7 +9,7 @@ export default function DeletedAccount() {
     const user = useAppStore((s) => s.user);
     const navigate = useNavigate();
 
-    const email = user?.email;
+    const email = user?.email ?? t("deleted.unknownEmail");
 
     return (
         <section className="deleted-container">
@@ -18,27 +18,13 @@ export default function DeletedAccount() {
                     <FaBan size={64} color="#e63946" />
                 </div>
 
-                <h2 className="deleted-title">
-                    {t("deleted.title", "Account Deleted")}
-                </h2>
+                <h2 className="deleted-title">{t("deleted.title")}</h2>
 
-                <p className="deleted-message">
-                    {t(
-                        "deleted.message",
-                        "Your account has been permanently deleted and access to the system has been revoked."
-                    )}
-                </p>
+                <p className="deleted-message">{t("deleted.message")}</p>
 
                 <div className="deleted-info">
-                    <strong>
-                        {t("deleted.details", "Account Details:")}
-                    </strong>
-                    <p>
-                        {t(
-                            "deleted.emailText",
-                            "This account was associated with the email address:"
-                        )}
-                    </p>
+                    <strong>{t("deleted.details")}</strong>
+                    <p>{t("deleted.emailText")}</p>
                     <div className="deleted-email">{email}</div>
                 </div>
 
@@ -48,16 +34,11 @@ export default function DeletedAccount() {
                         onClick={() => navigate("/")}
                     >
                         <FaArrowLeft size={16} style={{ marginRight: 8 }} />
-                        {t("deleted.actions.back", "Return to Home")}
+                        {t("deleted.actions.back")}
                     </button>
                 </div>
 
-                <p className="deleted-hint">
-                    {t(
-                        "deleted.contact",
-                        "If you believe this was a mistake, please contact the system administrator."
-                    )}
-                </p>
+                <p className="deleted-hint">{t("deleted.contact")}</p>
             </div>
         </section>
     );

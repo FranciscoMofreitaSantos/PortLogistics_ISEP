@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function ActivateAccount() {
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
-    const [message, setMessage] = useState("🔄 Activating your account...");
+    const [message, setMessage] = useState(t("activation.loading"));
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const navigate = useNavigate();
 
     useEffect(() => {
         const email = searchParams.get("email");
         if (!email) {
-            setMessage("⚠️ Invalid or missing activation link.");
+            setMessage(t("activation.missingLink"));
             setStatus("error");
             return;
         }
@@ -22,7 +24,7 @@ export default function ActivateAccount() {
                 );
 
                 if (!userRes.ok) {
-                    setMessage("⚠️ This activation link is invalid or expired (user not found).");
+                    setMessage(t("activation.invalidLink"));
                     setStatus("error");
                     return;
                 }
@@ -30,7 +32,7 @@ export default function ActivateAccount() {
                 const user = await userRes.json();
 
                 if (user.eliminated === true) {
-                    setMessage("❌ This account has been removed. The activation link is no longer valid.");
+                    setMessage(t("activation.removedAccount"));
                     setStatus("error");
                     return;
                 }
@@ -42,21 +44,21 @@ export default function ActivateAccount() {
                 const text = await activateRes.text();
 
                 if (activateRes.ok) {
-                    setMessage(text || "✅ Account activated successfully!");
+                    setMessage(text || t("activation.successMessage"));
                     setStatus("success");
                 } else {
-                    setMessage(text || "⚠️ Activation failed. Please contact support.");
+                    setMessage(text || t("activation.failedMessage"));
                     setStatus("error");
                 }
             } catch (err) {
                 console.error(err);
-                setMessage("❌ An unexpected error occurred while activating your account.");
+                setMessage(t("activation.unexpectedError"));
                 setStatus("error");
             }
         };
 
         verifyAndActivate();
-    }, [searchParams]);
+    }, [searchParams, t]);
 
     const handleGoHome = () => {
         navigate("/");
@@ -79,10 +81,10 @@ export default function ActivateAccount() {
         >
             <h2>
                 {status === "success"
-                    ? "✅ Account Activated"
+                    ? t("activation.titleSuccess")
                     : status === "error"
-                        ? "❌ Activation Failed"
-                        : "⏳ Please wait"}
+                        ? t("activation.titleError")
+                        : t("activation.titleLoading")}
             </h2>
 
             <p style={{ marginTop: "1rem", maxWidth: 520 }}>{message}</p>
@@ -111,7 +113,7 @@ export default function ActivateAccount() {
                         e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
                     }}
                 >
-                    Go to Home
+                    {t("activation.goHome")}
                 </button>
             )}
         </section>
