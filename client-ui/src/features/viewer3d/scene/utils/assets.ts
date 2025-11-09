@@ -30,7 +30,7 @@ export const ASSETS_MODELS = {
         forklift: `${MODELS}/physicalResources/vehicles/forklift.glb`,
     },
     storageArea: {
-        wareHouser: `${MODELS}/storageAreas/WareHouse.glb`,
+        wareHouser: `${MODELS}/storageAreas/building-s.glb`,
     },
     docks: {
         straight: `${MODELS}/Dock.glb`,

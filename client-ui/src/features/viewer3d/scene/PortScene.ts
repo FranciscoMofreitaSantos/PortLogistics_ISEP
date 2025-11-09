@@ -9,7 +9,7 @@ import { ASSETS_TEXTURES } from "./utils/assets";
 import { computePortGrids, drawPortGridsDebug } from "./objects/portGrids";
 import { makeContainerPlaceholder } from "./objects/Container";
 import { addRoadPoles } from "./objects/roadLights";
-import { makeStorageAreaPlaceholder } from "./objects/StorageArea";
+import { makeStorageArea } from "./objects/StorageArea";
 
 export type LayerVis = { containers: boolean };
 
@@ -32,7 +32,7 @@ export class PortScene {
     constructor(container: HTMLDivElement) {
         this.container = container;
 
-        // === RENDERER ===
+        // RENDERER
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.setSize(container.clientWidth, container.clientHeight);
@@ -40,7 +40,7 @@ export class PortScene {
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(this.renderer.domElement);
 
-        // === SCENE & CAMERA ===
+        // SCENE & CAMERA
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x000000);
 
@@ -50,7 +50,7 @@ export class PortScene {
         this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
         this.scene.add(new THREE.HemisphereLight(0xffffff, 0x404040, 0.25));
 
-        // === BASE DO PORTO ===
+        // BASE DO PORTO
         const { group: base, layout } = makePortBase({
             width: 1200,
             depth: 1000,
@@ -73,7 +73,7 @@ export class PortScene {
         this.gBase = base;
         this.scene.add(this.gBase);
 
-        // === FARÓIS ===
+        // FARÓIS
         addRoadPoles(this.scene, layout, {
             yGround: 0,
             roadWidth: 12,
@@ -85,18 +85,18 @@ export class PortScene {
             clearMargin: 1.2,
         });
 
-        // === GRELHAS (A/B/C) ===
+        // GRELHAS (A/B/C)
         const W = layout.zoneC.size.w;
         const D = layout.zoneC.size.d * 2;
         this._grids = computePortGrids(W, D, 10);
         drawPortGridsDebug(this.scene, this._grids, 0.06);
 
-        // === CONTROLOS ===
+        // CONTROLOS
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.target.set(0, 0, 0);
 
-        // === GRUPOS ===
+        // GRUPOS
         this.gContainers.name = "containers";
         this.gStorage.name = "storage-areas";
         this.gBase.add(this.gContainers);
@@ -118,51 +118,45 @@ export class PortScene {
     }
 
     /* ======================================================================
-       LAYOUT UNIFORME EM B: máx. 10 em B.1 e 10 em B.2, todos com o MESMO tamanho
-       por zona, escolhendo rows×cols para ocupar a área com melhores distâncias.
+       LAYOUT UNIFORME EM B: máx. 10 em B.1 e 10 em B.2, tamanhos uniformes
        ====================================================================== */
 
-    /** Distribui até `maxCount` SAs num rect, todas com o MESMO (w,d). */
     private placeUniformInRect(
         items: StorageAreaDto[],
         fromIdx: number,
         rect: { minX: number; maxX: number; minZ: number; maxZ: number },
         maxCount: number,
-        margin = 6,   // margem à borda
-        gap = 3       // espaço entre SAs
-    ): number {
+        marginInit = 6,
+        gapInit = 3,
+        rotY = 0
+): number {
+        let margin = marginInit;
+        let gap = gapInit;
+
         const total = Math.min(maxCount, Math.max(0, items.length - fromIdx));
         if (total <= 0) return fromIdx;
 
         const rectW = rect.maxX - rect.minX;
         const rectD = rect.maxZ - rect.minZ;
-
-        // escolher cols vs rows aproximando a razão de aspeto do rect
         const aspect = rectW / Math.max(1e-6, rectD);
-        let cols = Math.max(1, Math.min(total, Math.round(Math.sqrt(total * aspect))));
+
+        let cols = Math.max(1, Math.min(total, Math.ceil(Math.sqrt(total * aspect))));
         let rows = Math.max(1, Math.ceil(total / cols));
 
-        // calcula tamanho uniforme que cabe com margens e gaps
-        const calcSize = (mg: number, gp: number) => ({
-            w: (rectW - 2 * mg - (cols - 1) * gp) / cols,
-            d: (rectD - 2 * mg - (rows - 1) * gp) / rows,
+        const calcSize = () => ({
+            w: (rectW - 2 * margin - (cols - 1) * gap) / cols,
+            d: (rectD - 2 * margin - (rows - 1) * gap) / rows,
         });
 
-        let { w, d } = calcSize(margin, gap);
-
-        // fallback se ficar negativo por margens/gaps demasiado grandes
-        if (w <= 0 || d <= 0) {
-            margin = 4; gap = 2;
-            ({ w, d } = calcSize(margin, gap));
-        }
-        if (w <= 0 || d <= 0) {
-            // último recurso: força 1 linha
-            cols = Math.max(1, total);
-            rows = 1;
-            ({ w, d } = calcSize(margin, gap));
+        let { w, d } = calcSize();
+        let guard = 0;
+        while ((w <= 0 || d <= 0) && guard++ < 20) {
+            if (margin > 2) margin -= 1;
+            else if (gap > 1) gap -= 1;
+            else { cols = Math.max(1, cols - 1); rows = Math.max(1, Math.ceil(total / cols)); }
+            ({ w, d } = calcSize());
         }
 
-        // altura uniforme: usa a do objeto (ou 3)
         const hDefault = 3;
 
         for (let k = 0; k < total; k++) {
@@ -176,32 +170,31 @@ export class PortScene {
             const sa = items[idx] as any;
             const h = Math.max(1, Number(sa.heightM) || hDefault);
 
-            // override para uniformizar tamanhos na zona
-            sa.widthM = w;
-            sa.depthM = d;
+            // guarda tamanho base (placeholder/modelo aplicam scale final)
+            sa.widthM  = w;
+            sa.depthM  = d;
             sa.heightM = h;
 
             sa.positionX = cx;
             sa.positionY = h / 2;
             sa.positionZ = cz;
-            (sa as any).rotationY = 0;
+            sa.rotationY = rotY;
         }
 
         return fromIdx + total;
     }
 
-    /** Máx. 10 em B.1, depois máx. 10 em B.2, com tamanhos uniformes por zona. */
     private placeStorageAreasInB(storage: StorageAreaDto[]) {
         if (!this._grids) return;
 
         const B1 = this._grids.B["B.1"].rect;
         const B2 = this._grids.B["B.2"].rect;
 
-        let idx = this.placeUniformInRect(storage, 0, B1, 10, 6, 3);
+        let idx = this.placeUniformInRect(storage, 0, B1, 10, 6, 3,0);
         if (idx < storage.length) {
-            idx = this.placeUniformInRect(storage, idx, B2, 10, 6, 3);
+            idx = this.placeUniformInRect(storage, idx, B2, 10, 6, 3,Math.PI);
         }
-        // quaisquer restantes (se houver) ficam de fora por requisito (máx. 20 no total).
+        // restantes (se houvesse) ficam de fora por requisito (10+10).
     }
 
     /* ===================== Containers: A.2 com máx. 2 tiers ===================== */
@@ -288,17 +281,17 @@ export class PortScene {
         }
         this.pickables = [];
 
-        // ======== STORAGE AREAS ========
-        const storageCopy = data.storageAreas.map(sa => ({ ...sa }));
+        // STORAGE AREAS (B.1 → B.2)
+        const storageCopy = data.storageAreas.slice(0,20).map(sa => ({ ...sa }));
+        
         this.placeStorageAreasInB(storageCopy);
-        for (const sa of storageCopy.slice(0, 20)) { // salvaguarda: só 10+10
-            const m = makeStorageAreaPlaceholder(sa);
-            if ((sa as any).rotationY != null) (m as any).rotation.y = Number((sa as any).rotationY) || 0;
-            this.gStorage.add(m);
-            this.pickables.push(m);
+        for (const sa of storageCopy) {
+            const node = makeStorageArea(sa); // placeholder + swap interno para GLB
+            this.gStorage.add(node);
+            this.pickables.push(node);
         }
 
-        // ======== CONTAINERS (A.2, máx. 2 tiers por célula) ========
+        // CONTAINERS (A.2, máx. 2 tiers por célula)
         const a2 = this._grids?.A?.["A.2"];
         if (a2) this.remapContainersToA2_Max2PerSlot(data.containers, a2);
         for (const c of data.containers) {
@@ -307,7 +300,7 @@ export class PortScene {
             this.pickables.push(mesh);
         }
 
-        // Enquadrar câmara
+        // Fit da câmara
         const box = new THREE.Box3();
         this.pickables.forEach((o) => box.expandByObject(o));
         if (!box.isEmpty()) {
