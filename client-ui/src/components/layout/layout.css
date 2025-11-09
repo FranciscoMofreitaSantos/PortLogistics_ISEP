@@ -137,11 +137,10 @@ html, body {
 
 
 /* === SIDEBAR === */
-/* === SIDEBAR === */
 .sidebar {
     position: fixed;
     top: 0;
-    left: -260px; /* 🔹 igual à largura */
+    left: -260px;
     width: 240px;
     height: 100vh;
     background: rgba(15, 20, 30, 0.92);
@@ -153,28 +152,27 @@ html, body {
     z-index: 999;
     backdrop-filter: blur(18px);
     transition: left 0.35s ease;
-    overflow-y: auto; /* ✅ permite o conteúdo rolar */
-    overflow-x: hidden; /* ✅ impede scroll lateral */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-/* Quando aberta */
 .sidebar.open {
-    left: 0; /* ✅ entra na tela */
+    left: 0;
 }
 
 /* === CONTEÚDO === */
 .sidebar-content {
     display: flex;
     flex-direction: column;
-    flex: 1; /* 🔹 ocupa o espaço total */
-    min-height: 0; /* 🔹 evita colapso em flex com overflow */
-    padding-top: 100px; /* espaço para o header */
+    flex: 1;
+    min-height: 0;
+    padding-top: 100px;
     overflow-y: auto;
 }
 
 /* === NAVEGAÇÃO === */
 .sidebar nav {
-    flex: 1; /* 🔹 empurra o footer */
+    flex: 1;
 }
 
 .sidebar nav ul {
@@ -256,7 +254,7 @@ html, body {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #4fa3ff; /* substitui var(--brand-color) */
+    color: #4fa3ff;
 }
 
 .profile-in-sidebar img {

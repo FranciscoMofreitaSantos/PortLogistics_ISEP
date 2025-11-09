@@ -6,7 +6,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 import Profile from "../Profile";
 import LogoutButton from "../LogoutButton";
 
-// Importar ícones
 import {
     FiHome,
     FiBox,
@@ -17,12 +16,11 @@ import {
     FiBriefcase,
     FiUserCheck,
     FiFileText,
-    FiAnchor, // Substituto para Navios
-    FiLayers, // Substituto para 3D
+    FiAnchor,
+    FiLayers,
 } from "react-icons/fi";
 import {FaShip} from "react-icons/fa";
 
-// Definir que o componente aceita a prop 'isOpen'
 type NavProps = {
     isOpen: boolean;
 };
@@ -70,7 +68,6 @@ export default function Nav({ isOpen }: NavProps) {
 
     const menu = [...baseMenu, ...adminMenu, ...operatorMenu, ...sarMenu, ...portAuthorityOfficerMenu];
 
-    // Filtrar duplicados caso um user tenha múltiplos roles
     const uniqueMenu = menu.filter((item, index, self) =>
             index === self.findIndex((t) => (
                 t.path === item.path
@@ -78,7 +75,6 @@ export default function Nav({ isOpen }: NavProps) {
     );
 
     return (
-        // AQUI ESTÁ A CORREÇÃO: O 'aside' faz parte do Nav e recebe a classe 'open'
         <aside className={`sidebar ${isOpen ? "open" : ""}`}>
             <div className="sidebar-content">
                 <nav>

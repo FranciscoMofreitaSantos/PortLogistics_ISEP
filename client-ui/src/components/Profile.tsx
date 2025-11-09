@@ -5,14 +5,13 @@ export default function Profile() {
 
     if (isLoading || !isAuthenticated || !user) return null;
 
-    // Adicionamos classes para estilização específica na sidebar
     return (
         <div className="profile-in-sidebar">
             {user.picture && (
                 <img
                     src={user.picture}
                     alt={user.name}
-                    width="40" // Reduzido para um look mais compacto
+                    width="40"
                     height="40"
                     referrerPolicy="no-referrer"
                 />
