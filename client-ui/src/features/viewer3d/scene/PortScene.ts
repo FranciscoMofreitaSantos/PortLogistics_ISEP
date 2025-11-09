@@ -13,6 +13,7 @@ import { makeStorageArea } from "./objects/StorageArea";
 import { makeContainerPlaceholder } from "./objects/Container";
 import { makeDock } from "./objects/Dock";
 import { makeVessel } from "./objects/Vessel";
+import { makeDecorativeStorage } from "./objects/DecorativeStorage";
 
 import { computeLayout } from "../services/layoutEngine";
 
@@ -21,10 +22,10 @@ export type LayerVis = Partial<{
     containers: boolean;
     storage: boolean;
     docks: boolean;
-    vessels: boolean;    
+    vessels: boolean;
     resources: boolean;  // futuro
+    // decoratives?: boolean; // (opcional, se quiseres toggle no futuro)
 }>;
-
 
 export class PortScene {
     container: HTMLDivElement;
@@ -38,6 +39,7 @@ export class PortScene {
     gStorage = new THREE.Group();
     gDocks = new THREE.Group();
     gVessels = new THREE.Group();
+    gDecor = new THREE.Group(); // ⬅️ novo grupo para decoratives
 
     pickables: THREE.Object3D[] = [];
     reqId = 0;
@@ -110,7 +112,7 @@ export class PortScene {
         const W = layout.zoneC.size.w;
         const D = layout.zoneC.size.d * 2;
         this._grids = computePortGrids(W, D, 10);
-        // drawPortGridsDebug(this.scene, this._grids, 0.06);
+        drawPortGridsDebug(this.scene, this._grids, 1.10);
 
         /* ------------ CONTROLOS ------------ */
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -122,10 +124,12 @@ export class PortScene {
         this.gStorage.name = "storage-areas";
         this.gDocks.name = "docks";
         this.gVessels.name = "vessels";
+        this.gDecor.name = "decorative";
         this.gBase.add(this.gContainers);
         this.gBase.add(this.gStorage);
         this.gBase.add(this.gDocks);
         this.gBase.add(this.gVessels);
+        this.gBase.add(this.gDecor); 
 
         window.addEventListener("resize", this.onResize);
         this.loop();
@@ -139,15 +143,15 @@ export class PortScene {
         this.renderer.setSize(w, h);
     };
 
-// depois
+    // depois
     setLayers(vis: LayerVis) {
         if (vis.containers !== undefined) this.gContainers.visible = vis.containers;
         if (vis.storage    !== undefined) this.gStorage.visible    = vis.storage;
         if (vis.docks      !== undefined) this.gDocks.visible      = vis.docks;
-        if (vis.vessels   !== undefined) this.gVessels.visible   = vis.vessels;
+        if (vis.vessels    !== undefined) this.gVessels.visible    = vis.vessels;
+        // if ((vis as any).decoratives !== undefined) this.gDecor.visible = (vis as any).decoratives; // opcional
         // if (vis.resources !== undefined) this.gResources.visible = vis.resources;
     }
-
 
     /* ===========================================================
        LOAD / BUILD
@@ -167,6 +171,7 @@ export class PortScene {
         disposeGroup(this.gStorage);
         disposeGroup(this.gDocks);
         disposeGroup(this.gVessels);
+        disposeGroup(this.gDecor);
         this.pickables = [];
 
         // 2) calcular layout (storage B, containers A.2, docks C)
@@ -193,15 +198,21 @@ export class PortScene {
             this.gContainers.add(mesh);
             this.pickables.push(mesh);
         }
-        
-        
+
+        // Vessels
         for (const v of layout.vessels) {
             const node = makeVessel(v as any);
             this.gVessels.add(node);
             this.pickables.push(node);
         }
 
-        
+        // Decoratives (retângulos amarelos)
+        for (const deco of layout.decoratives) {
+            const mesh = makeDecorativeStorage(deco);
+            this.gDecor.add(mesh);
+            this.pickables.push(mesh);
+        }
+
         // 4) fit de câmara ao conteúdo
         const box = new THREE.Box3();
         this.pickables.forEach((o) => box.expandByObject(o));

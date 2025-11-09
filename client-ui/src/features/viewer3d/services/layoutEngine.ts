@@ -5,12 +5,21 @@ import { placeStorageAreasInB } from "./placement/placeStorageAreaB";
 import { placeContainersA2_Max2PerSlot } from "./placement/placeContainerA2";
 import { placeDocksC } from "./placement/placeDocksC";
 import { placeVesselsOnWater, type VesselPlacementOpts } from "./placement/placeVesselWater";
+import { placeDecorativeStorageAreasZoneC } from "./placement/placeDecorativeStorageAreasZoneC";
+
+/** Nó decorativo (retângulos amarelos em frente às docks na Zona C) */
+export type DecorativeSA = {
+    zone: string;
+    widthM: number; depthM: number; heightM: number;
+    positionX: number; positionZ: number; rotationY: number;
+};
 
 export type LayoutResult = {
     storage: SceneData["storageAreas"];
     containers: SceneData["containers"];
     docks: Array<SceneData["docks"][number] & { rotationY?: number }>;
     vessels: Array<SceneData["vessels"][number] & { rotationY?: number }>;
+    decoratives: DecorativeSA[]; 
 };
 
 export function computeLayout(data: SceneData, grids: GridsResult): LayoutResult {
@@ -30,10 +39,10 @@ export function computeLayout(data: SceneData, grids: GridsResult): LayoutResult
     const vesselOpts: VesselPlacementOpts = {
         lengthScale: 1.6,  // +60% no comprimento
         addLengthM:  20,   // +20 m extra
-        widthScale:  1.9, // +35% na largura
-        addWidthM:   6,    // +3 m extra
+        widthScale:  1.9,  // +90% na largura
+        addWidthM:   6,    // +6 m extra
         clearanceM:  8,    // mais afastado da doca para não colidir
-        yOffsetM:    -34,    // subir/descer todos
+        yOffsetM:    -34,  // subir/descer todos
         jitterAlongM:   0, // variação ao longo (0 = desligado)
         jitterLateralM: 0, // variação lateral (0 = desligado)
     };
@@ -41,5 +50,27 @@ export function computeLayout(data: SceneData, grids: GridsResult): LayoutResult
     const vesselsRaw = (data.vessels ?? []).map(v => ({ ...v }));
     const vessels = placeVesselsOnWater(vesselsRaw as any, docks as any, vesselOpts);
 
-    return { storage, containers, docks, vessels };
+    // --- Decoratives (Zona C: C.7, C.8, C.9, C.10 conforme regras) ---
+    const decoratives = placeDecorativeStorageAreasZoneC(grids, {
+        // mais “gordo” (X):
+        thicknessRatio: 0.25,
+        thicknessScale: 1.3,
+
+        // mais “comprido” (Z):
+        lengthRatio: 0.65,
+        lengthScale: 1.1,
+
+        // mais alto (Y):
+        heightM: 7,
+        heightScale: 6,
+
+        // folgas (se tocar na rua, sobam isto):
+        edgeInsetM: 8,
+        roadClearM: 8,
+
+        includeTopBands: true,
+    });
+
+
+    return { storage, containers, docks, vessels, decoratives };
 }
