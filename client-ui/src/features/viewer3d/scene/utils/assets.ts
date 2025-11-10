@@ -11,7 +11,7 @@ export const ASSETS_MODELS = {
     containers: {
         containerRealistic: `${MODELS}/containers/realistics/Container.glb`,
         container: `${MODELS}/containers/Container.glb`,
-        container2: `${MODELS}/containers/Container2.glb`,
+        container2: `${MODELS}/containers/Shi.glb`,
     },
     cranes: {
         mcCrane: `${MODELS}/physicalResources/cranes/MCrane.glb`,
@@ -35,13 +35,13 @@ export const ASSETS_MODELS = {
     },
     storageArea: {
         wareHouser: `${MODELS}/storageAreas/StorageArea.glb`,
-        decorativeBuilding: `${MODELS}/storageAreas/building-m.glb`,
     },
     buildings:{
         bigOffice: `${MODELS}/props/buildings/BigOffice.glb`,
         chillBuilding: `${MODELS}/props/buildings/extras/chillBuilding.glb`,
         midleBuilding: `${MODELS}/props/buildings/extras/midleBuilding.glb`,
         smallBuilding: `${MODELS}/props/buildings/extras/smallBuilding.glb`,
+        factoryBuilding: `${MODELS}/props/buildings/extras/FactoryBuilding.glb`,
     },
     docks: {
         straight: `${MODELS}/Dock.glb`,

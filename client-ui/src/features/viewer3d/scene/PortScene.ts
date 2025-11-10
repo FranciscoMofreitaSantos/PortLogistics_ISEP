@@ -14,13 +14,15 @@ import { makeStorageArea } from "./objects/StorageArea";
 import { makeContainerPlaceholder } from "./objects/Container";
 import { makeDock } from "./objects/Dock";
 import { makeVessel } from "./objects/Vessel";
-import { makeDecorativeStorage } from "./objects/DecorativeStorage";
+//import { makeDecorativeStorage } from "./objects/DecorativeStorage";
 import { makeDecorativeCrane } from "./objects/DecorativeCrane";
 
 import { addRoadTraffic } from "./objects/addRoadTraffic";
 import { addAngleParkingInC } from "./objects/addParking";
 import { addWorkshopsInC34 } from "./objects/addWorkshopsC34";
 import { addExtrasRowInC34 } from "../services/placement/addExtrasRowC34";
+import { addFactoriesInC78910 } from "../services/placement/addFactoriesC78910";
+import { addContainerYardsInC78910 } from "../services/placement/addStacksYardC78910";
 
 import { computeLayout } from "../services/layoutEngine";
 
@@ -50,6 +52,8 @@ export class PortScene {
     gParking = new THREE.Group();
     gWorkshops = new THREE.Group();
     gExtras = new THREE.Group();
+    gIndustry = new THREE.Group();
+    gYards = new THREE.Group();
 
     pickables: THREE.Object3D[] = [];
     reqId = 0;
@@ -77,7 +81,7 @@ export class PortScene {
         this.camera = new THREE.PerspectiveCamera(20, container.clientWidth / container.clientHeight, 0.1, 8000);
         this.camera.position.set(180, 200, 420);
 
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
         this.scene.add(new THREE.HemisphereLight(0xffffff, 0x404040, 0.25));
 
         /* ------------ BASE DO PORTO ------------ */
@@ -114,6 +118,8 @@ export class PortScene {
         this.gParking.name = "parking";
         this.gWorkshops.name = "workshops";
         this.gExtras.name = "extras";
+        this.gIndustry.name = "industry";
+        this.gYards.name = "yards";
         this.gBase.add(
             this.gContainers,
             this.gStorage,
@@ -124,6 +130,8 @@ export class PortScene {
             this.gParking,
             this.gWorkshops,
             this.gExtras,
+            this.gIndustry,
+            this.gYards,
         );
 
         /* ------------ GRELHAS (A/B/C) ------------ */
@@ -190,6 +198,9 @@ export class PortScene {
         disposeGroup(this.gTraffic);
         disposeGroup(this.gParking);
         disposeGroup(this.gWorkshops);
+        disposeGroup(this.gExtras);
+        disposeGroup(this.gIndustry);
+        disposeGroup(this.gYards);
         this.pickables = [];
 
         // 2) calcular layout (Storage/Containers/Docks/Vessels/Decor) com as grelhas
@@ -229,11 +240,11 @@ export class PortScene {
         }
 
         // Decoratives Storage Areas (retângulos amarelos)
-        for (const deco of layoutResult.decoratives) {
-            const mesh = makeDecorativeStorage(deco);
-            this.gDecor.add(mesh);
-            this.pickables.push(mesh);
-        }
+        // for (const deco of layoutResult.decoratives) {
+        //     const mesh = makeDecorativeStorage(deco);
+        //     this.gDecor.add(mesh);
+        //     this.pickables.push(mesh);
+        // }
 
         for (const dc of layoutResult.decorativeCranes) {
             const node = makeDecorativeCrane(dc as any);
@@ -291,10 +302,40 @@ export class PortScene {
             fillDepthRatio: 0.92,   // profunda
             marginX: 2.5,
             marginZ: 2.5,
-            cellGap: 0.6,           // edifícios quase encostados entre si
+            cellGap: 10,           // edifícios quase encostados entre si
             fitScaleFactor: 0.992,  // encosta às bordas da célula sem tocar
             roadY: 0.03,
         });
+
+
+        // 3 fábricas por zona (C.7,C.8,C.9,C.10) — faixa central em Z
+        addFactoriesInC78910(this.gIndustry, this._grids!, {
+            bandDepthRatio: 0.26,
+            marginX: 6,
+            marginZ: 6,
+            cellGapX: 1.5,
+            fitScaleFactor: 0.992,
+            // yawExtra: 0, // opcional
+            targetFootprint: { x: 26, z: 18 },
+            roadY: 0.03,
+        });
+
+
+
+        // Miolo com pilhas de contentores até 3 de altura (centro da zona)
+        addContainerYardsInC78910(this.gYards, this._grids!, {
+            unitScale: 0.60,   // ↓ tamanho → resolve “estão muito grandes”
+            gapX: 0.95,        // ↑ folga longitudinal → evita tocar
+            gapZ: 0.18,        // linhas mais juntas (sem colar)
+            widthRatio: 0.70,  // mais largo → permite mais colunas se precisares
+            depthRatio: 0.62,  // mais fundo → mais linhas
+            maxCols: 4,
+            rowsMax: 0,
+            maxStack: 3,
+            yawRad: -Math.PI / 2,
+            roadY: 0.03,
+        });
+
 
 
 
