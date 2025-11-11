@@ -821,5 +821,30 @@
     },
     "contact": "If you believe this was a mistake, please contact the system administrator.",
     "unknownEmail": "unknown email address"
+  },
+  "viewer3d": {
+    "title": "3D Port Viewer",
+    "toggles": {
+      "docks": "Docks",
+      "storage": "Storage",
+      "vessels": "Vessels",
+      "containers": "Containers",
+      "resources": "Resources"
+    },
+    "fullscreen": "Fullscreen",
+    "fullscreenExit": "Exit Fullscreen",
+    "loading": "Loading 3D…",
+    "errorPrefix": "⚠",
+    "sceneInfo": "Scene Info",
+    "counts": {
+      "docks": "Docks",
+      "storage": "Storage Areas",
+      "vessels": "Vessels",
+      "containers": "Containers",
+      "resources": "Resources"
+    },
+    "selection": "Selection",
+    "clickHint": "Click an object in the scene."
   }
+
 }

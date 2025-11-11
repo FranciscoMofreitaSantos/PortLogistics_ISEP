@@ -826,6 +826,31 @@
     },
     "contact": "Se acredita que isto foi um erro, por favor contacte o administrador do sistema.",
     "unknownEmail": "email desconhecido"
+  },
+  "viewer3d": {
+    "title": "Visualizador 3D do Porto",
+    "toggles": {
+      "docks": "Docas",
+      "storage": "Armazenamento",
+      "vessels": "Navios",
+      "containers": "Contentores",
+      "resources": "Recursos"
+    },
+    "fullscreen": "Ecrã inteiro",
+    "fullscreenExit": "Sair do ecrã inteiro",
+    "loading": "A carregar 3D…",
+    "errorPrefix": "⚠",
+    "sceneInfo": "Informação da Cena",
+    "counts": {
+      "docks": "Docas",
+      "storage": "Áreas de Armazenamento",
+      "vessels": "Navios",
+      "containers": "Contentores",
+      "resources": "Recursos"
+    },
+    "selection": "Seleção",
+    "clickHint": "Clica num objeto na cena."
   }
+
 
 }
