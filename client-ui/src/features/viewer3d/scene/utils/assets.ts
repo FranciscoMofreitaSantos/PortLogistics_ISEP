@@ -81,7 +81,8 @@ export const ASSETS_TEXTURES = {
             displacement:`${TEX}/containers/corrugated/CorrugatedSteel002_2K-JPG_Displacement.jpg`,
         },
     },
-    cranes: {},
-    vehicles: {},
-    props: {},
+    hdri: {
+        skybox: `${TEX}/skybox.hdr`,
+    },
+    
 } as const;

@@ -32,6 +32,8 @@ export default function Nav({ isOpen }: NavProps) {
 
     const baseMenu = [
         { label: t("menu.home"), path: "/", icon: <FiHome /> },
+        { label: t("menu.3dView"), path: "/3dSecene", icon: <FiLayers /> },
+
     ];
 
     const adminMenu = user?.role?.includes(Roles.Administrator)
@@ -53,7 +55,6 @@ export default function Nav({ isOpen }: NavProps) {
     const portAuthorityOfficerMenu = user?.role?.includes(Roles.PortAuthorityOfficer)
         ? [
             { label: t("menu.dashboard"), path: "/dashboard", icon: <FiShield /> },
-            { label: t("menu.3dView"), path: "/3dSecene", icon: <FiLayers /> },
             { label: t("menu.storageArea"), path: "/storage-areas", icon: <FiBox /> },
             { label: t("menu.vesselTypes"), path: "/vessel-types", icon: <FiAnchor /> },
             { label: t("menu.vessels"), path: "/vessels", icon: <FaShip /> },
