@@ -1,4 +1,3 @@
-// src/features/viewer3d/scene/PortScene.ts
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { SceneData, ContainerDto } from "../types";
@@ -31,6 +30,10 @@ import { computeLayout } from "../services/layoutEngine";
 import { WorkerAvatar } from "./objects/Worker";
 import { FirstPersonRig } from "./FisrtPersonRig";
 import { LightingController } from "./lighting/LightingController";
+
+// imports no topo
+import { PMREMGenerator, EquirectangularReflectionMapping } from "three";
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
 export type LayerVis = Partial<{
     containers: boolean;
@@ -95,7 +98,8 @@ export class PortScene {
         this.camera = new THREE.PerspectiveCamera(20, container.clientWidth / container.clientHeight, 0.1, 8000);
         this.camera.position.set(180, 200, 420);
 
-
+        //this.renderer.toneMappingExposure = 0.7;   // ajusta 0.7–1.2 se ficar “estourado”
+        //this.loadSkyHDR();
 
         /* ------------ Luzes ------------ */
 
@@ -128,11 +132,10 @@ export class PortScene {
         });
         host.appendChild(el);
 
-
         this.gBase.traverse((o: any) => {
             if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
         });
-        
+
         /* ------------ BASE DO PORTO ------------ */
         const { group: base, layout: baseLayout } = makePortBase({
             width: 1200,
@@ -229,10 +232,7 @@ export class PortScene {
             clearMargin: 1.2,
         });
 
-
-
         /* ------------ ARVORES ------------ */
-
         addRoadTrees(this.scene, this._baseLayout, {
             yGround: 0,
             roadWidth: 12,
@@ -246,22 +246,82 @@ export class PortScene {
             scaleMax: 1.45,
             bothSides: true,
             seed: 20251111,
-            // opcional: afinar pesos (continuará a garantir 1x de cada se houver >=3 marcas)
             // weights: { pine: 2, fallTree: 1, tree: 2 },
         });
 
-
-
-
-
-
         /* ------------ CONTROLOS ORBIT ------------ */
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+
+        this.controls.mouseButtons = {
+            LEFT: THREE.MOUSE.PAN,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.ROTATE,
+        };
+
         this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.08;     // suavidade (anti-jitter)
+        this.controls.rotateSpeed = 0.9;        // sensibilidade de rotação
+        this.controls.zoomSpeed = 0.9;          // sensibilidade da roda
+        this.controls.panSpeed = 0.9;
+        this.controls.enableZoom = true;
+        (this.controls as any).zoomToCursor = true;
+
+        // limites seguros 
+        const sceneRadius = this.getSceneRadius();
+        this.controls.minDistance = Math.max(10, sceneRadius * 0.15);
+        this.controls.maxDistance = sceneRadius * 3.0;
+        this.controls.minPolarAngle = 0.1;                   // evita mirar “para cima” demais
+        this.controls.maxPolarAngle = Math.PI / 2.05;       // não passar do horizonte
+
+        // alvo inicial
         this.controls.target.set(0, 0, 0);
+
+        // impedir o menu de contexto ao usar botão direito para orbitar
+        this.renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault());
 
         window.addEventListener("resize", this.onResize);
         this.loop();
+    }
+
+    /** Raio “seguro” da cena, calculado a partir das rects das zonas A/B/C. */
+    private getSceneRadius(): number {
+        const l: any = this._baseLayout;
+        if (l?.zoneA?.rect && l?.zoneB?.rect && l?.zoneC?.rect) {
+            const xs = [
+                l.zoneA.rect.minX, l.zoneA.rect.maxX,
+                l.zoneB.rect.minX, l.zoneB.rect.maxX,
+                l.zoneC.rect.minX, l.zoneC.rect.maxX,
+            ];
+            const zs = [
+                l.zoneA.rect.minZ, l.zoneA.rect.maxZ,
+                l.zoneB.rect.minZ, l.zoneB.rect.maxZ,
+                l.zoneC.rect.minZ, l.zoneC.rect.maxZ,
+            ];
+            const w = Math.max(...xs) - Math.min(...xs);
+            const d = Math.max(...zs) - Math.min(...zs);
+            return Math.hypot(w, d) * 0.5;
+        }
+
+        const W = 1200, D = 1000;
+        return Math.hypot(W, D) * 0.5;
+    }
+
+    // @ts-ignore
+    private async loadSkyHDR() {
+        const pmrem = new PMREMGenerator(this.renderer);
+        pmrem.compileEquirectangularShader();
+
+        const tex = await new RGBELoader().loadAsync(ASSETS_TEXTURES.hdri.skybox);
+        tex.mapping = EquirectangularReflectionMapping;
+
+        // fundo visível
+        this.scene.background = tex;
+        // iluminação/reflexos PBR
+        const env = pmrem.fromEquirectangular(tex).texture;
+        this.scene.environment = env;
+
+        // NOTE: mantemos tex vivo porque está em use como background
+        pmrem.dispose();
     }
 
     onResize = () => {
@@ -270,7 +330,6 @@ export class PortScene {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(w, h);
         this.light.updateShadowCameraBounds(400); // ou calculado com base na tua box3
-
     };
 
     setLayers(vis: LayerVis) {
