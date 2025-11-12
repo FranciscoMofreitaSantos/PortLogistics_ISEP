@@ -800,6 +800,84 @@
       "auth0UserId" : "Auth0_Id"
     }
   },
+  "Dock":{
+    "title": "Gestão de Docks",
+    "count": "{{count}} docks registadas",
+    "searchPlaceholder": "Pesquisar...",
+
+    "fields": {
+      "code": "Código *",
+      "location": "Localização *",
+      "status": "Estado",
+      "physicalResource": "Recursos Físicos (disponíveis)",
+      "vesselType": "Tipos de Navio Permitidos",
+      "length": "Comprimento (m)",
+      "depth": "Profundidade (m)",
+      "maxdraft": "Calado Máximo (m)"
+    },
+
+    "buttons": {
+      "add": "Adicionar Dock",
+      "search": "Pesquisar",
+      "clear": "Limpar",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "edit": "Editar"
+    },
+
+    "modal": {
+      "addTitle": "Adicionar Dock",
+      "editTitle": "Editar Dock"
+    },
+
+    "messages": {
+      "loading": "A carregar...",
+      "searchSuccess": "Resultados: {{count}}",
+      "noResults": "Sem resultados",
+      "created": "Dock criada",
+      "updated": "Dock atualizada",
+      "fillSomething": "Preenche algum campo para editar",
+      "noAvailablePR": "Sem recursos disponíveis"
+    },
+
+    "errors": {
+      "required": "Obrigatório",
+      "codeRequired": "Código é obrigatório",
+      "codeFormat": "Formato DK-0000",
+      "codeDuplicate": "Já existe uma dock com esse código",
+      "locationRequired": "Localização é obrigatória.",
+      "locationInvalid": "Localização contém caracteres inválidos.",
+      "lengthRequired": "Comprimento é obrigatório",
+      "depthRequired": "Profundidade é obrigatória",
+      "maxdraftRequired": "Calado é obrigatório",
+      "numberInvalid": "Número inválido",
+      "mustBePositive": "Deve ser > 0",
+      "chooseVesselType": "Seleciona pelo menos um tipo de navio.",
+      "formFix": "Corrige os erros do formulário."
+    },
+
+    "details": {
+      "code": "Código",
+      "location": "Localização",
+      "status": "Estado",
+      "vesselType": "Tipos de Navio",
+      "physicalResource": "Recursos Físicos",
+      "dimensions": "Dimensões (m)",
+      "length": "Comprimento",
+      "depth": "Profundidade",
+      "maxdraft": "Calado Máximo"
+    },
+
+    "status": {
+      "Available": "Disponível",
+      "Unavailable": "Indisponível",
+      "Maintenance": "Manutenção"
+    },
+
+    "chips": {
+      "summary": "{{pr}} PR selecionado(s) • {{vt}} tipo(s) de navio"
+    }
+  },
 
   "activation": {
     "titleLoading": "⏳ Por favor, aguarde",
