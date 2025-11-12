@@ -38,7 +38,7 @@ export default function Nav({ isOpen }: NavProps) {
 
     const adminMenu = user?.role?.includes(Roles.Administrator)
         ? [
-            { label: t("menu.admin"), path: "/admin", icon: <FiSettings /> },
+            { label: t("menu.admin"), path: "/users", icon: <FiSettings /> },
             { label: t("menu.vvn"), path: "/vvn", icon: <FiFileText /> },
         ]
         : [];
