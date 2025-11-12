@@ -47,6 +47,7 @@ export default function SyncUser() {
                     role: userData.role,
                     isActive: userData.isActive,
                 });
+                localStorage.setItem("sarId", "eb1fab4f-de0d-49e0-bcfd-8454c1f15307");
             } catch (err) {
                 console.error("⚠️ Falha ao sincronizar utilizador:", err);
             }
