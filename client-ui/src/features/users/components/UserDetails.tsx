@@ -3,194 +3,313 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { useAppStore } from "../../../app/store";
 import type { User } from "../../../app/types";
-import { changeUserRole, toggleUserStatus } from "../service/userService";
+import {
+    changeUserRole,
+    toggleUserStatus,
+    eliminateUser,
+} from "../service/userService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { modals } from "@mantine/modals";
 import "../style/user.css";
+import ConfettiExplosion from "react-confetti-explosion";
+
+import {
+    Stack,
+    Group,
+    Avatar,
+    Text,
+    Badge,
+    Select,
+    Button,
+    Alert,
+    Title,
+    Divider,
+    Paper,
+    SimpleGrid,
+    Switch, Box,
+} from "@mantine/core";
+import {
+    FaExclamationTriangle,
+    FaCheck,
+    FaTrash,
+    FaSave,
+} from "react-icons/fa";
 
 interface UserDetailsProps {
     user: User;
-    isOpen: boolean;
     onClose: () => void;
 }
 
-export default function UserDetails({ user, isOpen, onClose }: UserDetailsProps) {
+const fragmentationProps = {
+    force: 0.8,
+    duration: 3000,
+    particleCount: 200,
+    width: 1600,
+    colors: ['#FFFFFF', '#E0E0E0', '#BDBDBD', '#9E9E9E', '#757575', '#424242'],
+};
+
+export default function UserDetails({ user, onClose }: UserDetailsProps) {
     const { t } = useTranslation();
     const storeUser = useAppStore((s) => s.user);
-
-    const [isLoading, setIsLoading] = useState(false);
+    const queryClient = useQueryClient();
     const [currentUser, setCurrentUser] = useState<User>(user);
     const [selectedRole, setSelectedRole] = useState(user.role ?? "");
-    const [isAnimatingOut, setIsAnimatingOut] = useState(false);
-
+    const [isRoleSuccess, setIsRoleSuccess] = useState(false);
     const isSelf = storeUser?.id === user.id;
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
-        if (isOpen && user) {
-            setCurrentUser(user);
-            setSelectedRole(user.role ?? "");
-            setIsAnimatingOut(false);
-        }
-    }, [user, isOpen]);
+        setCurrentUser(user);
+        setSelectedRole(user.role ?? "");
+        setIsRoleSuccess(false);
+    }, [user]);
 
-    const handleRoleChange = async () => {
-        if (isSelf) {
-            toast.error(t("users.errors.cannotEditSelf"));
-            return;
-        }
-        if (!selectedRole || !user.id) {
-            toast.error(t("users.errors.noRoleSelected"));
-            return;
-        }
-        setIsLoading(true);
-        try {
-            const updated = await changeUserRole(user.id, selectedRole);
-            setCurrentUser(updated);
-            toast.success(t("users.success.roleChanged"));
-        } catch {
-            toast.error(t("users.errors.roleChangeFailed"));
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const roleMutation = useMutation({
+        mutationFn: () => {
+            if (!currentUser.id) throw new Error("User ID is missing");
+            if (!selectedRole)
+                throw new Error(t("errors.noRoleSelected"));
+            // @ts-ignore
+            return changeUserRole(currentUser.id, selectedRole);
+        },
+        onSuccess: (updatedUser) => {
+            toast.success(t("success.roleChanged"));
+            setIsRoleSuccess(true);
 
-    const handleToggleStatus = async () => {
-        if (isSelf) {
-            toast.error(t("users.errors.cannotEditSelf"));
-            return;
-        }
-        if (!user.id) return;
-        setIsLoading(true);
-        try {
-            const updated = await toggleUserStatus(user.id);
-            setCurrentUser(updated);
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+
+            setTimeout(() => {
+                setIsRoleSuccess(false);
+                setCurrentUser(updatedUser);
+            }, 2000);
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || t("errors.roleChangeFailed"));
+        },
+    });
+
+    const statusMutation = useMutation({
+        mutationFn: () => {
+            if (!currentUser.id) throw new Error("User ID is missing");
+            return toggleUserStatus(currentUser.id);
+        },
+        onSuccess: (updatedUser) => {
             toast.success(
-                updated.isActive
-                    ? t("users.success.activated")
-                    : t("users.success.deactivated")
+                updatedUser.isActive
+                    ? t("success.activated")
+                    : t("success.deactivated")
             );
-        } catch {
+
+            setCurrentUser(updatedUser);
+
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+        },
+        onError: () => {
             toast.error(t("users.errors.toggleFailed"));
-        } finally {
-            setIsLoading(false);
-        }
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: () => {
+            if (!currentUser.id) throw new Error("User ID is missing");
+            return eliminateUser(currentUser.email);
+        },
+        onSuccess: () => {
+            toast.success(t("users.success.deleted"));
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+
+            setIsDeleting(true);
+            setTimeout(() => {
+                onClose();
+            }, 400);
+        },
+        onError: () => {
+            toast.error(t("users.errors.deleteFailed"));
+        },
+    });
+
+    const handleOpenDeleteModal = () => {
+        modals.openConfirmModal({
+            title: (
+                <Title order={4} c="red">
+                    <Group gap="xs">
+                        <FaExclamationTriangle />
+                        {t("delete.title")}
+                    </Group>
+                </Title>
+            ),
+            children: (
+                <Text size="sm">
+                    {t("delete.message", { email: currentUser.email })}
+                </Text>
+            ),
+            labels: {
+                confirm: t("actions.confirmDelete"),
+                cancel: t("actions.cancel"),
+            },
+            confirmProps: {
+                color: "red",
+                loading: deleteMutation.isPending,
+            },
+            onConfirm: () => deleteMutation.mutate(),
+        });
     };
 
-    const handleClose = () => {
-        setIsAnimatingOut(true);
-        setTimeout(() => {
-            onClose();
-            setIsAnimatingOut(false);
-        }, 300);
-    };
+    const isLoading =
+        roleMutation.isPending ||
+        statusMutation.isPending ||
+        deleteMutation.isPending;
 
-    if (!isOpen && !isAnimatingOut) return null;
-
-    const isActive = currentUser.isActive ?? false;
-    const displayName = currentUser.name || t("users.unknown");
-    const email = currentUser.email || "—";
-    const picture = currentUser.picture || "";
+    const roleOptions = [
+        { value: "", label: t("roles.none") },
+        { value: "Administrator", label: t("roles.administrator") },
+        { value: "LogisticsOperator", label: t("roles.operator") },
+        { value: "PortAuthorityOfficer", label: t("roles.officer") },
+        { value: "ShippingAgentRepresentative", label: t("roles.agent") },
+        { value: "ProjectManager", label: t("roles.projectManager") },
+    ];
 
     return (
-        <div className={`user-modal-overlay ${isAnimatingOut ? "anim-out" : ""}`}>
-            <div className={`user-modal-content ${isAnimatingOut ? "anim-out" : ""}`}>
+        <div
+            className={`user-details-wrapper ${isDeleting ? "deleting" : ""}`}
+        >
+            <Stack gap="lg" style={{ position: "relative" }}>
+
+                {isDeleting && (
+                    <Box
+                        style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            zIndex: 99,
+                        }}
+                    >
+                        <ConfettiExplosion {...fragmentationProps} />
+                    </Box>
+                )}
+
                 {/* ===== HEADER ===== */}
-                <div className="user-details-header">
-                    <div className="user-avatar-wrapper">
-                        {picture ? (
-                            <img
-                                src={picture}
-                                alt={displayName}
-                                className="user-avatar"
-                                onError={(e) => (e.currentTarget.style.display = "none")}
-                            />
-                        ) : (
-                            <div className="user-avatar-placeholder">
-                                {(displayName || "U")
-                                    .split(" ")
-                                    .map((s) => s[0])
-                                    .slice(0, 2)
-                                    .join("")
-                                    .toUpperCase()}
-                            </div>
-                        )}
-                    </div>
-                    <div>
-                        <h2 className="user-details-name">{displayName}</h2>
-                        <p className="user-details-email">{email}</p>
-                    </div>
-                </div>
-
-                {/* ===== INFO GRID ===== */}
-                <div className="user-details-grid">
-                    <div className="user-info-card">
-                        <div className="user-info-label">{t("users.fields.id")}</div>
-                        <div className="user-info-value">{currentUser.id ?? "—"}</div>
-                    </div>
-
-                    <div className="user-info-card">
-                        <div className="user-info-label">{t("users.fields.auth0UserId")}</div>
-                        <div className="user-info-value">{currentUser.auth0UserId ?? "—"}</div>
-                    </div>
-
-                    <div className="user-info-card">
-                        <div className="user-info-label">{t("users.fields.status")}</div>
-                        <div className={`user-status-pill ${isActive ? "active" : "inactive"}`}>
-                            {isActive ? t("users.status.active") : t("users.status.inactive")}
-                        </div>
-                    </div>
-
-                    <div className="user-info-card">
-                        <div className="user-info-label">{t("users.fields.role")}</div>
-                        <select
-                            className="user-role-select"
-                            value={selectedRole ?? ""}
-                            onChange={(e) => setSelectedRole(e.target.value)}
-                            disabled={isLoading || isSelf}
+                {/* (Todo o resto do JSX permanece igual ao seu ficheiro) */}
+                <Paper p="lg" radius="md" withBorder>
+                    <Group>
+                        <Avatar
+                            src={currentUser.picture}
+                            alt={currentUser.name}
+                            radius="xl"
+                            size="lg"
                         >
-                            <option value="">{t("roles.none")}</option>
-                            <option value="Administrator">{t("roles.administrator")}</option>
-                            <option value="LogisticsOperator">{t("roles.operator")}</option>
-                            <option value="PortAuthorityOfficer">{t("roles.officer")}</option>
-                            <option value="ShippingAgentRepresentative">
-                                {t("roles.agent")}
-                            </option>
-                            <option value="ProjectManager">{t("roles.projectManager")}</option>
-                        </select>
-                    </div>
-                </div>
+                            {(currentUser.name || "U")
+                                .split(" ")
+                                .map((s) => s[0])
+                                .slice(0, 2)
+                                .join("")
+                                .toUpperCase()}
+                        </Avatar>
+                        <Stack gap={0}>
+                            <Title order={3}>
+                                {currentUser.name || t("users.unknown")}
+                            </Title>
+                            <Text c="dimmed">{currentUser.email || "—"}</Text>
+                        </Stack>
+                    </Group>
+                </Paper>
 
-                {/* ===== ACTIONS ===== */}
-                <div className="user-modal-actions">
-                    <button
-                        className="user-save-role-btn"
-                        onClick={handleRoleChange}
-                        disabled={isLoading || isSelf}
-                    >
-                        {t("users.actions.saveRole")}
-                    </button>
+                <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                    <Paper withBorder p="md" radius="md">
+                        <Text fz="xs" c="dimmed" tt="uppercase" fw={700}>
+                            {t("fields.status")}
+                        </Text>
+                        <Group justify="space-between" mt="sm">
+                            <Badge
+                                color={currentUser.isActive ? "green" : "red"}
+                                variant="light"
+                                size="lg"
+                            >
+                                {currentUser.isActive
+                                    ? t("status.active")
+                                    : t("status.inactive")}
+                            </Badge>
 
-                    <button
-                        className={`user-toggle-btn ${isActive ? "deactivate" : "activate"}`}
-                        onClick={handleToggleStatus}
-                        disabled={isLoading || isSelf}
-                    >
-                        {isActive
-                            ? t("users.actions.deactivate")
-                            : t("users.actions.activate")}
-                    </button>
+                            <Switch
+                                size="lg"
+                                onLabel={t("status.on")}
+                                offLabel={t("status.off")}
+                                checked={currentUser.isActive ?? false}
+                                onChange={() => statusMutation.mutate()}
+                                disabled={isLoading || isSelf}
+                            />
+                        </Group>
+                    </Paper>
 
-                    <button
-                        className="user-cancel-btn"
-                        onClick={handleClose}
-                        disabled={isLoading}
-                    >
-                        {t("users.actions.close")}
-                    </button>
-                </div>
+                    <Paper withBorder p="md" radius="md">
+                        <Text fz="xs" c="dimmed" tt="uppercase" fw={700}>
+                            {t("fields.role")}
+                        </Text>
+                        <Group justify="space-between" mt="sm" wrap="nowrap">
+                            <Select
+                                data={roleOptions}
+                                value={selectedRole}
+                                onChange={(value) => setSelectedRole(value ?? "")}
+                                disabled={isLoading || isSelf || isRoleSuccess}
+                                placeholder={t("roles.select")}
+                                style={{ flex: 1 }}
+                            />
+                            <Button
+                                onClick={() => roleMutation.mutate()}
+                                loading={roleMutation.isPending}
+                                disabled={
+                                    isLoading ||
+                                    isSelf ||
+                                    currentUser.role === selectedRole
+                                }
+                                color={isRoleSuccess ? "green" : "blue"}
+                                leftSection={
+                                    isRoleSuccess ? <FaCheck /> : <FaSave size={14} />
+                                }
+                            >
+                                {isRoleSuccess
+                                    ? t("actions.saved")
+                                    : t("actions.save")}
+                            </Button>
+                        </Group>
+                    </Paper>
+                </SimpleGrid>
 
                 {isSelf && (
-                    <p className="user-self-warning">⚠️ {t("users.errors.cannotEditSelf")}</p>
+                    <Alert
+                        color="yellow"
+                        title={t("errors.alert")}
+                        icon={<FaExclamationTriangle />}
+                        variant="light"
+                    >
+                        {t("errors.cannotEditSelf")}
+                    </Alert>
                 )}
-            </div>
+
+                <Divider my="xs" />
+
+                {/* ===== FOOTER ===== */}
+                <Group justify="space-between">
+                    <Button
+                        color="red"
+                        variant="outline"
+                        leftSection={<FaTrash size={14} />}
+                        onClick={handleOpenDeleteModal}
+                        disabled={isLoading || isSelf}
+                        loading={deleteMutation.isPending}
+                    >
+                        {t("actions.delete")}
+                    </Button>
+
+                    <Button
+                        variant="default"
+                        onClick={onClose}
+                        disabled={isLoading}
+                    >
+                        {t("actions.close")}
+                    </Button>
+                </Group>
+            </Stack>
         </div>
     );
 }

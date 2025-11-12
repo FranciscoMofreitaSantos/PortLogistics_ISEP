@@ -1,25 +1,31 @@
-import {Outlet} from "react-router-dom";
-import {FaShip, FaSun, FaMoon, FaBars, FaTimes} from "react-icons/fa";
-import {useState, useEffect} from "react";
-import {useTranslation} from "react-i18next";
+import { Outlet } from "react-router-dom";
+import { FaShip, FaSun, FaMoon, FaBars, FaTimes } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Nav from "./Nav";
 import "./layout.css";
-import {useAppStore} from "../../app/store";
-import {Roles} from "../../app/types";
+import { useAppStore } from "../../app/store";
+import { Roles } from "../../app/types";
 import RoleLauncher from "../RoleLaucher";
 
+
 export default function AppLayout() {
-    const [dark, setDark] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const {i18n, t} = useTranslation();
+    const { i18n, t } = useTranslation();
     const user = useAppStore((s) => s.user);
 
+    const theme = useAppStore((state) => state.theme);
+    const toggleTheme = useAppStore((state) => state.toggleTheme);
+    const isDarkMode = theme === "dark"; // Substitui a sua variável local 'dark'
 
+
+    /*
     const toggleTheme = () => {
         const newTheme = dark ? "light" : "dark";
         document.documentElement.setAttribute("data-theme", newTheme);
         setDark(!dark);
     };
+    */
 
     const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -44,26 +50,26 @@ export default function AppLayout() {
             <header className="header">
                 <div className="header-inner">
                     <div className="brand">
-                        <FaShip size={32} color="#4fa3ff"/>
+                        <FaShip size={32} color="#4fa3ff" />
                         <h1>ThPA Port Management</h1>
                     </div>
 
                     <div className="header-right">
                         {/* Lang Switch */}
                         <span className="lang-switch" onClick={changeLang}>
-              {i18n.language === "en" ? "EN | PT" : "PT | EN"}
-            </span>
+                            {i18n.language === "en" ? "EN | PT" : "PT | EN"}
+                        </span>
 
                         {/* Theme Switch */}
                         <button
                             onClick={toggleTheme}
                             className="theme-btn"
-                            title={dark ? t("layout.light") : t("layout.dark")}
+                            title={isDarkMode ? t("layout.light") : t("layout.dark")}
                         >
-                            {dark ? (
-                                <FaSun size={20} className="theme-icon rotate"/>
+                            {isDarkMode ? (
+                                <FaSun size={20} className="theme-icon rotate" />
                             ) : (
-                                <FaMoon size={20} className="theme-icon"/>
+                                <FaMoon size={20} className="theme-icon" />
                             )}
                         </button>
 
@@ -92,14 +98,14 @@ export default function AppLayout() {
                                 }`}
                                 title={user?.role ?? "Non Authorized"}
                             >
-                        {user?.role ?? "Non Authorized"}
-                        </span>
+                                {user?.role ?? "Non Authorized"}
+                            </span>
                         )}
 
-                        <RoleLauncher/>
+                        <RoleLauncher />
                         {/* Mobile Menu */}
                         <button className="menu-btn" onClick={toggleMenu} title="Menu">
-                            {menuOpen ? <FaTimes size={22}/> : <FaBars size={22}/>}
+                            {menuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
                         </button>
                     </div>
                 </div>
@@ -113,7 +119,7 @@ export default function AppLayout() {
 
             {/* MAIN */}
             <main className="content">
-                <Outlet/>
+                <Outlet />
             </main>
 
             {/* FOOTER */}

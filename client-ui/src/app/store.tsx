@@ -7,6 +7,8 @@ interface AppState {
     loading: boolean;
     setUser: (u: User | null) => void;
     setLoading: (v: boolean) => void;
+    theme: "light" | "dark";
+    toggleTheme: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -16,9 +18,14 @@ export const useAppStore = create<AppState>()(
             loading: false,
             setUser: (u) => set({ user: u }),
             setLoading: (v) => set({ loading: v }),
+            theme: "light",
+            toggleTheme: () =>
+                set((state) => ({
+                    theme: state.theme === "light" ? "dark" : "light",
+                })),
         }),
         {
-            name: "thpa-auth", // localStorage key
+            name: "thpa-auth",
         }
     )
 );

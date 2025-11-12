@@ -719,6 +719,9 @@
   "users": {
     "title": "Gestão de Utilizadores",
     "loading" : "A carregar...",
+      "on": "ON",
+      "off": "OFF"
+    },
     "empty" : "Nenhum utilizador encontrado para o filtro inserido",
     "search": {
       "byEmail": "Email",
@@ -735,7 +738,12 @@
       "close": "Fechar",
       "backToDashboard": "Voltar ao Dashboard",
       "view" : "Ver",
-      "saveRole" : "Salvar Função"
+      "saveRole" : "Salvar Função",
+      "delete": "Eliminar",
+      "confirmDelete": "Sim, eliminar este utilizador",
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "saved": "Salvo!"
     },
     "table": {
       "name": "Nome",
@@ -761,7 +769,8 @@
     "success": {
       "roleChanged": "Função alterada com sucesso!",
       "activated": "Utilizador ativado com sucesso!",
-      "deactivated": "Utilizador desativado com sucesso!"
+      "deactivated": "Utilizador desativado com sucesso!",
+      "deleted": "Utilizador eliminado com sucesso"
     },
     "errors": {
       "load": "Erro ao carregar utilizadores.",
@@ -773,7 +782,9 @@
       "cannotEditSelf": "Não é possível alterar a sua própria função ou estado.",
       "noRoleSelected": "Selecione uma função antes de guardar.",
       "roleChangeFailed": "Falha ao alterar a função do utilizador.",
-      "toggleFailed": "Falha ao alterar o estado do utilizador."
+      "toggleFailed": "Falha ao alterar o estado do utilizador.",
+      "deleteFailed": "Falha ao eliminar o utilizador",
+      "alert": "AVISO"
     },
     "confirm": {
       "activate": "Tens a certeza que queres ativar este utilizador?",
@@ -788,7 +799,9 @@
     },
     "status": {
       "inactive": "Inativo",
-      "active": "Ativo"
+      "active": "Ativo",
+      "on": "ON",
+      "off": "OFF"
     },
     "fields": {
       "email": "Email",
@@ -798,8 +811,8 @@
       "actions": "Ações",
       "id" : "Id",
       "auth0UserId" : "Auth0_Id"
-    }
-  },
+    },
+
 
   "activation": {
     "titleLoading": "⏳ Por favor, aguarde",
@@ -826,6 +839,13 @@
     },
     "contact": "Se acredita que isto foi um erro, por favor contacte o administrador do sistema.",
     "unknownEmail": "email desconhecido"
+  },
+    "delete": {
+      "title": "Ação Irreversível",
+      "message": "Tem a certeza que deseja eliminar permanentemente o utilizador {{email}}? Esta pessoa perderá todo o acesso à plataforma. Esta ação não pode ser desfeita."
+    },
+    "success": {
+      "deleted": "Utilizador eliminado com sucesso"
+    }
   }
 
-}

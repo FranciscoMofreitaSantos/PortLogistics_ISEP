@@ -1,27 +1,28 @@
+// src/features/users/components/UserSearch.tsx
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import "../style/user.css";
+import { Select, TextInput, Button, Group } from "@mantine/core";
+import { FaSearch } from "react-icons/fa";
 
 type FilterType = "all" | "email" | "noRole";
 
 interface UserSearchProps {
     onSearch: (type: FilterType, value: string) => void;
+    isLoading: boolean;
 }
 
-export default function UserSearch({ onSearch }: UserSearchProps) {
+export default function UserSearch({ onSearch, isLoading }: UserSearchProps) {
     const { t } = useTranslation();
     const [filterType, setFilterType] = useState<FilterType>("email");
     const [filterValue, setFilterValue] = useState<string>("");
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         if (filterType === "email" && filterValue.trim() === "") {
-            toast.error(t("users.search.errorEmpty"));
+            toast.error(t("search.errorEmpty"));
             return;
         }
-
         onSearch(filterType, filterValue.trim());
     };
 
@@ -31,49 +32,55 @@ export default function UserSearch({ onSearch }: UserSearchProps) {
         onSearch("all", "");
     };
 
-    const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newType = e.target.value as FilterType;
+    const handleTypeChange = (value: string | null) => {
+        const newType = (value ?? "email") as FilterType;
         setFilterType(newType);
         setFilterValue("");
     };
 
-    const renderFilterInput = () => {
-        if (filterType === "email") {
-            return (
-                <input
+    const searchOptions = [
+        { value: "email", label: t("search.byEmail") },
+        { value: "noRole", label: t("search.noRole") },
+        { value: "all", label: t("search.all") },
+    ];
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <Group>
+                <Select
+                    data={searchOptions}
+                    value={filterType}
+                    onChange={handleTypeChange}
+                    aria-label={t("search.title")}
+                    disabled={isLoading}
+                    style={{ width: 180 }}
+                />
+
+                <TextInput
                     type="email"
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
                     placeholder={t("users.search.emailPlaceholder")}
-                    className="user-search-input"
+                    disabled={filterType !== "email" || isLoading}
+                    style={{ flex: 1 }} // Ocupa o espaço restante
                 />
-            );
-        }
-        return null;
-    };
 
-    return (
-        <form onSubmit={handleSubmit} className="user-search-form">
-            <select
-                className="user-search-type-select"
-                value={filterType}
-                onChange={handleTypeChange}
-                aria-label={t("users.search.title")}
-            >
-                <option value="email">{t("users.search.byEmail")}</option>
-                <option value="noRole">{t("users.search.noRole")}</option>
-                <option value="all">{t("users.search.all")}</option>
-            </select>
+                <Button
+                    type="submit"
+                    leftSection={<FaSearch size={14} />}
+                    loading={isLoading}
+                >
+                    {t("actions.search")}
+                </Button>
 
-            {renderFilterInput()}
-
-            <button type="submit" className="user-search-button">
-                {t("users.actions.search")}
-            </button>
-
-            <button type="button" onClick={handleClear} className="user-clear-button">
-                {t("users.actions.clear")}
-            </button>
+                <Button
+                    variant="default"
+                    onClick={handleClear}
+                    disabled={isLoading}
+                >
+                    {t("actions.clear")}
+                </Button>
+            </Group>
         </form>
     );
 }

@@ -1,190 +1,256 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { FaUsers } from "react-icons/fa";
-import toast from "react-hot-toast";
+import { FaUsers, FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
-import "../style/user.css";
+import {
+    Container,
+    Stack,
+    Title,
+    Grid,
+    Paper,
+    Text,
+    Table,
+    Loader,
+    Alert,
+    Modal,
+    Group,
+    Button,
+    Badge,
+    ActionIcon,
+    Center,
+    Box,
+} from "@mantine/core";
 
-import { getUsers, getNonAuthorizedUsers, getUserByEmail } from "../service/userService";
+import {getNonAuthorizedUsers, getUserByEmail, getNotEliminatedUsers} from "../service/userService";
 import type { User } from "../../../app/types";
 
 import UserSearch from "../components/UserSearch";
 import UserDetails from "../components/UserDetails";
+import {
+    IconUsers,
+    IconUserCheck,
+    IconUserExclamation,
+    IconUserBolt,
+} from "@tabler/icons-react";
 
-/* ===============================
- * PAGE COMPONENT
- * =============================== */
+type SearchParams = {
+    type: "all" | "email" | "noRole";
+    value: string;
+};
 
 function UserManagementPage() {
     const { t } = useTranslation();
-    const [users, setUsers] = useState<User[]>([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+    const [searchParams, setSearchParams] = useState<SearchParams>({
+        type: "all",
+        value: "",
+    });
 
-    useEffect(() => {
-        loadAllUsers();
-    }, []);
+    const {
+        data: users,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["users", searchParams.type, searchParams.value],
 
-    const loadAllUsers = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const data = await getUsers();
-            setUsers(data);
-        } catch (err) {
-            setError(err as Error);
-            toast.error(t("users.errors.loadAll"));
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSearch = async (type: "all" | "email" | "noRole", value: string) => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            let data: User[] = [];
-            switch (type) {
+        queryFn: async (): Promise<User[]> => {
+            switch (searchParams.type) {
                 case "email": {
-                    const user = await getUserByEmail(value);
-                    data = user ? [user] : [];
-                    break;
+                    if (!searchParams.value) return [];
+                    const user = await getUserByEmail(searchParams.value);
+                    return user ? [user] : [];
                 }
                 case "noRole":
-                    data = await getNonAuthorizedUsers();
-                    break;
+                    return getNonAuthorizedUsers();
                 case "all":
                 default:
-                    await loadAllUsers();
-                    return;
+                    return getNotEliminatedUsers();
             }
-            setUsers(data);
-        } catch (err) {
-            setError(err as Error);
-            toast.error(t("users.errors.search"));
-            setUsers([]);
-        } finally {
-            setIsLoading(false);
-        }
+        },
+
+    });
+
+    const handleSearch = (type: "all" | "email" | "noRole", value: string) => {
+        setSearchParams({ type, value });
     };
 
     const userStats = useMemo(() => {
-        const total = users.length;
-        const withRole = users.filter(u => u.role).length;
-        const withoutRole = users.filter(u => !u.role).length;
-        const active = users.filter(u => u.isActive).length;
+        const data = users || [];
+        const total = data.length;
+        const withRole = data.filter((u) => u.role).length;
+        const withoutRole = total - withRole;
+        const active = data.filter((u) => u.isActive).length;
         return { total, withRole, withoutRole, active };
     }, [users]);
 
     const handleShowDetails = (user: User) => {
         setSelectedUser(user);
-        setIsDetailsOpen(true);
     };
 
     const handleCloseDetails = () => {
-        setIsDetailsOpen(false);
         setSelectedUser(null);
-        loadAllUsers();
     };
 
-    return (
-        <div className="user-page-container">
-            {/* HEADER */}
-            <div className="user-header">
-                <Link to="/dashboard" className="user-back-button" title={t("users.actions.backToDashboard")}>
-                    ‹
-                </Link>
-                <h1>
-                    <FaUsers className="user-icon" /> {t("users.title")}
-                </h1>
-            </div>
+    const tableRows = users?.map((u) => (
+        <Table.Tr key={u.id}>
+            <Table.Td>{u.name ?? "—"}</Table.Td>
+            <Table.Td>{u.email}</Table.Td>
+            <Table.Td>{u.role ?? t("users.roles.none")}</Table.Td>
+            <Table.Td>
+                <Badge color={u.isActive ? "green" : "red"} variant="light">
+                    {u.isActive
+                        ? t("status.active")
+                        : t("status.inactive")}
+                </Badge>
+            </Table.Td>
+            <Table.Td>
+                <Button
+                    size="xs"
+                    variant="outline"
+                    onClick={() => handleShowDetails(u)}
+                >
+                    {t("actions.view")}
+                </Button>
+            </Table.Td>
+        </Table.Tr>
+    ));
 
-            {/* STATS */}
-            <div className="user-controls-container">
-                <div className="user-stats-grid">
-                    <div className="user-stat-card total">
-                        <span className="stat-icon">👥</span>
-                        <span className="stat-value">{userStats.total}</span>
-                        <span className="stat-title">{t("users.stats.total")}</span>
-                    </div>
-                    <div className="user-stat-card active">
-                        <span className="stat-icon">✅</span>
-                        <span className="stat-value">{userStats.active}</span>
-                        <span className="stat-title">{t("users.stats.active")}</span>
-                    </div>
-                    <div className="user-stat-card with-role">
-                        <span className="stat-icon">🧩</span>
-                        <span className="stat-value">{userStats.withRole}</span>
-                        <span className="stat-title">{t("users.stats.withRole")}</span>
-                    </div>
-                    <div className="user-stat-card without-role">
-                        <span className="stat-icon">⚠️</span>
-                        <span className="stat-value">{userStats.withoutRole}</span>
-                        <span className="stat-title">{t("users.stats.withoutRole")}</span>
-                    </div>
-                </div>
+    return (
+        <Container fluid p="xl">
+            <Stack gap="xl">
+                {/* HEADER */}
+                <Group>
+                    <ActionIcon
+                        component={Link}
+                        to="/dashboard"
+                        title={t("actions.backToDashboard")}
+                        variant="light"
+                        size="lg"
+                    >
+                        <FaArrowLeft />
+                    </ActionIcon>
+                    <Title order={2}>
+                        <Group gap="sm">
+                            <FaUsers /> {t("users.title")}
+                        </Group>
+                    </Title>
+                </Group>
+
+                {/* STATS */}
+                <Grid>
+                    <StatCard
+                        title={t("stats.total")}
+                        value={userStats.total}
+                        icon={<IconUsers size={24} />}
+                        color="blue"
+                    />
+                    <StatCard
+                        title={t("stats.active")}
+                        value={userStats.active}
+                        icon={<IconUserCheck size={24} />}
+                        color="green"
+                    />
+                    <StatCard
+                        title={t("stats.withRole")}
+                        value={userStats.withRole}
+                        icon={<IconUserBolt size={24} />}
+                        color="cyan"
+                    />
+                    <StatCard
+                        title={t("stats.withoutRole")}
+                        value={userStats.withoutRole}
+                        icon={<IconUserExclamation size={24} />}
+                        color="orange"
+                    />
+                </Grid>
 
                 {/* SEARCH */}
-                <div className="user-action-box">
-                    <UserSearch onSearch={handleSearch} />
-                </div>
-            </div>
+                <Paper shadow="sm" p="md" withBorder>
+                    <UserSearch onSearch={handleSearch} isLoading={isLoading} />
+                </Paper>
 
-            {/* TABLE */}
-            {isLoading && <p>{t("users.loading")}</p>}
-            {error && <p className="error-message">{error.message}</p>}
-
-            <table className="user-table">
-                <thead>
-                <tr>
-                    <th>{t("users.fields.name")}</th>
-                    <th>{t("users.fields.email")}</th>
-                    <th>{t("users.fields.role")}</th>
-                    <th>{t("users.fields.status")}</th>
-                    <th>{t("users.fields.actions")}</th>
-                </tr>
-                </thead>
-                <tbody>
-                {users.map((u) => (
-                    <tr key={u.id}>
-                        <td>{u.name ?? "—"}</td>
-                        <td>{u.email}</td>
-                        <td>{u.role ?? t("users.roles.none")}</td>
-                        <td className={u.isActive ? "active-status" : "inactive-status"}>
-                            {u.isActive ? t("users.status.active") : t("users.status.inactive")}
-                        </td>
-                        <td>
-                            <button
-                                className="user-details-btn"
-                                onClick={() => handleShowDetails(u)}
-                            >
-                                {t("users.actions.view")}
-                            </button>
-                        </td>
-                    </tr>
-                ))}
-                {users.length === 0 && (
-                    <tr>
-                        <td colSpan={5} className="empty-table">
-                            {t("users.empty")}
-                        </td>
-                    </tr>
-                )}
-                </tbody>
-            </table>
+                {/* TABLE */}
+                <Paper shadow="sm" withBorder>
+                    {isLoading && (
+                        <Center h={200}>
+                            <Loader />
+                        </Center>
+                    )}
+                    {error && (
+                        <Alert color="red" title={t("errors.loadAll")}>
+                            {error.message}
+                        </Alert>
+                    )}
+                    {!isLoading && !error && (
+                        <Table
+                            verticalSpacing="md"
+                            horizontalSpacing="xl"
+                            highlightOnHover
+                            striped
+                        >
+                            <Table.Thead>
+                                <Table.Tr>
+                                    <Table.Th>{t("fields.name")}</Table.Th>
+                                    <Table.Th>{t("fields.email")}</Table.Th>
+                                    <Table.Th>{t("fields.role")}</Table.Th>
+                                    <Table.Th>{t("fields.status")}</Table.Th>
+                                    <Table.Th>{t("fields.actions")}</Table.Th>
+                                </Table.Tr>
+                            </Table.Thead>
+                            <Table.Tbody>
+                                {tableRows?.length === 0 ? (
+                                    <Table.Tr>
+                                        <Table.Td colSpan={5}>
+                                            <Center p="md">
+                                                <Text c="dimmed">{t("users.empty")}</Text>
+                                            </Center>
+                                        </Table.Td>
+                                    </Table.Tr>
+                                ) : (
+                                    tableRows
+                                )}
+                            </Table.Tbody>
+                        </Table>
+                    )}
+                </Paper>
+            </Stack>
 
             {/* MODAL */}
-            {selectedUser && (
-                <UserDetails
-                    user={selectedUser}
-                    isOpen={isDetailsOpen}
-                    onClose={handleCloseDetails}
-                />
-            )}
-        </div>
+            <Modal
+                opened={!!selectedUser}
+                onClose={handleCloseDetails}
+                size="xl"
+                centered
+                transitionProps={{ transition: "pop", duration: 200 }}
+            >
+                {selectedUser && (
+                    <UserDetails
+                        user={selectedUser}
+                        onClose={handleCloseDetails}
+                    />
+                )}
+            </Modal>
+        </Container>
+    );
+}
+
+function StatCard({ title, value, icon, color }: any) {
+    return (
+        <Grid.Col span={{ base: 6, md: 3 }}>
+            <Paper withBorder p="md" radius="md">
+                <Group justify="space-between">
+                    <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+                        {title}
+                    </Text>
+                    <Box c={color}>{icon}</Box>
+                </Group>
+                <Text fz={32} fw={700} mt="sm">
+                    {value}
+                </Text>
+            </Paper>
+        </Grid.Col>
     );
 }
 
