@@ -727,7 +727,7 @@
       "byEmail": "Email",
       "noRole": "Unauthorized Users",
       "all": "All",
-      "emailPlaceolder" : "Introduza o Email"
+      "emailPlaceholder" : "Introduza o Email"
     },
     "actions": {
       "search": "Pesquisar",

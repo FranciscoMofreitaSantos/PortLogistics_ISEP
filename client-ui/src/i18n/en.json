@@ -624,7 +624,12 @@
     "actions": {
       "submit": "Submit",
       "withdraw": "Withdraw",
-      "noActionsForState": "No actions for this state."
+      "noActionsForState": "No actions for this state.",
+      "delete": "Delete",
+      "confirmDelete": "Yes, delete this user",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saved": "Saved!"
     },
     "modals": {
       "reject": {
@@ -710,91 +715,107 @@
     "contactHelp": "If you believe this is a mistake, please contact a system Administrator."
   },
 
+  "delete": {
+    "title": "Irreversible Action",
+    "message": "Are you sure you want to permanently delete the user {{email}}? This person will lose all access to the platform. This action cannot be undone."
+  },
   "users": {
     "title": "User Management",
-    "loading" : "Loading...",
-    "empty" : "No users found for the selected filter",
-    "search": {
-      "byEmail": "Email",
-      "noRole": "Unauthorized Users",
-      "all": "All",
-      "emailPlaceholder" : "Enter Email"
-    },
-    "actions": {
-      "search": "Search",
-      "clear": "Clear",
-      "changeRole": "Change Role",
-      "activate": "Activate",
-      "deactivate": "Deactivate",
-      "close": "Close",
-      "backToDashboard": "Back to Dashboard",
-      "view" : "View",
-      "saveRole" : "Save Role"
-    },
-    "table": {
-      "name": "Name",
-      "email": "Email",
-      "role": "Role",
-      "status": "Status",
-      "actions": "Actions",
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "details": {
-      "title": "User Details",
-      "id": "User ID",
-      "email": "Email",
-      "role": "Role",
-      "isActive": "Active",
-      "noRole": "No role assigned"
-    },
-    "form": {
-      "selectRole": "Select Role",
-      "currentRole": "Current Role"
-    },
-    "success": {
-      "roleChanged": "User role changed successfully!",
-      "activated": "User activated successfully!",
-      "deactivated": "User deactivated successfully!"
-    },
-    "errors": {
-      "load": "Error loading users.",
-      "search": "Error searching users.",
-      "changeRole": "Error changing user role.",
-      "activate": "Error activating user.",
-      "deactivate": "Error deactivating user.",
-      "noResults": "No users found.",
-      "cannotEditSelf": "You cannot change your own role or status.",
-      "noRoleSelected": "Select a role before saving.",
-      "roleChangeFailed": "Failed to change user role.",
-      "toggleFailed": "Failed to change user status."
-    },
-    "confirm": {
-      "activate": "Are you sure you want to activate this user?",
-      "deactivate": "Are you sure you want to deactivate this user?",
-      "changeRole": "Are you sure you want to change this user's role?"
-    },
-    "stats": {
-      "total": "Total",
-      "active": "Active",
-      "inactive": "Inactive",
-      "withoutRole": "No Role",
-      "withRole": "W/ Role"
-    },
-    "status": {
-      "inactive": "Inactive",
-      "active": "Active"
-    },
-    "fields": {
-      "email": "Email",
-      "name": "Name",
-      "role": "Role",
-      "status": "Status",
-      "actions": "Actions",
-      "id" : "Id",
-      "auth0UserId" : "Auth0_Id"
-    }
+    "loading": "Loading...",
+    "on": "ON",
+    "off": "OFF"
   },
+  "empty": "No users found for the selected filter",
+  "search": {
+    "byEmail": "Email",
+    "noRole": "Unauthorized Users",
+    "all": "All",
+    "emailPlaceholder": "Enter Email"
+  },
+  "actions": {
+    "search": "Search",
+    "clear": "Clear",
+    "changeRole": "Change Role",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "close": "Close",
+    "backToDashboard": "Back to Dashboard",
+    "view": "View",
+    "saveRole": "Save Role",
+    "delete": "Delete",
+    "confirmDelete": "Yes, delete this user",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "Saved!"
+  },
+  "table": {
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "details": {
+    "title": "User Details",
+    "id": "User ID",
+    "email": "Email",
+    "role": "Role",
+    "isActive": "Active",
+    "noRole": "No role assigned"
+  },
+  "form": {
+    "selectRole": "Select role",
+    "currentRole": "Current role"
+  },
+  "success": {
+    "roleChanged": "Role changed successfully!",
+    "activated": "User activated successfully!",
+    "deactivated": "User deactivated successfully!",
+    "deleted": "User deleted successfully"
+  },
+  "errors": {
+    "load": "Error loading users.",
+    "search": "Error searching users.",
+    "changeRole": "Error changing user role.",
+    "activate": "Error activating user.",
+    "deactivate": "Error deactivating user.",
+    "noResults": "No users found.",
+    "cannotEditSelf": "You cannot change your own role or status.",
+    "noRoleSelected": "Please select a role before saving.",
+    "roleChangeFailed": "Failed to change user role.",
+    "toggleFailed": "Failed to change user status.",
+    "deleteFailed": "Failed to delete user",
+    "alert": "WARNING"
+  },
+  "confirm": {
+    "activate": "Are you sure you want to activate this user?",
+    "deactivate": "Are you sure you want to deactivate this user?",
+    "changeRole": "Are you sure you want to change this user's role?"
+  },
+  "stats": {
+    "total": "Total",
+    "active": "Active",
+    "withoutRole": "Without Role",
+    "withRole": "With Role"
+  },
+  "status": {
+    "inactive": "Inactive",
+    "active": "Active",
+    "on": "ON",
+    "off": "OFF"
+  },
+  "fields": {
+    "email": "Email",
+    "name": "Name",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "id": "Id",
+    "auth0UserId": "Auth0_Id"
+  },
+
   "Dock": {
   "title": "Dock Management",
   "count": "{{count}} docks registered",

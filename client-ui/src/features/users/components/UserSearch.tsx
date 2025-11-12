@@ -60,7 +60,7 @@ export default function UserSearch({ onSearch, isLoading }: UserSearchProps) {
                     type="email"
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
-                    placeholder={t("users.search.emailPlaceholder")}
+                    placeholder={t("search.emailPlaceholder")}
                     disabled={filterType !== "email" || isLoading}
                     style={{ flex: 1 }} // Ocupa o espaço restante
                 />
