@@ -141,7 +141,10 @@ function isAdminLocalStorage(): boolean {
     return false;
 }
 function getCurrentSarId(): string {
-    return localStorage.getItem("sarId") || "";
+    const c = localStorage.getItem("sarId") || "";
+    console.log(c);
+    return c;
+
 }
 /* ================================== */
 
@@ -150,7 +153,7 @@ export default function VvnListPage() {
 
     // ler do store; se não houver user/roles no store, usar fallback do localStorage
     const user = useAppStore((s) => s.user);
-    const admin = !!user?.roles?.includes(Roles.Administrator) || isAdminLocalStorage();
+    const admin = !!user?.role?.includes(Roles.Administrator) || isAdminLocalStorage();
 
     // filtros base
     const [sarId, setSarId] = useState<string>("");

@@ -1,18 +1,18 @@
 [
   {
-    "Name": "Alexandre Silva",
+    "Name": "Jorge Rodriguez",
     "CitizenId": { "PassportNumber": "111111" },
     "Nationality":  "Portugal",
-    "Email": {"Address": "alexandre.silva@gmail.com"},
+    "Email": {"Address": "jorgerodriguezf21@gmail.com"},
     "PhoneNumber": {"Number": "+351912345678"},
     "Status": "activated",
     "SAO": "1112223334"
   },
   {
-    "Name": "Beatriz Costa",
+    "Name": "Francisco Santos",
     "CitizenId": { "PassportNumber": "222222" },
     "Nationality": "Portugal",
-    "Email": {"Address":"beatriz.costa@gmail.com"},
+    "Email": {"Address":"xico.mofreitasantos@gmail.com"},
     "PhoneNumber": {"Number": "+351913456789"},
     "Status": "activated",
     "SAO": "2223334445"
