@@ -20,6 +20,7 @@ import { Roles } from "../app/types";
 import User from "../features/users/pages/User.tsx";
 import ActivateAccount from "../pages/ActivateAccount.tsx";
 import DeletedAccount from "../pages/DeletedAccount.tsx";
+import Dock from "../features/docks/pages/Dock";
 
 export const router = createBrowserRouter([
     {
@@ -94,6 +95,11 @@ export const router = createBrowserRouter([
                                 path: "users",
                                 element: <RequireRole roles={[Roles.Administrator]} />,
                                 children: [{ index: true, element: <User /> }],
+                            },
+                            {
+                                path: "docks",
+                                element: <RequireRole roles={[Roles.PortAuthorityOfficer]} />,
+                                children: [{ index: true, element: <Dock /> }],
                             },
                             { path: "forbidden", element: <Forbidden /> },
                         ],
