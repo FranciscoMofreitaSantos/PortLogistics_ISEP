@@ -77,7 +77,7 @@ namespace SEM5_PI_WEBAPI
                 {
                     options.Authority = domain;
                     options.Audience = audience;
-                    options.RequireHttpsMetadata = false; 
+                    options.RequireHttpsMetadata = false;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         NameClaimType = ClaimTypes.NameIdentifier,
@@ -89,7 +89,7 @@ namespace SEM5_PI_WEBAPI
             {
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole(Roles.Administrator.ToString()));
             });
-            
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowSPA", builder =>
@@ -106,25 +106,20 @@ namespace SEM5_PI_WEBAPI
                         .AllowCredentials();
                 });
             });
+            services.AddHealthChecks();
 
-            
+
             services.AddDbContext<DddSample1DbContext>(opt =>
                 opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
                     .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
 
-            
+
             ConfigureMyServices(services);
 
-           
+
             services.AddControllers()
-                .AddNewtonsoftJson(options =>
-                {
-                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
-                })
-                .AddJsonOptions(o =>
-            {
-                o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-            });
+                .AddNewtonsoftJson(options => { options.SerializerSettings.Converters.Add(new StringEnumConverter()); })
+                .AddJsonOptions(o => { o.JsonSerializerOptions.PropertyNameCaseInsensitive = true; });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -138,10 +133,10 @@ namespace SEM5_PI_WEBAPI
                 app.UseHsts();
             }
 
-            //app.UseHttpsRedirection();
+            
             app.UseRouting();
 
-            // ⚙️ CORS antes da autenticação
+            
             app.UseCors("AllowSPA");
 
             app.UseMiddleware<RequestLogsMiddleware>();
@@ -152,6 +147,7 @@ namespace SEM5_PI_WEBAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/api/health");
             });
         }
 
@@ -163,10 +159,10 @@ namespace SEM5_PI_WEBAPI
                 options.AddPolicy("AllowSPA", builder =>
                     builder
                         .WithOrigins(
-                            "http://localhost:5173", // Vite local
-                            "http://localhost:3000", // React default
-                            "http://10.9.23.188", // IP VM
-                            "http://10.9.23.188:5173" // IP VM + Vite
+                            "http://localhost:5173", 
+                            "http://localhost:3000", 
+                            "http://10.9.23.188", 
+                            "http://10.9.23.188:5173" 
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()

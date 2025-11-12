@@ -6,17 +6,13 @@ const TEX    = `${BASE}3Dtextures`;
 
 export const ASSETS_MODELS = {
     vessels: {
-        vessel: `${MODELS}/ships/Boat.glb`,
-        vesseltug: `${MODELS}/physicalResources/vessels/tugBoat.glb`,
-        cruise: `${MODELS}/ships/Cruise_ship.glb`,
-        cargo: `${MODELS}/ships/ship-cargo-a.glb`,
-        ship_ocean: `${MODELS}/ships/ship-ocean-liner.glb`,
-        containerShip: `${MODELS}/ships/Container_Ship.glb`,
+        containerShip: `${MODELS}/physicalResources/vessels/Container_Ship.glb`,
+        tugBoat: `${MODELS}/physicalResources/vessels/tugBoat.glb`,
     },
     containers: {
         containerRealistic: `${MODELS}/containers/realistics/Container.glb`,
         container: `${MODELS}/containers/Container.glb`,
-        container2: `${MODELS}/containers/Container2.glb`,
+        container2: `${MODELS}/containers/Shi.glb`,
     },
     cranes: {
         mcCrane: `${MODELS}/physicalResources/cranes/MCrane.glb`,
@@ -26,19 +22,40 @@ export const ASSETS_MODELS = {
     },
     vehicles: {
         truck: `${MODELS}/physicalResources/vehicles/truck.glb`,
-        sCarrier: `${MODELS}/physicalResources/vehicles/SCarrier.glb`,
+        truckCarrier: `${MODELS}/physicalResources/vehicles/SCarrier.glb`,
+        garbagetruck: `${MODELS}/physicalResources/vehicles/garbage-truck.glb`,
+        fireTuck: `${MODELS}/physicalResources/vehicles/firetruck.glb`,
+
+        sedan: `${MODELS}/physicalResources/vehicles/sedan.glb`,
+        suv: `${MODELS}/physicalResources/vehicles/suv.glb`,
+        taxi: `${MODELS}/physicalResources/vehicles/taxi.glb`,
+        sedanSport: `${MODELS}/physicalResources/vehicles/sedan-sports.glb`,
+        suvluxury: `${MODELS}/physicalResources/vehicles/suv-luxury.glb`,
+        
         forklift: `${MODELS}/physicalResources/vehicles/forklift.glb`,
-        extras:{
-            
-        }
     },
     storageArea: {
-        wareHouser: `${MODELS}/storageAreas/building-s.glb`,
+        wareHouser: `${MODELS}/storageAreas/StorageArea.glb`,
+    },
+    buildings:{
+        bigOffice: `${MODELS}/props/buildings/BigOffice.glb`,
+        chillBuilding: `${MODELS}/props/buildings/extras/chillBuilding.glb`,
+        midleBuilding: `${MODELS}/props/buildings/extras/midleBuilding.glb`,
+        smallBuilding: `${MODELS}/props/buildings/extras/smallBuilding.glb`,
+        factoryBuilding: `${MODELS}/props/buildings/extras/FactoryBuilding.glb`,
     },
     docks: {
         straight: `${MODELS}/Dock.glb`,
     },
-    props: {},
+    props: {
+        cone: `${MODELS}/physicalResources/Traffic_Cone.glb`,
+        worker: `${MODELS}/props/people/Worker.glb`
+    },
+    greens: {
+        pine: `${MODELS}/props/green/Pine.glb`,
+        fallTree: `${MODELS}/props/green/FallTree.glb`,
+        tree: `${MODELS}/props/green/Tree.glb`,
+    },
 } as const;
 
 export const ASSETS_TEXTURES = {

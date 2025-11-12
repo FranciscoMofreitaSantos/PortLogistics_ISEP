@@ -795,6 +795,84 @@
       "auth0UserId" : "Auth0_Id"
     }
   },
+  "Dock": {
+  "title": "Dock Management",
+  "count": "{{count}} docks registered",
+  "searchPlaceholder": "Search...",
+
+  "fields": {
+    "code": "Code *",
+    "location": "Location *",
+    "status": "Status",
+    "physicalResource": "Physical Resources (available)",
+    "vesselType": "Allowed Vessel Types",
+    "length": "Length (m)",
+    "depth": "Depth (m)",
+    "maxdraft": "Maximum Draft (m)"
+  },
+
+  "buttons": {
+    "add": "Add Dock",
+    "search": "Search",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit"
+  },
+
+  "modal": {
+    "addTitle": "Add Dock",
+    "editTitle": "Edit Dock"
+  },
+
+  "messages": {
+    "loading": "Loading...",
+    "searchSuccess": "Results: {{count}}",
+    "noResults": "No results",
+    "created": "Dock created",
+    "updated": "Dock updated",
+    "fillSomething": "Fill in a field to edit",
+    "noAvailablePR": "No available resources"
+  },
+
+  "errors": {
+    "required": "Required",
+    "codeRequired": "Code is required",
+    "codeFormat": "Format DK-0000",
+    "codeDuplicate": "A dock with this code already exists",
+    "locationRequired": "Location is required.",
+    "locationInvalid": "Location contains invalid characters.",
+    "lengthRequired": "Length is required",
+    "depthRequired": "Depth is required",
+    "maxdraftRequired": "Draft is required",
+    "numberInvalid": "Invalid number",
+    "mustBePositive": "Must be > 0",
+    "chooseVesselType": "Select at least one vessel type.",
+    "formFix": "Fix the form errors."
+  },
+
+  "details": {
+    "code": "Code",
+    "location": "Location",
+    "status": "Status",
+    "vesselType": "Vessel Types",
+    "physicalResource": "Physical Resources",
+    "dimensions": "Dimensions (m)",
+    "length": "Length",
+    "depth": "Depth",
+    "maxdraft": "Maximum Draft"
+  },
+
+  "status": {
+    "Available": "Available",
+    "Unavailable": "Unavailable",
+    "Maintenance": "Maintenance"
+  },
+
+  "chips": {
+    "summary": "{{pr}} PR selected • {{vt}} vessel type(s)"
+  }
+},
 
   "activation": {
     "titleLoading": "⏳ Please wait",
@@ -821,5 +899,30 @@
     },
     "contact": "If you believe this was a mistake, please contact the system administrator.",
     "unknownEmail": "unknown email address"
+  },
+  "viewer3d": {
+    "title": "3D Port Viewer",
+    "toggles": {
+      "docks": "Docks",
+      "storage": "Storage",
+      "vessels": "Vessels",
+      "containers": "Containers",
+      "resources": "Resources"
+    },
+    "fullscreen": "Fullscreen",
+    "fullscreenExit": "Exit Fullscreen",
+    "loading": "Loading 3D…",
+    "errorPrefix": "⚠",
+    "sceneInfo": "Scene Info",
+    "counts": {
+      "docks": "Docks",
+      "storage": "Storage Areas",
+      "vessels": "Vessels",
+      "containers": "Containers",
+      "resources": "Resources"
+    },
+    "selection": "Selection",
+    "clickHint": "Click an object in the scene."
   }
+
 }
