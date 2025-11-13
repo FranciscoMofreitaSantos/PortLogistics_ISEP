@@ -1,4 +1,3 @@
-// src/features/vvn/pages/VvnListPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { FaShip, FaPlus, FaPaperPlane, FaArrowRotateLeft, FaPen } from "react-icons/fa6";
 import toast from "react-hot-toast";
@@ -140,12 +139,25 @@ function isAdminLocalStorage(): boolean {
     }
     return false;
 }
-function getCurrentSarId(): string {
-    const c = localStorage.getItem("sarId") || "";
-    console.log(c);
-    return c;
-
+export async function getCurrentSarId(): Promise<string | null> {
+    const user = useAppStore.getState().user;
+    
+    if (!user) {
+        toast.error("No such user");
+        return null;
+    }
+    
+    try {
+        const sar = await vvnService.getIdSarByEmail(user.email);
+        return sar; 
+        
+    } catch (e: any) {
+        toast.error(e?.message ?? "Failed to get SAR id");
+        return null;
+    }
 }
+
+
 /* ================================== */
 
 export default function VvnListPage() {
@@ -212,15 +224,21 @@ export default function VvnListPage() {
     const [updUnloadFile, setUpdUnloadFile] = useState<File | null>(null);
 
     // se NÃO fores admin, tentar descobrir SAR; se fores admin, limpar sarId para evitar ramo SAR
+
+
     useEffect(() => {
+        let cancelled = false;
         if (admin) {
-            setSarId("");
+            setSarId(""); 
             return;
         }
-        const id = getCurrentSarId();
-        setSarId(id);
-        // evitamos hardcode de idioma: se faltar sarId, não tostar mensagem específica
+        (async () => {
+            const id = await getCurrentSarId();
+            if (!cancelled && id) setSarId(id); 
+        })();
+        return () => { cancelled = true; };
     }, [admin]);
+
 
     const MIN_LOADING_TIME = 500;
     async function runWithLoading<T>(promise: Promise<T>, loadingText: string) {

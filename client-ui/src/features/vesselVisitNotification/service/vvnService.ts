@@ -10,6 +10,13 @@ import type {
     CreatingVesselVisitNotificationDto,
 } from "../types/vvnTypes";
 
+
+
+export async function getIdSarByEmail(email: string) {
+    const res = await api.get(`/api/ShippingAgentRepresentative/id/email/${encodeURIComponent(email)}`);
+    return res.data as string;
+}
+
 /* ===== BY SAR ===== */
 export async function getInProgressPendingBySar(sarId: string, f: FilterInProgressPendingVvnStatusDto) {
     const res = await api.get(`/api/VesselVisitNotification/shippingAgentRepresentative/inProgress-pendingInformation/${sarId}`, { params: f });
@@ -28,7 +35,7 @@ export async function getAcceptedBySar(sarId: string, f: FilterAcceptedVvnStatus
     return res.data as VesselVisitNotificationDto[];
 }
 
-/* ===== ADMIN (ALL) — cria estes endpoints no controller ===== */
+/* ===== ADMIN (ALL)  ===== */
 export async function getInProgressPendingAll(f: FilterInProgressPendingVvnStatusDto) {
     const res = await api.get(`/api/VesselVisitNotification/all/inProgress-pendingInformation`, { params: f });
     return res.data as VesselVisitNotificationDto[];
@@ -74,6 +81,7 @@ export async function rejectByCode(dto: RejectVesselVisitNotificationDto) {
 }
 
 const vvnService = {
+    getIdSarByEmail,
     // lists
     getInProgressPendingBySar, getWithdrawnBySar, getSubmittedBySar, getAcceptedBySar,
     getInProgressPendingAll,   getWithdrawnAll,   getSubmittedAll,   getAcceptedAll,

@@ -312,7 +312,6 @@
 .vvn-title { margin: 0; font-size: 22px; font-weight: 800; }
 .vvn-sub { opacity: .8; }
 
-.vvn-actions { display: flex; gap: 8px; }
 
 .vvn-kpis {
     display: grid;
@@ -622,4 +621,18 @@ padding: 18px;}
 /* Responsivo: 1 coluna em ecrãs pequenos */
 @media (max-width: 640px){
     .vvn-quick-grid{ grid-template-columns: 1fr; }
+}
+
+/* só afeta os botões dentro de .vvn-actions */
+.vvn-actions .sa-btn {
+    padding: 6px 10px;      /* menos altura/largura */
+    font-size: 0.85rem;     /* texto menor */
+    line-height: 1;         /* compensa a altura */
+    gap: 6px;               /* espaço entre ícone e texto */
+    border-radius: 6px;     /* opcional: cantos menos arredondados */
+}
+
+.vvn-actions .sa-btn svg {
+    width: 14px;
+    height: 14px;           /* ícones menores (react-icons herdam font-size) */
 }

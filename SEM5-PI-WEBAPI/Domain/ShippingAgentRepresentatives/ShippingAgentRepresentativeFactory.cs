@@ -35,4 +35,19 @@ public class ShippingAgentRepresentativeFactory
         );
     }
 
+    
+    public static ShippingAgentRepresentativeDto CreateDto2(ShippingAgentRepresentative shippingAgentRepresentative)
+    {
+        return new ShippingAgentRepresentativeDto(
+            shippingAgentRepresentative.Id.AsGuid(),
+            shippingAgentRepresentative.Name,
+            shippingAgentRepresentative.CitizenId,
+            shippingAgentRepresentative.Nationality,
+            shippingAgentRepresentative.Email,
+            shippingAgentRepresentative.PhoneNumber,
+            shippingAgentRepresentative.Status,
+            shippingAgentRepresentative.SAO,
+            shippingAgentRepresentative.Notifs
+        );
+    }
 }

@@ -61,7 +61,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (q == null)
             return null;
 
-        return ShippingAgentRepresentativeFactory.CreateDto(q);
+        return ShippingAgentRepresentativeFactory.CreateDto2(q);
         }
     
      public async Task<ShippingAgentRepresentativeDto> GetByCitizenId(CitizenId cId)

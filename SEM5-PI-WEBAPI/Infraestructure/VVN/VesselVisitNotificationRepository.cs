@@ -33,7 +33,21 @@ public class VesselVisitNotificationRepository : BaseRepository<VesselVisitNotif
             .Include(v => v.Tasks)
             .FirstOrDefaultAsync(v => v.Id == id);
     }
-
+    
+    public async Task<List<VesselVisitNotification>> GetAllComplete()
+    {
+        return await _context.VesselVisitNotification
+            .Include(v => v.Dock)
+            .Include(v => v.CrewManifest)
+            .ThenInclude(cm => cm.CrewMembers)
+            .Include(v => v.LoadingCargoManifest)
+            .ThenInclude(cgm => cgm.ContainerEntries)
+            .ThenInclude(e => e.Container)
+            .Include(v => v.UnloadingCargoManifest)
+            .ThenInclude(cgm => cgm.ContainerEntries)
+            .ThenInclude(e => e.Container)
+            .Include(v => v.Tasks).ToListAsync();
+    }
     public async Task<VesselVisitNotification?> GetCompleteByCodeAsync(VvnCode code)
     {
         return await _context.VesselVisitNotification

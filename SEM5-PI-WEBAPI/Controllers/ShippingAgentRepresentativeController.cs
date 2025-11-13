@@ -78,6 +78,31 @@ public class ShippingAgentRepresentativeController : ControllerBase
             return NotFound(e.Message);
         }
     }
+    
+    
+    
+    [HttpGet("id/email/{email}")]
+    public async Task<ActionResult<Guid>> GetIdByEmailAsync(string email)
+    {
+        try
+        {
+            _logger.LogInformation("API Request: Fetching SAR ID with email = {NAME}", email);
+            
+            var shippingAgentRepresentativeDto = await _service.GetByEmailAsync(new EmailAddress(email));
+            
+            _logger.LogWarning("API Response (200): SAR ID with email = {NAME} {ID}-> FOUND", shippingAgentRepresentativeDto.Name,shippingAgentRepresentativeDto.Id);
+            
+            return Ok(shippingAgentRepresentativeDto.Id.ToString());
+
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Response (404): {Message}", e.Message);
+            return NotFound(e.Message);
+        }
+    }
+    
+    
 
         [HttpGet("status/{status}")]
     public async Task<ActionResult<List<ShippingAgentRepresentativeDto>>> GetByStatusAsync(Status status)

@@ -5,13 +5,9 @@ export type VvnStatus = "InProgress" | "PendingInformation" | "Withdrawn" | "Sub
 export type CargoManifestType = "Loading" | "Unloading";
 export type ContainerType = "General" | "Reefer" | "Electronic" | "Hazmat" | "Oversized";
 export type ContainerStatus = "Empty" | "Full" | "Reserved" | "Damaged" | "InTransit";
-export type CrewRole =
-    | "Captain" | "ChiefOfficer" | "SecondOfficer" | "ThirdOfficer"
-    | "ChiefEngineer" | "SecondEngineer" | "ThirdEngineer" | "FourthEngineer"
-    | "Electrician" | "Bosun" | "AbleSeaman" | "OrdinarySeaman" | "Cook" | "Steward"
-    | "DeckCadet" | "EngineCadet" | "RadioOfficer" | "SafetyOfficer" | "Purser" | "ChiefCook";
+export type CrewRole = | "Captain" | "ChiefOfficer" | "SecondOfficer" | "ThirdOfficer" | "ChiefEngineer" | "SecondEngineer" | "ThirdEngineer" | "FourthEngineer" | "Electrician" | "Bosun" | "AbleSeaman" | "OrdinarySeaman" | "Cook" | "Steward" | "DeckCadet" | "EngineCadet" | "RadioOfficer" | "SafetyOfficer" | "Purser" | "ChiefCook";
 
-/* Nationality – usar string solta (o backend tem muitos valores). */
+
 export type Nationality = string;
 
 /* ===== Value Objects ===== */
@@ -99,7 +95,7 @@ export interface VesselVisitNotificationDto {
     tasks: TaskDto[];
 }
 
-/* ===== Creating/Updating/Filters (iguais à versão anterior) ===== */
+/* ===== Creating/Updating/Filters===== */
 export interface CreatingVesselVisitNotificationDto {
     estimatedTimeArrival: string;
     estimatedTimeDeparture: string;

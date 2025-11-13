@@ -1023,7 +1023,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     {
         _logger.LogInformation("ALL - Query InProgress/Pending with filters: {@Filters}", dto);
 
-        var listVvnFiltered = await _repo.GetAllAsync();
+        var listVvnFiltered = await _repo.GetAllComplete();
 
         listVvnFiltered = listVvnFiltered
             .Where(v => v.Status.StatusValue == VvnStatus.InProgress ||
@@ -1049,7 +1049,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     {
         _logger.LogInformation("ALL - Query Withdrawn with filters: {@Filters}", dto);
 
-        var listVvnFiltered = await _repo.GetAllAsync();
+        var listVvnFiltered = await _repo.GetAllComplete();
 
         listVvnFiltered = listVvnFiltered
             .Where(v => v.Status.StatusValue == VvnStatus.Withdrawn)
@@ -1074,7 +1074,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     {
         _logger.LogInformation("ALL - Query Submitted with filters: {@Filters}", dto);
 
-        var listVvnFiltered = await _repo.GetAllAsync();
+        var listVvnFiltered = await _repo.GetAllComplete();
 
         listVvnFiltered = listVvnFiltered
             .Where(v => v.Status.StatusValue == VvnStatus.Submitted)
@@ -1102,7 +1102,7 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
     {
         _logger.LogInformation("ALL - Query Accepted with filters: {@Filters}", dto);
 
-        var listVvnFiltered = await _repo.GetAllAsync();
+        var listVvnFiltered = await _repo.GetAllComplete();
 
         listVvnFiltered = listVvnFiltered
             .Where(v => v.Status.StatusValue == VvnStatus.Accepted)
