@@ -194,11 +194,11 @@
     box-shadow: 0 8px 18px rgba(0,0,0,0.18);
 }
 
-.rotate-page {
-    animation: rotateLoop 0.5s linear infinite;
+.rotate-create {
+    animation: rotateCreate 1000s linear infinite;
 }
 
-@keyframes rotateLoop {
+@keyframes rotateCreate {
     from {
         transform: rotate(0deg);
     }
@@ -224,4 +224,20 @@
     max-width: 80%;
     max-height: 80%;
     border-radius: 12px;
+}
+
+.img-popup {
+    animation: zoomInOut 0.5s ease-in-out infinite;
+}
+
+@keyframes zoomInOut {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(3);
+    }
+    100% {
+        transform: scale(1);
+    }
 }

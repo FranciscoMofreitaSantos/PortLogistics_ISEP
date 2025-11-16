@@ -92,7 +92,6 @@ export default function DockPage() {
     const [items, setItems] = useState<Dock[]>([]);
     const [filtered, setFiltered] = useState<Dock[]>([]);
     const [loading, setLoading] = useState(true);
-    const [rotate, setRotate] = useState(false);
     const [showImage, setShowImage] = useState(false);
     const [vesselTypes, setVesselTypes] = useState<VesselType[]>([]);
     const [allPRCodes, setAllPRCodes] = useState<string[]>([]);
@@ -178,7 +177,6 @@ export default function DockPage() {
     };
 
     function openCreate() {
-        setRotate(true);
         setCreateErrors({});
         setCreatePRs([]);
         setCreateVTs([]);
@@ -616,7 +614,7 @@ export default function DockPage() {
         t(`Dock.status.${s ?? ""}`, { defaultValue: s ?? "—" });
 
     return (
-        <div className={`dk-page ${rotate ? "rotate-page" : ""}`}>
+        <div className="dk-page rotate-page">
             {selected && <div className="dk-overlay" onClick={closeSlide} />}
 
             {/* HEADER */}
@@ -895,7 +893,7 @@ export default function DockPage() {
             {/* CREATE MODAL */}
             {isCreateOpen && (
                 <div className="dk-modal-overlay">
-                    <div className="dk-modal">
+                    <div className="dk-modal rotate-create">
                         <h3>
                             {t("Dock.modal.addTitle", { defaultValue: "Adicionar Dock" })}
                         </h3>
@@ -1199,7 +1197,6 @@ export default function DockPage() {
                                 className="dk-btn-cancel"
                                 onClick={() => {
                                     setIsCreateOpen(false);
-                                    setRotate(false);
                                 }}
 
                             >
