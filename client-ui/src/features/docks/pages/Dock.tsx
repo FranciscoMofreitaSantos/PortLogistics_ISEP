@@ -92,7 +92,8 @@ export default function DockPage() {
     const [items, setItems] = useState<Dock[]>([]);
     const [filtered, setFiltered] = useState<Dock[]>([]);
     const [loading, setLoading] = useState(true);
-
+    const [rotate, setRotate] = useState(false);
+    const [showImage, setShowImage] = useState(false);
     const [vesselTypes, setVesselTypes] = useState<VesselType[]>([]);
     const [allPRCodes, setAllPRCodes] = useState<string[]>([]);
 
@@ -177,6 +178,7 @@ export default function DockPage() {
     };
 
     function openCreate() {
+        setRotate(true);
         setCreateErrors({});
         setCreatePRs([]);
         setCreateVTs([]);
@@ -614,13 +616,14 @@ export default function DockPage() {
         t(`Dock.status.${s ?? ""}`, { defaultValue: s ?? "—" });
 
     return (
-        <div className="dk-page">
+        <div className={`dk-page ${rotate ? "rotate-page" : ""}`}>
             {selected && <div className="dk-overlay" onClick={closeSlide} />}
 
             {/* HEADER */}
             <button
                 className="dk-back-btn"
-                onClick={() => window.history.back()}>
+                onClick={() => setShowImage(true)}
+            >
                 ←
             </button>
             <div className="dk-title-area">
@@ -875,7 +878,14 @@ export default function DockPage() {
                     )}
 
                     <div className="dk-slide-actions">
-                        <button className="dk-btn-edit" onClick={() => openEdit(selected)}>
+                        <button
+                            className="dk-btn-edit"
+                            onClick={() => {
+                                const audio = new Audio("/fail.mp3");
+                                audio.play();
+                                openEdit(selected);
+                            }}
+                        >
                             {t("Dock.buttons.edit", { defaultValue: "Editar" })}
                         </button>
                     </div>
@@ -1187,7 +1197,11 @@ export default function DockPage() {
                         <div className="dk-modal-actions">
                             <button
                                 className="dk-btn-cancel"
-                                onClick={() => setIsCreateOpen(false)}
+                                onClick={() => {
+                                    setIsCreateOpen(false);
+                                    setRotate(false);
+                                }}
+
                             >
                                 {t("Dock.buttons.cancel", { defaultValue: "Cancelar" })}
                             </button>
@@ -1438,6 +1452,11 @@ export default function DockPage() {
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+            {showImage && (
+                <div className="img-overlay" onClick={() => setShowImage(false)}>
+                    <img src="public/myImage.jpg" className="img-popup" />
                 </div>
             )}
         </div>
