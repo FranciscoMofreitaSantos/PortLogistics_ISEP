@@ -1,0 +1,19 @@
+@DecisionAddress = http://localhost:5296
+###
+
+GET {{DecisionAddress}}/api/schedule/assign-dock
+Accept: application/json
+
+###
+
+GET http://localhost:5296/api/schedule/check-staff?codes=TRK-001&codes=FLK-001&codes=CYS-001
+Accept: application/json
+###
+
+GET {{DecisionAddress}}/api/schedule/vessel-details?imo=9823455
+Accept: application/json
+
+###
+
+GET {{DecisionAddress}}/api/schedule/physicalResource-details?code=FORKL-0001
+Accept: application/json

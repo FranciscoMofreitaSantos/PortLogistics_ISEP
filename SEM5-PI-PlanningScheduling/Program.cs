@@ -6,6 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient<DockServiceClient>();
+builder.Services.AddHttpClient<PhysicalResourceServiceClient>();
+builder.Services.AddHttpClient<StaffMemberServiceClient>();
+builder.Services.AddHttpClient<VesselServiceClient>();
 
 builder.Services.AddOpenApi();
 

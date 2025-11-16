@@ -1,5 +1,0 @@
-@DecisionAddress = http://localhost:5296
-
-
-GET {{DecisionAddress}}/api/schedule/assign-dock
-Accept: application/json

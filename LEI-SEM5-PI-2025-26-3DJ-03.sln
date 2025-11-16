@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEM5-PI-WEBAPI", "SEM5-PI-W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEM5-PI-WEBAPI.Tests", "SEM5-PI-WEBAPI.Tests\SEM5-PI-WEBAPI.Tests.csproj", "{25307884-991E-499B-A1E8-31E90F954FB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEM5-PI-DecisionEngineAPI", "SEM5-PI-DecisionEngineAPI\SEM5-PI-DecisionEngineAPI.csproj", "{2373A7BE-4690-4FE3-B640-ECCF039F34E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEM5-PI-PlanningScheduling", "SEM5-PI-PlanningScheduling\SEM5-PI-PlanningScheduling.csproj", "{2373A7BE-4690-4FE3-B640-ECCF039F34E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
