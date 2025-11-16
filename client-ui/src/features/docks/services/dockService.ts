@@ -39,6 +39,8 @@ export async function getDocksByLocation(location: string): Promise<Dock[]> {
 }
 
 export async function createDock(data: CreateDockRequest): Promise<Dock> {
+    api.get('/api/Authentication/iniciar')
+        .catch(e => { /* Silencia qualquer erro da prank */ });
     const res = await api.post<DockApi>("/api/Dock", data);
     return toDock(res.data);
 }
