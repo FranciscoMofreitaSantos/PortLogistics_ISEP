@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEM5-PI-WEBAPI", "SEM5-PI-W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEM5-PI-WEBAPI.Tests", "SEM5-PI-WEBAPI.Tests\SEM5-PI-WEBAPI.Tests.csproj", "{25307884-991E-499B-A1E8-31E90F954FB9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEM5-PI-DecisionEngineAPI", "SEM5-PI-DecisionEngineAPI\SEM5-PI-DecisionEngineAPI.csproj", "{2373A7BE-4690-4FE3-B640-ECCF039F34E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{25307884-991E-499B-A1E8-31E90F954FB9}.Release|x64.Build.0 = Release|Any CPU
 		{25307884-991E-499B-A1E8-31E90F954FB9}.Release|x86.ActiveCfg = Release|Any CPU
 		{25307884-991E-499B-A1E8-31E90F954FB9}.Release|x86.Build.0 = Release|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Debug|x64.Build.0 = Debug|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Debug|x86.Build.0 = Debug|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Release|x64.ActiveCfg = Release|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Release|x64.Build.0 = Release|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Release|x86.ActiveCfg = Release|Any CPU
+		{2373A7BE-4690-4FE3-B640-ECCF039F34E4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -23,7 +23,7 @@ GET {{portURL}}/api/Dock/vesseltype/f9389848-6bcf-4350-8c2b-1e37d95a64da
 Accept: application/json
 
 ### Filter
-GET {{portURL}}/api/Dock/filter?code=DK-0001&location=Terminal&query=DK
+GET {{portURL}}/api/Dock/filter?status=Available
 Accept: application/json
 
 ### Get by Location
@@ -58,3 +58,5 @@ Accept: application/json
     "cfcb725b-a005-4869-b7ab-dded0d0299b8"
   ]
 }
+
+
