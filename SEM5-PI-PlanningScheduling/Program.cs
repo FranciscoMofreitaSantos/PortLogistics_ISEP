@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddHttpClient<PrologClient>();
 builder.Services.AddHttpClient<DockServiceClient>();
+builder.Services.AddHttpClient<QualificationServiceClient>();
 builder.Services.AddHttpClient<PhysicalResourceServiceClient>();
 builder.Services.AddHttpClient<StaffMemberServiceClient>();
 builder.Services.AddHttpClient<VesselServiceClient>();

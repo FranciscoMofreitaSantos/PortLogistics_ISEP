@@ -64,6 +64,23 @@ public class VesselVisitNotificationRepository : BaseRepository<VesselVisitNotif
             .FirstOrDefaultAsync(v => v.Code.YearNumber == code.YearNumber 
                                       && v.Code.SequenceNumber == code.SequenceNumber);
     }
+    
+    public async Task<List<VesselVisitNotification>> GetAllAcceptedComplete()
+    {
+        return await _context.VesselVisitNotification
+            .Where(v => v.Status.StatusValue == VvnStatus.Accepted)    
+            .Include(v => v.Dock)
+            .Include(v => v.CrewManifest)
+            .ThenInclude(cm => cm.CrewMembers)
+            .Include(v => v.LoadingCargoManifest)
+            .ThenInclude(cgm => cgm.ContainerEntries)
+            .ThenInclude(e => e.Container)
+            .Include(v => v.UnloadingCargoManifest)
+            .ThenInclude(cgm => cgm.ContainerEntries)
+            .ThenInclude(e => e.Container)
+            .Include(v => v.Tasks)
+            .ToListAsync();
+    }
 
 }
 
