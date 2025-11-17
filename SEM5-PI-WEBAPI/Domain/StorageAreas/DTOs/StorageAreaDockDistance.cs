@@ -5,6 +5,8 @@ public class StorageAreaDockDistanceDto
     public string DockCode { get; set; }
     public float Distance { get; set; }
 
+    public StorageAreaDockDistanceDto(){}
+    
     public StorageAreaDockDistanceDto(string dockCode, float distance)
     {
         DockCode = dockCode;

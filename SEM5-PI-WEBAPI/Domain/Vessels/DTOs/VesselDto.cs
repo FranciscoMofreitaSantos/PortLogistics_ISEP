@@ -11,6 +11,7 @@ public class VesselDto
     public string Owner {get; private set;}
     public VesselTypeId VesselTypeId {get; private set;}
 
+    public VesselDto(){}
     public VesselDto(Guid id,ImoNumber imoNumber, string name,string owner, VesselTypeId vesselTypeId)
     {
         this.Id = id;

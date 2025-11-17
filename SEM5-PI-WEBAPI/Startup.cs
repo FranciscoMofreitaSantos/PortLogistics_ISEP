@@ -53,9 +53,12 @@ namespace SEM5_PI_WEBAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _env;   // <--- ADD
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
         public IConfiguration Configuration { get; }
@@ -109,9 +112,21 @@ namespace SEM5_PI_WEBAPI
             services.AddHealthChecks();
             services.Configure<NetworkAccessOptions>(Configuration.GetSection("NetworkAccess"));
 
-            services.AddDbContext<DddSample1DbContext>(opt =>
-                opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
-                    .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
+            if (_env.IsEnvironment("Testing"))
+            {
+                // Provider para testes: InMemory
+                services.AddDbContext<DddSample1DbContext>(opt =>
+                    opt.UseInMemoryDatabase("SEM5_PI_WEBAPI_SystemTests")
+                        .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
+            }
+            else
+            {
+                // Provider normal: Postgres
+                services.AddDbContext<DddSample1DbContext>(opt =>
+                    opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
+                        .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
+            }
+
 
 
             ConfigureMyServices(services);

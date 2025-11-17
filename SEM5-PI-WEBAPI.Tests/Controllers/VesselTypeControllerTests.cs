@@ -234,6 +234,47 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             var value = Assert.IsType<VesselTypeDto>(ok.Value);
             Assert.Equal("Updated Vessel", value.Name);
         }
+        [Fact]
+        public async Task Delete_ShouldReturnOk_WhenDeletedSuccessfully()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+
+            _serviceMock
+                .Setup(s => s.DeleteAsync(It.IsAny<VesselTypeId>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.Delete(id);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, ok.StatusCode);
+            var msg = Assert.IsType<string>(ok.Value);
+            Assert.Contains(id.ToString(), msg);
+        }
+
+        [Fact]
+        public async Task Delete_ShouldReturnProblemResponse_WhenBusinessRuleFails()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+
+            _serviceMock
+                .Setup(s => s.DeleteAsync(It.IsAny<VesselTypeId>()))
+                .ThrowsAsync(new BusinessRuleValidationException("No Vessel Type found"));
+
+            // Act
+            var result = await _controller.Delete(id);
+
+            // Assert
+            var obj = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(404, obj.StatusCode);
+
+            var details = Assert.IsType<ProblemDetails>(obj.Value);
+            Assert.Equal("Not Found", details.Title);
+            Assert.Equal("No Vessel Type found", details.Detail);
+        }
 
     }
 }

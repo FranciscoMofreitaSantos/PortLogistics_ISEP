@@ -15,7 +15,7 @@ GET {{portURL}}/api/Dock/code/DK-0001
 Accept: application/json
 
 ### Get by PhysicalResourceCode
-GET {{portURL}}/api/Dock/physical-code/STSCR-0001
+GET {{portURL}}/api/Dock/filter?status=Available
 Accept: application/json
 
 ### Get by VesselType

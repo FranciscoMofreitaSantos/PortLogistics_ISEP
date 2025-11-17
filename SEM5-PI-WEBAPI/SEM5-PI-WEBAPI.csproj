@@ -33,6 +33,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2" />
     <PackageReference Include="xunit.assert" Version="2.9.2" />
     <PackageReference Include="xunit.extensibility.core" Version="2.9.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.9" />
   </ItemGroup>
 
   <ItemGroup>

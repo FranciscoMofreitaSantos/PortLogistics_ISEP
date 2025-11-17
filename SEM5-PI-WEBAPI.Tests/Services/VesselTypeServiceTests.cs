@@ -203,5 +203,39 @@ namespace SEM5_PI_WEBAPI.Tests.Services
             var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.UpdateAsync(id, dto));
             Assert.Contains("already exists", ex.Message);
         }
+        
+        [Fact]
+        public async Task DeleteAsync_ShouldRemoveVesselType_WhenExists()
+        {
+            // Arrange
+            var id = new VesselTypeId(Guid.NewGuid());
+            var entity = new VesselType("ToDelete", 5, 5, 5, "Will be deleted");
+
+            _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(entity);
+            _uowMock.Setup(u => u.CommitAsync()).ReturnsAsync(1);
+
+            // Act
+            await _service.DeleteAsync(id);
+
+            // Assert
+            _repoMock.Verify(r => r.GetByIdAsync(id), Times.Once);
+            _repoMock.Verify(r => r.Remove(entity), Times.Once);
+            _uowMock.Verify(u => u.CommitAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ShouldThrow_WhenVesselTypeNotFound()
+        {
+            // Arrange
+            var id = new VesselTypeId(Guid.NewGuid());
+            _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((VesselType)null);
+
+            // Act + Assert
+            var ex = await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.DeleteAsync(id));
+            Assert.Contains("No Vessel Type found", ex.Message);
+            _repoMock.Verify(r => r.Remove(It.IsAny<VesselType>()), Times.Never);
+            _uowMock.Verify(u => u.CommitAsync(), Times.Never);
+        }
+
     }
 }

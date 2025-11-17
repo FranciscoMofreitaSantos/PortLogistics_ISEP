@@ -11,6 +11,8 @@ namespace SEM5_PI_WEBAPI.Domain.Containers.DTOs
         public ContainerStatus Status { get; set; }
         public double WeightKg { get; set; }
         
+        public ContainerDto(){}
+        
         public ContainerDto(Guid id, Iso6346Code isoCode, string description, ContainerType type, ContainerStatus status, double weightKg)
         {
             Id = id;

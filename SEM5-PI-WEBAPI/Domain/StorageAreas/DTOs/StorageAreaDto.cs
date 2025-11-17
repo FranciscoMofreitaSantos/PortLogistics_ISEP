@@ -19,6 +19,8 @@ public class StorageAreaDto
 
     public List<StorageAreaDockDistanceDto> DistancesToDocks { get; private set; }
 
+    public StorageAreaDto(){}
+    
     public StorageAreaDto(Guid id, string name, string description,
         StorageAreaType type, int maxBays, int maxRows, int maxTiers,
         int maxCapacityTeu, int currentCapacityTeu,

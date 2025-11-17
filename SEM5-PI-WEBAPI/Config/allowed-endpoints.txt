@@ -10,7 +10,7 @@
 10.8.211.0/30
 
 # DEI private cloud – VNET1 (vs343, vs453, ...)
-//10.9.0.0/16
+10.9.0.0/16
 
 # (Opcional) só esta VM específica
 # 10.9.21.87/32   # vs343

@@ -170,7 +170,8 @@ namespace SEM5_PI_WEBAPI.Api.Middleware
                 {
                     if (force)
                     {
-                        _logger.LogWarning("AllowedCidrsFile '{File}' not found. Using only inline AllowedCidrs (environment {Env}).", _allowedCidrsFilePath, _environmentName);
+                        _logger.LogWarning("AllowedCidrsFile '{File}' not found. Using only inline AllowedCidrs (environment {Env}).",
+                            _allowedCidrsFilePath, _environmentName);
                     }
                     return;
                 }

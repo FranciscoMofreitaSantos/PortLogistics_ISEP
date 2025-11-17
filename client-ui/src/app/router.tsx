@@ -46,7 +46,7 @@ export const router = createBrowserRouter([
                             { path: "dashboard", element: <GenericDashboard /> },
                             {
                                 path: "3dSecene",
-                                element: (<RequireRole roles={[Roles.Administrator, Roles.PortAuthorityOfficer]}/>),
+                                element: (<RequireRole roles={[Roles.Administrator, Roles.PortAuthorityOfficer, Roles.ShippingAgentRepresentative]}/>),
                                 children: [{ index: true, element: <PortScene /> }],
                             },
                             {

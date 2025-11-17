@@ -7,6 +7,7 @@ public sealed class StorageSlotDto
     public int Tier { get; init; }
     public string? Iso { get; init; } // null -> slot vazio
 
+    public StorageSlotDto(){}
     public StorageSlotDto(int bay, int row, int tier, string? iso)
     {
         Bay = bay;
@@ -26,6 +27,8 @@ public sealed class StorageAreaGridDto
     /// Lista de slots. Para reduzir payload, **apenas slots ocupados** têm Iso != null.
     /// </summary>
     public List<StorageSlotDto> Slots { get; init; }
+    
+    public StorageAreaGridDto(){}
 
     public StorageAreaGridDto(int maxBays, int maxRows, int maxTiers, List<StorageSlotDto> slots)
     {

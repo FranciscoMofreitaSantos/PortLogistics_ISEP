@@ -27,6 +27,11 @@
     </ItemGroup>
     
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Using Include="Xunit" />
     </ItemGroup>
 
