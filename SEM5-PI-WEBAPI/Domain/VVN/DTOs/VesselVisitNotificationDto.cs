@@ -31,6 +31,7 @@ public class VesselVisitNotificationDto
 
     public IReadOnlyCollection<TaskDto> Tasks { get; private set; }
 
+    public VesselVisitNotificationDto(){}
     public VesselVisitNotificationDto(
         string id,
         string code,

@@ -1,4 +1,4 @@
-# Plano de Testes – StorageArea, Container, VesselType e Vessel
+# Plano de Testes – StorageArea, Container, VesselType, Vessel e VVN
 *(SEM5_PI_WEBAPI.Tests)*
 
 Este documento descreve, para os módulos:
@@ -7,13 +7,14 @@ Este documento descreve, para os módulos:
 - `Container`
 - `VesselType`
 - `Vessel`
+- `VesselVisitNotification (VVN)`
 
 que tipos de testes existem (ou são previstos), qual é o **SUT (System Under Test)** em cada caso,  
 e que nível de “caixa preta” está a ser considerado:
 
 - **Testes de domínio** (regras de negócio, quase white-box mas focados na API pública);
 - **Caixa preta de classe** (Service, Controller, etc.);
-- **Caixa preta de aplicação** (WebAPI completa via `HttpClient` + `WebApplicationFactory`).
+- **Caixa preta de aplicação** (WebAPI completa via `HttpClient` + `WebApplicationFactory` ou controller+service reais com repositórios mockados).
 
 ---
 
@@ -478,17 +479,221 @@ Cenários típicos:
 
 ---
 
-## 6. Síntese por módulo e nível
+## 6. VVN – Vessel Visit Notification
 
-| Módulo       | Domínio (Entidade)                    | Serviço (Service)                           | Controller                                   | Integração (Service+Controller)                   | Sistema / WebAPI (HTTP)                    |
-|--------------|----------------------------------------|---------------------------------------------|----------------------------------------------|---------------------------------------------------|-------------------------------------------|
-| StorageArea  | `StorageAreaTests`                     | `StorageAreaServiceTests`                   | `StorageAreasControllerTests`                | `StorageAreasControllerServiceTests`              | `StorageAreasSystemTests`                  |
-| Container    | `ContainerTests`                       | `ContainerServiceTests`                     | `ContainersControllerTests`                  | `ContainerServiceControllerTests` (se aplicável)  | `ContainerSystemTests`                    |
-| VesselType   | `VesselTypeTests`                      | `VesselTypeServiceTests`                    | `VesselTypeControllerTests`                  | opcional (`VesselTypeServiceControllerTests`)     | `VesselTypeSystemTests`                   |
-| Vessel       | `VesselTests`                          | `VesselServiceTests`                        | `VesselControllerTests`                      | `VesselServiceControllerTests`                   | `VesselSystemTests`                       |
+### 6.1 Testes de Domínio – `VesselVisitNotification`
+
+**Ficheiro:** `SEM5_PI_WEBAPI.Tests.Domain/VesselVisitNotificationTests.cs`  
+**SUT:** `SEM5_PI_WEBAPI.Domain.VVN.VesselVisitNotification`  
+**Tipo:** Testes de domínio / unidade  
+**Nível:** Caixa preta de classe de domínio
+
+Principais cenários:
+
+- Criação:
+    - `Create_WithValidData_ShouldInitializeCorrectly`
+        - Estado inicial `InProgress`, `IsEditable == true`, código formatado (`2025-THPA-000001`), volume correto, `Documents` não nulo.
+    - `Create_WithInvalidVolume_ShouldThrow`
+    - `Create_WithInvalidETAandETD_ShouldThrow` (ETA > ETD)
+    - `Create_WithNullDocuments_ShouldCreateEmptyCollection`
+
+- Ciclo de vida:
+    - `Submit_ShouldChangeStatusToSubmitted`
+    - `Submit_Twice_ShouldThrow`
+    - `MarkPending_ShouldChangeStatusAndStayEditable`
+    - `MarkPending_WhenNotSubmitted_ShouldThrow`
+    - `Withdraw_ShouldSetStatusToWithdrawn`
+    - `Withdraw_WhenAccepted_ShouldThrow`
+    - `Resume_ShouldReopenWithdrawnVVN`
+    - `Resume_WhenNotWithdrawn_ShouldThrow`
+    - `Accept_ShouldChangeStatusToAccepted`
+    - `Accept_WhenNotSubmitted_ShouldThrow`
+    - `FullLifecycle_ShouldFollowValidFlow`  
+      (`InProgress -> Submitted -> PendingInformation -> Withdrawn -> InProgress -> Submitted -> Accepted`)
+
+- Atualizações:
+    - `UpdateMethods_ShouldModifyValues_WhenEditable`  
+      (ETA, ETD, Volume, ImoNumber, DockCode, etc.)
+    - `UpdateVolume_WithNegative_ShouldThrow`
+    - `Update_WhenNotEditable_ShouldThrow`
+
+- Manifests e Tasks:
+    - `UpdateCrewAndCargo_ShouldSetManifests_WhenEditable`
+    - `SetTasks_ShouldAssignListProperly`
+
+- Outros:
+    - `ToString_ShouldContainReadableInfo`
+    - `Equals_ShouldReturnTrue_WhenCodesMatch`
+    - `Equals_ShouldReturnFalse_WhenCodesDiffer`
+    - `IsEditable_ShouldBeFalse_WhenAccepted`
+    - `IsEditable_ShouldBeTrue_WhenPendingInformation`
+
+> Estes testes garantem as regras de negócio centrais da VVN: estados permitidos, transições, possibilidade de edição e invariantes de dados.
+
+---
+
+### 6.2 Testes de Serviço – `VesselVisitNotificationService`
+
+**Ficheiro:** `SEM5_PI_WEBAPI.Tests.Services/VesselVisitNotificationServiceTests.cs`  
+**SUT:** `SEM5_PI_WEBAPI.Domain.VVN.VesselVisitNotificationService`  
+**Dependências mockadas:**  
+`IVesselVisitNotificationRepository`, `IVesselRepository`, `ICargoManifestRepository`,  
+`ICargoManifestEntryRepository`, `ICrewManifestRepository`, `ICrewMemberRepository`,  
+`IStorageAreaRepository`, `IContainerRepository`, `IShippingAgentRepresentativeRepository`,  
+`IShippingAgentOrganizationRepository`, `IDockRepository`, `ITaskRepository`,  
+`IUnitOfWork`, `ILogger<VesselVisitNotificationService>`  
+**Tipo:** Testes de unidade de serviço  
+**Nível:** Caixa preta de classe
+
+Cenários principais:
+
+- Criação:
+    - `AddAsync_ShouldCreate_WhenValid`
+        - SAR existe e está `activated`; Vessel existe; sem conflitos → cria VVN.
+    - `AddAsync_ShouldThrow_WhenVesselNotFound`
+
+- Aceitação:
+    - `AcceptVvnAsync_ShouldThrow_WhenNoDockAvailable`
+        - Garante que não é possível aceitar uma VVN sem dock compatível para o tipo de navio.
+
+- Atualização:
+    - `UpdateAsync_ShouldUpdate_WhenEditable`
+    - `UpdateAsync_ShouldThrow_WhenAlreadySubmitted`
+
+- Submissão:
+    - `SubmitByCodeAsync_ShouldSubmit_WhenValid`
+    - `SubmitByCodeAsync_ShouldThrow_WhenNotFound`
+    - `SubmitByIdAsync_ShouldSubmit_WhenValid`
+    - `SubmitByIdAsync_ShouldThrow_WhenNotFound`
+
+- Withdraw:
+    - `WithdrawByIdAsync_ShouldWithdraw_WhenExists`
+    - `WithdrawByIdAsync_ShouldThrow_WhenNotFound`
+    - `WithdrawByCodeAsync_ShouldWithdraw_WhenExists`
+    - `WithdrawByCodeAsync_ShouldThrow_WhenNotFound`
+
+- Pending:
+    - `MarkAsPendingAsync_ShouldThrow_WhenCodeNotFound`
+
+- Filtros por SAR:
+    - `GetInProgressPending_BySAR_ShouldReturnEmpty_WhenNone`
+        - Testa cenário em que, para determinado SAR/SAO, não há VVNs em `InProgress`/`PendingInformation`.
+
+---
+
+### 6.3 Testes de Controller – `VesselVisitNotificationController`
+
+**Ficheiro:** `SEM5_PI_WEBAPI.Tests.Controllers/VesselVisitNotificationControllerTests.cs`  
+**SUT:** `SEM5_PI_WEBAPI.Controllers.VesselVisitNotificationController`  
+**Dependências mockadas:** `IVesselVisitNotificationService`, `ILogger<VesselVisitNotificationController>`, `IResponsesToFrontend`  
+**Tipo:** Testes de unidade de controller  
+**Nível:** Caixa preta de classe
+
+Cenários principais (exemplos):
+
+- Criação:
+    - `CreateAsync_ShouldReturnOk_WhenValid`
+    - `CreateAsync_ShouldReturnBadRequest_WhenInvalid` (ex.: ETA/ETD inválidos)
+
+- GetById:
+    - `GetById_ShouldReturnOk_WhenExists`
+    - `GetById_ShouldReturnNotFound_WhenNotExists`
+
+- Withdraw:
+    - `WithdrawById_ShouldReturnOk_WhenSuccess`
+    - `WithdrawById_ShouldReturnBadRequest_WhenRuleFails`
+    - `WithdrawById_ShouldReturnServerError_WhenUnexpected`
+    - `WithdrawByCode_ShouldReturnOk_WhenSuccess`
+    - `WithdrawByCode_ShouldReturnBadRequest_WhenInvalid`  
+      (inclui verificação de mensagem de formato inválido do código)
+    - `WithdrawByCode_ShouldReturnServerError_WhenUnexpected`
+
+- Submit:
+    - `SubmitByCode_ShouldReturnOk_WhenSuccess`
+    - `SubmitById_ShouldReturnOk_WhenSuccess`
+    - `SubmitById_ShouldReturnBadRequest_WhenInvalid`
+
+- Update:
+    - `UpdateAsync_ShouldReturnOk_WhenValid`
+    - `UpdateAsync_ShouldReturnBadRequest_WhenRuleFails`
+    - `UpdateAsync_ShouldReturnServerError_WhenUnexpected`
+
+- Accept / Reject:
+    - `AcceptVvn_ShouldReturnOk_WhenSuccess`
+    - `AcceptVvn_ShouldReturnBadRequest_WhenInvalid`
+    - `AcceptVvn_ShouldReturnServerError_WhenUnexpected`
+    - `RejectVvn_ShouldReturnOk_WhenSuccess`
+    - `RejectVvn_ShouldReturnBadRequest_WhenInvalid`
+
+- Listagens por SAR:
+    - `GetInProgressOrPending_ShouldReturnOk_WhenSuccess`
+    - `GetInProgressOrPending_ShouldReturnNotFound_WhenRuleFails`
+    - `GetWithdrawn_ShouldReturnOk_WhenSuccess`
+    - `GetSubmitted_ShouldReturnOk_WhenSuccess`
+    - `GetAccepted_ShouldReturnOk_WhenSuccess`
+
+- Listagens (ADMIN – all):
+    - `GetAllInProgressPending_ShouldReturnOk_WhenSuccess`
+    - `GetAllWithdrawn_ShouldReturnOk_WhenSuccess`
+    - `GetAllSubmitted_ShouldReturnOk_WhenSuccess`
+    - `GetAllAccepted_ShouldReturnOk_WhenSuccess`
+
+> Tal como nos outros controllers, o foco está no mapeamento **Service → HTTP**:
+> - Sucesso → `Ok` / `Created`
+> - `BusinessRuleValidationException` → `400/404`
+> - Exceções genéricas → `500` (ou `400` conforme a estratégia de `ProblemResponse`).
+
+---
+
+### 6.4 Testes de Integração / Caixa Preta de Aplicação – VVN
+
+**Ficheiro:** `SEM5_PI_WEBAPI.Tests.SystemTests/VesselVisitNotificationControllerServiceTests.cs`  
+**Namespace:** `SEM5_PI_WEBAPI.Tests.SystemTests`  
+**SUT:** `VesselVisitNotificationController` + `VesselVisitNotificationService`  
+**Dependências mockadas:** Todos os repositórios + `IUnitOfWork`, `ILogger`, `IResponsesToFrontend`  
+**Tipo:** Integração / black-box de aplicação  
+**Nível:** Caixa preta de classe composta (controller + service reais; repositórios mockados)
+
+Cenários principais:
+
+- CRUD base:
+    - `Create_ShouldReturnOk_WhenValid`
+    - `Create_ShouldReturnBadRequest_WhenInvalidImo`
+    - `GetById_ShouldReturnOk_WhenExists`
+    - `GetById_ShouldReturnNotFound_WhenNotExists`
+    - `Update_ShouldReturnOk_WhenEditable`
+    - `Update_ShouldReturnBadRequest_WhenNotEditable`
+
+- Regras de negócio específicas:
+    - `Create_ShouldReturnBadRequest_WhenEtaIsAfterEtd`
+    - `SubmitById_ShouldReturnOk_AndChangeStatusToSubmitted`
+    - `SubmitById_ShouldReturnBadRequest_WhenAlreadySubmitted`
+    - `WithdrawByCode_ShouldReturnOk_WhenFromInProgress`
+    - `WithdrawByCode_ShouldReturnBadRequest_WhenStatusNotInProgressOrPending`
+
+- Filtros (ADMIN):
+    - `GetInProgressPendingInformationVvnsByFilters_ShouldFilterByImoAndEta`
+    - `GetAllAcceptedAsync_ShouldReturnOnlyAcceptedVvns`
+
+> Estes testes exercitam o **fluxo completo da aplicação para VVN**, do controller até ao domínio, com os repositórios simulados.  
+> Podem ser encarados como os testes **“black-box de aplicação”** para a funcionalidade VVN.
+
+*(Neste momento não existe ainda um `VesselVisitNotificationSystemTests` com `HttpClient` e `WebApplicationFactory`. Se for criado, entra na coluna de “Sistema / WebAPI” na síntese.)*
+
+---
+
+## 7. Síntese por módulo e nível
+
+| Módulo       | Domínio (Entidade)                          | Serviço (Service)                               | Controller                                           | Integração (Service+Controller)                          | Sistema / WebAPI (HTTP)                          |
+|--------------|----------------------------------------------|-------------------------------------------------|------------------------------------------------------|---------------------------------------------------------|---------------------------------------------------|
+| StorageArea  | `StorageAreaTests`                           | `StorageAreaServiceTests`                       | `StorageAreasControllerTests`                        | `StorageAreasControllerServiceTests`                    | `StorageAreasSystemTests`                         |
+| Container    | `ContainerTests`                             | `ContainerServiceTests`                         | `ContainersControllerTests`                          | `ContainerServiceControllerTests`        | `ContainerSystemTests`                            |
+| VesselType   | `VesselTypeTests`                            | `VesselTypeServiceTests`                        | `VesselTypeControllerTests`                          |`VesselTypeServiceControllerTests`            | `VesselTypeSystemTests`                           |
+| Vessel       | `VesselTests`                                | `VesselServiceTests`                            | `VesselControllerTests`                              | `VesselServiceControllerTests`                          | `VesselSystemTests`                               |
+| VVN          | `VesselVisitNotificationTests`               | `VesselVisitNotificationServiceTests`           | `VesselVisitNotificationControllerTests`             | `VesselVisitNotificationControllerServiceTests`         | `VesselVisitNotificationSystemTests` |
 
 - **Caixa preta de classe**:
     - Entidades de domínio, serviços, controllers (cada um como SUT isolado, com dependências mockadas).
 - **Caixa preta de aplicação**:
-    - Testes de sistema (`*SystemTests`) onde o SUT é a WebAPI inteira, exercitada via HTTP com `HttpClient`.
-
+    - Testes de sistema (`*SystemTests`) onde o SUT é a WebAPI inteira via HTTP,  
+      ou, no caso de VVN, o par Controller+Service reais exercitado como “black-box de aplicação”.
