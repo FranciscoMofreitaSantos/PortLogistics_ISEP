@@ -11,6 +11,7 @@ import PortScene from "../features/viewer3d/pages/Viewer3DPage";
 import PhysicalResource from "../features/physicalResource/pages/PhysicalResource";
 import GenericDashboard from "../pages/GenericDashboard";
 import VvnPage from "../features/vesselVisitNotification/pages/VvnListPage";
+import VvnResponse from "../features/vesselVisitNotification/pages/VvnSubmittedAdminPage";
 import NotFound from "../pages/NotFound";
 import Forbidden from "../pages/Forbidden";
 import PendingApproval from "../pages/PendingApproval.tsx";
@@ -57,6 +58,15 @@ export const router = createBrowserRouter([
                                     />
                                 ),
                                 children: [{ index: true, element: <VvnPage /> }],
+                            },
+                            {
+                                path: "responsevvn",
+                                element: (
+                                    <RequireRole
+                                        roles={[Roles.PortAuthorityOfficer]}
+                                    />
+                                ),
+                                children: [{ index: true, element: <VvnResponse /> }],
                             },
                             {
                                 path: "qualifications",

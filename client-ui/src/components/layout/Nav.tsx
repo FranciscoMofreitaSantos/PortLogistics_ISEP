@@ -58,7 +58,7 @@ export default function Nav({ isOpen }: NavProps) {
             { label: t("menu.storageArea"), path: "/storage-areas", icon: <FiBox /> },
             { label: t("menu.vesselTypes"), path: "/vessel-types", icon: <FiAnchor /> },
             { label: t("menu.vessels"), path: "/vessels", icon: <FaShip /> },
-            { label: t("menu.vvn"), path: "/vvn", icon: <FiFileText /> },
+            { label: t("menu.vvnResponse"), path: "/responsevvn", icon: <FiFileText /> },
         ]
         : [];
 
