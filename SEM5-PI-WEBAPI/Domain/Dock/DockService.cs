@@ -37,42 +37,55 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
         }
 
         public async Task<DockDto> CreateAsync(RegisterDockDto dto)
-        {
-            _logger.LogInformation("Create dock {Code}", dto.Code);
+{
+    _logger.LogInformation("Create dock {Code}", dto.Code);
 
-            var code = new DockCode(dto.Code);
-            var existing = await _dockRepository.GetByCodeAsync(code);
-            if (existing is not null) throw new BusinessRuleValidationException($"Dock with code '{code.Value}' already exists.");
-            List<PhysicalResourceCode> prcList = new List<PhysicalResourceCode>();
-            foreach (var raw in dto.PhysicalResourceCodes) 
-            {
-                    var prc = new PhysicalResourceCode(raw);
-                    var physicalResource = await _physicalResourceRepository.GetByCodeAsync(prc);
-                    if (physicalResource == null) throw new BusinessRuleValidationException($"PhysicalResource with code '{prc.Value}' does not exist in DB.");
-                    var existingPrc = await _dockRepository.GetByPhysicalResourceCodeAsync(prc);
-                    if (existingPrc is not null)
-                        throw new BusinessRuleValidationException($"Dock with PhysicalResourceCode '{prc.Value}' already exists in DB.");
-                    prcList.Add(physicalResource.Code);
-            }
-            
-            
-            List<VesselTypeId> vesselsTypes = new List<VesselTypeId>();
-            foreach (var raw in dto.AllowedVesselTypeNames)
-            {
-                var vt = await _vesselTypeRepository.GetByNameAsync(raw);
-                if (vt == null)
-                    throw new BusinessRuleValidationException($"VesselType '{raw}' does not exist in DB.");
-                vesselsTypes.Add(new VesselTypeId(vt.Id.Value));
-            }
+    var code = new DockCode(dto.Code);
+    var existing = await _dockRepository.GetByCodeAsync(code);
+    if (existing is not null)
+        throw new BusinessRuleValidationException($"Dock with code '{code.Value}' already exists.");
 
-            dto.VesselsTypesObjs = vesselsTypes;
+    var prcList = new List<PhysicalResourceCode>();
 
-            var dock = DockFactory.RegisterDock(dto, prcList);
-            await _dockRepository.AddAsync(dock);
-            await _unitOfWork.CommitAsync();
+    foreach (var raw in dto.PhysicalResourceCodes)
+    {
+        var prc = new PhysicalResourceCode(raw);
 
-            return DockMapper.RegisterDockDto(dock);
-        }
+        var physicalResource = await _physicalResourceRepository.GetByCodeAsync(prc);
+        if (physicalResource == null)
+            throw new BusinessRuleValidationException(
+                $"PhysicalResource with code '{prc.Value}' does not exist in DB.");
+
+        var existingPrc = await _dockRepository.GetByPhysicalResourceCodeAsync(prc);
+        if (existingPrc is not null)
+            throw new BusinessRuleValidationException(
+                $"Dock with PhysicalResourceCode '{prc.Value}' already exists in DB.");
+
+        physicalResource.UpdateStatus(PhysicalResourceStatus.Unavailable);
+
+        prcList.Add(physicalResource.Code);
+    }
+
+    var vesselsTypes = new List<VesselTypeId>();
+    foreach (var raw in dto.AllowedVesselTypeNames)
+    {
+        var vt = await _vesselTypeRepository.GetByNameAsync(raw);
+        if (vt == null)
+            throw new BusinessRuleValidationException($"VesselType '{raw}' does not exist in DB.");
+
+        vesselsTypes.Add(new VesselTypeId(vt.Id.Value));
+    }
+
+    dto.VesselsTypesObjs = vesselsTypes;
+
+    var dock = DockFactory.RegisterDock(dto, prcList);
+    await _dockRepository.AddAsync(dock);
+
+    await _unitOfWork.CommitAsync();
+
+    return DockMapper.RegisterDockDto(dock);
+}
+
 
         public async Task<DockDto> GetByIdAsync(DockId id)
         {
@@ -155,70 +168,107 @@ namespace SEM5_PI_WEBAPI.Domain.Dock
         }
 
         public async Task<DockDto> PatchByCodeAsync(string codeString, UpdateDockDto dto)
+{
+    var code = new DockCode(codeString);
+
+    var dock = await _dockRepository.GetByCodeAsync(code)
+               ?? throw new BusinessRuleValidationException($"No dock found with Code {code.Value}");
+
+    if (!string.IsNullOrWhiteSpace(dto.Code))
+    {
+        var newCode = new DockCode(dto.Code);
+        var duplicate = await _dockRepository.GetByCodeAsync(newCode);
+        if (duplicate is not null && duplicate.Id.AsGuid() != dock.Id.AsGuid())
+            throw new BusinessRuleValidationException($"Dock with code '{newCode.Value}' already exists.");
+        dock.SetCode(newCode);
+    }
+
+    if (dto.PhysicalResourceCodes is not null)
+    {
+        var oldCodes = dock.PhysicalResourceCodes
+            .Select(c => c.Value)
+            .ToList();
+
+        var newCodes = dto.PhysicalResourceCodes.ToList();
+
+        var prcs = new List<PhysicalResourceCode>();
+
+        foreach (var raw in newCodes)
         {
-            var code = new DockCode(codeString);
+            var newPrc = new PhysicalResourceCode(raw);
 
-            var dock = await _dockRepository.GetByCodeAsync(code)
-                       ?? throw new BusinessRuleValidationException($"No dock found with Code {code.Value}");
+            var duplicatePrc = await _dockRepository.GetByPhysicalResourceCodeAsync(newPrc);
+            if (duplicatePrc is not null && duplicatePrc.Id.AsGuid() != dock.Id.AsGuid())
+                throw new BusinessRuleValidationException(
+                    $"Dock with PhysicalResourceCode '{newPrc.Value}' already exists.");
 
-            if (!string.IsNullOrWhiteSpace(dto.Code))
-            {
-                var newCode = new DockCode(dto.Code);
-                var duplicate = await _dockRepository.GetByCodeAsync(newCode);
-                if (duplicate is not null && duplicate.Id.AsGuid() != dock.Id.AsGuid())
-                    throw new BusinessRuleValidationException($"Dock with code '{newCode.Value}' already exists.");
-                dock.SetCode(newCode);
-            }
-
-            if (dto.PhysicalResourceCodes is not null)
-            {
-                var prcs = new List<PhysicalResourceCode>();
-                foreach (var raw in dto.PhysicalResourceCodes)
-                {
-                    var newPrc = new PhysicalResourceCode(raw);
-                    var duplicatePrc = await _dockRepository.GetByPhysicalResourceCodeAsync(newPrc);
-                    if (duplicatePrc is not null && duplicatePrc.Id.AsGuid() != dock.Id.AsGuid())
-                        throw new BusinessRuleValidationException($"Dock with PhysicalResourceCode '{newPrc.Value}' already exists.");
-                    prcs.Add(newPrc);
-                }
-                dock.ReplacePhysicalResourceCodes(prcs);
-            }
-
-            if (!string.IsNullOrWhiteSpace(dto.Location))
-                dock.SetLocation(dto.Location);
-            if (dto.LengthM.HasValue)   dock.SetLength(dto.LengthM.Value);
-            if (dto.DepthM.HasValue)    dock.SetDepth(dto.DepthM.Value);
-            if (dto.MaxDraftM.HasValue) dock.SetMaxDraft(dto.MaxDraftM.Value);
-
-            if (dto.AllowedVesselTypeIds is not null)
-            {
-                if (!dto.AllowedVesselTypeIds.Any())
-                    throw new BusinessRuleValidationException("At least one VesselTypeId is required.");
-
-                var ids = new List<VesselTypeId>();
-
-                foreach (var raw in dto.AllowedVesselTypeIds)
-                {
-                    if (!Guid.TryParse(raw, out var g) || g == Guid.Empty)
-                        throw new BusinessRuleValidationException("Invalid VesselTypeId in update.");
-
-                    var vt = await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
-                    if (vt == null)
-                        throw new BusinessRuleValidationException($"Vessel Type '{g}' doesn't exist.");
-
-                    ids.Add(new VesselTypeId(g));
-                }
-
-                dock.ReplaceAllowedVesselTypes(ids);
-            }
-
-            if (dto.Status.HasValue)
-                dock.SetStatus(dto.Status.Value);
-
-            dock.EnsureHasAllowedVesselTypes();
-            await _unitOfWork.CommitAsync();
-            return DockMapper.RegisterDockDto(dock);
+            prcs.Add(newPrc);
         }
+
+        dock.ReplacePhysicalResourceCodes(prcs);
+
+        var addedCodes   = newCodes.Except(oldCodes);
+        var removedCodes = oldCodes.Except(newCodes);
+
+        foreach (var added in addedCodes)
+        {
+            var prc = new PhysicalResourceCode(added);
+            var pr = await _physicalResourceRepository.GetByCodeAsync(prc);
+            if (pr is not null)
+            {
+                pr.UpdateStatus(PhysicalResourceStatus.Unavailable);
+            }
+        }
+        
+        foreach (var removed in removedCodes)
+        {
+            var prc = new PhysicalResourceCode(removed);
+            var pr = await _physicalResourceRepository.GetByCodeAsync(prc);
+            if (pr is not null)
+            {
+                pr.UpdateStatus(PhysicalResourceStatus.Available);
+            }
+        }
+    }
+
+    if (!string.IsNullOrWhiteSpace(dto.Location))
+        dock.SetLocation(dto.Location);
+    if (dto.LengthM.HasValue)   dock.SetLength(dto.LengthM.Value);
+    if (dto.DepthM.HasValue)    dock.SetDepth(dto.DepthM.Value);
+    if (dto.MaxDraftM.HasValue) dock.SetMaxDraft(dto.MaxDraftM.Value);
+
+    if (dto.AllowedVesselTypeIds is not null)
+    {
+        if (!dto.AllowedVesselTypeIds.Any())
+            throw new BusinessRuleValidationException("At least one VesselTypeId is required.");
+
+        var ids = new List<VesselTypeId>();
+
+        foreach (var raw in dto.AllowedVesselTypeIds)
+        {
+            if (!Guid.TryParse(raw, out var g) || g == Guid.Empty)
+                throw new BusinessRuleValidationException("Invalid VesselTypeId in update.");
+
+            var vt = await _vesselTypeRepository.GetByIdAsync(new VesselTypeId(g));
+            if (vt == null)
+                throw new BusinessRuleValidationException($"Vessel Type '{g}' doesn't exist.");
+
+            ids.Add(new VesselTypeId(g));
+        }
+
+        dock.ReplaceAllowedVesselTypes(ids);
+    }
+
+    if (dto.Status.HasValue)
+        dock.SetStatus(dto.Status.Value);
+
+    dock.EnsureHasAllowedVesselTypes();
+
+    await _unitOfWork.CommitAsync();
+
+    return DockMapper.RegisterDockDto(dock);
+}
+
 
         public async Task<List<string>> GetAllDockCodesAsync()
         {
