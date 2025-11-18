@@ -103,6 +103,8 @@
     "quickActions": "Ações rápidas",
     "adminPanel" : "Administração de Utilizadores",
     "accessModules" : "Módulos de acesso",
+    "vessels" : "Gerir Navios",
+    "docks" : "Gerir Docks",
     "port3d" : "Visualização 3D",
     "announcement": {
       "title": "Avisos do sistema",

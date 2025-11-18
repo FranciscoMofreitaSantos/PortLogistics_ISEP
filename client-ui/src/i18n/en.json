@@ -97,6 +97,8 @@
     "noModules": "No modules available for your profile yet.",
     "recentActivity": "Recent activity",
     "quickActions": "Quick actions",
+    "vessels" : "Manage Vessels",
+    "docks" : "Manage Docks",
     "adminPanel" : "Users administration",
     "accessModules" : "Access Modules",
     "port3d" : "3D Visualization",
