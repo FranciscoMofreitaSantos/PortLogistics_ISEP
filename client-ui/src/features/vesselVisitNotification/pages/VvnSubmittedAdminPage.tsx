@@ -1,5 +1,4 @@
-﻿
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { FaShip, FaCheck, FaXmark } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -164,19 +163,17 @@ export default function VvnSubmittedAdminPage() {
             <div className="vt-title-area vvn-header-tight">
                 <div className="vvn-header-left">
                     <h2 className="vt-title">
-                        <FaShip /> {t("vvn.submittedAll.title") || "All Submitted VVNs"}
+                        <FaShip /> {t("vvn.submittedAll.title")}
                     </h2>
                     <div className="vvn-counters">
                         <span className="vvn-chip vvn-chip-sub">
-                            {t("vvn.header.submitted", { count: vvns.length }) ||
-                                `Submitted: ${vvns.length}`}
+                            {t("vvn.header.submitted", { count: vvns.length })}
                         </span>
                     </div>
                 </div>
                 <div className="vvn-header-right">
                     <span className="sa-note">
-                        {t("vvn.submittedAll.subtitle") ||
-                            "Review and accept/reject submitted notifications"}
+                        {t("vvn.submittedAll.subtitle")}
                     </span>
                 </div>
             </div>
@@ -255,8 +252,10 @@ export default function VvnSubmittedAdminPage() {
                                     </div>
                                     <div className="vvn-item-sub">
                                         {t("vvn.filters.imo")} {v.vesselImo} ·{" "}
-                                        {t("vvn.details.eta")} {shortDT(v.estimatedTimeArrival)} ·{" "}
-                                        {t("vvn.details.etd")} {shortDT(v.estimatedTimeDeparture)}
+                                        {t("vvn.details.eta")}{" "}
+                                        {shortDT(v.estimatedTimeArrival)} ·{" "}
+                                        {t("vvn.details.etd")}{" "}
+                                        {shortDT(v.estimatedTimeDeparture)}
                                     </div>
                                 </button>
                             );
@@ -275,7 +274,8 @@ export default function VvnSubmittedAdminPage() {
                                     <h3 className="vvn-title">{selected.code}</h3>
                                     <div className="vvn-sub">
                                         {t("vvn.filters.imo")} {selected.vesselImo} •{" "}
-                                        {t("vvn.details.status")}: <b>{selected.status}</b>
+                                        {t("vvn.details.status")}:{" "}
+                                        <b>{selected.status}</b>
                                     </div>
                                 </div>
                                 <div className="vvn-actions">
@@ -284,14 +284,14 @@ export default function VvnSubmittedAdminPage() {
                                         onClick={() => doAccept(selected)}
                                         title={t("vvn.actions.accept") as string}
                                     >
-                                        <FaCheck /> {t("vvn.actions.accept") || "Accept"}
+                                        <FaCheck /> {t("vvn.actions.accept")}
                                     </button>
                                     <button
                                         className="sa-btn sa-btn-danger"
                                         onClick={openReject}
                                         title={t("vvn.actions.reject") as string}
                                     >
-                                        <FaXmark /> {t("vvn.actions.reject") || "Reject"}
+                                        <FaXmark /> {t("vvn.actions.reject")}
                                     </button>
                                 </div>
                             </div>
@@ -300,7 +300,7 @@ export default function VvnSubmittedAdminPage() {
                             <section className="vvn-kpis">
                                 <div className="sa-card">
                                     <div className="sa-card-title">
-                                        {t("vvn.details.eta") || "ETA"}
+                                        {t("vvn.details.eta")}
                                     </div>
                                     <div className="sa-card-value">
                                         {fmtDT(selected.estimatedTimeArrival)}
@@ -308,7 +308,7 @@ export default function VvnSubmittedAdminPage() {
                                 </div>
                                 <div className="sa-card">
                                     <div className="sa-card-title">
-                                        {t("vvn.details.etd") || "ETD"}
+                                        {t("vvn.details.etd")}
                                     </div>
                                     <div className="sa-card-value">
                                         {fmtDT(selected.estimatedTimeDeparture)}
@@ -316,13 +316,13 @@ export default function VvnSubmittedAdminPage() {
                                 </div>
                                 <div className="sa-card">
                                     <div className="sa-card-title">
-                                        {t("vvn.details.volume") || "Volume"}
+                                        {t("vvn.details.volume")}
                                     </div>
                                     <div className="sa-card-value">{selected.volume}</div>
                                 </div>
                                 <div className="sa-card">
                                     <div className="sa-card-title">
-                                        {t("vvn.details.dock") || "Dock"}
+                                        {t("vvn.details.dock")}
                                     </div>
                                     <div className="sa-card-value">
                                         {selected.dock || "-"}
@@ -339,11 +339,7 @@ export default function VvnSubmittedAdminPage() {
                                     <span className="vvn-ico">🧑‍✈️</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.crew.title")}</b>
-                                        <span>
-                                            {t("vvn.modals.crew.title").toString().includes("Crew")
-                                                ? "view crew"
-                                                : "ver tripulação"}
-                                        </span>
+                                        <span>{t("vvn.quick.crewSubtitle")}</span>
                                     </span>
                                 </button>
 
@@ -354,13 +350,7 @@ export default function VvnSubmittedAdminPage() {
                                     <span className="vvn-ico">📦</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.loading.title")}</b>
-                                        <span>
-                                            {t("vvn.modals.loading.empty")
-                                                .toString()
-                                                .includes("No")
-                                                ? "loading containers"
-                                                : "containers de embarque"}
-                                        </span>
+                                        <span>{t("vvn.quick.loadingSubtitle")}</span>
                                     </span>
                                 </button>
 
@@ -371,13 +361,7 @@ export default function VvnSubmittedAdminPage() {
                                     <span className="vvn-ico">📤</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.unloading.title")}</b>
-                                        <span>
-                                            {t("vvn.modals.unloading.empty")
-                                                .toString()
-                                                .includes("No")
-                                                ? "unloading"
-                                                : "desembarque"}
-                                        </span>
+                                        <span>{t("vvn.quick.unloadingSubtitle")}</span>
                                     </span>
                                 </button>
 
@@ -388,13 +372,7 @@ export default function VvnSubmittedAdminPage() {
                                     <span className="vvn-ico">✅</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.tasks.title")}</b>
-                                        <span>
-                                            {t("vvn.modals.tasks.empty")
-                                                .toString()
-                                                .includes("No")
-                                                ? "open"
-                                                : "em aberto"}
-                                        </span>
+                                        <span>{t("vvn.quick.tasksSubtitle")}</span>
                                     </span>
                                 </button>
                             </div>
@@ -410,7 +388,7 @@ export default function VvnSubmittedAdminPage() {
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
                             <h3 className="sa-dock-title">
-                                {t("vvn.modals.reject.title") || "Reject VVN"}
+                                {t("vvn.modals.reject.title")}
                             </h3>
                             <button
                                 className="sa-icon-btn sa-dock-close"
@@ -424,7 +402,7 @@ export default function VvnSubmittedAdminPage() {
                                 className="sa-textarea"
                                 placeholder={
                                     (t("vvn.modals.reject.placeholder") as string) ||
-                                    "Describe the reason…"
+                                    (t("common.reasonPlaceholder") as string)
                                 }
                                 value={rejectMsg}
                                 onChange={(e) => setRejectMsg(e.target.value)}
@@ -456,7 +434,9 @@ export default function VvnSubmittedAdminPage() {
                     <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.crew.title")}</h3>
+                            <h3 className="sa-dock-title">
+                                {t("vvn.modals.crew.title")}
+                            </h3>
                             <button
                                 className="sa-icon-btn sa-dock-close"
                                 onClick={() => setCrewOpen(false)}
@@ -490,13 +470,21 @@ export default function VvnSubmittedAdminPage() {
                                     <table className="vvn-table">
                                         <thead>
                                         <tr>
-                                            <th>{t("vvn.modals.crew.table.name")}</th>
-                                            <th>{t("vvn.modals.crew.table.role")}</th>
                                             <th>
-                                                {t("vvn.modals.crew.table.nationality")}
+                                                {t("vvn.modals.crew.table.name")}
                                             </th>
                                             <th>
-                                                {t("vvn.modals.crew.table.citizenId")}
+                                                {t("vvn.modals.crew.table.role")}
+                                            </th>
+                                            <th>
+                                                {t(
+                                                    "vvn.modals.crew.table.nationality",
+                                                )}
+                                            </th>
+                                            <th>
+                                                {t(
+                                                    "vvn.modals.crew.table.citizenId",
+                                                )}
                                             </th>
                                         </tr>
                                         </thead>
@@ -526,7 +514,9 @@ export default function VvnSubmittedAdminPage() {
                     <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.loading.title")}</h3>
+                            <h3 className="sa-dock-title">
+                                {t("vvn.modals.loading.title")}
+                            </h3>
                             <button
                                 className="sa-icon-btn sa-dock-close"
                                 onClick={() => setLoadOpen(false)}
@@ -565,7 +555,10 @@ export default function VvnSubmittedAdminPage() {
                                             <br />
                                         </span>
                                         <strong>
-                                            {fmtDT(selected.loadingCargoManifest.createdAt)}
+                                            {fmtDT(
+                                                selected.loadingCargoManifest
+                                                    .createdAt,
+                                            )}
                                         </strong>
                                     </div>
                                     <div>
@@ -574,7 +567,10 @@ export default function VvnSubmittedAdminPage() {
                                             <br />
                                         </span>
                                         <strong>
-                                            {selected.loadingCargoManifest.createdBy}
+                                            {
+                                                selected.loadingCargoManifest
+                                                    .createdBy
+                                            }
                                         </strong>
                                     </div>
                                 </div>
@@ -635,7 +631,10 @@ export default function VvnSubmittedAdminPage() {
                                             <br />
                                         </span>
                                         <strong>
-                                            {fmtDT(selected.unloadingCargoManifest.createdAt)}
+                                            {fmtDT(
+                                                selected.unloadingCargoManifest
+                                                    .createdAt,
+                                            )}
                                         </strong>
                                     </div>
                                     <div>
@@ -644,7 +643,10 @@ export default function VvnSubmittedAdminPage() {
                                             <br />
                                         </span>
                                         <strong>
-                                            {selected.unloadingCargoManifest.createdBy}
+                                            {
+                                                selected.unloadingCargoManifest
+                                                    .createdBy
+                                            }
                                         </strong>
                                     </div>
                                 </div>
@@ -663,7 +665,9 @@ export default function VvnSubmittedAdminPage() {
                     <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.tasks.title")}</h3>
+                            <h3 className="sa-dock-title">
+                                {t("vvn.modals.tasks.title")}
+                            </h3>
                             <button
                                 className="sa-icon-btn sa-dock-close"
                                 onClick={() => setTasksOpen(false)}

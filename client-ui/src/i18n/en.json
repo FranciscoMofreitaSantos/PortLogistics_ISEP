@@ -69,7 +69,8 @@
     "adminPanel": "User Management",
     "login": "Login",
     "logout": "Logout",
-    "sao": "Shipping Agent Organizations"
+    "sao": "Shipping Agent Organizations",
+    "vvnResponse": "VVN Response"
   },
 
   "layout": {
@@ -614,6 +615,12 @@
       "accepted": "✅ Accepted: {{count}}",
       "withdrawn": "🗂️ Withdrawn: {{count}}"
     },
+
+    "submittedAll": {
+      "title": "All Submitted VVNs",
+      "subtitle": "Review and accept/reject submitted notifications"
+    },
+
     "list": {
       "empty": "No results."
     },
@@ -632,7 +639,9 @@
       "confirmDelete": "Yes, delete this user",
       "cancel": "Cancel",
       "save": "Save",
-      "saved": "Saved!"
+      "saved": "Saved!",
+      "accept": "Accept",
+      "reject": "Reject"
     },
     "modals": {
       "reject": {
@@ -684,6 +693,12 @@
       "type": "Type",
       "status": "Status",
       "weight": "Weight (kg)"
+    },
+    "quick": {
+      "crewSubtitle": "View crew",
+      "loadingSubtitle": "Loading containers",
+      "unloadingSubtitle": "Unloading",
+      "tasksSubtitle": "Open tasks"
     },
     "toast": {
       "loaded": "VVNs loaded successfully.",

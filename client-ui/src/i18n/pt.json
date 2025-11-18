@@ -73,7 +73,8 @@
     "login": "Entrar",
     "logout": "Sair",
     "adminPanel": "Gestão de Utilizadores",
-    "sao": "Organizações Agente de Transporte"
+    "sao": "Organizações Agente de Transporte",
+    "vvnResponse": "Responder VVN"
   },
 
   "layout": {
@@ -620,6 +621,12 @@
       "accepted": "✅ Aceites: {{count}}",
       "withdrawn": "🗂️ Congelados: {{count}}"
     },
+
+    "submittedAll": {
+      "title": "Todas as VVNs submetidas",
+      "subtitle": "Revê e aceita/rejeita as notificações submetidas"
+    },
+
     "list": {
       "empty": "Sem resultados."
     },
@@ -633,7 +640,9 @@
     "actions": {
       "submit": "Submeter",
       "withdraw": "Retirar",
-      "noActionsForState": "Sem ações para este estado."
+      "noActionsForState": "Sem ações para este estado.",
+      "accept": "Aceitar",
+      "reject": "Rejeitar"
     },
     "modals": {
       "reject": {
@@ -685,6 +694,12 @@
       "type": "Tipo",
       "status": "Estado",
       "weight": "Peso (kg)"
+    },
+    "quick": {
+      "crewSubtitle": "Ver tripulação",
+      "loadingSubtitle": "Contentores de embarque",
+      "unloadingSubtitle": "Desembarque",
+      "tasksSubtitle": "Tarefas em aberto"
     },
     "toast": {
       "loaded": "VVNs carregadas com sucesso.",
