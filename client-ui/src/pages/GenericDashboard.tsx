@@ -45,6 +45,7 @@ function useAccessibleLinksByRole(t: (k: string) => string, role?: "Administrato
                     { label: t("dashboard.qualifications"), path: "/qualifications", color, icon: routeIcon["/qualifications"] },
                     { label: t("dashboard.physicalResources"), path: "/physical-resources", color, icon: routeIcon["/physical-resources"] },
                     { label: t("dashboard.staffMembers"), path: "/staff-members", color, icon: routeIcon["/staff-members"] },
+                    { label: t("dashboard.port3d"), path: "/3dSecene", color, icon: routeIcon["/3dSecene"] },
                 );
                 break;
             case Roles.ShippingAgentRepresentative:

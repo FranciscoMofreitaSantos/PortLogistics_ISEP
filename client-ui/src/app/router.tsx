@@ -23,7 +23,7 @@ import ActivateAccount from "../pages/ActivateAccount.tsx";
 import DeletedAccount from "../pages/DeletedAccount.tsx";
 import Dock from "../features/docks/pages/Dock";
 import SAO from "../features/sao/pages/sao.tsx";
-import SAR from "../features/sar/pages/sar.tsx";
+//import SAR from "../features/sar/pages/sar.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -118,11 +118,11 @@ export const router = createBrowserRouter([
                                 element: <RequireRole roles={[Roles.PortAuthorityOfficer]} />,
                                 children: [{ index: true, element: <SAO /> }],
                             },
-                            {
+                           /* {
                                 path: "sar",
                                 element: <RequireRole roles={[Roles.PortAuthorityOfficer]} />,
                                 children: [{ index: true, element: <SAR /> }],
-                            },
+                            }, */
                             { path: "forbidden", element: <Forbidden /> },
                         ],
                     },

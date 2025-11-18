@@ -102,6 +102,7 @@
     "quickActions": "Ações rápidas",
     "adminPanel" : "Administração de Utilizadores",
     "accessModules" : "Módulos de acesso",
+    "port3d" : "Visualização 3D",
     "announcement": {
       "title": "Avisos do sistema",
       "body": "Manutenção agendada hoje às 23:00 — alguns módulos poderão ficar indisponíveis."

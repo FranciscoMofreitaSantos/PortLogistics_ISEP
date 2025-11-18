@@ -98,6 +98,7 @@
     "quickActions": "Quick actions",
     "adminPanel" : "Users administration",
     "accessModules" : "Access Modules",
+    "port3d" : "3D Visualization",
     "announcement": {
       "title": "System notices",
       "body": "Scheduled maintenance today at 23:00 — some modules may be unavailable."
