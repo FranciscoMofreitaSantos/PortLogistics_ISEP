@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaShip, FaSearch, FaPlus, FaTimes } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { mapVesselTypeDto } from "../../vesselsTypes/mappers/vesselTypeMapper";
 
 import {
     getVessels,
@@ -11,8 +12,8 @@ import {
     patchVesselByIMO
 } from "../services/vesselService";
 
-import { getVesselTypes } from "../../vesselsTypes/services/vesselTypeService";
-import type { VesselType } from "../../vesselsTypes/types/vesselType";
+import { apiGetVesselTypes } from "../../vesselsTypes/services/vesselTypeService";
+import type { VesselType } from "../../vesselsTypes/domain/vesselType";
 import type { Vessel, CreateVesselRequest, UpdateVesselRequest } from "../types/vessel";
 
 import "../style/vesselspage.css";
@@ -72,7 +73,12 @@ export default function Vessel() {
                 setFiltered(data);
                 toast.success(t("Vessel.messages.searchSuccess", { count: data.length }));
 
-                const types = await runWithLoading(getVesselTypes(), t("Vessel.messages.loading"));
+                const typesDto = await runWithLoading(
+                    apiGetVesselTypes(),
+                    t("Vessel.messages.loading")
+                );
+
+                const types = typesDto.map(mapVesselTypeDto);
                 setVesselTypes(types);
             } finally {
                 setLoading(false);

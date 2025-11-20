@@ -11,12 +11,13 @@ import {
     createDock,
     patchDockByCode,
 } from "../services/dockService";
-import { getVesselTypes } from "../../vesselsTypes/services/vesselTypeService";
-import type { VesselType } from "../../vesselsTypes/types/vesselType";
+import { apiGetVesselTypes } from "../../vesselsTypes/services/vesselTypeService";
+import type { VesselType } from "../../vesselsTypes/domain/vesselType";
 import { getAllPhysicalResources } from "../../physicalResource/services/physicalResourceService";
 import type { Dock, UpdateDockRequest } from "../types/dock";
 import { useTranslation } from "react-i18next";
 import "../style/dockpage.css";
+import { mapVesselTypeDto } from "../../vesselsTypes/mappers/vesselTypeMapper";
 
 const MIN_LOADING_TIME = 500;
 const guidRegex =
@@ -387,7 +388,12 @@ export default function DockPage() {
                         defaultValue: "Resultados: {{count}}",
                     })
                 );
-                const types = await getVesselTypes();
+                const typesDto = await runWithLoading(
+                    apiGetVesselTypes(),
+                    t("Vessel.messages.loading")
+                );
+
+                const types = typesDto.map(mapVesselTypeDto);
                 setVesselTypes(types);
                 const prs = await getAllPhysicalResources().catch(() => []);
                 setAllPRCodes(

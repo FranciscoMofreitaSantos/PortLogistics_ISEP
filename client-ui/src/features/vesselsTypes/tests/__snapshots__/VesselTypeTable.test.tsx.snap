@@ -1,0 +1,90 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VesselTypeTable > snapshot – garante que estrutura da tabela se mantém 1`] = `
+<div>
+  <div
+    class="vt-table-wrapper"
+  >
+    <table
+      class="vt-table"
+    >
+      <thead>
+        <tr>
+          <th>
+            vesselTypes.details.name
+          </th>
+          <th>
+            vesselTypes.details.description
+          </th>
+          <th>
+            vesselTypes.details.bays
+          </th>
+          <th>
+            vesselTypes.details.rows
+          </th>
+          <th>
+            vesselTypes.details.tiers
+          </th>
+          <th>
+            vesselTypes.details.capacity
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="vt-row"
+        >
+          <td>
+            <span
+              class="vt-badge"
+            >
+              Panamax
+            </span>
+          </td>
+          <td>
+            Panamax vessel
+          </td>
+          <td>
+            10
+          </td>
+          <td>
+            12
+          </td>
+          <td>
+            5
+          </td>
+          <td>
+            5000
+          </td>
+        </tr>
+        <tr
+          class="vt-row"
+        >
+          <td>
+            <span
+              class="vt-badge"
+            >
+              Feeder
+            </span>
+          </td>
+          <td>
+            Feeder vessel
+          </td>
+          <td>
+            8
+          </td>
+          <td>
+            10
+          </td>
+          <td>
+            4
+          </td>
+          <td>
+            2000
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;

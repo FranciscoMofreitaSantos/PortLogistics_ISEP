@@ -135,6 +135,8 @@
     "loadSuccess": "Loaded {{count}} vessel types.",
     "loadError": "Failed to load vessel types.",
     "created": "Vessel type created successfully",
+    "updated": "Vessel Type updated successfully",
+    "deleted": "Vessel Type deleted successfully",
     "save": "Save",
     "cancel": "Cancel",
     "errors": {

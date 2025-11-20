@@ -139,6 +139,8 @@
     "loadSuccess": "{{count}} tipos de navio carregados.",
     "loadError": "Falha ao carregar tipos de navio.",
     "created": "Tipo de navio criado com sucesso",
+    "updated": "Tipo de navio atualizado com sucesso",
+    "deleted": "Tipo de navio eliminado com sucesso",
     "save": "Guardar",
     "cancel": "Cancelar",
     "errors": {
