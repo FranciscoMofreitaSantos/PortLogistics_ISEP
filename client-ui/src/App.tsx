@@ -5,10 +5,28 @@ import "./styles/globals.css";
 
 import LoginButton from "./components/LoginButton";
 import SyncUser from "./components/SyncUser";
-
 import { Toaster } from "react-hot-toast";
 
 export default function App() {
+    const isCypress =
+        typeof window !== "undefined" && (window as any).Cypress;
+
+    if (isCypress) {
+        return (
+            <>
+                <RouterProvider router={router} />
+                <Toaster
+                    position="top-right"
+                    toastOptions={{
+                        duration: 3500,
+                        style: { zIndex: 2147483647 },
+                    }}
+                />
+            </>
+        );
+    }
+
+    // --- fluxo normal (produção / dev normal) ---
     const { isLoading, error, isAuthenticated } = useAuth0();
 
     if (isLoading) return <p style={{ textAlign: "center" }}>Loading...</p>;

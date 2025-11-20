@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "name": "Feeder",
+    "description": "Small feeder vessel",
+    "maxBays": 10,
+    "maxRows": 12,
+    "maxTiers": 6,
+    "capacityTeu": 1000
+  },
+  {
+    "id": "2",
+    "name": "Panamax",
+    "description": "Panamax class vessel",
+    "maxBays": 18,
+    "maxRows": 20,
+    "maxTiers": 8,
+    "capacityTeu": 4500
+  }
+]

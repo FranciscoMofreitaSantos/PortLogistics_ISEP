@@ -1,4 +1,3 @@
-// src/features/vesselsTypes/components/VesselTypeSlideDetails.tsx
 import { FaTimes } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import type { VesselType } from "../domain/vesselType";

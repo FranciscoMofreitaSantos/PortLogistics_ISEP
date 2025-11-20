@@ -145,6 +145,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "errors": {
+      "invalidDimensions": "Invalid dimension. Make sure numerics must be > 1.",
       "nameRequired": "Name is required!",
       "invalidStructure": "Bays, rows and tiers must be greater than zero!"
     },

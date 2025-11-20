@@ -149,6 +149,7 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "errors": {
+      "invalidDimensions": "Dimensões invalidas. Campos numéricos tem que cumprir > 1.",
       "nameRequired": "O nome é obrigatório!",
       "invalidStructure": "Bays, linhas e níveis devem ser maiores que zero!"
     },
