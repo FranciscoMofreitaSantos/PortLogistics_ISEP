@@ -1,0 +1,507 @@
+@startuml
+actor "Port Authority Officer" as Officer
+
+' ===== Frontend / SPA =====
+boundary "SPA StorageAreaPage (/storage-areas)" as SPAList
+boundary "SPA StorageAreaCreatePage (/storage-areas/new)" as SPACreate
+boundary "SPA StorageAreaEditPage/Modal" as SPAUpdate
+control  "useStorageAreas hook" as Hook
+control  "storageAreaService (frontend)" as FEService
+boundary "HTTP ApiClient (axios)" as ApiClient
+
+' ===== Backend / API =====
+boundary "API Controller" as Controller
+control  "StorageAreaService (backend)" as Service
+entity   "StorageAreaRepository" as Repo
+entity   "PhysicalResourceRepository" as PRRepo
+control  "StorageAreaFactory" as Factory
+database "Audit Log" as Audit
+
+title Sequence Diagram – US2.2.4 Register, Update & Query Storage Areas\n(Frontend SPA + Backend API)
+
+' ============================================================
+' 1) LOAD STORAGE AREAS PAGE – LIST + INITIAL GRID
+' ============================================================
+== Load StorageAreaPage (/storage-areas) ==
+
+Officer -> SPAList : Navigate to /storage-areas
+activate SPAList
+
+SPAList -> Hook : init() / useStorageAreas()
+activate Hook
+
+Hook -> FEService : getAllStorageAreas()
+activate FEService
+
+FEService -> ApiClient : GET /api/storageareas
+activate ApiClient
+
+ApiClient -> Controller : GET /api/storageareas
+activate Controller
+
+Controller -> Service : GetAllAsync()
+activate Service
+
+Service -> Repo : GetAllAsync()
+activate Repo
+Repo --> Service : List<StorageArea>
+deactivate Repo
+
+Service -> Factory : CreateStorageAreaDto(area*)
+activate Factory
+Factory --> Service : List<StorageAreaDto>
+deactivate Factory
+
+Service --> Controller : List<StorageAreaDto>
+deactivate Service
+
+Controller --> ApiClient : 200 OK (StorageAreaDto*)
+deactivate Controller
+
+ApiClient --> FEService : List<StorageAreaDto>
+deactivate ApiClient
+
+FEService --> Hook : StorageAreaDto[]
+deactivate FEService
+
+Hook -> SPAList : setItems(items) & setSelected(first)
+deactivate Hook
+
+' Load grid for initially selected area
+SPAList -> Hook : selected changed
+activate Hook
+Hook -> FEService : getStorageAreaGrid(selected.id)
+activate FEService
+
+FEService -> ApiClient : GET /api/storageareas/{id}/grid
+activate ApiClient
+
+ApiClient -> Controller : GET /api/storageareas/{id}/grid
+activate Controller
+
+Controller -> Service : GetGridAsync(id)
+activate Service
+
+Service -> Repo : GetByIdWithGridAsync(id)
+activate Repo
+Repo --> Service : StorageArea + Slots
+deactivate Repo
+
+Service --> Controller : StorageAreaGridDto
+deactivate Service
+
+Controller --> ApiClient : 200 OK (StorageAreaGridDto)
+deactivate Controller
+
+ApiClient --> FEService : StorageAreaGridDto
+deactivate ApiClient
+
+FEService --> Hook : StorageAreaGridDto
+deactivate FEService
+
+Hook -> SPAList : build slices & KPIs
+deactivate Hook
+
+SPAList --> Officer : StorageArea list + KPIs + grid
+deactivate SPAList
+
+
+' ============================================================
+' 2) CREATE STORAGE AREA (SUCCESS)
+' ============================================================
+== Create Storage Area (success) ==
+
+Officer -> SPACreate : Navigate to /storage-areas/new\nFill form & click "Create"
+activate SPACreate
+
+SPACreate -> FEService : createStorageArea(CreatingStorageArea)
+activate FEService
+
+FEService -> ApiClient : POST /api/storageareas {dto}
+activate ApiClient
+
+ApiClient -> Controller : POST /api/storageareas {dto}
+activate Controller
+
+Controller -> Service : CreateAsync(dto)
+activate Service
+
+Service -> Repo : GetByNameAsync(dto.Name)
+activate Repo
+Repo --> Service : null
+deactivate Repo
+
+loop Validate Physical Resources
+    Service -> PRRepo : GetByCodeAsync(code)
+    activate PRRepo
+    PRRepo --> Service : PhysicalResource or null
+    deactivate PRRepo
+
+    Service -> Service : throw BusinessRuleValidationException()\nif PhysicalResource is null
+end
+
+Service -> Factory : CreateStorageArea(dto)
+activate Factory
+Factory --> Service : StorageArea
+deactivate Factory
+
+Service -> Repo : AddAsync(storageArea)
+activate Repo
+Repo --> Service : ok
+deactivate Repo
+
+Service -> Repo : CommitAsync()
+activate Repo
+Repo --> Service : ok
+deactivate Repo
+
+Service -> Audit : log(CREATE, officerId, storageArea.Name, timestamp)
+
+Service --> Controller : StorageAreaDto
+deactivate Service
+
+Controller --> ApiClient : 201 Created (StorageAreaDto)
+deactivate Controller
+
+ApiClient --> FEService : StorageAreaDto
+deactivate ApiClient
+
+FEService --> SPACreate : created StorageAreaDto
+deactivate FEService
+
+SPACreate -> SPAList : navigate("/storage-areas") + toast success
+deactivate SPACreate
+
+' reload list after create
+activate SPAList
+SPAList -> Hook : reload()
+activate Hook
+Hook -> FEService : getAllStorageAreas()
+activate FEService
+
+FEService -> ApiClient : GET /api/storageareas
+activate ApiClient
+ApiClient -> Controller : GET /api/storageareas
+activate Controller
+
+Controller -> Service : GetAllAsync()
+activate Service
+Service -> Repo : GetAllAsync()
+activate Repo
+Repo --> Service : List<StorageArea>
+deactivate Repo
+
+Service -> Factory : CreateStorageAreaDto(area*)
+activate Factory
+Factory --> Service : List<StorageAreaDto>
+deactivate Factory
+
+Service --> Controller : List<StorageAreaDto>
+deactivate Service
+
+Controller --> ApiClient : 200 OK (StorageAreaDto*)
+deactivate Controller
+
+ApiClient --> FEService : List<StorageAreaDto>
+deactivate ApiClient
+
+FEService --> Hook : StorageAreaDto[]
+deactivate FEService
+
+Hook -> SPAList : update items & selected
+deactivate Hook
+
+SPAList --> Officer : updated list including new StorageArea
+deactivate SPAList
+
+
+' ============================================================
+' 3) CREATE – ERROR: DUPLICATE NAME
+' ============================================================
+== Error: Duplicate Name on Create ==
+
+Officer -> SPACreate : Submit form with existing name
+activate SPACreate
+
+SPACreate -> FEService : createStorageArea(dto)
+activate FEService
+
+FEService -> ApiClient : POST /api/storageareas {dto}
+activate ApiClient
+
+ApiClient -> Controller : POST /api/storageareas {dto}
+activate Controller
+
+Controller -> Service : CreateAsync(dto)
+activate Service
+
+Service -> Repo : GetByNameAsync(dto.Name)
+activate Repo
+Repo --> Service : StorageArea (exists)
+deactivate Repo
+
+Service -> Service : throw BusinessRuleValidationException("already exists")
+deactivate Service
+
+Controller --> ApiClient : 409 Conflict (BusinessRuleValidationException)
+deactivate Controller
+
+ApiClient --> FEService : 409 Conflict
+deactivate ApiClient
+
+FEService --> SPACreate : error
+deactivate FEService
+
+SPACreate -> SPACreate : show toast "Storage Area already exists"
+SPACreate --> Officer : validation error on UI
+deactivate SPACreate
+
+
+' ============================================================
+' 4) UPDATE STORAGE AREA
+' ============================================================
+== Update Storage Area ==
+
+Officer -> SPAUpdate : Open edit page/modal\nChange fields & click "Save"
+activate SPAUpdate
+
+SPAUpdate -> FEService : updateStorageArea(id, dto)
+activate FEService
+
+FEService -> ApiClient : PATCH /api/storageareas/{id} {dto}
+activate ApiClient
+
+ApiClient -> Controller : PATCH /api/storageareas/{id} {dto}
+activate Controller
+
+Controller -> Service : UpdateAsync(id, dto)
+activate Service
+
+Service -> Repo : GetByIdAsync(id)
+activate Repo
+Repo --> Service : StorageArea or null
+deactivate Repo
+
+alt not found
+    Service -> Service : throw BusinessRuleValidationException("not found")
+    deactivate Service
+
+    Controller --> ApiClient : 404 Not Found
+    deactivate Controller
+
+    ApiClient --> FEService : 404 Not Found
+    deactivate ApiClient
+
+    FEService --> SPAUpdate : not found error
+    deactivate FEService
+
+    SPAUpdate -> SPAUpdate : show toast "Storage Area not found"
+    SPAUpdate --> Officer : error state
+    deactivate SPAUpdate
+else found
+    Service -> Service : apply updates\n(description?, type?, docks?, resources?)
+    Service -> Repo : CommitAsync()
+    activate Repo
+    Repo --> Service : ok
+    deactivate Repo
+
+    Service -> Audit : log(UPDATE, officerId, id, timestamp)
+
+    Service --> Controller : Updated StorageAreaDto
+    deactivate Service
+
+    Controller --> ApiClient : 200 OK (StorageAreaDto)
+    deactivate Controller
+
+    ApiClient --> FEService : Updated StorageAreaDto
+    deactivate ApiClient
+
+    FEService --> SPAUpdate : Updated StorageAreaDto
+    deactivate FEService
+
+    SPAUpdate -> SPAList : close modal + refresh list/grid
+    SPAUpdate --> Officer : updated info visible
+    deactivate SPAUpdate
+end
+
+
+' ============================================================
+' 5) GET DISTANCES TO DOCKS
+' ============================================================
+== Get Distances to Docks ==
+
+Officer -> SPAList : Click "View distances"
+activate SPAList
+
+SPAList -> FEService : getStorageAreaDistances(id?, name?)
+activate FEService
+
+FEService -> ApiClient : GET /api/storageareas/distances?id={id}&name={name}
+activate ApiClient
+
+ApiClient -> Controller : GET /api/storageareas/distances
+activate Controller
+
+Controller -> Service : GetDistancesToDockAsync(name?, id?)
+activate Service
+
+Service -> Repo : GetByNameAsync(name) OR GetByIdAsync(id)
+activate Repo
+Repo --> Service : StorageArea or null
+deactivate Repo
+
+alt found
+    Service -> Service : extract DockCode + Distance
+    Service --> Controller : List<StorageAreaDockDistanceDto>
+    deactivate Service
+
+    Controller --> ApiClient : 200 OK (StorageAreaDockDistanceDto*)
+    deactivate Controller
+
+    ApiClient --> FEService : List<StorageAreaDockDistanceDto>
+    deactivate ApiClient
+
+    FEService --> SPAList : distances list
+    deactivate FEService
+
+    SPAList -> SPAList : open distances modal\nrender bars & values
+    SPAList --> Officer : modal with dock distances
+    deactivate SPAList
+else not found
+    Service -> Service : throw BusinessRuleValidationException("not found")
+    deactivate Service
+
+    Controller --> ApiClient : 404 Not Found
+    deactivate Controller
+
+    ApiClient --> FEService : 404 Not Found
+    deactivate ApiClient
+
+    FEService --> SPAList : error
+    deactivate FEService
+
+    SPAList -> SPAList : show toast "Storage Area not found"
+    SPAList --> Officer : error feedback
+    deactivate SPAList
+end
+
+
+' ============================================================
+' 6) GET PHYSICAL RESOURCES
+' ============================================================
+== Get Physical Resources ==
+
+Officer -> SPAList : View physical resources section
+activate SPAList
+
+SPAList -> FEService : getStorageAreaResources(id?, name?)
+activate FEService
+
+FEService -> ApiClient : GET /api/storageareas/physicalresources?id={id}&name={name}
+activate ApiClient
+
+ApiClient -> Controller : GET /api/storageareas/physicalresources
+activate Controller
+
+Controller -> Service : GetPhysicalResourcesAsync(name?, id?)
+activate Service
+
+Service -> Repo : GetByNameAsync(name) OR GetByIdAsync(id)
+activate Repo
+Repo --> Service : StorageArea or null
+deactivate Repo
+
+alt found
+    Service -> Service : extract PhysicalResources (List<string>)
+    Service --> Controller : List<string>
+    deactivate Service
+
+    Controller --> ApiClient : 200 OK (PhysicalResourceCode*)
+    deactivate Controller
+
+    ApiClient --> FEService : List<string>
+    deactivate ApiClient
+
+    FEService --> SPAList : PhysicalResource codes
+    deactivate FEService
+
+    SPAList -> SPAList : render chips in UI
+    SPAList --> Officer : resources visible
+    deactivate SPAList
+else not found
+    Service -> Service : throw BusinessRuleValidationException("not found")
+    deactivate Service
+
+    Controller --> ApiClient : 404 Not Found
+    deactivate Controller
+
+    ApiClient --> FEService : 404 Not Found
+    deactivate ApiClient
+
+    FEService --> SPAList : error
+    deactivate FEService
+
+    SPAList -> SPAList : show toast "Storage Area not found"
+    SPAList --> Officer : error feedback
+    deactivate SPAList
+end
+
+
+' ============================================================
+' 7) GET CONTAINER AT CELL POSITION
+' ============================================================
+== Get Container at Position (grid cell click) ==
+
+Officer -> SPAList : Click filled cell (bay,row,tier)
+activate SPAList
+
+SPAList -> FEService : getContainerAtPosition(storageAreaId, bay, row, tier)
+activate FEService
+
+FEService -> ApiClient : GET /api/storageareas/{id}/container?bay=&row=&tier=
+activate ApiClient
+
+ApiClient -> Controller : GET /api/storageareas/{id}/container
+activate Controller
+
+Controller -> Service : GetContainerAtPositionAsync(id, bay, row, tier)
+activate Service
+
+Service -> Repo : GetByIdWithGridAsync(id)
+activate Repo
+Repo --> Service : StorageArea + Slots
+deactivate Repo
+
+Service -> Service : find slot(bay,row,tier) → Container or null
+Service --> Controller : ContainerDto or null
+deactivate Service
+
+alt container found
+    Controller --> ApiClient : 200 OK (ContainerDto)
+    deactivate Controller
+
+    ApiClient --> FEService : ContainerDto
+    deactivate ApiClient
+
+    FEService --> SPAList : ContainerDto
+    deactivate FEService
+
+    SPAList -> SPAList : open container modal\nrender ISO, type, status, weight
+    SPAList --> Officer : container info shown
+    deactivate SPAList
+else no container
+    Controller --> ApiClient : 404 Not Found or 200 with null
+    deactivate Controller
+
+    ApiClient --> FEService : error / null
+    deactivate ApiClient
+
+    FEService --> SPAList : error / null
+    deactivate FEService
+
+    SPAList -> SPAList : show "No container at this position"
+    SPAList --> Officer : feedback in modal
+    deactivate SPAList
+end
+
+@enduml

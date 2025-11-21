@@ -1,0 +1,325 @@
+@startuml
+' ==========================================================
+' Generic System Sequence Diagram – SPA + API + Domain + DB
+' Pode ser reutilizado para qualquer entidade (Create/Read/Update/Delete)
+' ==========================================================
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+' ========= Atores / Fronteiras =========
+actor "System User" as User
+
+boundary "SPA Feature Page\n(React)" as SPA
+control  "Client State / Hook\n(useEntity)" as Hook
+control  "Frontend Service\n(entityService.ts)" as FEService
+boundary "HTTP Client\n(axios / fetch)" as Http
+
+boundary "API Controller\n(EntityController)" as Api
+control  "Application Service\n(EntityService)" as AppSvc
+control  "Domain Factory / Validator\n(EntityFactory)" as Factory
+entity   "Entity Repository\n(IEntityRepository)" as Repo
+entity   "Unit of Work\n(IUnitOfWork)" as UoW
+database "Database\n(SQL / NoSQL)" as DB
+collections "Logging / Telemetry\n(ILogger / APM)" as Log
+
+
+' ==========================================================
+' 0) INITIAL LOAD – LIST ENTITIES
+' ==========================================================
+== Initial Load (List Entities) ==
+
+User -> SPA : Navega para página da feature
+activate SPA
+
+SPA -> Hook : init() / useEntity()
+activate Hook
+
+Hook -> FEService : getAllEntities()
+activate FEService
+
+FEService -> Http : GET /api/entities
+activate Http
+
+Http -> Api : GET /api/entities
+activate Api
+
+Api -> AppSvc : GetAllAsync()
+activate AppSvc
+
+AppSvc -> Repo : GetAllAsync()
+activate Repo
+Repo -> DB : SELECT * FROM Entity
+DB --> Repo : rows
+Repo --> AppSvc : List<Entity>
+deactivate Repo
+
+AppSvc -> Log : Log(READ_ALL, count, SUCCESS)
+AppSvc --> Api : List<EntityDto>
+deactivate AppSvc
+
+Api --> Http : 200 OK (List<EntityDto>)
+deactivate Api
+
+Http --> FEService : List<EntityDto>
+deactivate Http
+
+FEService --> Hook : map to Entity[] (modelo UI)
+deactivate FEService
+
+Hook -> SPA : setItems(list)\nsetFiltered(list)
+deactivate Hook
+
+SPA --> User : tabela/cards com entidades
+deactivate SPA
+
+
+' ==========================================================
+' 1) CREATE ENTITY
+' ==========================================================
+== Create Entity ==
+
+User -> SPA : Clica "Create"
+SPA -> SPA : abre modal/formulário de criação
+
+User -> SPA : Preenche dados + clica "Save"
+SPA -> FEService : createEntity(CreateEntityRequest)
+activate FEService
+
+FEService -> Http : POST /api/entities\nBody: CreateEntityRequest
+activate Http
+
+Http -> Api : POST /api/entities
+activate Api
+
+Api -> AppSvc : CreateAsync(dto)
+activate AppSvc
+
+AppSvc -> Factory : CreateFromDto(dto)\n+ valida regras de negócio
+activate Factory
+Factory --> AppSvc : Entity (válida) ou erro
+deactivate Factory
+
+AppSvc -> Repo : AddAsync(entity)
+activate Repo
+Repo -> DB : INSERT Entity
+DB --> Repo : OK
+Repo --> AppSvc : persisted
+deactivate Repo
+
+AppSvc -> UoW : CommitAsync()
+activate UoW
+UoW --> AppSvc : transaction committed
+deactivate UoW
+
+AppSvc -> Log : Log(CREATE, entityId, SUCCESS)
+AppSvc --> Api : EntityDto
+deactivate AppSvc
+
+Api --> Http : 201 Created (EntityDto)
+deactivate Api
+
+Http --> FEService : EntityDto
+deactivate Http
+
+FEService --> SPA : entidade criada (para toasts / refresh)
+deactivate FEService
+
+SPA -> Hook : reload()   ' reutiliza fluxo de GetAllAsync
+Hook -> FEService : getAllEntities()
+' (detalhes idênticos ao fluxo inicial, omitidos)
+Hook --> SPA : lista atualizada
+SPA --> User : nova entidade aparece na lista
+
+
+' ==========================================================
+' 2) UPDATE ENTITY
+' ==========================================================
+== Update Entity ==
+
+User -> SPA : Seleciona entidade + clica "Edit"
+SPA -> SPA : abre modal de edição com dados atuais
+
+User -> SPA : Altera campos + "Save"
+SPA -> FEService : updateEntity(entityId, UpdateEntityRequest)
+activate FEService
+
+FEService -> Http : PUT /api/entities/{id}\nBody: UpdateEntityRequest
+activate Http
+
+Http -> Api : PUT /api/entities/{id}
+activate Api
+
+Api -> AppSvc : UpdateAsync(id, dto)
+activate AppSvc
+
+AppSvc -> Repo : GetByIdAsync(id)
+activate Repo
+Repo -> DB : SELECT Entity BY Id
+DB --> Repo : row / null
+Repo --> AppSvc : Entity / null
+deactivate Repo
+
+alt Entity not found
+    AppSvc -> Log : Log(UPDATE, id, NOT_FOUND)
+    AppSvc --> Api : 404 Not Found
+    deactivate AppSvc
+
+    Api --> Http : 404
+    deactivate Api
+    Http --> FEService : error
+    deactivate Http
+    FEService --> SPA : mostrar erro / toast
+    deactivate FEService
+else Entity found
+    AppSvc -> AppSvc : aplicar alterações válidas
+    AppSvc -> UoW : CommitAsync()
+    activate UoW
+    UoW --> AppSvc : committed
+    deactivate UoW
+
+    AppSvc -> Log : Log(UPDATE, id, SUCCESS)
+    AppSvc --> Api : Updated EntityDto
+    deactivate AppSvc
+
+    Api --> Http : 200 OK (EntityDto)
+    deactivate Api
+
+    Http --> FEService : EntityDto
+    deactivate Http
+
+    FEService --> SPA : entidade atualizada
+    deactivate FEService
+
+    SPA -> Hook : reload()
+    ' (volta a chamar getAllEntities)
+end
+
+
+' ==========================================================
+' 3) DELETE ENTITY
+' ==========================================================
+== Delete Entity ==
+
+User -> SPA : Seleciona entidade + "Delete"
+SPA -> SPA : mostra modal de confirmação
+
+User -> SPA : Confirma remoção
+SPA -> FEService : deleteEntity(id)
+activate FEService
+
+FEService -> Http : DELETE /api/entities/{id}
+activate Http
+
+Http -> Api : DELETE /api/entities/{id}
+activate Api
+
+Api -> AppSvc : DeleteAsync(id)
+activate AppSvc
+
+AppSvc -> Repo : GetByIdAsync(id)
+activate Repo
+Repo -> DB : SELECT Entity BY Id
+DB --> Repo : row / null
+Repo --> AppSvc : Entity / null
+deactivate Repo
+
+alt Entity not found
+    AppSvc -> Log : Log(DELETE, id, NOT_FOUND)
+    AppSvc --> Api : 404 Not Found
+    deactivate AppSvc
+    Api --> Http : 404
+    deactivate Api
+    Http --> FEService : error
+    deactivate Http
+    FEService --> SPA : mostrar erro
+    deactivate FEService
+else Entity found
+    AppSvc -> Repo : Remove(entity)
+    activate Repo
+    Repo -> DB : DELETE Entity
+    DB --> Repo : OK
+    Repo --> AppSvc : removed
+    deactivate Repo
+
+    AppSvc -> UoW : CommitAsync()
+    activate UoW
+    UoW --> AppSvc : committed
+    deactivate UoW
+
+    AppSvc -> Log : Log(DELETE, id, SUCCESS)
+    AppSvc --> Api : 204 NoContent
+    deactivate AppSvc
+
+    Api --> Http : 204 NoContent
+    deactivate Api
+
+    Http --> FEService : success
+    deactivate Http
+
+    FEService --> SPA : remoção confirmada
+    deactivate FEService
+
+    SPA -> Hook : reload()
+end
+
+
+' ==========================================================
+' 4) SEARCH – LOCAL VS REMOTE
+' ==========================================================
+== Search (Local vs Remote) ==
+
+User -> SPA : escreve filtro + clica "Search"
+SPA -> SearchBar : onSearch(query, mode)
+activate SearchBar
+
+alt Local search (client-side)
+    SearchBar -> Hook : filterInMemory(query)
+    Hook -> Hook : filtered = items.where(matches(query))
+    Hook --> SPA : setFiltered(filtered)
+    SPA --> User : lista filtrada sem API
+else Remote search (server-side)
+    SearchBar -> FEService : searchEntities(query)
+    activate FEService
+
+    FEService -> Http : GET /api/entities/filter?query=q
+    activate Http
+
+    Http -> Api : GET /api/entities/filter
+    activate Api
+
+    Api -> AppSvc : FilterAsync(criteria)
+    activate AppSvc
+
+    AppSvc -> Repo : FilterAsync(criteria)
+    activate Repo
+    Repo -> DB : SELECT ... WHERE ...
+    DB --> Repo : rows
+    Repo --> AppSvc : List<Entity>
+    deactivate Repo
+
+    AppSvc -> Mapper : CreateEntityDto(list)
+    activate Mapper
+    Mapper --> AppSvc : List<EntityDto>
+    deactivate Mapper
+
+    AppSvc --> Api : List<EntityDto>
+    deactivate AppSvc
+
+    Api --> Http : 200 OK (List<EntityDto>)
+    deactivate Api
+
+    Http --> FEService : List<EntityDto>
+    deactivate Http
+
+    FEService --> Hook : map to Entity[] / setFiltered()
+    deactivate FEService
+
+    Hook --> SPA : lista filtrada
+    SPA --> User : resultados da pesquisa
+end
+
+deactivate SearchBar
+
+@enduml

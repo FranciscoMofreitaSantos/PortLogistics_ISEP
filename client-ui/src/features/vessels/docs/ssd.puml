@@ -1,0 +1,537 @@
+@startuml
+' ==========================================================
+' Sequence Diagram – US2.2.2 (Register and Update Vessel Records)
+' SPA Frontend + API + Domain + Persistence
+' Author: Jorge Ubaldo Rodrigues
+' ==========================================================
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+' ========= ACTOR =========
+actor "Port Authority Officer" as Officer
+
+' ========= FRONTEND / SPA =========
+boundary "SPA VesselsPage\n(/vessels)" as SPAPage
+control  "useVessels hook" as Hook
+control  "VesselSearchBar" as SearchBar
+control  "VesselCardGrid" as CardGrid
+boundary "VesselCreateModal" as CreateModal
+boundary "VesselEditModal" as EditModal
+boundary "VesselDeleteModal" as DeleteModal
+boundary "VesselStatsModal" as StatsModal
+control  "Frontend Service\n(vesselService.ts)" as FEService
+boundary "HTTP ApiClient\n(axios)" as ApiClient
+
+' ========= BACKEND / API & DOMAIN =========
+boundary "API Layer\n(VesselController)\n<<uses IVesselService>>" as Controller
+control  "Application Layer\n(VesselService)\n(implements IVesselService)" as Service
+control  "Mapper\n(VesselMapper)" as Mapper
+control  "Factory\n(VesselFactory)" as Factory
+entity   "IVesselRepository\n<<interface>>" as IRepo
+entity   "VesselRepository" as Repo
+entity   "IVesselTypeRepository\n<<interface>>" as ITypeRepo
+entity   "VesselTypeRepository" as TypeRepo
+entity   "UnitOfWork\n<<interface>>\n(IUnitOfWork)" as UoW
+collections "Audit/Logs\n(ILogger / Serilog)" as Log
+database "Database" as DB
+
+
+' ==========================================================
+' 0) INITIAL LOAD – VESSELS + VESSEL TYPES
+' ==========================================================
+== Initial Load (Vessels + Types) ==
+
+Officer -> SPAPage : Navigate to /vessels
+activate SPAPage
+
+SPAPage -> Hook : init() / useVessels()
+activate Hook
+
+' --- load vessels ---
+Hook -> FEService : apiGetVessels()
+activate FEService
+
+FEService -> ApiClient : GET /api/Vessel
+activate ApiClient
+
+ApiClient -> Controller : GET /api/Vessel
+activate Controller
+
+Controller -> Service : GetAllAsync()
+activate Service
+
+Service -> IRepo : GetAllAsync()
+activate IRepo
+IRepo -> Repo : SELECT * FROM Vessels
+Repo -> DB : query
+DB --> Repo : rows
+Repo --> IRepo : List<Vessel>
+IRepo --> Service : List<Vessel>
+deactivate IRepo
+deactivate Repo
+
+Service -> Mapper : CreateVesselDto(list)
+activate Mapper
+Mapper --> Service : List<VesselDto>
+deactivate Mapper
+
+Service --> Controller : List<VesselDto>
+deactivate Service
+
+Controller --> ApiClient : 200 OK (List<VesselDto>)
+deactivate Controller
+
+ApiClient --> FEService : List<VesselDto>
+deactivate ApiClient
+
+FEService --> Hook : mapVesselDto → Vessel[]
+deactivate FEService
+
+Hook -> Hook : setItems(list)\nsetFiltered(list)
+
+' --- load vessel types for dropdown & stats ---
+Hook -> FEService : apiGetVesselTypes()
+activate FEService
+
+FEService -> ApiClient : GET /api/vesseltypes
+activate ApiClient
+ApiClient -> Controller : GET /api/vesseltypes
+Controller -> Service : GetAllVesselTypesAsync()
+Service -> ITypeRepo : GetAllAsync()
+ITypeRepo -> TypeRepo : SELECT * FROM VesselTypes
+TypeRepo -> DB : query
+DB --> TypeRepo : rows
+TypeRepo --> ITypeRepo : List<VesselType>
+ITypeRepo --> Service : List<VesselType>
+Service -> Mapper : ToVesselTypeDto(list)
+Mapper --> Service : List<VesselTypeDto>
+Service --> Controller : List<VesselTypeDto>
+Controller --> ApiClient : 200 OK (List<VesselTypeDto>)
+deactivate Controller
+ApiClient --> FEService : List<VesselTypeDto>
+deactivate ApiClient
+FEService --> Hook : mapVesselTypeDto → VesselType[]
+deactivate FEService
+
+Hook -> SPAPage : vessels + vesselTypes loaded
+deactivate Hook
+
+SPAPage -> SearchBar : render with search props
+SPAPage -> CardGrid  : render with filtered vessels
+SPAPage --> Officer : Vessels list visible
+deactivate SPAPage
+
+
+' ==========================================================
+' 1) CREATE VESSEL
+' ==========================================================
+== Create Vessel ==
+
+Officer -> SPAPage : Click "Add Vessel"
+activate SPAPage
+SPAPage -> CreateModal : open()
+deactivate SPAPage
+
+activate CreateModal
+Officer -> CreateModal : Fill IMO, Name, Owner, Type\nclick "Save"
+
+CreateModal -> FEService : apiCreateVessel(CreateVesselRequestDto)
+activate FEService
+
+FEService -> ApiClient : POST /api/Vessel\nBody: CreateVesselRequestDto
+activate ApiClient
+
+ApiClient -> Controller : POST /api/Vessel
+activate Controller
+
+Controller -> Service : CreateAsync(dto)  <<IVesselService.CreateAsync>>
+activate Service
+
+' valida se tipo de navio existe
+Service -> ITypeRepo : GetByNameAsync(dto.vesselTypeName)
+activate ITypeRepo
+ITypeRepo -> TypeRepo : SELECT VesselType BY Name
+TypeRepo -> DB : query
+DB --> TypeRepo : row / null
+TypeRepo --> ITypeRepo : VesselType / null
+ITypeRepo --> Service : VesselType / null
+deactivate ITypeRepo
+deactivate TypeRepo
+
+' valida se não há duplicado por IMO
+Service -> IRepo : GetByImoNumberAsync(dto.imoNumber)
+activate IRepo
+IRepo -> Repo : SELECT Vessel BY IMO
+Repo -> DB : query
+DB --> Repo : row / null
+Repo --> IRepo : Vessel / null
+IRepo --> Service : Vessel / null
+deactivate IRepo
+deactivate Repo
+
+Service -> Service : Validate IMO format,\nnon-empty name/owner,\nno duplicate
+
+' cria entidade
+Service -> Factory : CreateVessel(dto, vesselTypeId)
+activate Factory
+Factory --> Service : Vessel (entity)
+deactivate Factory
+
+' persiste
+Service -> IRepo : AddAsync(vessel)
+activate IRepo
+IRepo -> Repo : INSERT Vessel
+Repo -> DB : insert
+DB --> Repo : OK
+Repo --> IRepo : persisted
+IRepo --> Service : ok
+deactivate IRepo
+deactivate Repo
+
+Service -> UoW : CommitAsync()
+activate UoW
+UoW --> Service : Transaction committed
+deactivate UoW
+
+Service -> Mapper : CreateVesselDto(vessel)
+activate Mapper
+Mapper --> Service : VesselDto
+deactivate Mapper
+
+Service -> Log : Log(CREATE, officerId, vessel.imoNumber, SUCCESS)
+Service --> Controller : VesselDto
+deactivate Service
+
+Controller --> ApiClient : 201 Created (VesselDto)
+deactivate Controller
+
+ApiClient --> FEService : VesselDto
+deactivate ApiClient
+
+FEService --> CreateModal : created dto
+deactivate FEService
+
+CreateModal -> SPAPage : toast "created" + onCreated()
+CreateModal -> CreateModal : close()
+deactivate CreateModal
+
+' reload lista (reutiliza padrão do load inicial, simplificado)
+activate SPAPage
+SPAPage -> Hook : reload()
+activate Hook
+Hook -> FEService : apiGetVessels()
+activate FEService
+FEService -> ApiClient : GET /api/Vessel
+ApiClient -> Controller : GET /api/Vessel
+Controller -> Service : GetAllAsync()
+Service -> IRepo : GetAllAsync()
+IRepo -> Repo : SELECT * FROM Vessels
+Repo -> DB : query
+DB --> Repo : rows
+Repo --> IRepo : List<Vessel>
+IRepo --> Service : List<Vessel>
+Service -> Mapper : CreateVesselDto(list)
+Mapper --> Service : List<VesselDto>
+Service --> Controller : List<VesselDto>
+Controller --> ApiClient : 200 OK (List<VesselDto>)
+ApiClient --> FEService : List<VesselDto>
+deactivate ApiClient
+FEService --> Hook : map to Vessel[]
+deactivate FEService
+Hook -> SPAPage : update items & filtered
+deactivate Hook
+SPAPage --> Officer : new vessel visible in card grid
+deactivate SPAPage
+
+
+' ==========================================================
+' 2) EDIT VESSEL (PATCH BY IMO)
+' ==========================================================
+== Edit Vessel (Patch by IMO) ==
+
+Officer -> CardGrid : Click vessel card
+activate CardGrid
+CardGrid -> SPAPage : setSelected(vessel)
+deactivate CardGrid
+
+SPAPage -> SPAPage : show slide details
+Officer -> SPAPage : Click "Edit"
+SPAPage -> EditModal : open(editData, imo)
+deactivate SPAPage
+
+activate EditModal
+Officer -> EditModal : Change Name/Owner\nclick "Save"
+
+EditModal -> FEService : apiPatchVesselByIMO(imo, UpdateVesselRequestDto)
+activate FEService
+
+FEService -> ApiClient : PATCH /api/Vessel/imo/{imo}\nBody: UpdateVesselRequestDto
+activate ApiClient
+
+ApiClient -> Controller : PATCH /api/Vessel/imo/{imo}
+activate Controller
+
+Controller -> Service : PatchByImoAsync(imo, dto)
+activate Service
+
+Service -> IRepo : GetByImoNumberAsync(imo)
+activate IRepo
+IRepo -> Repo : SELECT Vessel BY IMO
+Repo -> DB : query
+DB --> Repo : row
+Repo --> IRepo : Vessel
+IRepo --> Service : Vessel
+deactivate IRepo
+deactivate Repo
+
+Service -> Service : ApplyUpdates(name?, owner?)
+Service -> UoW : CommitAsync()
+activate UoW
+UoW --> Service : Transaction committed
+deactivate UoW
+
+Service -> Mapper : CreateVesselDto(vessel)
+activate Mapper
+Mapper --> Service : VesselDto
+deactivate Mapper
+
+Service -> Log : Log(UPDATE, officerId, imo, SUCCESS)
+Service --> Controller : VesselDto
+deactivate Service
+
+Controller --> ApiClient : 200 OK (VesselDto)
+deactivate Controller
+
+ApiClient --> FEService : VesselDto
+deactivate ApiClient
+
+FEService --> EditModal : updated dto
+deactivate FEService
+
+EditModal -> SPAPage : toast "updated" + onUpdated()
+EditModal -> EditModal : close()
+deactivate EditModal
+
+SPAPage -> Hook : reload()
+Hook -> FEService : apiGetVessels()
+FEService -> ApiClient : GET /api/Vessel
+ApiClient -> Controller : GET /api/Vessel
+Controller -> Service : GetAllAsync()
+Service -> IRepo : GetAllAsync()
+IRepo -> Repo : SELECT * FROM Vessels
+Repo -> DB : query
+DB --> Repo : rows
+Repo --> IRepo : List<Vessel>
+IRepo --> Service : List<Vessel>
+Service -> Mapper : CreateVesselDto(list)
+Mapper --> Service : List<VesselDto>
+Service --> Controller : List<VesselDto>
+Controller --> ApiClient : 200 OK
+ApiClient --> FEService : List<VesselDto>
+FEService --> Hook : map to Vessel[]
+Hook -> SPAPage : update items & filtered
+SPAPage --> Officer : vessel card shows new data
+
+
+' ==========================================================
+' 3) DELETE VESSEL
+' ==========================================================
+== Delete Vessel ==
+
+Officer -> SPAPage : From slide, click "Delete"
+SPAPage -> DeleteModal : open(selected vessel)
+activate DeleteModal
+
+Officer -> DeleteModal : Confirm delete
+
+DeleteModal -> FEService : apiDeleteVessel(id)
+activate FEService
+
+FEService -> ApiClient : DELETE /api/Vessel/{id}
+activate ApiClient
+
+ApiClient -> Controller : DELETE /api/Vessel/{id}
+activate Controller
+
+Controller -> Service : DeleteAsync(id)
+activate Service
+
+Service -> IRepo : GetByIdAsync(id)
+activate IRepo
+IRepo -> Repo : SELECT Vessel BY Id
+Repo -> DB : query
+DB --> Repo : row
+Repo --> IRepo : Vessel
+IRepo --> Service : Vessel
+deactivate IRepo
+deactivate Repo
+
+Service -> IRepo : Remove(vessel)
+activate IRepo
+IRepo -> Repo : DELETE Vessel
+Repo -> DB : delete
+DB --> Repo : OK
+Repo --> IRepo : removed
+IRepo --> Service : ok
+deactivate IRepo
+deactivate Repo
+
+Service -> UoW : CommitAsync()
+activate UoW
+UoW --> Service : Transaction committed
+deactivate UoW
+
+Service -> Log : Log(DELETE, officerId, id, SUCCESS)
+Service --> Controller : 204 NoContent
+deactivate Service
+
+Controller --> ApiClient : 204 NoContent
+deactivate Controller
+
+ApiClient --> FEService : success
+deactivate ApiClient
+
+FEService --> DeleteModal : ok
+deactivate FEService
+
+DeleteModal -> SPAPage : toast "deleted" + onDeleted()
+DeleteModal -> DeleteModal : close()
+deactivate DeleteModal
+
+SPAPage -> Hook : reload()
+Hook -> FEService : apiGetVessels()
+' (mesmo padrão de reload do topo; omitido detalhes)
+FEService -> ApiClient : GET /api/Vessel
+ApiClient -> Controller : GET /api/Vessel
+Controller -> Service : GetAllAsync()
+Service -> IRepo : GetAllAsync()
+IRepo -> Repo : SELECT * FROM Vessels
+Repo -> DB : query
+DB --> Repo : rows
+Repo --> IRepo : List<Vessel>
+IRepo --> Service : List<Vessel>
+Service -> Mapper : CreateVesselDto(list)
+Mapper --> Service : List<VesselDto>
+Service --> Controller : List<VesselDto>
+Controller --> ApiClient : 200 OK
+ApiClient --> FEService : List<VesselDto>
+FEService --> Hook : map to Vessel[]
+Hook -> SPAPage : update items & filtered
+SPAPage --> Officer : deleted vessel removed from grid
+
+
+' ==========================================================
+' 4) SEARCH (LOCAL / IMO / OWNER)
+' ==========================================================
+== Search Vessels ==
+
+Officer -> SearchBar : Type query and click Search
+activate SearchBar
+
+alt Local search (client-side)
+    SearchBar -> Hook : executeSearch(local)
+    Hook -> Hook : filter in-memory list\nby name / owner / IMO
+    Hook -> SPAPage : setFiltered(results)
+    SPAPage -> CardGrid : render filtered list
+    SPAPage --> Officer : results shown without API call
+else Remote search by IMO or Owner
+    SearchBar -> Hook : executeSearch(remote)
+    activate Hook
+
+    alt Search by IMO
+        Hook -> FEService : apiGetVesselByIMO(imo)
+        activate FEService
+        FEService -> ApiClient : GET /api/Vessel/imo/{imo}
+        activate ApiClient
+        ApiClient -> Controller : GET /api/Vessel/imo/{imo}
+        activate Controller
+        Controller -> Service : GetByImoNumberAsync(imo)
+        activate Service
+        Service -> IRepo : GetByImoNumberAsync(imo)
+        IRepo -> Repo : SELECT Vessel BY IMO
+        Repo -> DB : query
+        DB --> Repo : row / null
+        Repo --> IRepo : Vessel / null
+        IRepo --> Service : Vessel / null
+        deactivate IRepo
+        deactivate Repo
+
+        alt found
+            Service -> Mapper : CreateVesselDto(vessel)
+            Mapper --> Service : VesselDto
+            Service --> Controller : VesselDto
+        else not found
+            Service --> Controller : 404 Not Found
+        end
+        deactivate Service
+
+        Controller --> ApiClient : 200 OK or 404
+        deactivate Controller
+        ApiClient --> FEService : dto or error
+        deactivate ApiClient
+        FEService --> Hook : map to [Vessel] or []
+        deactivate FEService
+    else Search by Owner
+        Hook -> FEService : apiGetVesselByOwner(owner)
+        activate FEService
+        FEService -> ApiClient : GET /api/Vessel/owner/{owner}
+        activate ApiClient
+        ApiClient -> Controller : GET /api/Vessel/owner/{owner}
+        activate Controller
+        Controller -> Service : GetByOwnerAsync(owner)
+        activate Service
+        Service -> IRepo : GetByOwnerAsync(owner)
+        IRepo -> Repo : SELECT Vessels BY Owner
+        Repo -> DB : query
+        DB --> Repo : rows
+        Repo --> IRepo : List<Vessel>
+        IRepo --> Service : List<Vessel>
+        deactivate IRepo
+        deactivate Repo
+
+        Service -> Mapper : CreateVesselDto(vessel*)
+        Mapper --> Service : List<VesselDto>
+        Service --> Controller : List<VesselDto>
+        deactivate Service
+
+        Controller --> ApiClient : 200 OK
+        deactivate Controller
+        ApiClient --> FEService : List<VesselDto>
+        deactivate ApiClient
+        FEService --> Hook : map to Vessel[]
+        deactivate FEService
+    end
+
+    Hook -> SPAPage : setFiltered(result list)
+    deactivate Hook
+    SPAPage -> CardGrid : render filtered list
+    SPAPage --> Officer : search results shown
+end
+
+deactivate SearchBar
+
+
+' ==========================================================
+' 5) STATS MODAL (CLIENT-SIDE ONLY)
+' ==========================================================
+== Vessel Statistics (client-side only) ==
+
+Officer -> SPAPage : Click "Statistics"
+activate SPAPage
+
+SPAPage -> Hook : compute vesselTypeCounts (useMemo)
+Hook -> Hook : group vessels by vesselTypeId\n(count per type)
+Hook --> SPAPage : array {name, count}
+
+SPAPage -> StatsModal : open(vesselTypeCounts)
+deactivate SPAPage
+
+activate StatsModal
+StatsModal -> StatsModal : render Bar chart\n(no extra API calls)
+Officer -> StatsModal : Close
+StatsModal -> StatsModal : close()
+deactivate StatsModal
+
+@enduml
