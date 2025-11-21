@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "name": "Ever Pride",
+    "owner": "Evergreen",
+    "imoNumber": "1234567",
+    "vesselTypeId": "VT1"
+  },
+  {
+    "id": "2",
+    "name": "MSC Helena",
+    "owner": "MSC",
+    "imoNumber": "7654321",
+    "vesselTypeId": "VT2"
+  }
+]

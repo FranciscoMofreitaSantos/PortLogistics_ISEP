@@ -7,8 +7,10 @@ import { VesselCreateModal } from "../components/modals/VesselCreateModal";
 import { VesselEditModal } from "../components/modals/VesselEditModal";
 import VesselDeleteModal from "../components/modals/VesselDeleteModal";
 import { VesselStatsModal } from "../components/modals/VesselStatsModal";
+import {useTranslation} from "react-i18next";
 
 export default function VesselsPage() {
+    const { t } = useTranslation();
     const {
         items,
         filtered,
@@ -92,10 +94,10 @@ export default function VesselsPage() {
                         <strong>IMO:</strong> {val(selected.imoNumber)}
                     </p>
                     <p>
-                        <strong>Owner:</strong> {selected.owner}
+                        <strong>{t("Vessel.fields.owner")}:</strong> {selected.owner}
                     </p>
                     <p>
-                        <strong>Type:</strong> {getVesselTypeNameById(selected.vesselTypeId)}
+                        <strong>{t("Vessel.fields.type")}:</strong> {getVesselTypeNameById(selected.vesselTypeId)}
                     </p>
 
                     <div className="vt-slide-actions">
@@ -118,7 +120,7 @@ export default function VesselsPage() {
                                 setSelected(null);
                             }}
                         >
-                            Edit
+                            {t("Vessel.buttons.edit")}
                         </button>
 
                         {/* VER TIPO DE NAVIO */}
@@ -133,7 +135,7 @@ export default function VesselsPage() {
                                 window.location.href = `/vessel-types?id=${id}`;
                             }}
                         >
-                            View Type
+                            {t("Vessel.buttons.viewType")}
                         </button>
 
                         {/* ELIMINAR NAVIO */}
@@ -141,7 +143,7 @@ export default function VesselsPage() {
                             className="vt-btn-delete"
                             onClick={() => setIsDeleteOpen(true)}
                         >
-                            Delete
+                            {t("Vessel.buttons.delete")}
                         </button>
                     </div>
                 </div>

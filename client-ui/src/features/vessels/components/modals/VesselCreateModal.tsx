@@ -48,7 +48,7 @@ export function VesselCreateModal({open, form, setForm, vesselTypes, onSave, onC
                     value={form.vesselTypeName}
                     onChange={e => setForm({ ...form, vesselTypeName: e.target.value })}
                 >
-                    <option value="">Select Vessel Type</option>
+                    <option value="">{t("Vessel.fields.selectType")}Select Vessel Type</option>
                     {vesselTypes.map(t => (
                         <option key={t.id} value={t.name}>
                             {t.name}

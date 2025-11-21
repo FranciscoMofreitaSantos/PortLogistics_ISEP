@@ -179,6 +179,7 @@
       "selectType": "Select Vessel Type"
     },
     "buttons": {
+      "delete": "Delete",
       "add": "Add Vessel",
       "search": "Search",
       "clear": "Clear",
@@ -204,7 +205,8 @@
     },
     "modal": {
       "addTitle": "Add Vessel",
-      "editTitle": "Edit Vessel"
+      "editTitle": "Edit Vessel",
+      "deleteTitle": "Delete Navio"
     },
     "details": {
       "owner": "Owner",

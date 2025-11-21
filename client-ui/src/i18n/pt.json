@@ -183,6 +183,7 @@
       "selectType": "Selecione o Tipo de Navio"
     },
     "buttons": {
+      "delete": "Eliminar",
       "add": "Adicionar Navio",
       "search": "Pesquisar",
       "clear": "Limpar",
@@ -208,7 +209,8 @@
     },
     "modal": {
       "addTitle": "Adicionar Navio",
-      "editTitle": "Editar Navio"
+      "editTitle": "Editar Navio",
+      "deleteTitle": "Eliminar Navio"
     },
     "details": {
       "owner": "Proprietário",

@@ -75,15 +75,12 @@ describe("VesselsPage", () => {
 
         render(<VesselsPage />);
 
-        // header (usa i18n → key)
         expect(screen.getByText("Vessel.title")).toBeTruthy();
         expect(screen.getByText("Vessel.count (2)")).toBeTruthy();
 
-        // cards com nomes dos navios
         expect(screen.getAllByText("Ever Pride").length).toBeGreaterThan(0);
         expect(screen.getAllByText("MSC Helena").length).toBeGreaterThan(0);
 
-        // search input (placeholder com key)
         expect(
             screen.getByPlaceholderText("Vessel.searchPlaceholder")
         ).toBeTruthy();
@@ -100,18 +97,22 @@ describe("VesselsPage", () => {
 
         const { container } = render(<VesselsPage />);
 
-        // garante que o slide existe
         const slide = container.querySelector(".vt-slide") as HTMLElement;
         expect(slide).toBeTruthy();
 
-        // texto dentro do slide (evita conflito com os cards)
         expect(within(slide).getByText(selected.name)).toBeTruthy();
         expect(within(slide).getByText(selected.owner)).toBeTruthy();
 
-        // botões Edit / View Type / Delete também dentro do slide
-        expect(within(slide).getByText("Edit")).toBeTruthy();
-        expect(within(slide).getByText("View Type")).toBeTruthy();
-        expect(within(slide).getByText("Delete")).toBeTruthy();
+        // botões Edit / View Type / Delete (i18n keys)
+        expect(
+            within(slide).getByText("Vessel.buttons.edit")
+        ).toBeTruthy();
+        expect(
+            within(slide).getByText("Vessel.buttons.viewType")
+        ).toBeTruthy();
+        expect(
+            within(slide).getByText("Vessel.buttons.delete")
+        ).toBeTruthy();
     });
 
     it("clicar em Edit no slide chama setEditData, setEditIMO e abre o modal de edição", () => {
@@ -133,7 +134,8 @@ describe("VesselsPage", () => {
 
         render(<VesselsPage />);
 
-        const editBtn = screen.getByText("Edit");
+        // procura pelo texto que realmente está no botão
+        const editBtn = screen.getByText("Vessel.buttons.edit");
         fireEvent.click(editBtn);
 
         expect(setEditData).toHaveBeenCalledTimes(1);
@@ -162,7 +164,7 @@ describe("VesselsPage", () => {
 
         render(<VesselsPage />);
 
-        const delBtn = screen.getByText("Delete");
+        const delBtn = screen.getByText("Vessel.buttons.delete");
         fireEvent.click(delBtn);
 
         expect(setIsDeleteOpen).toHaveBeenCalledWith(true);
