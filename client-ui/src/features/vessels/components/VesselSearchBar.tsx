@@ -1,11 +1,10 @@
 import { FaSearch } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-
-type SearchMode = "local" | "imo" | "owner";
+import type { VesselSearchMode } from "../hooks/useVessels";
 
 type Props = {
-    searchMode: SearchMode;
-    setSearchMode: (m: SearchMode) => void;
+    searchMode: VesselSearchMode;
+    setSearchMode: (m: VesselSearchMode) => void;
     searchValue: string;
     setSearchValue: (v: string) => void;
     onSearch: () => void;
@@ -22,7 +21,7 @@ export function VesselSearchBar({searchMode, setSearchMode, searchValue, setSear
                     <button
                         key={m}
                         className={searchMode === m ? "active" : ""}
-                        onClick={() => setSearchMode(m as SearchMode)}
+                        onClick={() => setSearchMode(m as VesselSearchMode)}
                     >
                         {t(`Vessel.modes.${m}`)}
                     </button>

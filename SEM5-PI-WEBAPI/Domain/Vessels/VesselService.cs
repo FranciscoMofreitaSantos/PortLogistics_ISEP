@@ -162,4 +162,21 @@ public class VesselService : IVesselService
         return VesselMapper.CreateVesselDto(vessel);
     }
 
+    public async Task DeleteAsync(VesselId id)
+    {
+        _logger.LogInformation("Business Domain: Request to delete Vessel with ID = {Id}", id.Value);
+
+        var vesselInDb = await _vesselRepository.GetByIdAsync(id);
+
+        if (vesselInDb == null)
+        {
+            _logger.LogWarning("Business Domain: Vessel with ID = {Id} not found. Delete aborted.", id.Value);
+            throw new BusinessRuleValidationException($"No Vessel found with ID = {id.Value}");
+        }
+
+        _vesselRepository.Remove(vesselInDb);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Business Domain: Vessel with ID = {Id} deleted successfully.", id.Value);
+    }
 }

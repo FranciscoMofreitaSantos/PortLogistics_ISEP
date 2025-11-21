@@ -8,7 +8,6 @@ import type { VesselType } from "../../vesselsTypes/domain/vesselType";
 
 import {
     apiCreateVessel,
-    apiGetVesselById,
     apiGetVesselByIMO,
     apiGetVesselByOwner,
     apiGetVessels,
@@ -18,10 +17,9 @@ import {
 import { mapVesselDto } from "../mappers/vesselMapper";
 import type { Vessel, CreateVesselRequest, UpdateVesselRequest } from "../domain/vessel";
 
-type SearchMode = "local" | "imo" | "id" | "owner";
+export type VesselSearchMode = "local" | "imo" | "owner";
 
 const IMO_REGEX = /^\d{7}$/;
-const GUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 const MIN_LOADING_TIME = 500;
 
 export function useVessels() {
@@ -34,7 +32,7 @@ export function useVessels() {
     const [vesselTypes, setVesselTypes] = useState<VesselType[]>([]);
     const [selected, setSelected] = useState<Vessel | null>(null);
 
-    const [searchMode, setSearchMode] = useState<SearchMode>("local");
+    const [searchMode, setSearchMode] = useState<VesselSearchMode>("local");
     const [searchValue, setSearchValue] = useState("");
 
     const [form, setForm] = useState<CreateVesselRequest>({
@@ -50,6 +48,7 @@ export function useVessels() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isStatsOpen, setIsStatsOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
     const val = (x: any) => (typeof x === "string" ? x : x?.value);
 
@@ -66,16 +65,19 @@ export function useVessels() {
         }
     }
 
+    /** Recarrega a lista de navios */
+    async function reload() {
+        const dataDto = await apiGetVessels();
+        const data = dataDto.map(mapVesselDto);
+        setItems(data);
+        setFiltered(data);
+    }
+
     // load inicial
     useEffect(() => {
         async function load() {
             try {
-                const dataDto = await runWithLoading(apiGetVessels(), t("Vessel.messages.loading"));
-                const data = dataDto.map(mapVesselDto);
-
-                setItems(data);
-                setFiltered(data);
-                toast.success(t("Vessel.messages.searchSuccess", { count: data.length }));
+                await runWithLoading(reload(), t("Vessel.messages.loading"));
 
                 const typesDto = await runWithLoading(
                     apiGetVesselTypes(),
@@ -133,12 +135,7 @@ export function useVessels() {
             toast.success(t("Vessel.messages.searchSuccess", { count: results.length }));
             return;
         }
-
-        // GUID
-        if (searchMode === "id" && !GUID_REGEX.test(searchValue)) {
-            toast.error("Invalid ID format. Please enter a valid GUID.");
-            return;
-        }
+        
 
         // IMO
         if (searchMode === "imo" && !IMO_REGEX.test(searchValue)) {
@@ -150,8 +147,6 @@ export function useVessels() {
 
         if (searchMode === "imo") {
             apiPromise = apiGetVesselByIMO(searchValue).then(v => [mapVesselDto(v)]);
-        } else if (searchMode === "id") {
-            apiPromise = apiGetVesselById(searchValue).then(v => [mapVesselDto(v)]);
         } else {
             apiPromise = apiGetVesselByOwner(searchValue).then(arr => arr.map(mapVesselDto));
         }
@@ -184,12 +179,9 @@ export function useVessels() {
 
         if (!created) return;
 
-        const dataDto = await apiGetVessels();
-        const data = dataDto.map(mapVesselDto);
+        await reload();
 
         toast.success(t("Vessel.messages.created"));
-        setItems(data);
-        setFiltered(data);
         setIsCreateOpen(false);
 
         setForm({ imoNumber: "", name: "", owner: "", vesselTypeName: "" });
@@ -215,11 +207,8 @@ export function useVessels() {
 
         toast.success(t("Vessel.messages.updated"));
 
-        const dataDto = await apiGetVessels();
-        const data = dataDto.map(mapVesselDto);
+        await reload();
 
-        setItems(data);
-        setFiltered(data);
         setIsEditOpen(false);
         setEditIMO(null);
     }
@@ -257,6 +246,11 @@ export function useVessels() {
         isEditOpen,
         setIsEditOpen,
         setEditIMO,
+
+        // delete
+        isDeleteOpen,
+        setIsDeleteOpen,
+        reload,
 
         // stats modal
         isStatsOpen,

@@ -6,6 +6,7 @@ import { VesselSearchBar } from "../components/VesselSearchBar";
 import { VesselCardGrid } from "../components/VesselCardGrid";
 import { VesselCreateModal } from "../components/modals/VesselCreateModal";
 import { VesselEditModal } from "../components/modals/VesselEditModal";
+import VesselDeleteModal from "../components/modals/VesselDeleteModal";
 import { VesselStatsModal } from "../components/modals/VesselStatsModal";
 
 export default function VesselsPage() {
@@ -37,6 +38,9 @@ export default function VesselsPage() {
         setIsStatsOpen,
         getVesselTypeNameById,
         val,
+        isDeleteOpen,
+        setIsDeleteOpen,
+        reload,
     } = useVessels();
 
     const closeSlide = () => setSelected(null);
@@ -60,7 +64,6 @@ export default function VesselsPage() {
                 setSearchValue={setSearchValue}
                 onSearch={executeSearch}
                 resetFilter={() => {
-                    // volta à lista original
                     if (!loading) {
                         setSelected(null);
                     }
@@ -101,7 +104,6 @@ export default function VesselsPage() {
                         <button
                             className="vt-btn-edit"
                             onClick={() => {
-                                // preenche os dados para o modal
                                 setEditData({
                                     name: selected.name,
                                     owner: selected.owner,
@@ -134,6 +136,14 @@ export default function VesselsPage() {
                         >
                             View Type
                         </button>
+
+                        {/* ELIMINAR NAVIO */}
+                        <button
+                            className="vt-btn-delete"
+                            onClick={() => setIsDeleteOpen(true)}
+                        >
+                            Delete
+                        </button>
                     </div>
                 </div>
             )}
@@ -155,6 +165,14 @@ export default function VesselsPage() {
                 setEditData={setEditData}
                 onSave={handleSaveEdit}
                 onClose={() => setIsEditOpen(false)}
+            />
+
+            {/* DELETE MODAL */}
+            <VesselDeleteModal
+                open={isDeleteOpen}
+                vessel={selected}
+                onClose={() => setIsDeleteOpen(false)}
+                onDeleted={reload}
             />
 
             {/* STATS MODAL */}

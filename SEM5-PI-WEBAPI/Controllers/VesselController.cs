@@ -188,4 +188,21 @@ public class VesselController : ControllerBase
         }
     }
 
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        _logger.LogInformation("API Request: Delete Vessel with ID = {Id}", id);
+
+        try
+        {
+            await _service.DeleteAsync(new VesselId(id));
+            _logger.LogInformation("API Response (200): Vessel with ID = {Id} deleted successfully.", id);
+            return Ok($"Vessel with ID = {id} deleted successfully.");
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Error (404): Vessel with ID = {Id} -> NOT FOUND", id);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
+        }
+    }
 }

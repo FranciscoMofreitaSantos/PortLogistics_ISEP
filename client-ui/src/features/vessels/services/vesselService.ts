@@ -37,3 +37,7 @@ export async function apiPatchVesselByIMO(
     const res = await api.patch(`/api/Vessel/imo/${imo}`, data);
     return res.data;
 }
+
+export async function apiDeleteVessel(id: string): Promise<void> {
+    await api.delete(`/api/Vessel/${id}`);
+}

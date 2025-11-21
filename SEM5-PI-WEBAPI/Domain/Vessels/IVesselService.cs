@@ -20,5 +20,6 @@ namespace SEM5_PI_WEBAPI.Domain.Vessels
         Task<List<VesselDto>> GetFilterAsync(string? name, string? imo, string? ownerName, string? query);
 
         Task<VesselDto> PatchByImoAsync(string imo, UpdatingVesselDto dto);
+        Task DeleteAsync(VesselId vesselId);
     }
 }
