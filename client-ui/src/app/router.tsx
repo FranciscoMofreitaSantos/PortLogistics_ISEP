@@ -5,7 +5,7 @@ import Qualification from "../features/qualifications/pages/Qualification.tsx";
 import StaffMember from "../features/staffMembers/pages/StaffMember.tsx";
 import VesselsTypes from "../features/vesselsTypes/pages/VesselsTypes";
 import Vessels from "../features/vessels/pages/Vessel";
-import StorageArea from "../features/storageAreas/pages/storageAreaPage";
+import StorageArea from "../features/storageAreas/pages/StorageAreaPage";
 import StorageAreaCreate from "../features/storageAreas/pages/StorageAreaCreatePage.tsx";
 import PortScene from "../features/viewer3d/pages/Viewer3DPage";
 import PhysicalResource from "../features/physicalResource/pages/PhysicalResource";
