@@ -99,9 +99,7 @@ export function StorageAreaContainerModal({
                                 </strong>
                             </div>
                             <div className="sa-info-card">
-                                <span>
-                                    {t("storageAreas.modal.container.weight")}
-                                </span>
+                                {t("storageAreas.modal.container.weight")}
                                 <strong>
                                     {t(
                                         "storageAreas.modal.container.weight_unit",

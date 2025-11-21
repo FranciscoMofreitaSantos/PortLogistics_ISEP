@@ -1,0 +1,28 @@
+[
+  {
+    "id": "A1",
+    "name": "Yard A",
+    "description": "Main yard",
+    "type": "Yard",
+    "maxBays": 2,
+    "maxRows": 1,
+    "maxTiers": 1,
+    "maxCapacityTeu": 10,
+    "currentCapacityTeu": 5,
+    "physicalResources": ["Crane"],
+    "distancesToDocks": [{ "dockCode": "D1", "distance": 100 }]
+  },
+  {
+    "id": "B1",
+    "name": "Yard B",
+    "description": "Secondary yard",
+    "type": "Yard",
+    "maxBays": 1,
+    "maxRows": 1,
+    "maxTiers": 1,
+    "maxCapacityTeu": 5,
+    "currentCapacityTeu": 0,
+    "physicalResources": [],
+    "distancesToDocks": [{ "dockCode": "D2", "distance": 200 }]
+  }
+]
