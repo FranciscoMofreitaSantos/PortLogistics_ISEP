@@ -798,23 +798,23 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             throw new BusinessRuleValidationException($"No representative found with ID {idSarWhoImAm}");
         }
 
-        var organizationCode = representativeInDb.SAO;
-        if (organizationCode == null)
+        var organizationName = representativeInDb.SAO;
+        if (organizationName == null)
         {
             _logger.LogError("Representative {SAR_ID} has no organization assigned!", idSarWhoImAm);
             throw new BusinessRuleValidationException($"SAR {idSarWhoImAm} is not associated with any organization.");
         }
 
-        var organizationInDb = await _shippingAgentOrganizationRepository.GetByCodeAsync(organizationCode);
+        var organizationInDb = await _shippingAgentOrganizationRepository.GetByLegalNameAsync(organizationName);
         if (organizationInDb == null)
         {
-            _logger.LogError("Organization with code {Code} not found for SAR {SAR_ID}", organizationCode.Value,
+            _logger.LogError("Organization with name {Code} not found for SAR {SAR_ID}", organizationName,
                 idSarWhoImAm);
-            throw new BusinessRuleValidationException($"No organization found for code {organizationCode.Value}");
+            throw new BusinessRuleValidationException($"No organization found for name {organizationName}");
         }
 
-        var reps = await _shippingAgentRepresentativeRepository.GetAllSarBySaoAsync(organizationCode);
-        _logger.LogInformation("Found {Count} SARs under organization {OrgCode}", reps.Count, organizationCode.Value);
+        var reps = await _shippingAgentRepresentativeRepository.GetAllSarBySaoAsync(organizationName);
+        _logger.LogInformation("Found {Count} SARs under organization {OrgCode}", reps.Count, organizationName);
 
         return reps;
     }

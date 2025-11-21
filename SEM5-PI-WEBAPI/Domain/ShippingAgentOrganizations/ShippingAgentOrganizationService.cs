@@ -72,16 +72,22 @@ public class ShippingAgentOrganizationService: IShippingAgentOrganizationService
     public async Task<ShippingAgentOrganizationDto> CreateAsync(CreatingShippingAgentOrganizationDto creatingshippingAgentOrganizationDto)
     {
 
-        _logger.LogInformation("Business Domain: Request to add new Shipping Agent Organization with code  = {CODE}", creatingshippingAgentOrganizationDto.ShippingOrganizationCode);
-
+        
         //verificação de duplicados com o mesmo código
-        var code = new ShippingOrganizationCode(creatingshippingAgentOrganizationDto.ShippingOrganizationCode);
+        var code = ShippingOrganizationCode.Generate();
+        
+        _logger.LogInformation("Business Domain: Request to add new Shipping Agent Organization with code  = {CODE}",code);
+
         var codeExist = await _repo.GetByCodeAsync(code);
         if (codeExist != null)
-            throw new BusinessRuleValidationException($"SAO with code '{creatingshippingAgentOrganizationDto.ShippingOrganizationCode}' already exists on DB.");
+            throw new BusinessRuleValidationException($"SAO with code '{code}' already exists on DB.");
+
+        if (!TaxNumber.TryParse(creatingshippingAgentOrganizationDto.Taxnumber, out var taxNumber))
+        throw new BusinessRuleValidationException("Invalid or unsupported tax number.");
 
         //verificação de duplicados com o mesmo tax number
         var tax = new TaxNumber(creatingshippingAgentOrganizationDto.Taxnumber);
+        
         var taxExist = await _repo.GetByTaxNumberAsync(tax);
         if (taxExist != null)
             throw new BusinessRuleValidationException($"SAO with tax number '{creatingshippingAgentOrganizationDto.Taxnumber}' already exists on DB.");
@@ -91,7 +97,7 @@ public class ShippingAgentOrganizationService: IShippingAgentOrganizationService
         if (legalExist != null)
             throw new BusinessRuleValidationException($"SAO with legal name '{creatingshippingAgentOrganizationDto.LegalName}' already exists on DB.");
 
-        ShippingAgentOrganization createdOrg = ShippingAgentOrganizationFactory.CreateEntity(creatingshippingAgentOrganizationDto);
+        ShippingAgentOrganization createdOrg = ShippingAgentOrganizationFactory.CreateEntity(code,creatingshippingAgentOrganizationDto);
          
         await _repo.AddAsync(createdOrg);
         await _unitOfWork.CommitAsync();

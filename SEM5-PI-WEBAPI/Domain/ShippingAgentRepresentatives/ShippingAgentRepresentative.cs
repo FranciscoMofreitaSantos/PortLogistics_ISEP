@@ -22,7 +22,7 @@ public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>
 
     public Status Status { get; set; }
 
-    public ShippingOrganizationCode SAO { get; set; }
+    public string SAO { get; set; }
 
     public List<VvnCode> Notifs { get; set; }
 
@@ -31,7 +31,7 @@ public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>
     }
 
     public ShippingAgentRepresentative(string name, CitizenId citizenId, Nationality nationality, EmailAddress email,
-        PhoneNumber phoneNumber, Status status, ShippingOrganizationCode sao)
+        PhoneNumber phoneNumber, Status status, string sao)
     {
         Name = name;
         CitizenId = citizenId;

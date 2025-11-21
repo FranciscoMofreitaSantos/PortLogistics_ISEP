@@ -76,7 +76,7 @@ namespace SEM5_PI_WEBAPI.Tests.Services
                     new EmailAddress("agent@example.com"),
                     phone,
                     Status.activated,
-                    new ShippingOrganizationCode("1234567890")
+                    "Test Org"
                 ));
 
             _vesselRepo.Setup(r => r.GetByImoNumberAsync(It.IsAny<ImoNumber>()))
@@ -280,12 +280,12 @@ namespace SEM5_PI_WEBAPI.Tests.Services
             var saoCode = new ShippingOrganizationCode("1234567890");
             var phone = new PhoneNumber("+351912345678");
             var sar = new ShippingAgentRepresentative(
-                "John", new CitizenId("AB123456"), Nationality.Portugal, new EmailAddress("john@example.com"), phone, Status.activated, saoCode);
+                "John", new CitizenId("AB123456"), Nationality.Portugal, new EmailAddress("john@example.com"), phone, Status.activated, "Test Org");
 
             _sarRepo.Setup(r => r.GetByIdAsync(It.IsAny<ShippingAgentRepresentativeId>())).ReturnsAsync(sar);
-            _saoRepo.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>()))
+            _saoRepo.Setup(r => r.GetByLegalNameAsync(It.IsAny<string>()))
                 .ReturnsAsync(new ShippingAgentOrganization(saoCode, "Org", "Alt", "Addr", new TaxNumber("PT123456789")));
-            _sarRepo.Setup(r => r.GetAllSarBySaoAsync(It.IsAny<ShippingOrganizationCode>()))
+            _sarRepo.Setup(r => r.GetAllSarBySaoAsync(It.IsAny<string>()))
                 .ReturnsAsync(new List<ShippingAgentRepresentative> { sar });
 
             var dto = new FilterInProgressPendingVvnStatusDto();

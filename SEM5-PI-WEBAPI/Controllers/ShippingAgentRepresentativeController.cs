@@ -167,7 +167,7 @@ public class ShippingAgentRepresentativeController : ControllerBase
 
         try
         {
-            _logger.LogInformation("API Request: Partial update for Shipping AgentRepresentative with email = {EMAIL}", address);
+            _logger.LogInformation("API Request: Partial update for Shipping Agent Representative with email = {EMAIL}", address);
 
             var updatedDto = await _service.PatchByEmailAsync(address, dto);
             _logger.LogInformation("API Response (200): Representative with  email = {EMAIL} patched successfully", address);
@@ -197,6 +197,24 @@ public class ShippingAgentRepresentativeController : ControllerBase
         {
             _logger.LogWarning("API Error (400): {Message}", e.Message);
             return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        _logger.LogInformation("API Request: Delete Shipping Agent Representative with ID = {Id}", id);
+
+        try
+        {
+            await _service.DeleteAsync(id);
+            _logger.LogInformation("API Response (200): Shipping Agent Representative with ID = {Id} deleted successfully.", id);
+            return Ok($"Shipping Agent Representative with ID = {id} deleted successfully.");
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Error (404): Vessel Type with ID = {Id} -> NOT FOUND", id);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
 

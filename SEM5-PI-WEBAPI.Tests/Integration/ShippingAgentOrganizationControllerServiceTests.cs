@@ -148,8 +148,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         [Fact]
         public async Task Create_ShouldReturnCreated_WhenValidData()
         {
-            var creatingDto = new CreatingShippingAgentOrganizationDto(
-                "ORG4567XYZ", 
+            var creatingDto = new CreatingShippingAgentOrganizationDto( 
                 "LegalName", 
                 "AltName", 
                 "Address", 
@@ -158,7 +157,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
 
             var createdDto = new ShippingAgentOrganizationDto(
                 Guid.NewGuid(), 
-                new ShippingOrganizationCode(creatingDto.ShippingOrganizationCode), 
+                ShippingOrganizationCode.Generate(), 
                 creatingDto.LegalName, 
                 creatingDto.AltName, 
                 creatingDto.Address, 
@@ -178,7 +177,6 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         public async Task Create_ShouldReturnBadRequest_WhenBusinessRuleViolationOccurs()
         {
             var creatingDto = new CreatingShippingAgentOrganizationDto(
-                "CODE1234AA", 
                 "LegalName", 
                 "AltName", 
                 "Address", 

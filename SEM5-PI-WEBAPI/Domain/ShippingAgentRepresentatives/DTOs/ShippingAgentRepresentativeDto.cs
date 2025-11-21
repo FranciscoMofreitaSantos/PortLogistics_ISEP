@@ -10,25 +10,13 @@ public class ShippingAgentRepresentativeDto
     public Nationality Nationality { get; set; }
     public EmailAddress Email { get; set; }
     public PhoneNumber PhoneNumber { get; set; }
-    public ShippingOrganizationCode SAO { get; set; }
+    public string SAO { get; set; }
     public List<VvnCode> Notifs { get; set; } 
     public Status Status { get; set; }
 
-    public ShippingAgentRepresentativeDto(Guid id, string name, CitizenId citizenId, Nationality nationality, EmailAddress email, PhoneNumber phoneNumber, Status status, ShippingOrganizationCode sao, List<VvnCode> notifs)
+    public ShippingAgentRepresentativeDto(Guid id, string name, CitizenId citizenId, Nationality nationality, EmailAddress email, PhoneNumber phoneNumber, Status status, string sao, List<VvnCode> notifs)
     {
-        Name = name;
-        CitizenId = citizenId;
-        Nationality = nationality;
-        Email = email;
-        PhoneNumber = phoneNumber;
-        Status = status;
-        SAO = sao;
-        Notifs = notifs;
         Id = id;
-    }
-
-    public ShippingAgentRepresentativeDto(string name, CitizenId citizenId, Nationality nationality, EmailAddress email, PhoneNumber phoneNumber, Status status, ShippingOrganizationCode sao, List<VvnCode> notifs)
-    {
         Name = name;
         CitizenId = citizenId;
         Nationality = nationality;

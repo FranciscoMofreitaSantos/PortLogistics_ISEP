@@ -6,7 +6,7 @@
     "Email": {"Address": "jorgerodriguezf21@gmail.com"},
     "PhoneNumber": {"Number": "+351912345678"},
     "Status": "activated",
-    "SAO": "1112223334"
+    "SAO": "Atlantic Maritime Lines"
   },
   {
     "Name": "Francisco Santos",
@@ -15,7 +15,7 @@
     "Email": {"Address":"xico.mofreitasantos@gmail.com"},
     "PhoneNumber": {"Number": "+351913456789"},
     "Status": "activated",
-    "SAO": "2223334445"
+    "SAO": "BlueOcean Logistics SA"
   },
   {
     "Name": "Carlos Mendes",
@@ -24,7 +24,7 @@
     "Email": {"Address":"carlos.mendes@gmail.com"},
     "PhoneNumber": {"Number": "+351914567890"},
     "Status": "activated",
-    "SAO": "3334445556"
+    "SAO": "Global Freight Solutions"
   },
   {
     "Name": "Diana Ferreira",
@@ -33,7 +33,7 @@
     "Email": {"Address":"diana.ferreira@gmail.com"},
     "PhoneNumber": {"Number": "+351915678901"},
     "Status": "activated",
-    "SAO": "4445556667"
+    "SAO": "PortoCargo Lines Lda"
   },
   {
     "Name": "Eduardo Rocha",
@@ -42,6 +42,6 @@
     "Email": {"Address":"eduardo.rocha@gmail.com"},
     "PhoneNumber": {"Number": "+351916789012"},
     "Status": "activated",
-    "SAO": "5556667778"
+    "SAO": "Lusitanian Sea Transport"
   }
 ]

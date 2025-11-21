@@ -49,7 +49,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                     new EmailAddress("john@example.com"),
                     new PhoneNumber("+123456789"),
                     SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated,
-                    new ShippingOrganizationCode("REP001XYZ"),
+                    "Test Org 1",
                     new List<VvnCode>()
                 ),
                 new ShippingAgentRepresentativeDto(
@@ -60,7 +60,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                     new EmailAddress("jane@example.com"),
                     new PhoneNumber("+987654321"),
                     SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.deactivated,
-                    new ShippingOrganizationCode("REP002ABC"),
+                    "Test Org ",
                     new List<VvnCode>()
                 )
             };
@@ -85,7 +85,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 new EmailAddress("john@example.com"),
                 new PhoneNumber("+123456789"),
                 "activated",
-                "REP001XYZ"
+                "Test Org"
             );
 
             var createdDto = new ShippingAgentRepresentativeDto(
@@ -96,7 +96,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 creatingDto.Email,
                 creatingDto.PhoneNumber,
                 SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated,
-                new ShippingOrganizationCode(creatingDto.Sao),
+                creatingDto.Sao,
                 new List<VvnCode>()
             );
 
@@ -122,7 +122,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 new EmailAddress("john@example.com"),
                 new PhoneNumber("+123456789"),
                 SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives.Status.activated,
-                new ShippingOrganizationCode("REP001XYZ"),
+                "Test Org",
                 new List<VvnCode> { vvn }
             );
 

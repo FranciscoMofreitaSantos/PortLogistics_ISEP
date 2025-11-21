@@ -84,7 +84,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         return ShippingAgentRepresentativeFactory.CreateDto(q);
     }
 
-    public async Task<ShippingAgentRepresentativeDto> GetBySaoAsync(ShippingOrganizationCode Code)
+    public async Task<ShippingAgentRepresentativeDto> GetBySaoAsync(string Code)
     {
         var q = await this._repo.GetBySaoAsync(Code);
 
@@ -108,13 +108,12 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (!Enum.TryParse<Status>(dto.Status, true, out var status))
             throw new BusinessRuleValidationException($"Invalid status '{dto.Status}'. Must be 'activated' or 'deactivated'.");
 
-        var saoInDb = await _shippingAgentOrganizationRepository.GetByCodeAsync(new ShippingOrganizationCode(dto.Sao));
+        var saoInDb = await _shippingAgentOrganizationRepository.GetByLegalNameAsync(dto.Sao);
         if (saoInDb == null) throw new BusinessRuleValidationException($"SAO '{dto.Sao}' not found in Db.");
         
-        var saoCode = new ShippingOrganizationCode(dto.Sao);
         
         //verfica se já existe algum SAR associado ao SAO que se pretende associar ao SAR que se está a criar
-        var saoTaken = await _repo.GetBySaoAsync(saoCode);
+        var saoTaken = await _repo.GetBySaoAsync(dto.Sao);
         if (saoTaken != null) throw new BusinessRuleValidationException($"A representative for SAO '{dto.Sao}' already exists on DB.");
 
         ShippingAgentRepresentativeFactory.CreateEntity(dto);
@@ -126,7 +125,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
             dto.Email,
             dto.PhoneNumber,
             status,
-            saoCode
+            dto.Sao
         );
 
         await _repo.AddAsync(representative);
@@ -145,13 +144,19 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
         if (representative == null)
             throw new BusinessRuleValidationException($"No representative found with email {email}.");
 
-       if (dto.Email != null)
+        if (!string.IsNullOrWhiteSpace(dto.Email))
         {
-            var emailExist = await _repo.GetByEmailAsync(dto.Email);
-            if (emailExist != null)
-                throw new BusinessRuleValidationException($"An SAR with email address '{dto.Email}' already exists on DB.");
+            var normalizedDtoEmail = dto.Email.Address.Trim().ToLowerInvariant();
 
-            representative.UpdateEmail(dto.Email);
+            // Only attempt update if different from current
+            if (!string.Equals(normalizedDtoEmail, representative.Email.Address.Trim().ToLowerInvariant()))
+            {
+                var emailExist = await _repo.GetByEmailAsync(new EmailAddress(normalizedDtoEmail));
+                if (emailExist != null && emailExist.Id != representative.Id)
+                    throw new BusinessRuleValidationException($"An SAR with email address '{dto.Email}' already exists on DB.");
+
+                representative.UpdateEmail(new EmailAddress(normalizedDtoEmail));
+            }
         }
 
         // Only update status if provided
@@ -194,6 +199,19 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
             representative.SAO,
             representative.Notifs
         );
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        var sarInDB = await _repo.GetByIdAsync(new ShippingAgentRepresentativeId(id));
+
+        if (sarInDB == null)
+        {
+            throw new BusinessRuleValidationException($"No Vessel Type found with ID = {id.ToString()}. Deletion aborted.");
+        }
+
+        _repo.Remove(sarInDB);
+        await _unitOfWork.CommitAsync();
     }
 
 }

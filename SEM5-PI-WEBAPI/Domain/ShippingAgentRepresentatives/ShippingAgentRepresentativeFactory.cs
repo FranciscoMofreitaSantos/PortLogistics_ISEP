@@ -8,6 +8,7 @@ public class ShippingAgentRepresentativeFactory
     public static ShippingAgentRepresentativeDto CreateDto(ShippingAgentRepresentative shippingAgentRepresentative)
     {
         return new ShippingAgentRepresentativeDto(
+            shippingAgentRepresentative.Id.AsGuid(),
             shippingAgentRepresentative.Name,
             shippingAgentRepresentative.CitizenId,
             shippingAgentRepresentative.Nationality,
@@ -31,7 +32,7 @@ public class ShippingAgentRepresentativeFactory
             dto.Email,
             dto.PhoneNumber,
             parsedStatus,
-            new ShippingOrganizationCode(dto.Sao)
+            dto.Sao
         );
     }
 

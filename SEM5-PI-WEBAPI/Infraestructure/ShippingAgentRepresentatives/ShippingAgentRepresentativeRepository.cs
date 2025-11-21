@@ -13,9 +13,9 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
             _context = context;
         }
 
-        public async Task<List<ShippingAgentRepresentative>> GetAllSarBySaoAsync(ShippingOrganizationCode organizationCode)
+        public async Task<List<ShippingAgentRepresentative>> GetAllSarBySaoAsync(string organization)
         {
-            return await _context.ShippingAgentRepresentative.Where(s => s.SAO.Value == organizationCode.Value).ToListAsync();
+            return await _context.ShippingAgentRepresentative.Where(s => s.SAO.Equals(organization)).ToListAsync();
         }
 
         public async Task<ShippingAgentRepresentative?> GetByNameAsync(string name)
@@ -42,13 +42,13 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
                 .FirstOrDefaultAsync(x => x.Status == status);
         }
 
-        public async Task<ShippingAgentRepresentative?> GetBySaoAsync(ShippingOrganizationCode sao)
+        public async Task<ShippingAgentRepresentative?> GetBySaoAsync(string sao)
         {
             return await _context.ShippingAgentRepresentative
-                .FirstOrDefaultAsync(x => x.SAO.Value.ToLower().Trim() == sao.Value.ToLower().Trim());
+                .FirstOrDefaultAsync(x => x.SAO.ToLower().Trim().Equals(sao.ToLower().Trim()));
         }
 
-        public async Task<List<ShippingAgentRepresentative>> GetFilterAsync(string? name, CitizenId? citizenId, Nationality? nationality, EmailAddress? email, PhoneNumber? phoneNumber,Status? status,ShippingOrganizationCode? sao, string? query)
+        public async Task<List<ShippingAgentRepresentative>> GetFilterAsync(string? name, CitizenId? citizenId, Nationality? nationality, EmailAddress? email, PhoneNumber? phoneNumber,Status? status,string? sao, string? query)
         {
             var normalizedName = name?.Trim().ToLower();
             var normalizedQuery = query?.Trim().ToLower();
@@ -74,7 +74,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
                 queryable = queryable.Where(v => v.Status == status);
 
             if (sao != null)
-                queryable = queryable.Where(v => v.SAO == sao);
+                queryable = queryable.Where(v => v.SAO.Equals(sao));
 
             if (!string.IsNullOrEmpty(normalizedQuery))
                 queryable = queryable.Where(v =>
@@ -84,7 +84,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
                     v.Email == email ||
                     v.PhoneNumber == phoneNumber ||
                     v.Status == status ||
-                    v.SAO == sao);
+                    v.SAO.Equals(sao));
 
             return await queryable.ToListAsync();
         }

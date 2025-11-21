@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
@@ -6,7 +7,9 @@ namespace SEM5_PI_WEBAPI.Domain.ValueObjects
     public class ShippingOrganizationCode : IValueObject
     {
         public string Value { get; private set; }
-
+        
+        private static readonly Random _random = new Random();
+        private const string _chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         public ShippingOrganizationCode(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -43,5 +46,22 @@ namespace SEM5_PI_WEBAPI.Domain.ValueObjects
         }
 
         public override int GetHashCode() => Value.GetHashCode(StringComparison.OrdinalIgnoreCase);
+
+
+
+        public static ShippingOrganizationCode Generate()
+        {
+            int length = 10;
+            if (length <= 0 || length > 10)
+                throw new ArgumentException("Length must be between 1 and 10.");
+
+            var sb = new StringBuilder(length);
+            for (int i = 0; i < length; i++)
+            {
+                sb.Append(_chars[_random.Next(_chars.Length)]);
+            }
+
+            return new ShippingOrganizationCode(sb.ToString());
+        }
     }
 }

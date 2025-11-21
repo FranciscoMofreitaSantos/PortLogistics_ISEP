@@ -47,7 +47,7 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
             new EmailAddress("john.doe@example.com"),
             new PhoneNumber("+351912345678"),
             Status.activated,
-            new ShippingOrganizationCode("AB1234567"),
+            "Test ORg",
             new List<VvnCode>()
         );
 

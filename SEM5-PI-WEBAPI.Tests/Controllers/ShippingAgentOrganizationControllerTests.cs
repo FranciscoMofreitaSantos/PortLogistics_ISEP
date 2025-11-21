@@ -115,7 +115,6 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task Create_ShouldReturnCreated_WhenValid()
         {
             var creatingDto = new CreatingShippingAgentOrganizationDto(
-                _sampleDto.ShippingOrganizationCode.ToString(),
                 _sampleDto.LegalName,
                 _sampleDto.AltName,
                 _sampleDto.Address,
@@ -135,7 +134,6 @@ namespace SEM5_PI_WEBAPI.Tests.Controllers
         public async Task Create_ShouldReturnBadRequest_WhenBusinessRuleException()
         {
             var creatingDto = new CreatingShippingAgentOrganizationDto(
-                _sampleDto.ShippingOrganizationCode.ToString(),
                 _sampleDto.LegalName,
                 _sampleDto.AltName,
                 _sampleDto.Address,

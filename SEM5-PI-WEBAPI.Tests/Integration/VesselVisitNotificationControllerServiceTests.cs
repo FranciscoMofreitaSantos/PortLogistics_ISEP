@@ -93,7 +93,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                     new EmailAddress("agent@example.com"),
                     phone,
                     Status.activated,
-                    new ShippingOrganizationCode("1234567890")
+                    "Test Org"
                 ));
 
             _crewManifestRepoMock.Setup(r => r.AddAsync(It.IsAny<CrewManifest>()))

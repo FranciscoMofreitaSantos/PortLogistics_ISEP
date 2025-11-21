@@ -42,12 +42,8 @@ namespace SEM5_PI_WEBAPI.Infraestructure.ShippingAgentRepresentatives
             builder.Property(b => b.Status)
                 .IsRequired();
 
-            builder.OwnsOne(b => b.SAO, shippingOrganizationCode =>
-            {
-                shippingOrganizationCode.Property(p => p.Value)
-                    .HasColumnName("ShippingOrganizationCode")
-                    .IsRequired();
-            });
+            builder.Property(b=> b.SAO)
+                .IsRequired();
 
             //cria tabela intermediária para fazer tracking de que VVNs o SAR tem
             builder.OwnsMany(b => b.Notifs, notif =>

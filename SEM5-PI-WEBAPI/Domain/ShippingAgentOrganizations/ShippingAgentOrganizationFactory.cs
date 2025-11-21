@@ -11,10 +11,10 @@ public class ShippingAgentOrganizationFactory
             shippingAgentOrganization.AltName, shippingAgentOrganization.Address, shippingAgentOrganization.Taxnumber);
     }
 
-    public static ShippingAgentOrganization CreateEntity(CreatingShippingAgentOrganizationDto dto)
+    public static ShippingAgentOrganization CreateEntity(ShippingOrganizationCode code,CreatingShippingAgentOrganizationDto dto)
     {
         return new ShippingAgentOrganization(
-            new ShippingOrganizationCode(dto.ShippingOrganizationCode),
+            code,
             dto.LegalName,
             dto.AltName,
             dto.Address,

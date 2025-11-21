@@ -43,9 +43,9 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             var reps = new List<ShippingAgentRepresentative>
             {
                 new ShippingAgentRepresentative("John Doe", new CitizenId("A123456"), Nationality.Portugal,
-                    new EmailAddress("john@doe.com"), new PhoneNumber("+351912345678"), Activated, new ShippingOrganizationCode("AB1234")),
+                    new EmailAddress("john@doe.com"), new PhoneNumber("+351912345678"), Activated, "Test Org 1"),
                 new ShippingAgentRepresentative("Jane Smith", new CitizenId("B987654"), Nationality.Spain,
-                    new EmailAddress("jane@smith.com"), new PhoneNumber("+34912345678"), Deactivated, new ShippingOrganizationCode("ZX9876"))
+                    new EmailAddress("jane@smith.com"), new PhoneNumber("+34912345678"), Deactivated, "Test Org 2")
             };
 
             _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(reps);
@@ -61,7 +61,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         public async Task GetById_ShouldReturnRepresentative_WhenExists()
         {
             var rep = new ShippingAgentRepresentative("John Doe", new CitizenId("C123456"), Nationality.Italy,
-                new EmailAddress("john@doe.com"), new PhoneNumber("+390123456789"), Activated, new ShippingOrganizationCode("REP1234"));
+                new EmailAddress("john@doe.com"), new PhoneNumber("+390123456789"), Activated, "Test Org 1");
 
             _repoMock.Setup(r => r.GetByIdAsync(rep.Id)).ReturnsAsync(rep);
 
@@ -81,12 +81,12 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
                 new EmailAddress("alice@wonder.com"),
                 new PhoneNumber("+33123456789"),
                 "activated",
-                "SAO12345"
+                "Test Org"
             );
 
             _repoMock.Setup(r => r.GetByCitizenIdAsync(dto.CitizenId)).ReturnsAsync((ShippingAgentRepresentative)null);
-            _repoMock.Setup(r => r.GetBySaoAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync((ShippingAgentRepresentative)null);
-            _saoRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>()))
+            _repoMock.Setup(r => r.GetBySaoAsync(It.IsAny<string>())).ReturnsAsync((ShippingAgentRepresentative)null);
+            _saoRepoMock.Setup(r => r.GetByLegalNameAsync(It.IsAny<string>()))
                 .ReturnsAsync(new ShippingAgentOrganization(new ShippingOrganizationCode("SAO12345"),
                     "Legal Four", "Alt Four", "Addr Four", new TaxNumber("PT000000004")));
 
@@ -115,7 +115,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             );
 
             var existing = new ShippingAgentRepresentative("Someone", dto.CitizenId, Nationality.Spain,
-                new EmailAddress("someone@old.com"), new PhoneNumber("+34123456789"), Deactivated, new ShippingOrganizationCode("OLD5678"));
+                new EmailAddress("someone@old.com"), new PhoneNumber("+34123456789"), Deactivated, "Test Existing Org");
 
             _repoMock.Setup(r => r.GetByCitizenIdAsync(dto.CitizenId)).ReturnsAsync(existing);
 
@@ -158,11 +158,11 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             var sao = new ShippingAgentOrganization(new ShippingOrganizationCode("REP2222"),
                 "Legal Seven", "Alt Seven", "Addr Seven", new TaxNumber("PT000000007"));
             var existingRep = new ShippingAgentRepresentative("Existing", new CitizenId("Z987654"),
-                Nationality.Spain, new EmailAddress("exist@mail.com"), new PhoneNumber("+34111222333"), Activated, sao.ShippingOrganizationCode);
+                Nationality.Spain, new EmailAddress("exist@mail.com"), new PhoneNumber("+34111222333"), Activated, sao.LegalName);
 
             _repoMock.Setup(r => r.GetByCitizenIdAsync(dto.CitizenId)).ReturnsAsync((ShippingAgentRepresentative)null);
             _saoRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync(sao);
-            _repoMock.Setup(r => r.GetBySaoAsync(It.IsAny<ShippingOrganizationCode>())).ReturnsAsync(existingRep);
+            _repoMock.Setup(r => r.GetBySaoAsync(It.IsAny<string>())).ReturnsAsync(existingRep);
 
             await Assert.ThrowsAsync<BusinessRuleValidationException>(() => _service.AddAsync(dto));
         }
@@ -187,7 +187,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
             );
 
             var rep = new ShippingAgentRepresentative("Eddie", new CitizenId("H123456"), Nationality.Portugal,
-                new EmailAddress("eddie@mail.com"), new PhoneNumber("+351911111111"), Activated, new ShippingOrganizationCode("AGENT88"));
+                new EmailAddress("eddie@mail.com"), new PhoneNumber("+351911111111"), Activated, "Test Org");
 
             _repoMock.Setup(r => r.GetByNameAsync(rep.Name)).ReturnsAsync(rep);
             _vvnRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<VvnCode>())).ReturnsAsync(vvn);
@@ -203,7 +203,7 @@ namespace SEM5_PI_WEBAPI.Tests.Integration
         public async Task AddNotificationAsync_ShouldThrow_WhenVVNNotFound()
         {
             var rep = new ShippingAgentRepresentative("Fiona", new CitizenId("I123456"), Nationality.France,
-                new EmailAddress("fiona@mail.com"), new PhoneNumber("+33111111111"), Activated, new ShippingOrganizationCode("FR00123"));
+                new EmailAddress("fiona@mail.com"), new PhoneNumber("+33111111111"), Activated, "Test Org");
 
             _repoMock.Setup(r => r.GetByNameAsync(rep.Name)).ReturnsAsync(rep);
             _vvnRepoMock.Setup(r => r.GetByCodeAsync(It.IsAny<VvnCode>()))
