@@ -1,9 +1,3 @@
-export interface Qualification {
-    code: string,
-    name: string,
-    id: string
-}
-
 export interface CreateQualificationRequest {
     name: string,
     code?: string
@@ -14,6 +8,6 @@ export interface UpdateQualificationRequest {
     code?: string
 }
 
-export interface QualificationsList {
+export interface QualificationsListResponse {
     qualificationsCodes: string[]
 }

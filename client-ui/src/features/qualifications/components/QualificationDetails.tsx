@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
-import type { Qualification } from "../types/qualification";
+import type { Qualification } from "../domain/qualification";
 
 interface Props {
     qualification: Qualification;

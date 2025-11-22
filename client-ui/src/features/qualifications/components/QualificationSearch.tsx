@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { notifyError, notifyLoading, notifySuccess } from "../../../utils/notify";
 import toast from "react-hot-toast";
 import { FaSearch } from "react-icons/fa";
-import type { Qualification } from "../types/qualification";
+import type { Qualification } from "../domain/qualification";
 import { getQualificationByCode, getQualificationByName } from "../services/qualificationService";
 
 interface Props {
