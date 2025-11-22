@@ -1,0 +1,17 @@
+[
+  {
+    "id": "1",
+    "code": "QLF-001",
+    "name": "Sistema de Gestão de Qualidade"
+  },
+  {
+    "id": "2",
+    "code": "QLF-002",
+    "name": "Sistema de Gestão de Segurança"
+  },
+  {
+    "id": "3",
+    "code": "QLF-003",
+    "name": "Segurança de Navios e Instalações Portuárias"
+  }
+]
