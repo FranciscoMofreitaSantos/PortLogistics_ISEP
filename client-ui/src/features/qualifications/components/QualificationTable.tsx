@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { Qualification } from "../types/qualification";
+import type { Qualification } from "../domain/qualification";
 
 interface Props {
     items: Qualification[];

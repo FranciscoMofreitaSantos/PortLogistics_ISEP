@@ -4,7 +4,7 @@ import { notifyLoading, notifySuccess } from "../../../utils/notify";
 import toast from "react-hot-toast";
 import { FaCertificate } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import type { Qualification } from "../types/qualification";
+import type { Qualification } from "../domain/qualification";
 import { getQualifications } from "../services/qualificationService";
 import QualificationTable from "../components/QualificationTable";
 import QualificationSearch from "../components/QualificationSearch";
@@ -64,9 +64,7 @@ export default function Qualification() {
 
     return (
         <div className="qual-page">
-            {/* HEADER */}
             <div className="qual-title-area">
-                {/* BOTÃO DE VOLTAR + TÍTULO */}
                 <div className="qual-header-left">
                     <Link
                         to="/dashboard"
