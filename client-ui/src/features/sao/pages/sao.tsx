@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 
 import {
     getSAOs,
-    getById,
     getByCode,
     getByLegalName,
     getByTaxNumber,
-    createSAO
+    createSAO,
+    deleteSAO
 } from "../services/saoService";
 
 import type { SAO } from "../types/sao";
@@ -38,6 +38,8 @@ export default function SAO() {
     const [filtered, setFiltered] = useState<SAO[]>([]);
     const [selected, setSelected] = useState<SAO | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [deleteModel, setDeleteModel] = useState<SAO | null>(null);
 
     const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -50,8 +52,8 @@ export default function SAO() {
     const [taxnumber, setTaxnumber] = useState("");
 
     const [searchMode, setSearchMode] = useState<
-        "local" | "id" | "code" | "legalName" | "taxnumber"
-    >("local");
+        "legalName" | "taxnumber"
+    >("legalName");
 
 
    const [searchValue, setSearchValue] = useState("");
@@ -91,32 +93,14 @@ export default function SAO() {
             return;
         }
 
-        // Local search only
-        if (searchMode === "local") {
-            const q = searchValue.toLowerCase();
-            const results = items.filter(s =>
-                s.legalName.toLowerCase().includes(q) ||
-                s.altName?.toLowerCase().includes(q) ||
-                s.taxnumber?.value?.toLowerCase().includes(q) ||
-                s.shippingOrganizationCode?.value?.toLowerCase().includes(q)
-            );
-
-            setFiltered(results);
-            toast.success(t("sao.loadSuccess", { count: results.length }));
-            return;
-        }
-
-        // Remote search
         let result: SAO | null = null;
 
         const p =
-            searchMode === "id"
-                ? getById(searchValue)
-                : searchMode === "code"
-                ? getByCode(searchValue)
-                : searchMode === "legalName"
+                searchMode === "legalName"
                 ? getByLegalName(searchValue)
-                : getByTaxNumber({ value: searchValue });
+                : searchMode === "taxnumber"
+                ? getByTaxNumber(searchValue)
+                : getByLegalName(searchValue);
 
         result = await runWithLoading(p, t("sao.loading")).catch(() => null);
 
@@ -130,8 +114,6 @@ export default function SAO() {
     };
 
     const handleCreate = async () => {
-        if (!shippingOrganizationCode.trim())
-            return toast.error(t("sao.errors.codeRequired"));
 
         if (!legalName.trim())
             return toast.error(t("sao.errors.legalNameRequired"));
@@ -170,8 +152,70 @@ export default function SAO() {
         setTaxnumber("");
     };
 
+    
+    const openDelete = () => {
+        if (!selected) return;
+        setDeleteModel({ ...selected });
+        setSelected(null);
+        setIsDeleteOpen(true);
+        document.body.classList.add("no-scroll");
+    };
+
+    const closeDelete = () => {
+        setIsDeleteOpen(false);
+        setDeleteModel(null);
+        document.body.classList.remove("no-scroll");
+    };
+
 
     const closeSlide = () => setSelected(null);
+
+    function DeleteSAOModal({
+        deleteModel,
+        closeDelete,
+        refresh,
+        t
+    }: {
+        deleteModel: SAO | null;
+        closeDelete: () => void;
+        refresh: () => Promise<void>;
+        t: any;
+    }) {
+        if (!deleteModel) return null;
+
+        const model = deleteModel;
+
+        async function handleDelete() {
+            await deleteSAO(model.legalName);
+            toast.success(t("sao.deleted"));
+            await refresh();
+            closeDelete();
+        }
+
+        return (
+            <div className="sao-modal-overlay">
+                <div className="sao-modal sao-modal-delete">
+                    <h3>{t("sao.delete")}</h3>
+                    <p>
+                        {t("sao.details.legalName")}: <strong>{model.legalName}</strong><br />
+                        {t("sao.details.altName")}: <strong>{model.altName}</strong><br />
+                        {t("sao.details.address")}: <strong>{model.address}</strong><br />
+                        {t("sao.details.taxnumber")}: <strong>{model.taxnumber.value}</strong>
+                    </p>
+
+                    <div className="sao-modal-actions">
+                        <button className="vt-btn-cancel" onClick={closeDelete}>
+                            {t("sao.cancel")}
+                        </button>
+                        <button className="vt-btn-delete" onClick={handleDelete}>
+                            {t("sao.delete")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <div className="sao-page">
@@ -197,35 +241,18 @@ export default function SAO() {
 
             {/* SEARCH MODE BUTTONS */}
             <div className="sao-search-mode">
-                <button
-                    className={searchMode === "local" ? "active" : ""}
-                    onClick={() => setSearchMode("local")}
-                >
-                    Local
-                </button>
-                <button
-                    className={searchMode === "id" ? "active" : ""}
-                    onClick={() => setSearchMode("id")}
-                >
-                    ID
-                </button>
-                <button
-                    className={searchMode === "code" ? "active" : ""}
-                    onClick={() => setSearchMode("code")}
-                >
-                    Code
-                </button>
+                {t("sao.searchMode") }
                 <button
                     className={searchMode === "legalName" ? "active" : ""}
                     onClick={() => setSearchMode("legalName")}
                 >
-                    Legal Name
+                    {t("sao.details.legalName")}
                 </button>
                 <button
                     className={searchMode === "taxnumber" ? "active" : ""}
                     onClick={() => setSearchMode("taxnumber")}
                 >
-                    Tax Number
+                    {t("sao.details.taxnumber")}
                 </button>
             </div>
 
@@ -269,7 +296,6 @@ export default function SAO() {
                     <table className="sao-table">
                         <thead>
                             <tr>
-                                <th>{t("sao.details.code")}</th>
                                 <th>{t("sao.details.legalName")}</th>
                                 <th>{t("sao.details.altName")}</th>
                                 <th>{t("sao.details.address")}</th>
@@ -279,11 +305,10 @@ export default function SAO() {
                         <tbody>
                             {filtered.map((s) => (
                                 <tr
-                                    key={s.shippingOrganizationCode.value}
+                                    key={s.legalName}
                                     className="sao-row"
                                     onClick={() => setSelected(s)}
                                 >
-                                    <td><span className="sao-badge">{s.shippingOrganizationCode.value}</span></td>
                                     <td>{s.legalName}</td>
                                     <td>{s.altName}</td>
                                     <td>{s.address}</td>
@@ -307,11 +332,15 @@ export default function SAO() {
 
                     <h3>{selected.legalName}</h3>
 
-                    <p><strong>{t("sao.details.code")}:</strong> {selected.shippingOrganizationCode.value}</p>
                     <p><strong>{t("sao.details.altName")}:</strong> {selected.altName}</p>
                     <p><strong>{t("sao.details.address")}:</strong> {selected.address}</p>
                     <p><strong>{t("sao.details.taxnumber")}:</strong> {selected.taxnumber.value}</p>
+                    <div className="vt-slide-actions">
+
+                        <button className="vt-btn-delete" onClick={openDelete}>{t("sao.delete")}</button>
+                    </div>
                 </div>
+                
             )}
 
             {/* CREATE MODAL */}
@@ -319,13 +348,6 @@ export default function SAO() {
                 <div className="sao-modal-overlay">
                     <div className="sao-modal">
                         <h3>{t("sao.add")}</h3>
-
-                        <label>{t("sao.details.code")} *</label>
-                        <input
-                            className="sao-input"
-                            value={shippingOrganizationCode}
-                            onChange={(e) => setShippingOrganizationCode(e.target.value)}
-                        />
 
                         <label>{t("sao.details.legalName")} *</label>
                         <input
@@ -372,6 +394,21 @@ export default function SAO() {
                     </div>
                 </div>
             )}
+
+        {isDeleteOpen && (
+            <DeleteSAOModal
+                deleteModel={deleteModel}
+                closeDelete={closeDelete}
+                refresh={async () => {
+                    const data = await getSAOs();
+                    setItems(data);
+                    setFiltered(data);
+                }}
+                t={t}
+            />
+        )}
+
+            
         </div>
     );
 }

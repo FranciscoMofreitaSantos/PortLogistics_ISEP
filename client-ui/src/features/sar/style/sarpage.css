@@ -1,5 +1,5 @@
 /* PAGE BASE */
-.sao-page {
+.vt-page {
     position: relative;
     padding: 24px;
     background: var(--bg);
@@ -7,7 +7,7 @@
     font-family: "Poppins", sans-serif;
 }
 
-.sao-overlay {
+.vt-overlay {
     position: fixed;
     inset: 0;
     backdrop-filter: blur(6px);
@@ -16,7 +16,7 @@
 }
 
 /* TITLE HEADER */
-.sao-title-area {
+.vt-title-area {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -27,13 +27,13 @@
     margin-bottom: 24px;
 }
 
-.sao-title-box {
+.vt-title-box {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.sao-title {
+.vt-title {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -41,14 +41,14 @@
     font-weight: 600;
 }
 
-.sao-sub {
+.vt-sub {
     opacity: .7;
     font-size: 14px;
     margin: 0;
 }
 
 /* CREATE BUTTON */
-.sao-create-btn-top {
+.vt-create-btn-top {
     padding: 12px 22px;
     border-radius: 12px;
     background: linear-gradient(135deg, var(--accent), #0099ff);
@@ -60,19 +60,19 @@
     box-shadow: 0 6px 14px rgba(0,0,0,.18);
 }
 
-.sao-create-btn-top:hover {
+.vt-create-btn-top:hover {
     transform: translateY(-2px) scale(1.04);
     box-shadow: 0 10px 26px rgba(0,0,0,.24);
 }
 
 /* SEARCH MODE */
-.sao-search-mode {
+.vt-search-mode {
     display: flex;
     gap: 8px;
     margin-bottom: 12px;
 }
 
-.sao-search-mode button {
+.vt-search-mode button {
     padding: 6px 14px;
     border-radius: 8px;
     border: 1px solid var(--shadow);
@@ -83,7 +83,7 @@
     color: var(--text);
 }
 
-.sao-search-mode button.active {
+.vt-search-mode button.active {
     background: var(--accent);
     color: white;
     transform: scale(1.05);
@@ -91,21 +91,21 @@
 }
 
 /* SEARCH BAR */
-.sao-search-box {
+.vt-search-box {
     display: flex;
     gap: 6px;
     margin-bottom: 18px;
     justify-content: center;
 }
 
-.sao-search-wrapper {
+.vt-search-wrapper {
     position: relative;
     display: flex;
     align-items: center;
     width: 320px;
 }
 
-.sao-search {
+.vt-search {
     width: 100%;
     padding: 8px 32px 8px 10px;
     border-radius: 8px;
@@ -115,7 +115,7 @@
     font-size: 14px;
 }
 
-.sao-clear-input {
+.vt-clear-input {
     position: absolute;
     right: 8px;
     background: rgba(0,0,0,0.07);
@@ -127,7 +127,7 @@
     cursor: pointer;
 }
 
-.sao-search-btn {
+.vt-search-btn {
     padding: 8px 10px;
     border-radius: 8px;
     border: 1px solid var(--accent);
@@ -139,30 +139,30 @@
     transition: .25s;
 }
 
-.sao-search-btn:hover {
+.vt-search-btn:hover {
     background: var(--accent);
     color: white;
 }
 
 /* TABLE */
-.sao-table-wrapper {
+.vt-table-wrapper {
     border-radius: 14px;
     overflow: hidden;
     border: 1px solid var(--shadow);
     background: var(--card-bg);
 }
 
-.sao-table {
+.vt-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.sao-table thead {
+.vt-table thead {
     background: rgba(255,255,255,0.05);
     border-bottom: 1px solid var(--shadow);
 }
 
-.sao-table th {
+.vt-table th {
     padding: 12px 14px;
     font-size: 13px;
     text-transform: uppercase;
@@ -171,22 +171,22 @@
     text-align: left;
 }
 
-.sao-table td {
+.vt-table td {
     padding: 12px 14px;
     border-bottom: 1px solid var(--shadow);
 }
 
-.sao-row {
+.vt-row {
     cursor: pointer;
     transition: .2s ease;
 }
 
-.sao-row:hover {
+.vt-row:hover {
     background: rgba(255,255,255,.05);
     transform: translateY(-2px);
 }
 
-.sao-badge {
+.vt-badge {
     background: var(--accent);
     color: white;
     padding: 4px 10px;
@@ -196,7 +196,7 @@
 }
 
 /* SLIDE PANEL */
-.sao-slide {
+.vt-slide {
     position: fixed;
     top: 0;
     right: 0;
@@ -214,79 +214,13 @@
     to { transform: translateX(0); }
 }
 
-.sao-slide-close {
+.vt-slide-close {
     float: right;
     font-size: 20px;
     cursor: pointer;
     border: none;
     background: none;
     color: var(--text);
-}
-
-/* MODAL */
-.sao-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
-    backdrop-filter: blur(8px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 3000;
-}
-
-.sao-modal {
-    background: var(--card-bg);
-    padding: 28px;
-    border-radius: 14px;
-    width: 420px;
-    border: 1px solid var(--shadow);
-}
-
-.sao-input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 12px;
-    margin-top: 6px;
-    border-radius: 8px;
-    border: 1px solid var(--shadow);
-    background: var(--card-bg);
-    color: var(--text);
-    text-align: center;
-}
-
-.sao-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.sao-btn-cancel {
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: none;
-    color: #fff;
-    background: linear-gradient(135deg, var(--accent), #0099ff);
-    cursor: pointer;
-    font-weight: 600;
-    box-shadow: 0 6px 14px rgba(0,0,0,.18);
-    transition: .25s ease;
-}
-
-.sao-btn-cancel:hover {
-    transform: translateY(-2px) scale(1.04);
-    box-shadow: 0 10px 26px rgba(0,0,0,.24);
-}
-
-.sao-btn-save {
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: none;
-    background: linear-gradient(135deg, var(--accent), #00b4ff);
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-    transition: .25s;
 }
 
 .vt-btn-delete {
@@ -299,6 +233,7 @@
     font-size: 14px;
     transition: .2s ease;
 }
+
 
 .vt-btn-delete {
     background: #ff4d4d;
@@ -313,4 +248,70 @@
 
 .vt-btn-delete:active {
     transform: scale(.96);
+}
+
+/* MODAL */
+.vt-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.vt-modal {
+    background: var(--card-bg);
+    padding: 28px;
+    border-radius: 14px;
+    width: 420px;
+    border: 1px solid var(--shadow);
+}
+
+.vt-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: 1px solid var(--shadow);
+    background: var(--card-bg);
+    color: var(--text);
+    text-align: center;
+}
+
+.vt-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.vt-btn-cancel {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), #0099ff);
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 6px 14px rgba(0,0,0,.18);
+    transition: .25s ease;
+}
+
+.vt-btn-cancel:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 10px 26px rgba(0,0,0,.24);
+}
+
+.vt-btn-save {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #00b4ff);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: .25s;
 }

@@ -106,4 +106,17 @@ public class ShippingAgentOrganizationService: IShippingAgentOrganizationService
 
         return ShippingAgentOrganizationFactory.CreateDto(createdOrg);
     }
+
+    public async Task DeleteAsync(string legalName)
+    {
+        var sarInDB = await _repo.GetByLegalNameAsync(legalName);
+
+        if (sarInDB == null)
+        {
+            throw new BusinessRuleValidationException($"No SAO found with legalName = {legalName}. Deletion aborted.");
+        }
+
+        _repo.Remove(sarInDB);
+        await _unitOfWork.CommitAsync();
+    }
 }

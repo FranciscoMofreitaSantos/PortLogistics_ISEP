@@ -207,7 +207,7 @@ public class ShippingAgentRepresentativeService: IShippingAgentRepresentativeSer
 
         if (sarInDB == null)
         {
-            throw new BusinessRuleValidationException($"No Vessel Type found with ID = {id.ToString()}. Deletion aborted.");
+            throw new BusinessRuleValidationException($"No SAR found with ID = {id.ToString()}. Deletion aborted.");
         }
 
         _repo.Remove(sarInDB);

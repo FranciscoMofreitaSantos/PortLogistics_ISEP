@@ -16,7 +16,6 @@ export interface TaxNumber{
 
 
 export interface CreateSAORequest {
-   shippingOrganizationCode : string
    legalName : string 
    altName : string  
    address : string  

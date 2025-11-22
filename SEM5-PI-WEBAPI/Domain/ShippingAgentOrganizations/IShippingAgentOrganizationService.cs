@@ -11,4 +11,5 @@ public interface IShippingAgentOrganizationService
     Task<ShippingAgentOrganizationDto> GetByCodeAsync(ShippingOrganizationCode shippingOrganizationCode);
     Task<ShippingAgentOrganizationDto> GetByTaxNumberAsync(TaxNumber taxnumber);
     Task<ShippingAgentOrganizationDto> CreateAsync(CreatingShippingAgentOrganizationDto creatingshippingAgentOrganizationDto);
+    Task DeleteAsync(string legalName);
 }

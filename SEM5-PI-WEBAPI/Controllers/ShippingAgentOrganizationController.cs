@@ -138,4 +138,22 @@ public class ShippingAgentOrganizationController : ControllerBase
             return _refrontend.ProblemResponse("Validation Error", e.Message, 400);
         }
     }
+
+    [HttpDelete("legalName/{legalName}")]
+    public async Task<ActionResult> Delete(string legalName)
+    {
+        _logger.LogInformation("API Request: Delete Shipping Agent Representative with legalName = {legalName}", legalName);
+
+        try
+        {
+            await _service.DeleteAsync(legalName);
+            _logger.LogInformation("API Response (200): Shipping Agent Representative with legalName = {legalName} deleted successfully.", legalName);
+            return Ok($"Shipping Agent Representative with legalName = {legalName} deleted successfully.");
+        }
+        catch (BusinessRuleValidationException e)
+        {
+            _logger.LogWarning("API Error (404): Spiiping Agent Organization with legalName = {legalName} -> NOT FOUND", legalName);
+            return _refrontend.ProblemResponse("Not Found", e.Message, 404);
+        }
+    }
 }

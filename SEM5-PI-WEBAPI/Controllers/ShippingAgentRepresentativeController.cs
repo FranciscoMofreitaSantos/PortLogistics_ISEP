@@ -54,7 +54,7 @@ public class ShippingAgentRepresentativeController : ControllerBase
         }
     }
 
-    [HttpGet("name/{name}")]
+    [HttpGet("name/{*name}")]
     public async Task<ActionResult<List<ShippingAgentRepresentativeDto>>> GetByNameAsync(string name)
     {
         try
@@ -75,19 +75,19 @@ public class ShippingAgentRepresentativeController : ControllerBase
         }
     }
 
-    [HttpGet("email/{email}")]
-    public async Task<ActionResult<ShippingAgentRepresentativeDto>> GetByEmailAsync(EmailAddress email)
-    {
+    [HttpGet("email/{*email}")]
+    public async Task<ActionResult<ShippingAgentRepresentativeDto>> GetByEmailAsync([FromRoute] string email){
         try
         {
-            _logger.LogInformation("API Request: Fetching SAR with email = {NAME}", email);
-            
-            var shippingAgentRepresentativeDto = await _service.GetByEmailAsync(email);
-            
-            _logger.LogWarning("API Response (200): SAR with email = {NAME} -> FOUND", email);
-            
-            return Ok(shippingAgentRepresentativeDto);
+            var emailAddress = new EmailAddress(email);
 
+            _logger.LogInformation("API Request: Fetching SAR with email = {EMAIL}", emailAddress);
+                
+            var shippingAgentRepresentativeDto = await _service.GetByEmailAsync(emailAddress);
+                
+            _logger.LogInformation("API Response (200): SAR with email = {EMAIL} -> FOUND", emailAddress);
+                
+            return Ok(shippingAgentRepresentativeDto);
         }
         catch (BusinessRuleValidationException e)
         {
@@ -95,6 +95,7 @@ public class ShippingAgentRepresentativeController : ControllerBase
             return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
+
     
     
     
@@ -213,7 +214,7 @@ public class ShippingAgentRepresentativeController : ControllerBase
         }
         catch (BusinessRuleValidationException e)
         {
-            _logger.LogWarning("API Error (404): Vessel Type with ID = {Id} -> NOT FOUND", id);
+            _logger.LogWarning("API Error (404): Shipping Agent Representative with ID = {Id} -> NOT FOUND", id);
             return _refrontend.ProblemResponse("Not Found", e.Message, 404);
         }
     }
