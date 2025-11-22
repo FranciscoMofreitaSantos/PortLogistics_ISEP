@@ -657,20 +657,19 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
                 $"Invalid EstimatedTimeDeparture format: {estimatedTimeDeparture}");
         }
 
-        var filterClockTime = new ClockTime(parsedDate);
-        _logger.LogInformation("Filtering VVNs by ETD near {Date}", filterClockTime.Value);
+        var filterDate = parsedDate.Date;
+        _logger.LogInformation("Filtering VVNs by ETD date = {Date}", filterDate);
 
         var filtered = vvnList
-            .Where(v => v.EstimatedTimeDeparture?.Value != null &&
-                        filterClockTime.Value != null &&
-                        Math.Abs(
-                            ((DateTime)v.EstimatedTimeDeparture.Value - (DateTime)filterClockTime.Value).TotalHours) <=
-                        1)
+            .Where(v =>
+                v.EstimatedTimeDeparture?.Value is DateTime etd &&
+                etd.Date == filterDate)
             .ToList();
 
         _logger.LogInformation("ETD filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
         return filtered;
     }
+
 
     private List<VesselVisitNotification> GetVvnsFilterByEstimatedTimeArrival(
         List<VesselVisitNotification> vvnList, string estimatedTimeArrival)
@@ -686,20 +685,23 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
             _logger.LogWarning("Invalid ETA format received: {ETA}", estimatedTimeArrival);
             throw new BusinessRuleValidationException($"Invalid EstimatedTimeArrival format: {estimatedTimeArrival}");
         }
-
-        var filterClockTime = new ClockTime(parsedDate);
-        _logger.LogInformation("Filtering VVNs by ETA near {Date}", filterClockTime.Value);
+        
+        var filterDate = parsedDate.Date;
+        _logger.LogInformation("Filtering VVNs by ETA date = {Date}", filterDate);
 
         var filtered = vvnList
             .Where(v =>
                 v.EstimatedTimeArrival?.Value != null &&
-                filterClockTime.Value != null &&
-                Math.Abs(((DateTime)v.EstimatedTimeArrival.Value - (DateTime)filterClockTime.Value).TotalHours) <= 1)
+                ((DateTime)v.EstimatedTimeArrival.Value).Date == filterDate)
             .ToList();
 
-        _logger.LogInformation("ETA filter result: {Count}/{Total} VVNs matched.", filtered.Count, vvnList.Count);
+        _logger.LogInformation(
+            "ETA filter result: {Count}/{Total} VVNs matched.",
+            filtered.Count, vvnList.Count);
+
         return filtered;
     }
+
 
 
     private async Task<List<VesselVisitNotification>> GetVvnsFilterByImoNumber(

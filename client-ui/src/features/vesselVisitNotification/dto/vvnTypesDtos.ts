@@ -1,19 +1,44 @@
 
 /* ===== Enums vindos do backend (string literals) ===== */
-export type VvnStatus = "InProgress" | "PendingInformation" | "Withdrawn" | "Submitted" | "Accepted";
+export type VvnStatus =
+    | "InProgress"
+    | "PendingInformation"
+    | "Withdrawn"
+    | "Submitted"
+    | "Accepted";
+
 export type CargoManifestType = "Loading" | "Unloading";
 export type ContainerType = "General" | "Reefer" | "Electronic" | "Hazmat" | "Oversized";
 export type ContainerStatus = "Empty" | "Full" | "Reserved" | "Damaged" | "InTransit";
-export type CrewRole = | "Captain" | "ChiefOfficer" | "SecondOfficer" | "ThirdOfficer" | "ChiefEngineer" | "SecondEngineer" | "ThirdEngineer" | "FourthEngineer" | "Electrician" | "Bosun" | "AbleSeaman" | "OrdinarySeaman" | "Cook" | "Steward" | "DeckCadet" | "EngineCadet" | "RadioOfficer" | "SafetyOfficer" | "Purser" | "ChiefCook";
 
+export type CrewRole =
+    | "Captain"
+    | "ChiefOfficer"
+    | "SecondOfficer"
+    | "ThirdOfficer"
+    | "ChiefEngineer"
+    | "SecondEngineer"
+    | "ThirdEngineer"
+    | "FourthEngineer"
+    | "Electrician"
+    | "Bosun"
+    | "AbleSeaman"
+    | "OrdinarySeaman"
+    | "Cook"
+    | "Steward"
+    | "DeckCadet"
+    | "EngineCadet"
+    | "RadioOfficer"
+    | "SafetyOfficer"
+    | "Purser"
+    | "ChiefCook";
 
 export type Nationality = string;
 
 /* ===== Value Objects ===== */
 export interface Iso6346Code {
-    value?: string;   // backend pode serializar como { value: "XXXX1234567" }
-    Value?: string;   // (dependendo do serializer)
-    // em alguns casos podes receber só a string; a UI trata disso
+    value?: string;
+    Value?: string;
 }
 
 /* ===== Containers / Cargo ===== */
@@ -39,7 +64,7 @@ export interface CargoManifestDto {
     id: string;
     code: string;
     type: CargoManifestType;
-    createdAt: string;   // DateTime
+    createdAt: string;
     createdBy: string;
     entries: CargoManifestEntryDto[];
 }

@@ -8,48 +8,86 @@ import type {
     UpdateVesselVisitNotificationDto,
     RejectVesselVisitNotificationDto,
     CreatingVesselVisitNotificationDto,
-} from "../types/vvnTypes";
-
-
+} from "../dto/vvnTypesDtos";
 
 export async function getIdSarByEmail(email: string) {
-    const res = await api.get(`/api/ShippingAgentRepresentative/id/email/${encodeURIComponent(email)}`);
+    const res = await api.get(
+        `/api/ShippingAgentRepresentative/id/email/${encodeURIComponent(email)}`,
+    );
     return res.data as string;
 }
 
 /* ===== BY SAR ===== */
-export async function getInProgressPendingBySar(sarId: string, f: FilterInProgressPendingVvnStatusDto) {
-    const res = await api.get(`/api/VesselVisitNotification/shippingAgentRepresentative/inProgress-pendingInformation/${sarId}`, { params: f });
+export async function getInProgressPendingBySar(
+    sarId: string,
+    f: FilterInProgressPendingVvnStatusDto,
+) {
+    const res = await api.get(
+        `/api/VesselVisitNotification/shippingAgentRepresentative/inProgress-pendingInformation/${sarId}`,
+        { params: f },
+    );
     return res.data as VesselVisitNotificationDto[];
 }
-export async function getWithdrawnBySar(sarId: string, f: FilterWithdrawnVvnStatusDto) {
-    const res = await api.get(`/api/VesselVisitNotification/shippingAgentRepresentative/withDrawn/${sarId}`, { params: f });
+export async function getWithdrawnBySar(
+    sarId: string,
+    f: FilterWithdrawnVvnStatusDto,
+) {
+    const res = await api.get(
+        `/api/VesselVisitNotification/shippingAgentRepresentative/withDrawn/${sarId}`,
+        { params: f },
+    );
     return res.data as VesselVisitNotificationDto[];
 }
-export async function getSubmittedBySar(sarId: string, f: FilterSubmittedVvnStatusDto) {
-    const res = await api.get(`/api/VesselVisitNotification/shippingAgentRepresentative/submitted/${sarId}`, { params: f });
+export async function getSubmittedBySar(
+    sarId: string,
+    f: FilterSubmittedVvnStatusDto,
+) {
+    const res = await api.get(
+        `/api/VesselVisitNotification/shippingAgentRepresentative/submitted/${sarId}`,
+        { params: f },
+    );
     return res.data as VesselVisitNotificationDto[];
 }
-export async function getAcceptedBySar(sarId: string, f: FilterAcceptedVvnStatusDto) {
-    const res = await api.get(`/api/VesselVisitNotification/shippingAgentRepresentative/accepted/${sarId}`, { params: f });
+export async function getAcceptedBySar(
+    sarId: string,
+    f: FilterAcceptedVvnStatusDto,
+) {
+    const res = await api.get(
+        `/api/VesselVisitNotification/shippingAgentRepresentative/accepted/${sarId}`,
+        { params: f },
+    );
     return res.data as VesselVisitNotificationDto[];
 }
 
 /* ===== ADMIN (ALL)  ===== */
-export async function getInProgressPendingAll(f: FilterInProgressPendingVvnStatusDto) {
-    const res = await api.get(`/api/VesselVisitNotification/all/inProgress-pendingInformation`, { params: f });
+export async function getInProgressPendingAll(
+    f: FilterInProgressPendingVvnStatusDto,
+) {
+    const res = await api.get(
+        `/api/VesselVisitNotification/all/inProgress-pendingInformation`,
+        { params: f },
+    );
     return res.data as VesselVisitNotificationDto[];
 }
 export async function getWithdrawnAll(f: FilterWithdrawnVvnStatusDto) {
-    const res = await api.get(`/api/VesselVisitNotification/all/withDrawn`, { params: f });
+    const res = await api.get(
+        `/api/VesselVisitNotification/all/withDrawn`,
+        { params: f },
+    );
     return res.data as VesselVisitNotificationDto[];
 }
 export async function getSubmittedAll(f: FilterSubmittedVvnStatusDto) {
-    const res = await api.get(`/api/VesselVisitNotification/all/submitted`, { params: f });
+    const res = await api.get(
+        `/api/VesselVisitNotification/all/submitted`,
+        { params: f },
+    );
     return res.data as VesselVisitNotificationDto[];
 }
 export async function getAcceptedAll(f: FilterAcceptedVvnStatusDto) {
-    const res = await api.get(`/api/VesselVisitNotification/all/accepted`, { params: f });
+    const res = await api.get(
+        `/api/VesselVisitNotification/all/accepted`,
+        { params: f },
+    );
     return res.data as VesselVisitNotificationDto[];
 }
 
@@ -63,11 +101,13 @@ export async function withdrawById(id: string) {
     return res.data as VesselVisitNotificationDto;
 }
 export async function acceptById(id: string) {
-    // usa a tua rota "accept/id/{id}" que pede id -> depois o service resolve o code
     const res = await api.put(`/api/VesselVisitNotification/accept/id/${id}`);
     return res.data as VesselVisitNotificationDto;
 }
-export async function updateVvn(id: string, dto: UpdateVesselVisitNotificationDto) {
+export async function updateVvn(
+    id: string,
+    dto: UpdateVesselVisitNotificationDto,
+) {
     const res = await api.put(`/api/VesselVisitNotification/${id}/update`, dto);
     return res.data as VesselVisitNotificationDto;
 }
@@ -82,11 +122,20 @@ export async function rejectByCode(dto: RejectVesselVisitNotificationDto) {
 
 const vvnService = {
     getIdSarByEmail,
-    // lists
-    getInProgressPendingBySar, getWithdrawnBySar, getSubmittedBySar, getAcceptedBySar,
-    getInProgressPendingAll,   getWithdrawnAll,   getSubmittedAll,   getAcceptedAll,
-    // actions
-    submitById, withdrawById, acceptById, updateVvn, createVvn, rejectByCode,
+    getInProgressPendingBySar,
+    getWithdrawnBySar,
+    getSubmittedBySar,
+    getAcceptedBySar,
+    getInProgressPendingAll,
+    getWithdrawnAll,
+    getSubmittedAll,
+    getAcceptedAll,
+    submitById,
+    withdrawById,
+    acceptById,
+    updateVvn,
+    createVvn,
+    rejectByCode,
 };
 
 export default vvnService;

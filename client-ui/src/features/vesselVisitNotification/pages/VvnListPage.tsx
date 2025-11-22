@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FaShip, FaPlus, FaPaperPlane, FaArrowRotateLeft, FaPen } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+
 import vvnService from "../service/vvnService";
 import type {
     VesselVisitNotificationDto,
@@ -11,154 +12,50 @@ import type {
     FilterAcceptedVvnStatusDto,
     UpdateVesselVisitNotificationDto,
     RejectVesselVisitNotificationDto,
-    CrewMemberDto,
-    CargoManifestEntryDto,
-    Iso6346Code,
-} from "../types/vvnTypes";
+} from "../dto/vvnTypesDtos";
+
+import { GUID_RE, isoToLocalInput, dtLocalToIso, shortDT, fmtDT } from "../mappers/vvnMappers";
+import {
+    readJsonFile,
+    downloadTemplate,
+    crewTemplate,
+    cargoTemplateLoading,
+    cargoTemplateUnloading,
+} from "../utils/vvnFileUtils";
+
+import { VvnCrewModal } from "../components/modals/VvnCrewModal";
+import { VvnCargoManifestModal } from "../components/modals/VvnCargoManifestModal";
+import { VvnTasksModal } from "../components/modals/VvnTasksModal";
+import { VvnRejectModal } from "../components/modals/VvnRejectModal";
+
 import "../../storageAreas/style/storageAreaStyle.css";
 import "../style/vvn.css";
+
 import { useAppStore } from "../../../app/store";
 import { Roles } from "../../../app/types";
 
-type TabKey = "inprogress" | "submitted" | "accepted" | "withdrawn";
-
-const GUID_RE =
-    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-
-/* ========== Helpers ========== */
-function isoToLocalInput(s?: string | null): string {
-    if (!s) return "";
-    const d = new Date(s);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mi = String(d.getMinutes()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-}
-
-function shortDT(s?: string | null) {
-    if (!s) return "-";
-    const d = new Date(s);
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${dd}/${mm}`;
-}
-function fmtDT(s?: string | null) {
-    if (!s) return "-";
-    const d = new Date(s);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mi = String(d.getMinutes()).padStart(2, "0");
-    return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
-}
-/** aceita Iso6346Code | string */
-function isoString(x: Iso6346Code | string | undefined | null) {
-    if (!x) return "-";
-    if (typeof x === "string") return x;
-    return (x as any).value || (x as any).Value || "-";
-}
-
-type AnyJson = Record<string, any>;
-
-function dtLocalToIso(s: string): string {
-    // "YYYY-MM-DDTHH:mm" -> "YYYY-MM-DDTHH:mm:00"
-    if (!s) return "";
-    return s.length === 16 ? `${s}:00` : s;
-}
-
-async function readJsonFile(f: File | null): Promise<AnyJson | null> {
-    if (!f) return null;
-    const text = await f.text();
-    try {
-        return JSON.parse(text);
-    } catch {
-        toast.error(`JSON ${f.name}`);
-        return null;
-    }
-}
-
-function downloadTemplate(filename: string, obj: AnyJson) {
-    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-// ===== TEMPLATES =====
-const crewTemplate: AnyJson = {
-    totalCrew: 12,
-    captainName: "John Smith",
-    crewMembers: [
-        { name: "Alice", role: "Captain", nationality: "Portugal", citizenId: "A12345" },
-        { name: "Bob", role: "ChiefOfficer", nationality: "Spain", citizenId: "B98765" }
-    ]
-};
-
-const cargoTemplateLoading: AnyJson = {
-    type: "Loading",
-    createdBy: "agent@example.com",
-    entries: [
-        {
-            bay: 1, row: 0, tier: 0, storageAreaName: "Warehouse B",
-            container: { isoCode: "MSCU6639870", description: "Electronics Loading", type: "General", weightKg: 9000 }
-        }
-    ]
-};
-
-const cargoTemplateUnloading: AnyJson = {
-    type: "Unloading",
-    createdBy: "agent@example.com",
-    entries: [
-        {
-            bay: 0, row: 0, tier: 0, storageAreaName: "Yard A",
-            container: { isoCode: "CSQU3054383", description: "Furniture Loading", type: "General", weightKg: 12000 }
-        }
-    ]
-};
-
-/* ====== AUTH PLACEHOLDERS ====== */
-function isAdminLocalStorage(): boolean {
-    const r = localStorage.getItem("role");
-    if (r && /administrator/i.test(r.trim())) return true;
-
-    const rolesRaw = localStorage.getItem("roles");
-    if (rolesRaw) {
-        try {
-            const arr = JSON.parse(rolesRaw);
-            if (Array.isArray(arr) && arr.some((x) => /administrator/i.test(String(x).trim()))) return true;
-        } catch {
-            const arr = rolesRaw.split(/[,\s]+/).filter(Boolean);
-            if (arr.some((x) => /administrator/i.test(String(x).trim()))) return true;
-        }
-    }
-    return false;
-}
+/* ===== Util para descobrir SAR atual (fora do componente) ===== */
 export async function getCurrentSarId(): Promise<string | null> {
     const user = useAppStore.getState().user;
-    
+
     if (!user) {
         toast.error("No such user");
         return null;
     }
-    
+
     try {
         const sar = await vvnService.getIdSarByEmail(user.email);
-        return sar; 
-        
+        return sar;
     } catch (e: any) {
         toast.error(e?.message ?? "Failed to get SAR id");
         return null;
     }
 }
 
+/* ===== Página principal ===== */
+type TabKey = "inprogress" | "submitted" | "accepted" | "withdrawn";
 
-/* ================================== */
+const MIN_LOADING_TIME = 500;
 
 export default function VvnListPage() {
     const { t } = useTranslation();
@@ -185,7 +82,12 @@ export default function VvnListPage() {
     const [acceptedDate, setAcceptedDate] = useState("");
 
     // contagens header
-    const [counts, setCounts] = useState({ inprogress: 0, submitted: 0, accepted: 0, withdrawn: 0 });
+    const [counts, setCounts] = useState({
+        inprogress: 0,
+        submitted: 0,
+        accepted: 0,
+        withdrawn: 0,
+    });
 
     // modais (reject/update)
     const [rejectOpen, setRejectOpen] = useState(false);
@@ -202,7 +104,7 @@ export default function VvnListPage() {
 
     // === CREATE MODAL STATE ===
     const [createOpen, setCreateOpen] = useState(false);
-    const [cEta, setCEta] = useState<string>("");        // input type="datetime-local"
+    const [cEta, setCEta] = useState<string>(""); // input type="datetime-local"
     const [cEtd, setCEtd] = useState<string>("");
     const [cVolume, setCVolume] = useState<string>("");
     const [cDocuments, setCDocuments] = useState<string>("");
@@ -218,29 +120,27 @@ export default function VvnListPage() {
     const [updEtd, setUpdEtd] = useState<string>("");
     const [updImo, setUpdImo] = useState<string>("");
 
-    // ficheiros JSON opcionais
+    // ficheiros JSON opcionais para update
     const [updCrewFile, setUpdCrewFile] = useState<File | null>(null);
     const [updLoadFile, setUpdLoadFile] = useState<File | null>(null);
     const [updUnloadFile, setUpdUnloadFile] = useState<File | null>(null);
 
     // se NÃO fores admin, tentar descobrir SAR; se fores admin, limpar sarId para evitar ramo SAR
-
-
     useEffect(() => {
         let cancelled = false;
         if (admin) {
-            setSarId(""); 
+            setSarId("");
             return;
         }
         (async () => {
             const id = await getCurrentSarId();
-            if (!cancelled && id) setSarId(id); 
+            if (!cancelled && id) setSarId(id);
         })();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [admin]);
 
-
-    const MIN_LOADING_TIME = 500;
     async function runWithLoading<T>(promise: Promise<T>, loadingText: string) {
         const id = toast.loading(loadingText);
         const start = Date.now();
@@ -248,7 +148,11 @@ export default function VvnListPage() {
             return await promise;
         } finally {
             const elapsed = Date.now() - start;
-            if (elapsed < MIN_LOADING_TIME) await new Promise((res) => setTimeout(res, MIN_LOADING_TIME - elapsed));
+            if (elapsed < MIN_LOADING_TIME) {
+                await new Promise((res) =>
+                    setTimeout(res, MIN_LOADING_TIME - elapsed),
+                );
+            }
             toast.dismiss(id);
         }
     }
@@ -329,7 +233,9 @@ export default function VvnListPage() {
             setSelected(data[0] ?? null);
             toast.success(t("vvn.toast.loaded") as string);
         } catch (e: any) {
-            toast.error(e?.response?.data ?? (t("vvn.toast.loadError") as string));
+            toast.error(
+                e?.response?.data ?? (t("vvn.toast.loadError") as string),
+            );
         } finally {
             setLoading(false);
         }
@@ -359,13 +265,20 @@ export default function VvnListPage() {
                         ? vvnService.getWithdrawnBySar(sarId, {})
                         : Promise.resolve([]),
             ]);
-            setCounts({ inprogress: inprog.length, submitted: subm.length, accepted: acc.length, withdrawn: wdr.length });
-        } catch {}
+            setCounts({
+                inprogress: inprog.length,
+                submitted: subm.length,
+                accepted: acc.length,
+                withdrawn: wdr.length,
+            });
+        } catch {
+            // ignore
+        }
     }
 
     useEffect(() => {
         load();
-        // eslint-disable-next-line
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab, admin]);
 
     useEffect(() => {
@@ -374,7 +287,7 @@ export default function VvnListPage() {
             loadCounts();
         }, 350);
         return () => clearTimeout(h);
-        // eslint-disable-next-line
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sarId, specificRep, imo, eta, etd, submittedDate, acceptedDate, admin]);
 
     const filtered = useMemo(() => vvns, [vvns]);
@@ -384,7 +297,9 @@ export default function VvnListPage() {
         if (!selected) return;
         setUpdEta(isoToLocalInput(selected.estimatedTimeArrival));
         setUpdEtd(isoToLocalInput(selected.estimatedTimeDeparture));
-        setUpdVolume(selected.volume != null ? String(selected.volume) : "");
+        setUpdVolume(
+            selected.volume != null ? String(selected.volume) : "",
+        );
         setUpdDock(selected.dock ?? "");
         setUpdImo(selected.vesselImo ?? "");
 
@@ -398,11 +313,15 @@ export default function VvnListPage() {
 
     async function doCreate() {
         // validações básicas
-        if (!cEta || !cEtd) return toast.error(t("vvn.validation.etaEtdRequired"));
-        if (!cVolume || Number.isNaN(Number(cVolume))) return toast.error(t("vvn.validation.volumeInvalid"));
+        if (!cEta || !cEtd)
+            return toast.error(t("vvn.validation.etaEtdRequired"));
+        if (!cVolume || Number.isNaN(Number(cVolume)))
+            return toast.error(t("vvn.validation.volumeInvalid"));
         const IMO_RE = /^IMO\s?\d{7}$/i;
-        if (!IMO_RE.test(cVesselImo.trim())) return toast.error(t("vvn.validation.imoInvalid"));
-        if (!cEmailSar.trim()) return toast.error(t("vvn.validation.sarEmailRequired"));
+        if (!IMO_RE.test(cVesselImo.trim()))
+            return toast.error(t("vvn.validation.imoInvalid"));
+        if (!cEmailSar.trim())
+            return toast.error(t("vvn.validation.sarEmailRequired"));
 
         // Crew Manifest obrigatório
         if (!fileCrew) return toast.error(t("vvn.validation.crewRequired"));
@@ -420,21 +339,30 @@ export default function VvnListPage() {
             estimatedTimeDeparture: dtLocalToIso(cEtd),
             volume: Number(cVolume),
             documents: cDocuments?.trim() || null,
-            crewManifest: crewJson,                 // obrigatório
+            crewManifest: crewJson, // obrigatório
             loadingCargoManifest: loadJson || null, // opcional
             unloadingCargoManifest: unloadJson || null, // opcional
             vesselImo: cVesselImo.trim(),
             emailSar: cEmailSar.trim(),
         };
 
-        await runWithLoading(vvnService.createVvn(dto), t("vvn.loading.creating") as string);
+        await runWithLoading(
+            vvnService.createVvn(dto),
+            t("vvn.loading.creating") as string,
+        );
         toast.success(t("vvn.toast.loaded") as string);
         setCreateOpen(false);
 
         // limpar campos
-        setCEta(""); setCEtd(""); setCVolume(""); setCDocuments("");
-        setCVesselImo(""); setCEmailSar("");
-        setFileCrew(null); setFileLoad(null); setFileUnload(null);
+        setCEta("");
+        setCEtd("");
+        setCVolume("");
+        setCDocuments("");
+        setCVesselImo("");
+        setCEmailSar("");
+        setFileCrew(null);
+        setFileLoad(null);
+        setFileUnload(null);
 
         // refresh
         load();
@@ -442,13 +370,20 @@ export default function VvnListPage() {
     }
 
     async function doSubmit(v: VesselVisitNotificationDto) {
-        await runWithLoading(vvnService.submitById(v.id), t("vvn.loading.submitting") as string);
+        await runWithLoading(
+            vvnService.submitById(v.id),
+            t("vvn.loading.submitting") as string,
+        );
         toast.success(t("vvn.toast.submitSuccess") as string);
         load();
         loadCounts();
     }
+
     async function doWithdraw(v: VesselVisitNotificationDto) {
-        await runWithLoading(vvnService.withdrawById(v.id), t("vvn.loading.withdrawing") as string);
+        await runWithLoading(
+            vvnService.withdrawById(v.id),
+            t("vvn.loading.withdrawing") as string,
+        );
         toast.success(t("vvn.toast.withdrawSuccess") as string);
         load();
         loadCounts();
@@ -460,8 +395,14 @@ export default function VvnListPage() {
             toast.error(t("vvn.modals.reject.placeholder") as string);
             return;
         }
-        const dto: RejectVesselVisitNotificationDto = { vvnCode: selected.code, reason: rejectMsg.trim() };
-        await runWithLoading(vvnService.rejectByCode(dto), t("vvn.loading.rejecting") as string);
+        const dto: RejectVesselVisitNotificationDto = {
+            vvnCode: selected.code,
+            reason: rejectMsg.trim(),
+        };
+        await runWithLoading(
+            vvnService.rejectByCode(dto),
+            t("vvn.loading.rejecting") as string,
+        );
         setRejectOpen(false);
         setRejectMsg("");
         toast.success(t("vvn.toast.rejectSuccess") as string);
@@ -481,7 +422,8 @@ export default function VvnListPage() {
 
         if (updVolume !== "") {
             const v = Number(updVolume);
-            if (Number.isNaN(v) || v < 0) return toast.error(t("vvn.validation.volumeInvalid"));
+            if (Number.isNaN(v) || v < 0)
+                return toast.error(t("vvn.validation.volumeInvalid"));
             dto.volume = v;
         }
 
@@ -489,8 +431,12 @@ export default function VvnListPage() {
 
         if (updImo.trim()) {
             const IMO_RE = /^IMO\s?\d{7}$/i;
-            if (!IMO_RE.test(updImo.trim())) return toast.error(t("vvn.validation.imoInvalid"));
-            dto.imoNumber = updImo.trim().toUpperCase().replace(/\s+/, " ");
+            if (!IMO_RE.test(updImo.trim()))
+                return toast.error(t("vvn.validation.imoInvalid"));
+            dto.imoNumber = updImo
+                .trim()
+                .toUpperCase()
+                .replace(/\s+/, " ");
         }
 
         // ficheiros JSON opcionais
@@ -507,7 +453,10 @@ export default function VvnListPage() {
         if (loadJson) dto.loadingCargoManifest = loadJson;
         if (unloadJson) dto.unloadingCargoManifest = unloadJson;
 
-        await runWithLoading(vvnService.updateVvn(selected.id, dto), t("vvn.loading.updating") as string);
+        await runWithLoading(
+            vvnService.updateVvn(selected.id, dto),
+            t("vvn.loading.updating") as string,
+        );
         setUpdOpen(false);
         toast.success(t("vvn.toast.updateSuccess") as string);
         load();
@@ -521,17 +470,37 @@ export default function VvnListPage() {
             <div className="vt-title-area vvn-header-tight">
                 <div className="vvn-header-left">
                     <h2 className="vt-title">
-                        <FaShip /> {t("vvn.title") || "Vessel Visit Notifications"}
+                        <FaShip />{" "}
+                        {t("vvn.title") || "Vessel Visit Notifications"}
                     </h2>
                     <div className="vvn-counters">
-                        <span className="vvn-chip vvn-chip-inp">{t("vvn.header.inprogress", { count: counts.inprogress })}</span>
-                        <span className="vvn-chip vvn-chip-sub">{t("vvn.header.submitted", { count: counts.submitted })}</span>
-                        <span className="vvn-chip vvn-chip-acc">{t("vvn.header.accepted", { count: counts.accepted })}</span>
-                        <span className="vvn-chip vvn-chip-wdr">{t("vvn.header.withdrawn", { count: counts.withdrawn })}</span>
+                        <span className="vvn-chip vvn-chip-inp">
+                            {t("vvn.header.inprogress", {
+                                count: counts.inprogress,
+                            })}
+                        </span>
+                        <span className="vvn-chip vvn-chip-sub">
+                            {t("vvn.header.submitted", {
+                                count: counts.submitted,
+                            })}
+                        </span>
+                        <span className="vvn-chip vvn-chip-acc">
+                            {t("vvn.header.accepted", {
+                                count: counts.accepted,
+                            })}
+                        </span>
+                        <span className="vvn-chip vvn-chip-wdr">
+                            {t("vvn.header.withdrawn", {
+                                count: counts.withdrawn,
+                            })}
+                        </span>
                     </div>
                 </div>
                 <div className="vvn-header-right">
-                    <button className="vt-create-btn-top" onClick={() => setCreateOpen(true)}>
+                    <button
+                        className="vt-create-btn-top"
+                        onClick={() => setCreateOpen(true)}
+                    >
                         <FaPlus /> {t("vvn.new")}
                     </button>
                 </div>
@@ -539,41 +508,79 @@ export default function VvnListPage() {
 
             {/* TABS */}
             <div className="vvn-tabs">
-                {(["inprogress", "submitted", "accepted", "withdrawn"] as TabKey[]).map((k) => (
-                    <button key={k} className={`vvn-tab ${tab === k ? "active" : ""}`} onClick={() => setTab(k)}>
-                        {tabLabel(k)}
-                    </button>
-                ))}
+                {(["inprogress", "submitted", "accepted", "withdrawn"] as TabKey[]).map(
+                    (k) => (
+                        <button
+                            key={k}
+                            className={`vvn-tab ${tab === k ? "active" : ""}`}
+                            onClick={() => setTab(k)}
+                        >
+                            {tabLabel(k)}
+                        </button>
+                    ),
+                )}
             </div>
 
             {/* FILTROS */}
             <div className="vvn-filters">
                 <div className="sa-field small">
                     <label>{t("vvn.filters.specificRepGuid")}</label>
-                    <input className="sa-input" value={specificRep} onChange={(e) => setSpecificRep(e.target.value)} />
+                    <input
+                        className="sa-input"
+                        value={specificRep}
+                        onChange={(e) => setSpecificRep(e.target.value)}
+                    />
                 </div>
                 <div className="sa-field small">
                     <label>{t("vvn.filters.imo")}</label>
-                    <input className="sa-input" value={imo} onChange={(e) => setImo(e.target.value)} />
+                    <input
+                        className="sa-input"
+                        value={imo}
+                        onChange={(e) => setImo(e.target.value)}
+                    />
                 </div>
                 <div className="sa-field small">
                     <label>{t("vvn.filters.eta")}</label>
-                    <input type="date" className="sa-input" value={eta} onChange={(e) => setEta(e.target.value)} />
+                    <input
+                        type="date"
+                        className="sa-input"
+                        value={eta}
+                        onChange={(e) => setEta(e.target.value)}
+                    />
                 </div>
                 <div className="sa-field small">
                     <label>{t("vvn.filters.etd")}</label>
-                    <input type="date" className="sa-input" value={etd} onChange={(e) => setEtd(e.target.value)} />
+                    <input
+                        type="date"
+                        className="sa-input"
+                        value={etd}
+                        onChange={(e) => setEtd(e.target.value)}
+                    />
                 </div>
                 {tab !== "inprogress" && tab !== "withdrawn" && (
                     <div className="sa-field small">
                         <label>{t("vvn.filters.submitted")}</label>
-                        <input type="date" className="sa-input" value={submittedDate} onChange={(e) => setSubmittedDate(e.target.value)} />
+                        <input
+                            type="date"
+                            className="sa-input"
+                            value={submittedDate}
+                            onChange={(e) =>
+                                setSubmittedDate(e.target.value)
+                            }
+                        />
                     </div>
                 )}
                 {tab === "accepted" && (
                     <div className="sa-field small">
                         <label>{t("vvn.filters.accepted")}</label>
-                        <input type="date" className="sa-input" value={acceptedDate} onChange={(e) => setAcceptedDate(e.target.value)} />
+                        <input
+                            type="date"
+                            className="sa-input"
+                            value={acceptedDate}
+                            onChange={(e) =>
+                                setAcceptedDate(e.target.value)
+                            }
+                        />
                     </div>
                 )}
             </div>
@@ -582,21 +589,39 @@ export default function VvnListPage() {
             <div className="vvn-grid">
                 <aside className="vvn-list">
                     {loading ? (
-                        Array.from({ length: 6 }).map((_, i) => <div className="vvn-skel" key={i} />)
+                        Array.from({ length: 6 }).map((_, i) => (
+                            <div className="vvn-skel" key={i} />
+                        ))
                     ) : filtered.length === 0 ? (
                         <div className="sa-empty">{t("vvn.list.empty")}</div>
                     ) : (
                         filtered.map((v) => {
                             const active = v.id === selected?.id;
-                            const statusKey = `v-${(v.status || "").toLowerCase()}`;
+                            const statusKey = `v-${(
+                                v.status || ""
+                            ).toLowerCase()}`;
                             return (
-                                <button key={v.id} className={`vvn-item ${active ? "active" : ""}`} onClick={() => setSelected(v)}>
+                                <button
+                                    key={v.id}
+                                    className={`vvn-item ${
+                                        active ? "active" : ""
+                                    }`}
+                                    onClick={() => setSelected(v)}
+                                >
                                     <div className="vvn-item-top">
                                         <strong>{v.code}</strong>
-                                        <span className={`vvn-status ${statusKey}`}>{v.status}</span>
+                                        <span
+                                            className={`vvn-status ${statusKey}`}
+                                        >
+                                            {v.status}
+                                        </span>
                                     </div>
                                     <div className="vvn-item-sub">
-                                        {t("vvn.filters.imo")} {v.vesselImo} · {t("vvn.details.eta")} {shortDT(v.estimatedTimeArrival)} · {t("vvn.details.etd")} {shortDT(v.estimatedTimeDeparture)}
+                                        {t("vvn.filters.imo")} {v.vesselImo} ·{" "}
+                                        {t("vvn.details.eta")}{" "}
+                                        {shortDT(v.estimatedTimeArrival)} ·{" "}
+                                        {t("vvn.details.etd")}{" "}
+                                        {shortDT(v.estimatedTimeDeparture)}
                                     </div>
                                 </button>
                             );
@@ -606,40 +631,84 @@ export default function VvnListPage() {
 
                 <main className="vvn-main">
                     {!selected ? (
-                        <div className="sa-empty">{t("common.selectOne")}</div>
+                        <div className="sa-empty">
+                            {t("common.selectOne")}
+                        </div>
                     ) : (
                         <>
                             <div className="vvn-head">
                                 <div>
-                                    <h3 className="vvn-title">{selected.code}</h3>
+                                    <h3 className="vvn-title">
+                                        {selected.code}
+                                    </h3>
                                     <div className="vvn-sub">
-                                        {t("vvn.filters.imo")} {selected.vesselImo} • {t("vvn.details.status")}: <b>{selected.status}</b>
+                                        {t("vvn.filters.imo")}{" "}
+                                        {selected.vesselImo} •{" "}
+                                        {t("vvn.details.status")}:{" "}
+                                        <b>{selected.status}</b>
                                     </div>
                                 </div>
 
                                 {/* BOTÕES: Submit / Withdraw / Update */}
                                 <div className="vvn-actions">
                                     {(() => {
-                                        const s = (selected.status || "").toString().toLowerCase();
-                                        const canSubmitOrWithdraw = s.includes("inprogress") || s.includes("pending");
+                                        const s = (
+                                            selected.status || ""
+                                        ).toString().toLowerCase();
+                                        const canSubmitOrWithdraw =
+                                            s.includes("inprogress") ||
+                                            s.includes("pending");
                                         return canSubmitOrWithdraw ? (
                                             <>
-                                                <button className="sa-btn sa-btn-primary" onClick={() => doSubmit(selected)} title={t("vvn.actions.submit") as string}>
-                                                    <FaPaperPlane /> {t("vvn.actions.submit")}
+                                                <button
+                                                    className="sa-btn sa-btn-primary"
+                                                    onClick={() =>
+                                                        doSubmit(selected)
+                                                    }
+                                                    title={
+                                                        t(
+                                                            "vvn.actions.submit",
+                                                        ) as string
+                                                    }
+                                                >
+                                                    <FaPaperPlane />{" "}
+                                                    {t("vvn.actions.submit")}
                                                 </button>
-                                                <button className="sa-btn sa-btn-danger" onClick={() => doWithdraw(selected)} title={t("vvn.actions.withdraw") as string}>
-                                                    <FaArrowRotateLeft /> {t("vvn.actions.withdraw")}
+                                                <button
+                                                    className="sa-btn sa-btn-danger"
+                                                    onClick={() =>
+                                                        doWithdraw(selected)
+                                                    }
+                                                    title={
+                                                        t(
+                                                            "vvn.actions.withdraw",
+                                                        ) as string
+                                                    }
+                                                >
+                                                    <FaArrowRotateLeft />{" "}
+                                                    {t(
+                                                        "vvn.actions.withdraw",
+                                                    )}
                                                 </button>
                                                 <button
                                                     className="sa-btn"
                                                     onClick={openUpdate}
-                                                    title={t("common.update") as string}
+                                                    title={
+                                                        t(
+                                                            "common.update",
+                                                        ) as string
+                                                    }
                                                 >
-                                                    <FaPen /> {t("common.update")}
+                                                    <FaPen />{" "}
+                                                    {t("common.update")}
                                                 </button>
                                             </>
                                         ) : (
-                                            <span className="sa-note">{t("vvn.actions.noActionsForState")}</span>
+                                            <span className="sa-note">
+                                                {t(
+                                                    "vvn.actions.noActionsForState",
+                                                )}
+                                            </span>
                                         );
                                     })()}
                                 </div>
@@ -648,54 +717,110 @@ export default function VvnListPage() {
                             {/* KPIs */}
                             <section className="vvn-kpis">
                                 <div className="sa-card">
-                                    <div className="sa-card-title">{t("vvn.details.eta")}</div>
-                                    <div className="sa-card-value">{fmtDT(selected.estimatedTimeArrival)}</div>
+                                    <div className="sa-card-title">
+                                        {t("vvn.details.eta")}
+                                    </div>
+                                    <div className="sa-card-value">
+                                        {fmtDT(selected.estimatedTimeArrival)}
+                                    </div>
                                 </div>
                                 <div className="sa-card">
-                                    <div className="sa-card-title">{t("vvn.details.etd")}</div>
-                                    <div className="sa-card-value">{fmtDT(selected.estimatedTimeDeparture)}</div>
+                                    <div className="sa-card-title">
+                                        {t("vvn.details.etd")}
+                                    </div>
+                                    <div className="sa-card-value">
+                                        {fmtDT(selected.estimatedTimeDeparture)}
+                                    </div>
                                 </div>
                                 <div className="sa-card">
-                                    <div className="sa-card-title">{t("vvn.details.volume")}</div>
-                                    <div className="sa-card-value">{selected.volume}</div>
+                                    <div className="sa-card-title">
+                                        {t("vvn.details.volume")}
+                                    </div>
+                                    <div className="sa-card-value">
+                                        {selected.volume}
+                                    </div>
                                 </div>
                                 <div className="sa-card">
-                                    <div className="sa-card-title">{t("vvn.details.dock")}</div>
-                                    <div className="sa-card-value">{selected.dock || "-"}</div>
+                                    <div className="sa-card-title">
+                                        {t("vvn.details.dock")}
+                                    </div>
+                                    <div className="sa-card-value">
+                                        {selected.dock || "-"}
+                                    </div>
                                 </div>
                             </section>
 
                             {/* AÇÕES DETALHE: abrir popups */}
                             <div className="vvn-quick-grid">
-                                <button className="vvn-tile is-crew" onClick={() => setCrewOpen(true)}>
+                                <button
+                                    className="vvn-tile is-crew"
+                                    onClick={() => setCrewOpen(true)}
+                                >
                                     <span className="vvn-ico">🧑‍✈️</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.crew.title")}</b>
-                                    <span> {t("vvn.modals.crew.title").toString().includes("Crew") ? "view crew" : "ver tripulação"}</span>
-                                  </span>
-                                </button>
-
-                                <button className="vvn-tile is-loading" onClick={() => setLoadOpen(true)}>
-                                    <span className="vvn-ico">📦</span>
-                                    <span className="vvn-text">
-                                        <b>{t("vvn.modals.loading.title")}</b>
-                                    <span> {t("vvn.modals.loading.empty").toString().includes("No") ? "loading containers" : "containers de embarque"}</span>
-                                  </span>
-                                </button>
-
-                                <button className="vvn-tile is-unloading" onClick={() => setUnloadOpen(true)}>
-                                    <span className="vvn-ico">📤</span>
-                                    <span className="vvn-text">
-                                        <b>{t("vvn.modals.unloading.title")}</b>
-                                        <span> {t("vvn.modals.unloading.empty").toString().includes("No") ? "unloading" : "desembarque"}</span>
+                                        <span>
+                                            {" "}
+                                            {t(
+                                                "vvn.modals.crew.title",
+                                            ).toString().includes("Crew")
+                                                ? "view crew"
+                                                : "ver tripulação"}
+                                        </span>
                                     </span>
                                 </button>
 
-                                <button className="vvn-tile is-tasks" onClick={() => setTasksOpen(true)}>
+                                <button
+                                    className="vvn-tile is-loading"
+                                    onClick={() => setLoadOpen(true)}
+                                >
+                                    <span className="vvn-ico">📦</span>
+                                    <span className="vvn-text">
+                                        <b>{t("vvn.modals.loading.title")}</b>
+                                        <span>
+                                            {" "}
+                                            {t(
+                                                "vvn.modals.loading.empty",
+                                            ).toString().includes("No")
+                                                ? "loading containers"
+                                                : "containers de embarque"}
+                                        </span>
+                                    </span>
+                                </button>
+
+                                <button
+                                    className="vvn-tile is-unloading"
+                                    onClick={() => setUnloadOpen(true)}
+                                >
+                                    <span className="vvn-ico">📤</span>
+                                    <span className="vvn-text">
+                                        <b>{t("vvn.modals.unloading.title")}</b>
+                                        <span>
+                                            {" "}
+                                            {t(
+                                                "vvn.modals.unloading.empty",
+                                            ).toString().includes("No")
+                                                ? "unloading"
+                                                : "desembarque"}
+                                        </span>
+                                    </span>
+                                </button>
+
+                                <button
+                                    className="vvn-tile is-tasks"
+                                    onClick={() => setTasksOpen(true)}
+                                >
                                     <span className="vvn-ico">✅</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.tasks.title")}</b>
-                                        <span> {t("vvn.modals.tasks.empty").toString().includes("No") ? "open" : "em aberto"}</span>
+                                        <span>
+                                            {" "}
+                                            {t(
+                                                "vvn.modals.tasks.empty",
+                                            ).toString().includes("No")
+                                                ? "open"
+                                                : "em aberto"}
+                                        </span>
                                     </span>
                                 </button>
                             </div>
@@ -704,345 +829,372 @@ export default function VvnListPage() {
                 </main>
             </div>
 
-            {/* ======= POPUPS ======= */}
+            {/* ========= MODAIS ========= */}
+
+            {/* CREATE MODAL */}
             {createOpen && (
-                <div className="sa-modal-backdrop" onClick={() => setCreateOpen(false)}>
-                    <div className="vvn-modal" onClick={(e) => e.stopPropagation()}>
+                <div
+                    className="sa-modal-backdrop"
+                    onClick={() => setCreateOpen(false)}
+                >
+                    <div
+                        className="vvn-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">➕ {t("vvn.new")}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setCreateOpen(false)}>✖</button>
+                            <h3 className="sa-dock-title">
+                                ➕ {t("vvn.new")}
+                            </h3>
+                            <button
+                                className="sa-icon-btn sa-dock-close"
+                                onClick={() => setCreateOpen(false)}
+                            >
+                                ✖
+                            </button>
                         </div>
 
                         <div className="vvn-modal-body grid2">
                             <div className="sa-field">
                                 <label>{t("vvn.details.eta")}</label>
-                                <input type="datetime-local" className="sa-input" value={cEta} onChange={e=>setCEta(e.target.value)} />
+                                <input
+                                    type="datetime-local"
+                                    className="sa-input"
+                                    value={cEta}
+                                    onChange={(e) =>
+                                        setCEta(e.target.value)
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
                                 <label>{t("vvn.details.etd")}</label>
-                                <input type="datetime-local" className="sa-input" value={cEtd} onChange={e=>setCEtd(e.target.value)} />
+                                <input
+                                    type="datetime-local"
+                                    className="sa-input"
+                                    value={cEtd}
+                                    onChange={(e) =>
+                                        setCEtd(e.target.value)
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
                                 <label>{t("vvn.details.volume")}</label>
-                                <input type="number" min={0} className="sa-input" value={cVolume} onChange={e=>setCVolume(e.target.value)} />
+                                <input
+                                    type="number"
+                                    min={0}
+                                    className="sa-input"
+                                    value={cVolume}
+                                    onChange={(e) =>
+                                        setCVolume(e.target.value)
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
                                 <label>Documents</label>
-                                <input className="sa-input" value={cDocuments} onChange={e=>setCDocuments(e.target.value)} />
+                                <input
+                                    className="sa-input"
+                                    value={cDocuments}
+                                    onChange={(e) =>
+                                        setCDocuments(e.target.value)
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
                                 <label>{t("vvn.filters.imo")}</label>
-                                <input className="sa-input" placeholder="IMO 9823455" value={cVesselImo} onChange={e=>setCVesselImo(e.target.value)} />
+                                <input
+                                    className="sa-input"
+                                    placeholder="IMO 9823455"
+                                    value={cVesselImo}
+                                    onChange={(e) =>
+                                        setCVesselImo(e.target.value)
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
                                 <label>Email SAR</label>
-                                <input type="email" className="sa-input" placeholder="agent@example.com" value={cEmailSar} onChange={e=>setCEmailSar(e.target.value)} />
+                                <input
+                                    type="email"
+                                    className="sa-input"
+                                    placeholder="agent@example.com"
+                                    value={cEmailSar}
+                                    onChange={(e) =>
+                                        setCEmailSar(e.target.value)
+                                    }
+                                />
                             </div>
                         </div>
 
                         <div className="vvn-modal-body">
                             <div className="sa-field">
                                 <label>{t("vvn.modals.crew.title")} *</label>
-                                <input type="file" accept="application/json" onChange={e=>setFileCrew(e.target.files?.[0] ?? null)} />
-                                <button className="sa-btn sa-btn-ghost" onClick={()=>downloadTemplate("CrewManifest.template.json", crewTemplate)}>
+                                <input
+                                    type="file"
+                                    accept="application/json"
+                                    onChange={(e) =>
+                                        setFileCrew(
+                                            e.target.files?.[0] ?? null,
+                                        )
+                                    }
+                                />
+                                <button
+                                    className="sa-btn sa-btn-ghost"
+                                    onClick={() =>
+                                        downloadTemplate(
+                                            "CrewManifest.template.json",
+                                            crewTemplate,
+                                        )
+                                    }
+                                >
                                     {t("common.downloadTemplate")}
                                 </button>
                             </div>
                             <div className="sa-field">
-                                <label>{t("vvn.modals.loading.title")} (JSON)</label>
-                                <input type="file" accept="application/json" onChange={e=>setFileLoad(e.target.files?.[0] ?? null)} />
-                                <button className="sa-btn sa-btn-ghost" onClick={()=>downloadTemplate("LoadingCargoManifest.template.json", cargoTemplateLoading)}>
+                                <label>
+                                    {t("vvn.modals.loading.title")} (JSON)
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="application/json"
+                                    onChange={(e) =>
+                                        setFileLoad(
+                                            e.target.files?.[0] ?? null,
+                                        )
+                                    }
+                                />
+                                <button
+                                    className="sa-btn sa-btn-ghost"
+                                    onClick={() =>
+                                        downloadTemplate(
+                                            "LoadingCargoManifest.template.json",
+                                            cargoTemplateLoading,
+                                        )
+                                    }
+                                >
                                     {t("common.downloadTemplate")}
                                 </button>
                             </div>
                             <div className="sa-field">
-                                <label>{t("vvn.modals.unloading.title")} (JSON)</label>
-                                <input type="file" accept="application/json" onChange={e=>setFileUnload(e.target.files?.[0] ?? null)} />
-                                <button className="sa-btn sa-btn-ghost" onClick={()=>downloadTemplate("UnloadingCargoManifest.template.json", cargoTemplateUnloading)}>
+                                <label>
+                                    {t("vvn.modals.unloading.title")} (JSON)
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="application/json"
+                                    onChange={(e) =>
+                                        setFileUnload(
+                                            e.target.files?.[0] ?? null,
+                                        )
+                                    }
+                                />
+                                <button
+                                    className="sa-btn sa-btn-ghost"
+                                    onClick={() =>
+                                        downloadTemplate(
+                                            "UnloadingCargoManifest.template.json",
+                                            cargoTemplateUnloading,
+                                        )
+                                    }
+                                >
                                     {t("common.downloadTemplate")}
                                 </button>
                             </div>
                         </div>
 
                         <div className="vvn-modal-actions">
-                            <button className="sa-btn sa-btn-cancel" onClick={()=>setCreateOpen(false)}>{t("common.cancel")}</button>
-                            <button className="sa-btn sa-btn-primary" onClick={doCreate}>{t("common.save")}</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Crew Manifest */}
-            {crewOpen && selected && (
-                <div className="sa-modal-backdrop" onClick={() => setCrewOpen(false)}>
-                    <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.crew.title")}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setCrewOpen(false)}>
-                                ✖
-                            </button>
-                        </div>
-                        {!selected.crewManifest ? (
-                            <div className="sa-empty">{t("vvn.modals.crew.empty")}</div>
-                        ) : (
-                            <>
-                                <div className="vvn-def">
-                                    <div>
-                                        <span>{t("vvn.modals.crew.captain")}<br/></span>
-                                        <strong>{selected.crewManifest.captainName}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{t("vvn.modals.crew.total")}<br/></span>
-                                        <strong>{selected.crewManifest.totalCrew}</strong>
-                                    </div>
-                                </div>
-                                <div className="vvn-table-wrap">
-                                    <table className="vvn-table">
-                                        <thead>
-                                        <tr>
-                                            <th>{t("vvn.modals.crew.table.name")}</th>
-                                            <th>{t("vvn.modals.crew.table.role")}</th>
-                                            <th>{t("vvn.modals.crew.table.nationality")}</th>
-                                            <th>{t("vvn.modals.crew.table.citizenId")}</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {(selected.crewManifest.crewMembers || []).map((m: CrewMemberDto) => (
-                                            <tr key={m.id}>
-                                                <td>{m.name}</td>
-                                                <td>{m.role}</td>
-                                                <td>{m.nationality}</td>
-                                                <td>{m.citizenId}</td>
-                                            </tr>
-                                        ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Loading Cargo Manifest */}
-            {loadOpen && selected && (
-                <div className="sa-modal-backdrop" onClick={() => setLoadOpen(false)}>
-                    <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.loading.title")}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setLoadOpen(false)}>
-                                ✖
-                            </button>
-                        </div>
-                        {!selected.loadingCargoManifest ? (
-                            <div className="sa-empty">{t("vvn.modals.loading.empty")}</div>
-                        ) : (
-                            <>
-                                <div className="vvn-def">
-                                    <div>
-                                        <span>{t("vvn.modals.loading.code")}<br/></span>
-                                        <strong>{selected.loadingCargoManifest.code}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{t("vvn.modals.loading.type")}<br/></span>
-                                        <strong>{selected.loadingCargoManifest.type}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{t("vvn.modals.loading.created")}<br/></span>
-                                        <strong>{fmtDT(selected.loadingCargoManifest.createdAt)}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{t("vvn.modals.loading.createdBy")}<br/></span>
-                                        <strong>{selected.loadingCargoManifest.createdBy}</strong>
-                                    </div>
-                                </div>
-                                <EntriesTable entries={selected.loadingCargoManifest.entries} />
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Unloading Cargo Manifest */}
-            {unloadOpen && selected && (
-                <div className="sa-modal-backdrop" onClick={() => setUnloadOpen(false)}>
-                    <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.unloading.title")}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setUnloadOpen(false)}>
-                                ✖
-                            </button>
-                        </div>
-                        {!selected.unloadingCargoManifest ? (
-                            <div className="sa-empty">{t("vvn.modals.unloading.empty")}<br/></div>
-                        ) : (
-                            <>
-                                <div className="vvn-def">
-                                    <div>
-                                        <span>{t("vvn.modals.unloading.code")}<br/></span>
-                                        <strong>{selected.unloadingCargoManifest.code}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{t("vvn.modals.unloading.type")}<br/></span>
-                                        <strong>{selected.unloadingCargoManifest.type}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{t("vvn.modals.unloading.created")}<br/></span>
-                                        <strong>{fmtDT(selected.unloadingCargoManifest.createdAt)}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{t("vvn.modals.unloading.createdBy")}<br/></span>
-                                        <strong>{selected.unloadingCargoManifest.createdBy}</strong>
-                                    </div>
-                                </div>
-                                <EntriesTable entries={selected.unloadingCargoManifest.entries} />
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Tasks */}
-            {tasksOpen && selected && (
-                <div className="sa-modal-backdrop" onClick={() => setTasksOpen(false)}>
-                    <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.tasks.title")}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setTasksOpen(false)}>
-                                ✖
-                            </button>
-                        </div>
-                        {!selected.tasks || selected.tasks.length === 0 ? (
-                            <div className="sa-empty">{t("vvn.modals.tasks.empty")}<br/></div>
-                        ) : (
-                            <ul className="vvn-task-list">
-                                {selected.tasks.map((tk) => (
-                                    <li key={tk.id}>
-                                        <b>{tk.title}</b>
-                                        {tk.status ? <span className="vvn-task-status"> · {tk.status}</span> : null}
-                                        {tk.description ? <div className="vvn-task-desc">{tk.description}</div> : null}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* MODAIS EXTRA (Reject/Update) */}
-            {rejectOpen && (
-                <div className="sa-modal-backdrop" onClick={() => setRejectOpen(false)}>
-                    <div className="vvn-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.reject.title")}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setRejectOpen(false)}>
-                                ✖
-                            </button>
-                        </div>
-                        <div className="vvn-modal-body">
-              <textarea
-                  className="sa-textarea"
-                  placeholder={t("vvn.modals.reject.placeholder") as string}
-                  value={rejectMsg}
-                  onChange={(e) => setRejectMsg(e.target.value)}
-              />
-                        </div>
-                        <div className="vvn-modal-actions">
-                            <button className="sa-btn sa-btn-cancel" onClick={() => setRejectOpen(false)}>
+                            <button
+                                className="sa-btn sa-btn-cancel"
+                                onClick={() => setCreateOpen(false)}
+                            >
                                 {t("common.cancel")}
                             </button>
-                            <button className="sa-btn sa-btn-danger" onClick={doReject}>
-                                {t("common.confirm")}
+                            <button
+                                className="sa-btn sa-btn-primary"
+                                onClick={doCreate}
+                            >
+                                {t("common.save")}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
+            {/* UPDATE MODAL */}
             {updOpen && (
-                <div className="sa-modal-backdrop" onClick={() => setUpdOpen(false)}>
-                    <div className="vvn-modal" onClick={(e) => e.stopPropagation()}>
+                <div
+                    className="sa-modal-backdrop"
+                    onClick={() => setUpdOpen(false)}
+                >
+                    <div
+                        className="vvn-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div className="sa-dock-head">
                             <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">{t("vvn.modals.update.title")}</h3>
-                            <button className="sa-icon-btn sa-dock-close" onClick={() => setUpdOpen(false)}>✖</button>
+                            <h3 className="sa-dock-title">
+                                {t("vvn.modals.update.title")}
+                            </h3>
+                            <button
+                                className="sa-icon-btn sa-dock-close"
+                                onClick={() => setUpdOpen(false)}
+                            >
+                                ✖
+                            </button>
                         </div>
 
                         {/* Campos simples */}
                         <div className="vvn-modal-body grid2">
                             <div className="sa-field">
-                                <label>{t("vvn.details.eta")} ({t("common.optional") ?? "opcional"})</label>
-                                <input type="datetime-local" className="sa-input" value={updEta} onChange={(e)=>setUpdEta(e.target.value)} />
+                                <label>
+                                    {t("vvn.details.eta")} (
+                                    {t("common.optional") ?? "opcional"})
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    className="sa-input"
+                                    value={updEta}
+                                    onChange={(e) =>
+                                        setUpdEta(e.target.value)
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
-                                <label>{t("vvn.details.etd")} ({t("common.optional") ?? "opcional"})</label>
-                                <input type="datetime-local" className="sa-input" value={updEtd} onChange={(e)=>setUpdEtd(e.target.value)} />
+                                <label>
+                                    {t("vvn.details.etd")} (
+                                    {t("common.optional") ?? "opcional"})
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    className="sa-input"
+                                    value={updEtd}
+                                    onChange={(e) =>
+                                        setUpdEtd(e.target.value)
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
-                                <label>{t("vvn.modals.update.volume")} ({t("common.optional") ?? "opcional"})</label>
-                                <input type="number" min={0} className="sa-input" value={updVolume} onChange={(e)=>setUpdVolume(e.target.value)} />
+                                <label>
+                                    {t("vvn.modals.update.volume")} (
+                                    {t("common.optional") ?? "opcional"})
+                                </label>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    className="sa-input"
+                                    value={updVolume}
+                                    onChange={(e) =>
+                                        setUpdVolume(e.target.value)
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
-                                <label>{t("vvn.modals.update.dock")} ({t("common.optional") ?? "opcional"})</label>
-                                <input className="sa-input" value={updDock} onChange={(e)=>setUpdDock(e.target.value.toUpperCase())} />
+                                <label>
+                                    {t("vvn.modals.update.dock")} (
+                                    {t("common.optional") ?? "opcional"})
+                                </label>
+                                <input
+                                    className="sa-input"
+                                    value={updDock}
+                                    onChange={(e) =>
+                                        setUpdDock(
+                                            e.target.value.toUpperCase(),
+                                        )
+                                    }
+                                />
                             </div>
                             <div className="sa-field">
-                                <label>{t("vvn.filters.imo")} ({t("common.optional") ?? "opcional"})</label>
-                                <input className="sa-input" placeholder="IMO 1234567" value={updImo} onChange={(e)=>setUpdImo(e.target.value)} />
+                                <label>
+                                    {t("vvn.filters.imo")} (
+                                    {t("common.optional") ?? "opcional"})
+                                </label>
+                                <input
+                                    className="sa-input"
+                                    placeholder="IMO 1234567"
+                                    value={updImo}
+                                    onChange={(e) =>
+                                        setUpdImo(e.target.value)
+                                    }
+                                />
                             </div>
                         </div>
 
                         {/* Manifests via ficheiro + templates */}
                         <div className="vvn-modal-body">
                             <div className="sa-field">
-                                <label>{t("vvn.modals.crew.title")} (JSON)</label>
+                                <label>
+                                    {t("vvn.modals.crew.title")} (JSON)
+                                </label>
                                 <input
                                     type="file"
                                     accept="application/json"
-                                    onChange={(e)=>setUpdCrewFile(e.target.files?.[0] ?? null)}
+                                    onChange={(e) =>
+                                        setUpdCrewFile(
+                                            e.target.files?.[0] ?? null,
+                                        )
+                                    }
                                 />
                                 <button
                                     type="button"
                                     className="sa-btn sa-btn-ghost"
-                                    onClick={()=>downloadTemplate("CrewManifest.template.json", crewTemplate)}
+                                    onClick={() =>
+                                        downloadTemplate(
+                                            "CrewManifest.template.json",
+                                            crewTemplate,
+                                        )
+                                    }
                                 >
                                     {t("common.downloadTemplate")}
                                 </button>
                             </div>
 
                             <div className="sa-field">
-                                <label>{t("vvn.modals.loading.title")} (JSON)</label>
+                                <label>
+                                    {t("vvn.modals.loading.title")} (JSON)
+                                </label>
                                 <input
                                     type="file"
                                     accept="application/json"
-                                    onChange={(e)=>setUpdLoadFile(e.target.files?.[0] ?? null)}
+                                    onChange={(e) =>
+                                        setUpdLoadFile(
+                                            e.target.files?.[0] ?? null,
+                                        )
+                                    }
                                 />
                                 <button
                                     type="button"
                                     className="sa-btn sa-btn-ghost"
-                                    onClick={()=>downloadTemplate("LoadingCargoManifest.template.json", cargoTemplateLoading)}
+                                    onClick={() =>
+                                        downloadTemplate(
+                                            "LoadingCargoManifest.template.json",
+                                            cargoTemplateLoading,
+                                        )
+                                    }
                                 >
                                     {t("common.downloadTemplate")}
                                 </button>
                             </div>
 
                             <div className="sa-field">
-                                <label>{t("vvn.modals.unloading.title")} (JSON)</label>
+                                <label>
+                                    {t("vvn.modals.unloading.title")} (JSON)
+                                </label>
                                 <input
                                     type="file"
                                     accept="application/json"
-                                    onChange={(e)=>setUpdUnloadFile(e.target.files?.[0] ?? null)}
+                                    onChange={(e) =>
+                                        setUpdUnloadFile(
+                                            e.target.files?.[0] ?? null,
+                                        )
+                                    }
                                 />
                                 <button
                                     type="button"
                                     className="sa-btn sa-btn-ghost"
-                                    onClick={()=>downloadTemplate("UnloadingCargoManifest.template.json", cargoTemplateUnloading)}
+                                    onClick={() =>
+                                        downloadTemplate(
+                                            "UnloadingCargoManifest.template.json",
+                                            cargoTemplateUnloading,
+                                        )
+                                    }
                                 >
                                     {t("common.downloadTemplate")}
                                 </button>
@@ -1050,46 +1202,88 @@ export default function VvnListPage() {
                         </div>
 
                         <div className="vvn-modal-actions">
-                            <button className="sa-btn sa-btn-cancel" onClick={()=>setUpdOpen(false)}>{t("common.cancel")}</button>
-                            <button className="sa-btn sa-btn-primary" onClick={doUpdate}>{t("common.save")}</button>
+                            <button
+                                className="sa-btn sa-btn-cancel"
+                                onClick={() => setUpdOpen(false)}
+                            >
+                                {t("common.cancel")}
+                            </button>
+                            <button
+                                className="sa-btn sa-btn-primary"
+                                onClick={doUpdate}
+                            >
+                                {t("common.save")}
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* MODAIS REUTILIZÁVEIS (Crew/Manifests/Tasks/Reject) */}
+            <VvnCrewModal
+                open={crewOpen && !!selected}
+                onClose={() => setCrewOpen(false)}
+                crewManifest={selected?.crewManifest ?? null}
+            />
+
+            <VvnCargoManifestModal
+                open={loadOpen && !!selected}
+                onClose={() => setLoadOpen(false)}
+                manifest={selected?.loadingCargoManifest ?? null}
+                mode="loading"
+            />
+
+            <VvnCargoManifestModal
+                open={unloadOpen && !!selected}
+                onClose={() => setUnloadOpen(false)}
+                manifest={selected?.unloadingCargoManifest ?? null}
+                mode="unloading"
+            />
+
+            <VvnTasksModal
+                open={tasksOpen && !!selected}
+                onClose={() => setTasksOpen(false)}
+                tasks={selected?.tasks ?? []}
+            />
+
+            <VvnRejectModal
+                open={rejectOpen}
+                onClose={() => setRejectOpen(false)}
+                message={rejectMsg}
+                setMessage={setRejectMsg}
+                onConfirm={doReject}
+            />
         </div>
     );
 }
 
-/* Tabela de entries de cargo manifest */
-function EntriesTable({ entries }: { entries: CargoManifestEntryDto[] }) {
-    const { t } = useTranslation();
-    if (!entries || entries.length === 0) return <div className="sa-empty">{t("vvn.modals.loading.empty")}</div>;
-    return (
-        <div className="vvn-table-wrap">
-            <table className="vvn-table">
-                <thead>
-                <tr>
-                    <th>{t("vvn.entriesTable.storageArea")}</th>
-                    <th>{t("vvn.entriesTable.position")}</th>
-                    <th>{t("vvn.entriesTable.iso")}</th>
-                    <th>{t("vvn.entriesTable.type")}</th>
-                    <th>{t("vvn.entriesTable.status")}</th>
-                    <th>{t("vvn.entriesTable.weight")}</th>
-                </tr>
-                </thead>
-                <tbody>
-                {entries.map((e) => (
-                    <tr key={e.id}>
-                        <td>{e.storageAreaName}</td>
-                        <td>{`Bay ${e.bay} · Row ${e.row} · Tier ${e.tier}`}</td>
-                        <td>{isoString(e.container?.isoCode)}</td>
-                        <td>{e.container?.type ?? "-"}</td>
-                        <td>{e.container?.status ?? "-"}</td>
-                        <td>{e.container?.weightKg ?? 0}</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </div>
-    );
+/* ===== Helpers locais extra ===== */
+
+/** fallback para admin baseado em localStorage (igual ao teu original) */
+function isAdminLocalStorage(): boolean {
+    const r = localStorage.getItem("role");
+    if (r && /administrator/i.test(r.trim())) return true;
+
+    const rolesRaw = localStorage.getItem("roles");
+    if (rolesRaw) {
+        try {
+            const arr = JSON.parse(rolesRaw);
+            if (
+                Array.isArray(arr) &&
+                arr.some((x) =>
+                    /administrator/i.test(String(x).trim()),
+                )
+            )
+                return true;
+        } catch {
+            const arr = rolesRaw.split(/[,\s]+/).filter(Boolean);
+            if (
+                arr.some((x) =>
+                    /administrator/i.test(String(x).trim()),
+                )
+            )
+                return true;
+        }
+    }
+    return false;
 }

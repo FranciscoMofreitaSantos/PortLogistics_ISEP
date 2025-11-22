@@ -7,43 +7,17 @@ import vvnService from "../service/vvnService";
 import type {
     VesselVisitNotificationDto,
     FilterSubmittedVvnStatusDto,
-    CargoManifestEntryDto,
-    CrewMemberDto,
-    Iso6346Code,
-} from "../types/vvnTypes";
+} from "../dto/vvnTypesDtos";
+
+import { GUID_RE, shortDT, fmtDT } from "../mappers/vvnMappers";
+
+import { VvnCrewModal } from "../components/modals/VvnCrewModal";
+import { VvnCargoManifestModal } from "../components/modals/VvnCargoManifestModal";
+import { VvnTasksModal } from "../components/modals/VvnTasksModal";
+import { VvnRejectModal } from "../components/modals/VvnRejectModal";
 
 import "../../storageAreas/style/storageAreaStyle.css";
 import "../style/vvn.css";
-
-/* ===== Helpers reutilizados ===== */
-const GUID_RE =
-    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-
-function shortDT(s?: string | null) {
-    if (!s) return "-";
-    const d = new Date(s);
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${dd}/${mm}`;
-}
-
-function fmtDT(s?: string | null) {
-    if (!s) return "-";
-    const d = new Date(s);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mi = String(d.getMinutes()).padStart(2, "0");
-    return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
-}
-
-/** aceita Iso6346Code | string */
-function isoString(x: Iso6346Code | string | undefined | null) {
-    if (!x) return "-";
-    if (typeof x === "string") return x;
-    return (x as any).value || (x as any).Value || "-";
-}
 
 /* ========================= PAGE ========================= */
 
@@ -52,7 +26,9 @@ export default function VvnSubmittedAdminPage() {
 
     // dados
     const [vvns, setVvns] = useState<VesselVisitNotificationDto[]>([]);
-    const [selected, setSelected] = useState<VesselVisitNotificationDto | null>(null);
+    const [selected, setSelected] = useState<VesselVisitNotificationDto | null>(
+        null,
+    );
     const [loading, setLoading] = useState(false);
 
     // filtros
@@ -66,7 +42,7 @@ export default function VvnSubmittedAdminPage() {
     const [rejectOpen, setRejectOpen] = useState(false);
     const [rejectMsg, setRejectMsg] = useState("");
 
-    // popups de detalhe (opcional: ver manifests / crew / tasks)
+    // popups de detalhe
     const [crewOpen, setCrewOpen] = useState(false);
     const [loadOpen, setLoadOpen] = useState(false);
     const [unloadOpen, setUnloadOpen] = useState(false);
@@ -167,7 +143,9 @@ export default function VvnSubmittedAdminPage() {
                     </h2>
                     <div className="vvn-counters">
                         <span className="vvn-chip vvn-chip-sub">
-                            {t("vvn.header.submitted", { count: vvns.length })}
+                            {t("vvn.header.submitted", {
+                                count: vvns.length,
+                            })}
                         </span>
                     </div>
                 </div>
@@ -237,16 +215,22 @@ export default function VvnSubmittedAdminPage() {
                     ) : (
                         filtered.map((v) => {
                             const active = v.id === selected?.id;
-                            const statusKey = `v-${(v.status || "").toLowerCase()}`;
+                            const statusKey = `v-${(
+                                v.status || ""
+                            ).toLowerCase()}`;
                             return (
                                 <button
                                     key={v.id}
-                                    className={`vvn-item ${active ? "active" : ""}`}
+                                    className={`vvn-item ${
+                                        active ? "active" : ""
+                                    }`}
                                     onClick={() => setSelected(v)}
                                 >
                                     <div className="vvn-item-top">
                                         <strong>{v.code}</strong>
-                                        <span className={`vvn-status ${statusKey}`}>
+                                        <span
+                                            className={`vvn-status ${statusKey}`}
+                                        >
                                             {v.status}
                                         </span>
                                     </div>
@@ -265,15 +249,20 @@ export default function VvnSubmittedAdminPage() {
 
                 <main className="vvn-main">
                     {!selected ? (
-                        <div className="sa-empty">{t("common.selectOne")}</div>
+                        <div className="sa-empty">
+                            {t("common.selectOne")}
+                        </div>
                     ) : (
                         <>
                             {/* HEAD: info + Accept / Reject */}
                             <div className="vvn-head">
                                 <div>
-                                    <h3 className="vvn-title">{selected.code}</h3>
+                                    <h3 className="vvn-title">
+                                        {selected.code}
+                                    </h3>
                                     <div className="vvn-sub">
-                                        {t("vvn.filters.imo")} {selected.vesselImo} •{" "}
+                                        {t("vvn.filters.imo")}{" "}
+                                        {selected.vesselImo} •{" "}
                                         {t("vvn.details.status")}:{" "}
                                         <b>{selected.status}</b>
                                     </div>
@@ -282,14 +271,22 @@ export default function VvnSubmittedAdminPage() {
                                     <button
                                         className="sa-btn sa-btn-primary"
                                         onClick={() => doAccept(selected)}
-                                        title={t("vvn.actions.accept") as string}
+                                        title={
+                                            t(
+                                                "vvn.actions.accept",
+                                            ) as string
+                                        }
                                     >
                                         <FaCheck /> {t("vvn.actions.accept")}
                                     </button>
                                     <button
                                         className="sa-btn sa-btn-danger"
                                         onClick={openReject}
-                                        title={t("vvn.actions.reject") as string}
+                                        title={
+                                            t(
+                                                "vvn.actions.reject",
+                                            ) as string
+                                        }
                                     >
                                         <FaXmark /> {t("vvn.actions.reject")}
                                     </button>
@@ -318,7 +315,9 @@ export default function VvnSubmittedAdminPage() {
                                     <div className="sa-card-title">
                                         {t("vvn.details.volume")}
                                     </div>
-                                    <div className="sa-card-value">{selected.volume}</div>
+                                    <div className="sa-card-value">
+                                        {selected.volume}
+                                    </div>
                                 </div>
                                 <div className="sa-card">
                                     <div className="sa-card-title">
@@ -330,7 +329,7 @@ export default function VvnSubmittedAdminPage() {
                                 </div>
                             </section>
 
-                            {/* Acesso rápido aos detalhes (crew/loading/unloading/tasks) */}
+                            {/* Acesso rápido aos detalhes */}
                             <div className="vvn-quick-grid">
                                 <button
                                     className="vvn-tile is-crew"
@@ -339,7 +338,9 @@ export default function VvnSubmittedAdminPage() {
                                     <span className="vvn-ico">🧑‍✈️</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.crew.title")}</b>
-                                        <span>{t("vvn.quick.crewSubtitle")}</span>
+                                        <span>
+                                            {t("vvn.quick.crewSubtitle")}
+                                        </span>
                                     </span>
                                 </button>
 
@@ -350,7 +351,9 @@ export default function VvnSubmittedAdminPage() {
                                     <span className="vvn-ico">📦</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.loading.title")}</b>
-                                        <span>{t("vvn.quick.loadingSubtitle")}</span>
+                                        <span>
+                                            {t("vvn.quick.loadingSubtitle")}
+                                        </span>
                                     </span>
                                 </button>
 
@@ -361,7 +364,9 @@ export default function VvnSubmittedAdminPage() {
                                     <span className="vvn-ico">📤</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.unloading.title")}</b>
-                                        <span>{t("vvn.quick.unloadingSubtitle")}</span>
+                                        <span>
+                                            {t("vvn.quick.unloadingSubtitle")}
+                                        </span>
                                     </span>
                                 </button>
 
@@ -372,7 +377,9 @@ export default function VvnSubmittedAdminPage() {
                                     <span className="vvn-ico">✅</span>
                                     <span className="vvn-text">
                                         <b>{t("vvn.modals.tasks.title")}</b>
-                                        <span>{t("vvn.quick.tasksSubtitle")}</span>
+                                        <span>
+                                            {t("vvn.quick.tasksSubtitle")}
+                                        </span>
                                     </span>
                                 </button>
                             </div>
@@ -381,363 +388,41 @@ export default function VvnSubmittedAdminPage() {
                 </main>
             </div>
 
-            {/* ===== REJECT MODAL ===== */}
-            {rejectOpen && (
-                <div className="sa-modal-backdrop" onClick={() => setRejectOpen(false)}>
-                    <div className="vvn-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">
-                                {t("vvn.modals.reject.title")}
-                            </h3>
-                            <button
-                                className="sa-icon-btn sa-dock-close"
-                                onClick={() => setRejectOpen(false)}
-                            >
-                                ✖
-                            </button>
-                        </div>
-                        <div className="vvn-modal-body">
-                            <textarea
-                                className="sa-textarea"
-                                placeholder={
-                                    (t("vvn.modals.reject.placeholder") as string) ||
-                                    (t("common.reasonPlaceholder") as string)
-                                }
-                                value={rejectMsg}
-                                onChange={(e) => setRejectMsg(e.target.value)}
-                            />
-                        </div>
-                        <div className="vvn-modal-actions">
-                            <button
-                                className="sa-btn sa-btn-cancel"
-                                onClick={() => setRejectOpen(false)}
-                            >
-                                {t("common.cancel")}
-                            </button>
-                            <button
-                                className="sa-btn sa-btn-danger"
-                                onClick={doReject}
-                            >
-                                {t("common.confirm")}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* ===== MODAIS REUTILIZÁVEIS ===== */}
 
-            {/* ===== POPUPS DE DETALHE (mesmo estilo da outra page) ===== */}
+            <VvnRejectModal
+                open={rejectOpen}
+                onClose={() => setRejectOpen(false)}
+                message={rejectMsg}
+                setMessage={setRejectMsg}
+                onConfirm={doReject}
+            />
 
-            {/* Crew Manifest */}
-            {crewOpen && selected && (
-                <div className="sa-modal-backdrop" onClick={() => setCrewOpen(false)}>
-                    <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">
-                                {t("vvn.modals.crew.title")}
-                            </h3>
-                            <button
-                                className="sa-icon-btn sa-dock-close"
-                                onClick={() => setCrewOpen(false)}
-                            >
-                                ✖
-                            </button>
-                        </div>
-                        {!selected.crewManifest ? (
-                            <div className="sa-empty">
-                                {t("vvn.modals.crew.empty")}
-                            </div>
-                        ) : (
-                            <>
-                                <div className="vvn-def">
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.crew.captain")}
-                                            <br />
-                                        </span>
-                                        <strong>{selected.crewManifest.captainName}</strong>
-                                    </div>
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.crew.total")}
-                                            <br />
-                                        </span>
-                                        <strong>{selected.crewManifest.totalCrew}</strong>
-                                    </div>
-                                </div>
-                                <div className="vvn-table-wrap">
-                                    <table className="vvn-table">
-                                        <thead>
-                                        <tr>
-                                            <th>
-                                                {t("vvn.modals.crew.table.name")}
-                                            </th>
-                                            <th>
-                                                {t("vvn.modals.crew.table.role")}
-                                            </th>
-                                            <th>
-                                                {t(
-                                                    "vvn.modals.crew.table.nationality",
-                                                )}
-                                            </th>
-                                            <th>
-                                                {t(
-                                                    "vvn.modals.crew.table.citizenId",
-                                                )}
-                                            </th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {(selected.crewManifest.crewMembers || []).map(
-                                            (m: CrewMemberDto) => (
-                                                <tr key={m.id}>
-                                                    <td>{m.name}</td>
-                                                    <td>{m.role}</td>
-                                                    <td>{m.nationality}</td>
-                                                    <td>{m.citizenId}</td>
-                                                </tr>
-                                            ),
-                                        )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+            <VvnCrewModal
+                open={crewOpen && !!selected}
+                onClose={() => setCrewOpen(false)}
+                crewManifest={selected?.crewManifest ?? null}
+            />
 
-            {/* Loading Cargo Manifest */}
-            {loadOpen && selected && (
-                <div className="sa-modal-backdrop" onClick={() => setLoadOpen(false)}>
-                    <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">
-                                {t("vvn.modals.loading.title")}
-                            </h3>
-                            <button
-                                className="sa-icon-btn sa-dock-close"
-                                onClick={() => setLoadOpen(false)}
-                            >
-                                ✖
-                            </button>
-                        </div>
-                        {!selected.loadingCargoManifest ? (
-                            <div className="sa-empty">
-                                {t("vvn.modals.loading.empty")}
-                            </div>
-                        ) : (
-                            <>
-                                <div className="vvn-def">
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.loading.code")}
-                                            <br />
-                                        </span>
-                                        <strong>
-                                            {selected.loadingCargoManifest.code}
-                                        </strong>
-                                    </div>
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.loading.type")}
-                                            <br />
-                                        </span>
-                                        <strong>
-                                            {selected.loadingCargoManifest.type}
-                                        </strong>
-                                    </div>
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.loading.created")}
-                                            <br />
-                                        </span>
-                                        <strong>
-                                            {fmtDT(
-                                                selected.loadingCargoManifest
-                                                    .createdAt,
-                                            )}
-                                        </strong>
-                                    </div>
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.loading.createdBy")}
-                                            <br />
-                                        </span>
-                                        <strong>
-                                            {
-                                                selected.loadingCargoManifest
-                                                    .createdBy
-                                            }
-                                        </strong>
-                                    </div>
-                                </div>
-                                <EntriesTable
-                                    entries={selected.loadingCargoManifest.entries}
-                                />
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+            <VvnCargoManifestModal
+                open={loadOpen && !!selected}
+                onClose={() => setLoadOpen(false)}
+                manifest={selected?.loadingCargoManifest ?? null}
+                mode="loading"
+            />
 
-            {/* Unloading Cargo Manifest */}
-            {unloadOpen && selected && (
-                <div className="sa-modal-backdrop" onClick={() => setUnloadOpen(false)}>
-                    <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">
-                                {t("vvn.modals.unloading.title")}
-                            </h3>
-                            <button
-                                className="sa-icon-btn sa-dock-close"
-                                onClick={() => setUnloadOpen(false)}
-                            >
-                                ✖
-                            </button>
-                        </div>
-                        {!selected.unloadingCargoManifest ? (
-                            <div className="sa-empty">
-                                {t("vvn.modals.unloading.empty")}
-                                <br />
-                            </div>
-                        ) : (
-                            <>
-                                <div className="vvn-def">
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.unloading.code")}
-                                            <br />
-                                        </span>
-                                        <strong>
-                                            {selected.unloadingCargoManifest.code}
-                                        </strong>
-                                    </div>
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.unloading.type")}
-                                            <br />
-                                        </span>
-                                        <strong>
-                                            {selected.unloadingCargoManifest.type}
-                                        </strong>
-                                    </div>
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.unloading.created")}
-                                            <br />
-                                        </span>
-                                        <strong>
-                                            {fmtDT(
-                                                selected.unloadingCargoManifest
-                                                    .createdAt,
-                                            )}
-                                        </strong>
-                                    </div>
-                                    <div>
-                                        <span>
-                                            {t("vvn.modals.unloading.createdBy")}
-                                            <br />
-                                        </span>
-                                        <strong>
-                                            {
-                                                selected.unloadingCargoManifest
-                                                    .createdBy
-                                            }
-                                        </strong>
-                                    </div>
-                                </div>
-                                <EntriesTable
-                                    entries={selected.unloadingCargoManifest.entries}
-                                />
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+            <VvnCargoManifestModal
+                open={unloadOpen && !!selected}
+                onClose={() => setUnloadOpen(false)}
+                manifest={selected?.unloadingCargoManifest ?? null}
+                mode="unloading"
+            />
 
-            {/* Tasks */}
-            {tasksOpen && selected && (
-                <div className="sa-modal-backdrop" onClick={() => setTasksOpen(false)}>
-                    <div className="vvn-pop-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="sa-dock-head">
-                            <div className="sa-dock-spacer" />
-                            <h3 className="sa-dock-title">
-                                {t("vvn.modals.tasks.title")}
-                            </h3>
-                            <button
-                                className="sa-icon-btn sa-dock-close"
-                                onClick={() => setTasksOpen(false)}
-                            >
-                                ✖
-                            </button>
-                        </div>
-                        {!selected.tasks || selected.tasks.length === 0 ? (
-                            <div className="sa-empty">
-                                {t("vvn.modals.tasks.empty")}
-                                <br />
-                            </div>
-                        ) : (
-                            <ul className="vvn-task-list">
-                                {selected.tasks.map((tk) => (
-                                    <li key={tk.id}>
-                                        <b>{tk.title}</b>
-                                        {tk.status ? (
-                                            <span className="vvn-task-status">
-                                                {" "}
-                                                · {tk.status}
-                                            </span>
-                                        ) : null}
-                                        {tk.description ? (
-                                            <div className="vvn-task-desc">
-                                                {tk.description}
-                                            </div>
-                                        ) : null}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
-
-/* Tabela de entries de cargo manifest (mesma da outra page) */
-function EntriesTable({ entries }: { entries: CargoManifestEntryDto[] }) {
-    const { t } = useTranslation();
-    if (!entries || entries.length === 0)
-        return <div className="sa-empty">{t("vvn.modals.loading.empty")}</div>;
-    return (
-        <div className="vvn-table-wrap">
-            <table className="vvn-table">
-                <thead>
-                <tr>
-                    <th>{t("vvn.entriesTable.storageArea")}</th>
-                    <th>{t("vvn.entriesTable.position")}</th>
-                    <th>{t("vvn.entriesTable.iso")}</th>
-                    <th>{t("vvn.entriesTable.type")}</th>
-                    <th>{t("vvn.entriesTable.status")}</th>
-                    <th>{t("vvn.entriesTable.weight")}</th>
-                </tr>
-                </thead>
-                <tbody>
-                {entries.map((e) => (
-                    <tr key={e.id}>
-                        <td>{e.storageAreaName}</td>
-                        <td>{`Bay ${e.bay} · Row ${e.row} · Tier ${e.tier}`}</td>
-                        <td>{isoString(e.container?.isoCode)}</td>
-                        <td>{e.container?.type ?? "-"}</td>
-                        <td>{e.container?.status ?? "-"}</td>
-                        <td>{e.container?.weightKg ?? 0}</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+            <VvnTasksModal
+                open={tasksOpen && !!selected}
+                onClose={() => setTasksOpen(false)}
+                tasks={selected?.tasks ?? []}
+            />
         </div>
     );
 }
