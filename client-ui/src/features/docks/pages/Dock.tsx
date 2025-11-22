@@ -256,15 +256,15 @@ export default function DockPage() {
         const C = parseDecimal(editNums.maxDraftM);
         if (editNums.lengthM && !isPositive(L))
             next.lengthM = t("Dock.errors.mustBePositive", {
-                defaultValue: "Deve ser > 0",
+                defaultValue: "Deve ser maior que 0",
             });
         if (editNums.depthM && !isPositive(D))
             next.depthM = t("Dock.errors.mustBePositive", {
-                defaultValue: "Deve ser > 0",
+                defaultValue: "Deve ser maior que 0",
             });
         if (editNums.maxDraftM && !isPositive(C))
             next.maxDraftM = t("Dock.errors.mustBePositive", {
-                defaultValue: "Deve ser > 0",
+                defaultValue: "Deve ser maior que 0",
             });
         if (!editVTs.length)
             next.vessels = t("Dock.errors.chooseVesselType", {
@@ -328,7 +328,7 @@ export default function DockPage() {
             });
         else if (rawL && !isPositive(L))
             next.lengthM = t("Dock.errors.mustBePositive", {
-                defaultValue: "Deve ser > 0",
+                defaultValue: "Deve ser maior que 0",
             });
 
         if (rawD && D == null)
@@ -337,7 +337,7 @@ export default function DockPage() {
             });
         else if (rawD && !isPositive(D))
             next.depthM = t("Dock.errors.mustBePositive", {
-                defaultValue: "Deve ser > 0",
+                defaultValue: "Deve ser maior que 0",
             });
 
         if (rawC && C == null)
@@ -346,7 +346,7 @@ export default function DockPage() {
             });
         else if (rawC && !isPositive(C))
             next.maxDraftM = t("Dock.errors.mustBePositive", {
-                defaultValue: "Deve ser > 0",
+                defaultValue: "Deve ser maior que 0",
             });
 
         if (!createVTs.length)

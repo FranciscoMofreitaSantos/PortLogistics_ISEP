@@ -894,7 +894,7 @@
       "depthRequired": "Profundidade é obrigatória",
       "maxdraftRequired": "Calado é obrigatório",
       "numberInvalid": "Número inválido",
-      "mustBePositive": "Deve ser > 0",
+      "mustBePositive": "Deve ser maior que 0",
       "chooseVesselType": "Seleciona pelo menos um tipo de navio.",
       "formFix": "Corrige os erros do formulário."
     },

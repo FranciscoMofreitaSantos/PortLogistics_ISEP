@@ -897,7 +897,7 @@
     "depthRequired": "Depth is required",
     "maxdraftRequired": "Draft is required",
     "numberInvalid": "Invalid number",
-    "mustBePositive": "Must be > 0",
+    "mustBePositive": "Must be bigger than 0",
     "chooseVesselType": "Select at least one vessel type.",
     "formFix": "Fix the form errors."
   },
