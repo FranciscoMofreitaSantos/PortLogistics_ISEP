@@ -1,7 +1,4 @@
-﻿// cypress/e2e/docks.cy.ts
-
-// Torna o ficheiro um módulo TS, para não haver conflito de variáveis com outros specs
-export {};
+﻿export {};
 
 const API_DOCK = "**/api/Dock";
 const API_DOCK_BY_CODE = "**/api/Dock/code/*";
@@ -99,8 +96,6 @@ describe("Docks – E2E", () => {
     // ------------------------------------------------------------------
 
     it("faz pesquisa por localização (fallback local) e filtra os cards", () => {
-        // intercept da pesquisa por localização para devolver 0 results
-        // e assim forçar o fallback local (filter em memória)
         cy.intercept("GET", API_DOCK_LOCATION, {
             statusCode: 200,
             body: [],
@@ -113,7 +108,6 @@ describe("Docks – E2E", () => {
 
         cy.wait("@searchByLocation");
 
-        // agora deve ficar só a dock com location "Porto Sul" (DK-0001)
         cy.get(".dk-card").should("have.length", 1);
         cy.contains(".dk-card", "DK-0001").should("exist");
         cy.contains(".dk-card", "DK-0002").should("not.exist");
@@ -141,15 +135,12 @@ describe("Docks – E2E", () => {
     // ------------------------------------------------------------------
 
     it("botão de criação abre o modal de criação e faz POST", () => {
-        // intercept do checkDockCodeExists -> GET /api/Dock/code/{code}
         cy.intercept("GET", API_DOCK_BY_CODE, {
             statusCode: 404, // 404 = código livre
         }).as("checkCode");
 
-        // intercept do POST /api/Dock
         cy.intercept("POST", API_DOCK, (req) => {
-            // verifica só coisas essenciais para evitar falhas chatas
-            expect(req.body).to.have.property("location");            // não verificamos espaçamento
+            expect(req.body).to.have.property("location"); 
             expect(req.body).to.have.property("lengthM", 350);
             expect(req.body).to.have.property("depthM", 15.5);
             expect(req.body).to.have.property("maxDraftM", 14.8);
@@ -203,13 +194,8 @@ describe("Docks – E2E", () => {
     // ------------------------------------------------------------------
 
     it("a partir do slide abre o modal de edição e faz PATCH por código", () => {
-        // intercept do PATCH /api/Dock/code/DK-0001
         cy.intercept("PATCH", API_DOCK_PATCH_DK1, (req) => {
-            // aqui também não vamos ser picuinhas com espaços,
-            // só garantimos que a propriedade existe
             expect(req.body).to.have.property("location");
-            // se quiseres, podes fazer algo assim:
-            // expect(req.body.location).to.contain("Porto");
 
             req.reply({
                 statusCode: 200,
