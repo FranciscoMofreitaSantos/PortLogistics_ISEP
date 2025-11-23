@@ -75,7 +75,8 @@
     "adminPanel": "Gestão de Utilizadores",
     "sao": "Organizações Agente de Transporte",
     "vvnResponse": "Responder VVN",
-    "docks" : "Docks"
+    "docks" : "Docks",
+    "sar": "Representates de Agentes de Transporte"
   },
 
   "layout": {
@@ -1027,6 +1028,7 @@
     "nationality":"Nacionalidade",
     "active":"Ativo",
     "inactive":"Inativo",
-    "deleted":"Representante eliminado com sucesso!"
+    "deleted":"Representante eliminado com sucesso!",
+    "searchMode":"Pesquisar por: "
   }
 }
