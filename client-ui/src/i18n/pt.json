@@ -589,7 +589,9 @@
       "updateFailed": "Falha ao atualizar recurso.",
       "deactivateFailed": "Falha ao desativar recurso.",
       "activateFailed": "Falha ao reativar recurso.",
-      "loadQualificationDetails": "Nome da qualif. indisponível"
+      "loadQualificationDetails": "Nome da qualif. indisponível",
+      "invalidCapacity": "A capacidade operacional deve ser um valor numérico positivo.",
+      "invalidSetupTime": "O tempo de setup deve ser um valor numérico não negativo."
     }
   },
 
