@@ -78,6 +78,7 @@ function PhysicalResourceDetails({ resource, isOpen, onClose }: PhysicalResource
             setCurrentResource(updatedResource);
             toast.success(t("physicalResource.success.deactivated"));
             onClose();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             toast.error(t("physicalResource.errors.deactivateFailed"));
         } finally {
@@ -94,6 +95,7 @@ function PhysicalResourceDetails({ resource, isOpen, onClose }: PhysicalResource
             setCurrentResource(updatedResource);
             toast.success(t("physicalResource.success.activated"));
             onClose();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             toast.error(t("physicalResource.errors.activateFailed"));
         } finally {
