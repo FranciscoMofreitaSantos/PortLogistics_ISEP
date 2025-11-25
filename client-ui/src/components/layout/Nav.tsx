@@ -19,6 +19,7 @@ import {
     FiLayers, FiMapPin,
 } from "react-icons/fi";
 import {FaShip} from "react-icons/fa";
+import { FaCalendarAlt } from 'react-icons/fa'; // Importar um ícone para Agendamento
 
 type NavProps = {
     isOpen: boolean;
@@ -51,6 +52,12 @@ export default function Nav({ isOpen }: NavProps) {
         ]
         : [];
 
+    const projectManagerMenu = user?.role?.includes(Roles.ProjectManager)
+        ? [
+            { label: t("menu.planningScheduling"), path: "/planning-scheduling", icon: <FaCalendarAlt /> },
+        ]
+        : [];
+
     const portAuthorityOfficerMenu = user?.role?.includes(Roles.PortAuthorityOfficer)
         ? [
             { label: t("menu.storageArea"), path: "/storage-areas", icon: <FiBox /> },
@@ -69,7 +76,8 @@ export default function Nav({ isOpen }: NavProps) {
         ]
         : [];
 
-    const menu = [...baseMenu, ...adminMenu, ...operatorMenu, ...sarMenu, ...portAuthorityOfficerMenu];
+    // Incluir o menu do Project Manager na lista combinada
+    const menu = [...baseMenu, ...adminMenu, ...operatorMenu, ...sarMenu, ...portAuthorityOfficerMenu, ...projectManagerMenu];
 
     const uniqueMenu = menu.filter((item, index, self) =>
             index === self.findIndex((t) => (

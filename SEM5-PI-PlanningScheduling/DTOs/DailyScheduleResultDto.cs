@@ -10,18 +10,18 @@ public class SchedulingOperationDto
     public string VvnId { get; set; }
     public string Vessel { get; set; }
     public string Dock { get; set; }
-    public int StartTime { get; set; }      
-    public int EndTime { get; set; }        
+    public int StartTime { get; set; }
+    public int EndTime { get; set; }
     public int LoadingDuration { get; set; }
     public int UnloadingDuration { get; set; }
     public string Crane { get; set; }
     public List<StaffAssignmentDto> StaffAssignments { get; set; }
-    
+
     //PARA A US 3.4.5
-    public int CraneCountUsed { get; set; }              
-    public int OptimizedOperationDuration { get; set; }  
-    public int RealDepartureTime { get; set; }           
-    public int DepartureDelay { get; set; }     
+    public int CraneCountUsed { get; set; }
+    public int OptimizedOperationDuration { get; set; }
+    public int RealDepartureTime { get; set; }
+    public int DepartureDelay { get; set; }
 }
 
 public class MultiCraneComparisonResultDto

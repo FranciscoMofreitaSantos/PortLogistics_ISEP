@@ -105,6 +105,7 @@
     "storage-areas" : "Manage Storage Areas",
     "sao" : "Manage Shipping Agent Organizations",
     "adminPanel" : "Users administration",
+    "planning" : "Planning",
     "accessModules" : "Access Modules",
     "port3d" : "3D Visualization",
     "announcement": {
@@ -1038,5 +1039,49 @@
     "nationalityRequired":"Nationality is required!",
     "saoRequired": "Representative must have an associated Organization!",
     "emailRequired": "Email is required!"
+  },
+
+  "planningScheduling": {
+    "title": "Daily Schedule Calculation",
+    "selectDay": "Select Day",
+    "selectAlgorithm": "Select Algorithm",
+    "optimal": "Optimal",
+    "greedy": "Greedy",
+    "localSearch": "Local Search",
+    "computeSchedule": "Compute Schedule",
+    "loading": "Loading...",
+    "error": "Error",
+    "noDateSelected": "Please select a date to calculate.",
+    "scheduleResult": "Schedule Result (Algorithm: {{algo}})",
+    "totalOperations": "Total Operations",
+    "totalDelay": "Total Delay (Prolog)",
+    "hours": "h",
+    "prologRaw": "Prolog Raw Response",
+    "vessel": "Vessel",
+    "dock": "Dock",
+    "window": "Window (ETA/ETD)",
+    "work": "Work (Loading/Unloading)",
+    "craneUsed": "Crane Used",
+    "optimizedDuration": "Optimized Duration",
+    "realDeparture": "Real Departure",
+    "delay": "Delay",
+    "staffAssignments": "Staff Assignments",
+    "noOperations": "There are no operations for the selected day.",
+    "scheduleLoading": "Loading schedule...",
+    "scheduleSuccess": "Schedule calculated successfully!",
+    "scheduleFail": "Failed to load schedule.",
+    "computeScheduleFor" : "Generate",
+    "algorithm" : "Algorithm",
+    "totalCraneHours" : "Total of hours/crane",
+    "notComputed" : "Not generated yet...",
+    "comparisonTitle" : "Comparison table"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "confirm": "Confirm",
+    "close": "Close",
+    "loading": "Loading...",
+    "noResults": "No results."
   }
 }

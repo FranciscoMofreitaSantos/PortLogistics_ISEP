@@ -53,7 +53,7 @@ namespace SEM5_PI_WEBAPI
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment _env;   // <--- ADD
+        private readonly IWebHostEnvironment _env;   
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
