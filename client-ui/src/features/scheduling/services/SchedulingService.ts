@@ -10,7 +10,7 @@ export type ScheduleResponse = {
 
 export type AlgorithmType = 'optimal' | 'greedy' | 'local-search';
 
-const BASE_URL = 'http://localhost:5296/api/schedule';
+const BASE_URL = import.meta.env.VITE_Planning_API_BASE_URL ?? "http://localhost:5296";
 
 
 export const SchedulingService = {
