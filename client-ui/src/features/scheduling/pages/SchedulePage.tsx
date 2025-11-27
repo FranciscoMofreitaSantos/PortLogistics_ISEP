@@ -84,13 +84,10 @@ function HtmlDateInput({
     );
 }
 
-// O seu componente OperationRow (sem alterações)
+
 const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, locale: string }) => {
     const formatTime = (iso: string) => {
         try {
-            // Assume que 'iso' vem do StaffAssignmentDto (DateTime)
-            // Se o seu backend estiver a devolver o tempo em horas inteiras (int),
-            // esta lógica precisará de ser ajustada.
             return new Date(iso).toLocaleTimeString(
                 locale === "pt" ? "pt-PT" : "en-US",
                 {hour: "2-digit", minute: "2-digit"}
@@ -161,7 +158,7 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
                         {op.staffAssignments.map((s: StaffAssignmentDto, idx: number) => (
                             <Grid.Col span={6} key={idx}>
                                 <Badge fullWidth variant="light">
-                                    {s.staffMemberName}: {formatTime(s.intervalStart)} - {formatTime(s.intervalEnd)}
+                                    {s.staffMemberName}
                                 </Badge>
                             </Grid.Col>
                         ))}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace SEM5_PI_DecisionEngineAPI.DTOs;
 
@@ -64,4 +65,35 @@ public class OptimizationStepDto
     public int TotalCranesUsed { get; set; }
     public string AlgorithmUsed { get; set; } = string.Empty;
     public string ChangeDescription { get; set; } = string.Empty;
+}
+
+
+public class PrologOperationResultDto
+{
+    
+    [JsonPropertyName("vessel")]
+    public string Vessel { get; set; } = string.Empty;
+
+    [JsonPropertyName("start")]
+    public int StartTime { get; set; }
+
+    [JsonPropertyName("end")]
+    public int EndTime { get; set; }
+}
+
+
+public class PrologFullResultDto
+{
+
+    [JsonPropertyName("algorithm")]
+    public string Algorithm { get; set; } = string.Empty;
+    
+    [JsonPropertyName("total_delay")]
+    public int TotalDelay { get; set; }
+    
+    [JsonPropertyName("best_sequence")]
+    public List<PrologOperationResultDto> BestSequence { get; set; } = new();
+    
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = string.Empty;
 }

@@ -580,4 +580,60 @@ public class SchedulingService
         int offset = day.DayOfWeek switch { DayOfWeek.Monday => 0, DayOfWeek.Tuesday => 1, DayOfWeek.Wednesday => 2, DayOfWeek.Thursday => 3, DayOfWeek.Friday => 4, DayOfWeek.Saturday => 5, DayOfWeek.Sunday => 6, _ => 0 };
         return staff.Schedule.DaysOfWeek[staff.Schedule.DaysOfWeek.Length - 1 - offset] == '1';
     }
+    
+    
+    public DailyScheduleResultDto UpdateScheduleFromPrologResult(
+    DailyScheduleResultDto schedule, 
+    object? prologResponse)
+{
+    if (prologResponse is JsonElement json)
+    {
+        try
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            
+            
+            var prologResult = json.Deserialize<PrologFullResultDto>(options);
+
+            if (prologResult?.BestSequence == null) return schedule; 
+
+            
+            var scheduleOpsDict = schedule.Operations
+                .ToDictionary(op => op.Vessel, op => op);
+
+            
+            var reorderedOperations = new List<SchedulingOperationDto>();
+
+            foreach (var pOp in prologResult.BestSequence)
+            {
+                if (scheduleOpsDict.TryGetValue(pOp.Vessel, out var op))
+                {
+                    
+                    op.StartTime = pOp.StartTime; 
+                    op.RealDepartureTime = pOp.EndTime;
+                    op.OptimizedOperationDuration = pOp.EndTime - pOp.StartTime; 
+                    
+                    op.DepartureDelay = Math.Max(0, op.RealDepartureTime - op.EndTime);
+                    
+                    if (op.DepartureDelay > 0)
+                        op.DepartureDelay += 1;
+                    
+                    
+                    reorderedOperations.Add(op);
+                }
+            }
+            
+            schedule.Operations = reorderedOperations;
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Erro ao desserializar resposta do Prolog: {ex.Message}");
+        }
+    }
+
+    return schedule;
+}
 }
