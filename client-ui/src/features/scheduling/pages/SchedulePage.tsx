@@ -198,7 +198,7 @@ export default function SchedulePage() {
     const algorithms = [
         {value: 'optimal', label: t('planningScheduling.optimal'), icon: IconStar},
         {value: 'greedy', label: t('planningScheduling.greedy'), icon: IconBolt},
-        {value: 'local-search', label: t('planningScheduling.localSearch'), icon: IconSearch},
+        {value: 'local_search', label: t('planningScheduling.localSearch'), icon: IconSearch},
     ];
 
     const getAlgoName = useCallback(

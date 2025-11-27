@@ -8,7 +8,7 @@ export type ScheduleResponse = {
     prolog: any;
 };
 
-export type AlgorithmType = 'optimal' | 'greedy' | 'local-search';
+export type AlgorithmType = 'optimal' | 'greedy' | 'local_search';
 
 const BASE_URL = import.meta.env.VITE_Planning_API_BASE_URL ?? "http://localhost:5296";
 
@@ -18,7 +18,7 @@ export const SchedulingService = {
         day: string,
         algorithm: AlgorithmType,
     ): Promise<ScheduleResponse> {
-        const endpoint = `daily/${algorithm}`;
+        const endpoint = `api/schedule/daily/${algorithm}`;
         const url = `${BASE_URL}/${endpoint}?day=${day}`;
 
         const response = await fetch(url);

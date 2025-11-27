@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace SEM5_PI_DecisionEngineAPI.DTOs;
 
 public class DailyScheduleResultDto
@@ -14,15 +17,20 @@ public class SchedulingOperationDto
     public int EndTime { get; set; }
     public int LoadingDuration { get; set; }
     public int UnloadingDuration { get; set; }
-    public string Crane { get; set; }
     public List<StaffAssignmentDto> StaffAssignments { get; set; }
+    public string Crane { get; set; } = string.Empty;
 
-    //PARA A US 3.4.5
-    public int CraneCountUsed { get; set; }
+    // Multi-crane Real
+    public int CraneCountUsed { get; set; } = 1;
     public int OptimizedOperationDuration { get; set; }
     public int RealDepartureTime { get; set; }
     public int DepartureDelay { get; set; }
+
+    // Multi-crane Hypothetical (Resource Analysis)
+    public int? TheoreticalRequiredCranes { get; set; }
+    public string? ResourceSuggestion { get; set; } // Ex: "Requires 3 cranes to minimize delay (Only 1 available)"
 }
+
 
 public class MultiCraneComparisonResultDto
 {
@@ -35,9 +43,11 @@ public class MultiCraneComparisonResultDto
     public int SingleTotalDelay { get; set; }
     public int MultiTotalDelay { get; set; }
     public int DelayImprovement => SingleTotalDelay - MultiTotalDelay;
-
     public int SingleCraneHours { get; set; }
     public int MultiCraneHours { get; set; }
+
+    // History of the optimization process for the UI
+    public List<OptimizationStepDto> OptimizationSteps { get; set; } = new();
 }
 
 public class StaffAssignmentDto
@@ -45,4 +55,13 @@ public class StaffAssignmentDto
     public string StaffMemberName { get; set; }
     public DateTime IntervalStart { get; set; }
     public DateTime IntervalEnd { get; set; }
+}
+
+public class OptimizationStepDto
+{
+    public int StepNumber { get; set; }
+    public int TotalDelay { get; set; }
+    public int TotalCranesUsed { get; set; }
+    public string AlgorithmUsed { get; set; } = string.Empty;
+    public string ChangeDescription { get; set; } = string.Empty;
 }
