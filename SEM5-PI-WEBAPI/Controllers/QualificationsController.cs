@@ -8,7 +8,7 @@ using SEM5_PI_WEBAPI.utils;
 
 namespace SEM5_PI_WEBAPI.Controllers;
 
-[Authorize(Roles = "LogisticsOperator")]
+
 [Route("api/[controller]")]
 [ApiController]
 public class QualificationsController : ControllerBase
@@ -134,7 +134,7 @@ public class QualificationsController : ControllerBase
         }
     }
     
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("test-role")]
     public IActionResult TestRole()
     {
@@ -142,7 +142,7 @@ public class QualificationsController : ControllerBase
         var userId = User.FindFirst("sub")?.Value;
         var email = User.FindFirst("email")?.Value;
     
-        // ✅ Buscar roles corretamente
+        
         var userRoles = User.Claims
             .Where(c => c.Type == ClaimTypes.Role || c.Type == "roles")
             .Select(c => c.Value)

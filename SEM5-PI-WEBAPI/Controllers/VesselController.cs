@@ -45,7 +45,7 @@ public class VesselController : ControllerBase
         
     }
 
-    [Authorize(Roles = "PortAuthorityOfficer")]
+    
     [HttpGet("id/{id:guid}")]
     public async Task<ActionResult<VesselTypeDto>> GetById(Guid id)
     {
@@ -64,7 +64,7 @@ public class VesselController : ControllerBase
         }
     }
     
-    [Authorize(Roles = "PortAuthorityOfficer")]
+    
     [HttpPost]
     public async Task<ActionResult<VesselDto>> CreateAsync(CreatingVesselDto creatingVesselDto)
     {
@@ -84,7 +84,7 @@ public class VesselController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "PortAuthorityOfficer")]
+    
     [HttpGet("imo/{imo}")]
     public async Task<ActionResult<VesselDto>> GetByImoAsync(string imo)
     {
@@ -106,7 +106,7 @@ public class VesselController : ControllerBase
         }
     }
     
-    [Authorize(Roles = "PortAuthorityOfficer")]
+    
     [HttpGet("name/{name}")]
     public async Task<ActionResult<List<VesselDto>>> GetByNameAsync(string name)
     {
@@ -128,7 +128,7 @@ public class VesselController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "PortAuthorityOfficer")]
+    
     [HttpGet("owner/{owner}")]
     public async Task<ActionResult<VesselDto>> GetByOwnerAsync(string owner)
     {
@@ -150,7 +150,7 @@ public class VesselController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "PortAuthorityOfficer")]
+    
     [HttpGet("filter")]
     public async Task<ActionResult<List<VesselDto>>> GetByFilterAsync(string? name, string? imo, string? ownerName,string? query)
     {
@@ -171,7 +171,7 @@ public class VesselController : ControllerBase
         }
     }
     
-    [Authorize(Roles = "PortAuthorityOfficer")]
+    
     [HttpPatch("imo/{imo}")]
     public async Task<ActionResult<VesselDto>> PatchByImoAsync(string imo, [FromBody] UpdatingVesselDto? dto)
     {
@@ -193,7 +193,7 @@ public class VesselController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "PortAuthorityOfficer")]
+    
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult> Delete(Guid id)
     {

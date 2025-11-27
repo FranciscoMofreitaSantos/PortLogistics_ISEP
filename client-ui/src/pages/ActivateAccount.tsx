@@ -38,10 +38,12 @@ export default function ActivateAccount() {
                 }
 
                 const activateRes = await fetch(
-                    `http://localhost:5008/api/user/activate?email=${encodeURIComponent(email)}`
+                    `http://localhost:5008/api/user/activate?email=${encodeURIComponent(email)}`,
+                    { method: "PUT" }
                 );
 
                 const text = await activateRes.text();
+                console.log("Activation response:", activateRes.status, text);
 
                 if (activateRes.ok) {
                     setMessage(text || t("activation.successMessage"));

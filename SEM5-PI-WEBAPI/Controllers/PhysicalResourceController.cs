@@ -35,7 +35,7 @@ public class PhysicalResourceController : ControllerBase
         return Ok(list);
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("get/{id}")]
     public async Task<ActionResult<PhysicalResourceDTO>> GetByID(Guid id)
     {
@@ -58,7 +58,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("get/code/{code}")]
     public async Task<ActionResult<PhysicalResourceDTO>> GetByCode(string code)
     {
@@ -81,7 +81,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("get/description/{description}")]
     public async Task<ActionResult<IEnumerable<PhysicalResourceDTO>>> GetByDescription(string description)
     {
@@ -104,7 +104,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("get/status/{status}")]
     public async Task<ActionResult<IEnumerable<PhysicalResourceDTO>>> GetByStatus(PhysicalResourceStatus status)
     {
@@ -127,7 +127,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("get/type/{type}")]
     public async Task<ActionResult<IEnumerable<PhysicalResourceDTO>>> GetByType(PhysicalResourceType type)
     {
@@ -150,7 +150,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("get/qualification/{qualification}")]
     public async Task<ActionResult<IEnumerable<PhysicalResourceDTO>>> GetByQualification(Guid qualification)
     {
@@ -173,7 +173,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpPost]
     public async Task<ActionResult<PhysicalResourceDTO>> Create(CreatingPhysicalResourceDto dto)
     {
@@ -191,7 +191,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpPatch("update/{id}")]
     public async Task<ActionResult<PhysicalResourceDTO>> Update(Guid id, JObject body)
     {
@@ -227,7 +227,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpPatch("deactivate/{id}")]
     public async Task<ActionResult<PhysicalResourceDTO>> Deactivate(Guid id)
     {
@@ -251,7 +251,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpPatch("reactivate/{id}")]
     public async Task<ActionResult<PhysicalResourceDTO>> Activate(Guid id)
     {
@@ -275,7 +275,7 @@ public class PhysicalResourceController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("search/code/{partialCode}")]
     public async Task<ActionResult<IEnumerable<PhysicalResourceDTO>>> SearchByPartialCode(string partialCode)
     {
@@ -290,7 +290,7 @@ public class PhysicalResourceController : ControllerBase
         return Ok(list);
     }
 
-    [Authorize(Roles = "LogisticsOperator")]
+    
     [HttpGet("search/description/{partialDescription}")]
     public async Task<ActionResult<IEnumerable<PhysicalResourceDTO>>> SearchByPartialDescription(string partialDescription)
     {

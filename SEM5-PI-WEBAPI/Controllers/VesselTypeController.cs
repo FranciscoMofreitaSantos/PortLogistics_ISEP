@@ -45,7 +45,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             }
         }
 
-        [Authorize(Roles = "PortAuthorityOfficer")]
+        
         [HttpGet("id/{id:guid}")]
         public async Task<ActionResult<VesselTypeDto>> GetById(Guid id)
         {
@@ -64,7 +64,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             }
         }
 
-        [Authorize(Roles = "PortAuthorityOfficer")]
+        
         [HttpGet("name/{name}")]
         public async Task<ActionResult<VesselTypeDto>> GetByName(string name)
         {
@@ -83,7 +83,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             }
         }
         
-        [Authorize(Roles = "PortAuthorityOfficer")]
+        
         [HttpGet("description/{description}")]
         public async Task<ActionResult<List<VesselTypeDto>>> GetByDescription(string description)
         {
@@ -102,7 +102,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             }
         }
 
-        [Authorize(Roles = "PortAuthorityOfficer")]
+        
         [HttpPost]
         public async Task<ActionResult<VesselTypeDto>> Create(CreatingVesselTypeDto dto)
         {
@@ -121,7 +121,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             }
         }
 
-        [Authorize(Roles = "PortAuthorityOfficer")]
+        
         [HttpGet("filter")]
         public async Task<ActionResult<List<VesselTypeDto>>> Filter(string? name, string? description,
             string? query)
@@ -144,7 +144,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             
         }
         
-        [Authorize(Roles = "PortAuthorityOfficer")]
+        
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<VesselTypeDto>> Update(Guid id, UpdateVesselTypeDto dto)
         {
@@ -162,7 +162,7 @@ namespace SEM5_PI_WEBAPI.Controllers
             }
         }
         
-        [Authorize(Roles = "PortAuthorityOfficer")]
+        
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(Guid id)
         {
