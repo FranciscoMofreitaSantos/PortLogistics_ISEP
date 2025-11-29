@@ -223,6 +223,11 @@ export class PortScene {
 
     private simulationStartSec: number;
 
+    // spotlight dinâmico que segue a câmara e ilumina a seleção
+    private selectionSpotlight: THREE.SpotLight | null = null;
+    private selectionSpotlightTarget: THREE.Object3D | null = null;
+    private selectionCenter = new THREE.Vector3();
+
     constructor(container: HTMLDivElement) {
         this.container = container;
 
@@ -263,9 +268,6 @@ export class PortScene {
         );
         this.camera.position.set(180, 200, 420);
 
-        // this.renderer.toneMappingExposure = 0.7;
-        // this.loadSkyHDR();
-
         /* ------------ Luzes (LightingController) ------------ */
         this.light = new LightingController(this.scene, this.renderer, {
             enableGUI: true,
@@ -280,14 +282,14 @@ export class PortScene {
             shadowSize: 1024,
         });
 
-
-        const numLights = 6;      
-        const spacing = 100;       
-        const baseX = 50;        
+        // iluminação estática do cais
+        const numLights = 6;
+        const spacing = 100;
+        const baseX = 50;
         const y = 45;
         const width = 1000 / 2 / 2 / 2;
         const z = -width;
-        
+
         for (let i = 0; i < numLights; i++) {
             const offset = spacing * i;
             const x = baseX + offset;
@@ -300,11 +302,28 @@ export class PortScene {
             spotLight.penumbra = 0.5;
             spotLight.decay = 1;
             spotLight.distance = 0; // ilimitado
-            
+
             this.scene.add(spotLight);
             this.scene.add(spotLight.target);
-            
         }
+
+        // === Spotlight dinâmico para o elemento selecionado ===
+        this.selectionSpotlightTarget = new THREE.Object3D();
+        this.scene.add(this.selectionSpotlightTarget);
+
+        this.selectionSpotlight = new THREE.SpotLight(
+            0xff0000,
+            400,          // intensidade forte para sobressair
+            0,            // distance 0 → sem limite
+            Math.PI / 6,  // cone ~30º
+            0.5,          // penumbra bem visível
+            1,            // decay
+        );
+        this.selectionSpotlight.castShadow = false;
+        this.selectionSpotlight.visible = false; // só liga com seleção
+        this.selectionSpotlight.target = this.selectionSpotlightTarget;
+
+        this.scene.add(this.selectionSpotlight);
 
         const el = this.light.gui!.domElement as HTMLElement;
         const host = this.renderer.domElement.parentElement!;
@@ -412,13 +431,8 @@ export class PortScene {
         // drawPortGridsDebug(this.scene, this._grids, 1.1);
 
         /* ------------ OBJETOS “AMBIENTAIS” FIXOS ------------ */
-        // FARÓIS
         addRoadPoles(this.scene, this._baseLayout, portSceneConfig.roadLights);
-
-        // ÁRVORES
         addRoadTrees(this.scene, this._baseLayout, portSceneConfig.roadTrees);
-
-        // PONTES + CIDADE
         addBridges(this.gBridge, this._baseLayout, portSceneConfig.bridges);
 
         /* ------------ CONTROLOS ORBIT ------------ */
@@ -537,23 +551,24 @@ export class PortScene {
             if (!o.isMesh || !o.userData.__origMat) return;
 
             const current = o.material;
-            // libertar o clone
             if (Array.isArray(current)) current.forEach((m: any) => m?.dispose?.());
             else current?.dispose?.();
 
-            // restaurar material original
             o.material = o.userData.__origMat;
             delete o.userData.__origMat;
         });
 
         this.selectedObj = null;
+
+        if (this.selectionSpotlight) {
+            this.selectionSpotlight.visible = false;
+        }
     }
 
     private applyHighlight(obj: THREE.Object3D) {
         obj.traverse((o: any) => {
             if (!o.isMesh) return;
 
-            // Se ainda não tiver material original guardado, guarda e clona
             if (!o.userData.__origMat) {
                 if (Array.isArray(o.material)) {
                     o.userData.__origMat = o.material;
@@ -564,15 +579,43 @@ export class PortScene {
                 }
             }
 
-            // seguro mexer na cor (é um clone)
             const mats = Array.isArray(o.material) ? o.material : [o.material];
             mats.forEach((m: any) => {
-                if (!m || !("color" in m)) return;
-                m.color.lerp(new THREE.Color(0xffff00), 0.5);
+                if (!m) return;
+
+                const highlightColor = new THREE.Color(0xffff00); // amarelo bem forte
+
+                // cor base → puxar muito para o amarelo
+                if ("color" in m && m.color) {
+                    m.color.lerp(highlightColor, 0.7);
+                }
+                
+                if ("emissive" in m) {
+                    if (!m.emissive) {
+                        m.emissive = new THREE.Color(0x000000);
+                    }
+                    m.emissive.lerp(highlightColor, 0.8);
+                    // se o material suportar intensidade emissiva:
+                    if ("emissiveIntensity" in m) {
+                        m.emissiveIntensity = 1.5;
+                    }
+                }
             });
+
         });
 
         this.selectedObj = obj;
+
+        // spotlight aponta para o centro do objeto
+        if (this.selectionSpotlight && this.selectionSpotlightTarget) {
+            const box = new THREE.Box3().setFromObject(obj);
+            box.getCenter(this.selectionCenter);
+
+            this.selectionSpotlightTarget.position.copy(this.selectionCenter);
+            this.selectionSpotlightTarget.updateMatrixWorld();
+
+            this.selectionSpotlight.visible = true;
+        }
     }
 
     private applyVesselStatusVisual(node: THREE.Object3D, status?: SimStatus) {
@@ -740,7 +783,7 @@ export class PortScene {
             portSceneConfig.yards,
         );
 
-        // toldos A.1 (ainda hardcoded, mas podes criar portSceneConfig.awnings se quiseres)
+        // toldos A.1
         addModernAwningsInA1(this.gDecor, this._grids!, {
             fillWidthRatio: 0.87,
             fillDepthRatio: 0.87,
@@ -867,7 +910,6 @@ export class PortScene {
 
         const hits = raycaster.intersectObjects(this.pickables, true);
         if (!hits.length) {
-            // opcional: limpar seleção se clicares no "vazio"
             this.clearHighlight();
             return;
         }
@@ -898,6 +940,26 @@ export class PortScene {
         this.fp.update(dt);
 
         this.updateVesselLabelsAndStatus();
+
+        // spotlight dinâmico segue a câmara e continua apontado ao centro da seleção
+        if (this.selectionSpotlight && this.selectionSpotlightTarget && this.selectedObj) {
+            const box = new THREE.Box3().setFromObject(this.selectedObj);
+            box.getCenter(this.selectionCenter);
+
+            this.selectionSpotlightTarget.position.copy(this.selectionCenter);
+            this.selectionSpotlightTarget.updateMatrixWorld();
+
+            // direção câmara → centro do objeto
+            const dir = new THREE.Vector3()
+                .subVectors(this.selectionCenter, this.camera.position)
+                .normalize();
+
+            // luz fica um pouco atrás dessa direção e mais alta
+            const lightPos = this.selectionCenter.clone().sub(dir.multiplyScalar(80));
+            lightPos.y += 40;
+
+            this.selectionSpotlight.position.copy(lightPos);
+        }
 
         this.renderer.render(this.scene, this.camera);
         this.reqId = requestAnimationFrame(this.loop);
