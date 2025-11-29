@@ -1,3 +1,4 @@
+// src/features/viewer3d/pages/Viewer3DPage.tsx
 import {
     useEffect,
     useMemo,
@@ -5,9 +6,7 @@ import {
     useState,
     useCallback,
 } from "react";
-import ThreeScene, {
-    type ThreeSceneHandle,
-} from "../components/ThreeScene";
+import ThreeScene, { type ThreeSceneHandle } from "../components/ThreeScene";
 import { loadSceneData } from "../services/viewer3dService";
 import type { SceneData } from "../types";
 import { useTranslation } from "react-i18next";
@@ -16,7 +15,7 @@ import "../style/viewer3d.css";
 import { InfoOverlay } from "../components/InfoOverlay";
 import type { SelectedEntityInfo } from "../types/selection";
 import { mapPickedToSelection } from "../types/selection";
-import {type Role } from "../../../app/types";
+import type { Role } from "../../../app/types";
 import { useAppStore } from "../../../app/store";
 
 type Layers = {
@@ -55,15 +54,10 @@ export default function Viewer3DPage() {
     });
 
     // seleção + overlay
-    const [selected, setSelected] = useState<SelectedEntityInfo | null>(
-        null,
-    );
+    const [selected, setSelected] = useState<SelectedEntityInfo | null>(null);
     const [showInfo, setShowInfo] = useState(true);
 
-    const canShow = useMemo(
-        () => !loading && !err,
-        [loading, err],
-    );
+    const canShow = useMemo(() => !loading && !err, [loading, err]);
 
     // ===== Fullscreen control =====
     const sceneHandle = useRef<ThreeSceneHandle | null>(null);
@@ -73,15 +67,13 @@ export default function Viewer3DPage() {
         const el = sceneHandle.current?.getHost();
         if (!el) return;
         // @ts-ignore Safari
-        (el.requestFullscreen ||
-            (el as any).webkitRequestFullscreen)?.call(el, {
+        (el.requestFullscreen || (el as any).webkitRequestFullscreen)?.call(el, {
             navigationUI: "hide",
         });
     }, []);
     const exitFs = useCallback(() => {
         // @ts-ignore Safari
-        (document.exitFullscreen ||
-            (document as any).webkitExitFullscreen)?.call(
+        (document.exitFullscreen || (document as any).webkitExitFullscreen)?.call(
             document,
         );
     }, []);
@@ -108,10 +100,7 @@ export default function Viewer3DPage() {
         };
         document.addEventListener("fullscreenchange", onFsChange);
         // @ts-ignore
-        document.addEventListener(
-            "webkitfullscreenchange",
-            onFsChange,
-        );
+        document.addEventListener("webkitfullscreenchange", onFsChange);
 
         const onKey = (e: KeyboardEvent) => {
             // Alt+Enter → fullscreen
@@ -128,15 +117,9 @@ export default function Viewer3DPage() {
         window.addEventListener("keydown", onKey);
 
         return () => {
-            document.removeEventListener(
-                "fullscreenchange",
-                onFsChange,
-            );
+            document.removeEventListener("fullscreenchange", onFsChange);
             // @ts-ignore
-            document.removeEventListener(
-                "webkitfullscreenchange",
-                onFsChange,
-            );
+            document.removeEventListener("webkitfullscreenchange", onFsChange);
             window.removeEventListener("keydown", onKey);
         };
     }, [toggleFs]);
@@ -153,10 +136,7 @@ export default function Viewer3DPage() {
                 }
             })
             .catch((e) => {
-                if (alive)
-                    setErr(
-                        e?.message ?? "Failed to load 3D data.",
-                    );
+                if (alive) setErr(e?.message ?? "Failed to load 3D data.");
             })
             .finally(() => {
                 if (alive) setLoading(false);
@@ -189,17 +169,11 @@ export default function Viewer3DPage() {
                     <div className="viewer3d-stats-row">
                         <button
                             type="button"
-                            className={`viewer3d-stat-btn ${
-                                layers.docks ? "on" : "off"
-                            }`}
+                            className={`viewer3d-stat-btn ${layers.docks ? "on" : "off"}`}
                             onClick={() => toggleLayer("docks")}
                         >
-                            <span className="viewer3d-stat-icon">
-                                ⚓
-                            </span>
-                            <span className="viewer3d-stat-label">
-                                Docks
-                            </span>
+                            <span className="viewer3d-stat-icon">⚓</span>
+                            <span className="viewer3d-stat-label">Docks</span>
                             <span className="viewer3d-stat-value">
                                 {data.docks.length}
                             </span>
@@ -207,17 +181,11 @@ export default function Viewer3DPage() {
 
                         <button
                             type="button"
-                            className={`viewer3d-stat-btn ${
-                                layers.storage ? "on" : "off"
-                            }`}
+                            className={`viewer3d-stat-btn ${layers.storage ? "on" : "off"}`}
                             onClick={() => toggleLayer("storage")}
                         >
-                            <span className="viewer3d-stat-icon">
-                                🧺
-                            </span>
-                            <span className="viewer3d-stat-label">
-                                Armazenamento
-                            </span>
+                            <span className="viewer3d-stat-icon">🧺</span>
+                            <span className="viewer3d-stat-label">Armazenamento</span>
                             <span className="viewer3d-stat-value">
                                 {data.storageAreas.length}
                             </span>
@@ -225,17 +193,11 @@ export default function Viewer3DPage() {
 
                         <button
                             type="button"
-                            className={`viewer3d-stat-btn ${
-                                layers.vessels ? "on" : "off"
-                            }`}
+                            className={`viewer3d-stat-btn ${layers.vessels ? "on" : "off"}`}
                             onClick={() => toggleLayer("vessels")}
                         >
-                            <span className="viewer3d-stat-icon">
-                                🚢
-                            </span>
-                            <span className="viewer3d-stat-label">
-                                Navios
-                            </span>
+                            <span className="viewer3d-stat-icon">🚢</span>
+                            <span className="viewer3d-stat-label">Navios</span>
                             <span className="viewer3d-stat-value">
                                 {data.vessels.length}
                             </span>
@@ -243,17 +205,11 @@ export default function Viewer3DPage() {
 
                         <button
                             type="button"
-                            className={`viewer3d-stat-btn ${
-                                layers.containers ? "on" : "off"
-                            }`}
+                            className={`viewer3d-stat-btn ${layers.containers ? "on" : "off"}`}
                             onClick={() => toggleLayer("containers")}
                         >
-                            <span className="viewer3d-stat-icon">
-                                📦
-                            </span>
-                            <span className="viewer3d-stat-label">
-                                Contentores
-                            </span>
+                            <span className="viewer3d-stat-icon">📦</span>
+                            <span className="viewer3d-stat-label">Contentores</span>
                             <span className="viewer3d-stat-value">
                                 {data.containers.length}
                             </span>
@@ -261,17 +217,11 @@ export default function Viewer3DPage() {
 
                         <button
                             type="button"
-                            className={`viewer3d-stat-btn ${
-                                layers.resources ? "on" : "off"
-                            }`}
+                            className={`viewer3d-stat-btn ${layers.resources ? "on" : "off"}`}
                             onClick={() => toggleLayer("resources")}
                         >
-                            <span className="viewer3d-stat-icon">
-                                🛠️
-                            </span>
-                            <span className="viewer3d-stat-label">
-                                Recursos
-                            </span>
+                            <span className="viewer3d-stat-icon">🛠️</span>
+                            <span className="viewer3d-stat-label">Recursos</span>
                             <span className="viewer3d-stat-value">
                                 {data.resources.length}
                             </span>
@@ -286,17 +236,13 @@ export default function Viewer3DPage() {
                         onClick={toggleFs}
                         title="Alt+Enter"
                     >
-                        {isFs
-                            ? t("viewer3d.fullscreenExit")
-                            : t("viewer3d.fullscreen")}
+                        {isFs ? t("viewer3d.fullscreenExit") : t("viewer3d.fullscreen")}
                     </button>
                 </div>
             </div>
 
             {loading && (
-                <div className="viewer3d-fallback">
-                    {t("viewer3d.loading")}
-                </div>
+                <div className="viewer3d-fallback">{t("viewer3d.loading")}</div>
             )}
             {err && (
                 <div className="viewer3d-error">

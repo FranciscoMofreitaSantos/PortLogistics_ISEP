@@ -1,5 +1,5 @@
 import api from "../../../services/api";
-import type { SceneData, DockDto, StorageAreaDto, VesselDto, ContainerDto, PhysicalResourceDTO } from "../types";
+import type { SceneData, DockDto, StorageAreaDto, VesselDto, ContainerDto, PhysicalResourceDTO, VesselOperationalStatus } from "../types";
 
 /** -------- helpers -------- */
 const TEU_LENGTH = 6.06;
@@ -48,6 +48,48 @@ function snap(v: number, step = GRID) {
 function normalizeImo(x: any): string {
     return str(x).replace(/\s+/g, "").toUpperCase();
 }
+
+function isDefaultDateStr(x: any): boolean {
+    if (!x) return true;
+    const t = Date.parse(x);
+    if (!Number.isFinite(t)) return true;
+    const year = new Date(t).getUTCFullYear();
+    // tudo < 2000 tratamos como “default” / lixo
+    return year < 2000;
+}
+
+function computeOperationalStatus(vvn: any, tasks: { startTime?: string | null; endTime?: string | null; status: string; }[]): VesselOperationalStatus {
+    const now = Date.now();
+
+    const hasLoadingManifest = !!vvn.loadingCargoManifest;
+    const hasUnloadingManifest = !!vvn.unloadingCargoManifest;
+
+    const hasInProgress = tasks.some((t) => {
+        const ts = t.startTime ? Date.parse(t.startTime) : NaN;
+        const te = t.endTime ? Date.parse(t.endTime) : NaN;
+        if (Number.isFinite(ts) && Number.isFinite(te)) {
+            return ts <= now && now <= te;
+        }
+        return t.status === "InProgress";
+    });
+
+    const hasPending = tasks.some((t) => t.status === "Pending");
+    const hasCompleted = tasks.some((t) => t.status === "Completed");
+
+    if (hasInProgress) {
+        if (hasLoadingManifest && hasUnloadingManifest) return "Loading & Unloading";
+        if (hasLoadingManifest) return "Loading";
+        if (hasUnloadingManifest) return "Unloading";
+        return "Loading";
+    }
+
+    if (hasPending) return "Waiting";
+    if (hasCompleted) return "Completed";
+
+    return "Waiting";
+}
+
+
 
 /** -------- fetchers (mapeamento + LAYOUT alinhado) -------- */
 
@@ -141,6 +183,8 @@ export async function fetchStorageAreas(): Promise<StorageAreaDto[]> {
     }
 }
 
+
+
 export async function fetchVessels(): Promise<VesselDto[]> {
     try {
         // 1) ir buscar TODOS os vessels + TODOS os VVNs accepted
@@ -163,7 +207,7 @@ export async function fetchVessels(): Promise<VesselDto[]> {
         }));
 
         // 2) indexar VVNs accepted por IMO (normalizado)
-        type RawVvn = any; // vem do backend
+        type RawVvn = any;
         const rawVvns = (vvnRes.data as RawVvn[]) ?? [];
 
         const vvnByImo = new Map<string, RawVvn>();
@@ -178,7 +222,7 @@ export async function fetchVessels(): Promise<VesselDto[]> {
                 continue;
             }
 
-            // se já existir uma visita para este navio, guardamos a com ETA mais recente
+            // fica com a visita de ETA mais recente
             const etaExisting = Date.parse(existing.estimatedTimeArrival ?? "") || 0;
             const etaNew      = Date.parse(v.estimatedTimeArrival ?? "") || 0;
             if (etaNew > etaExisting) {
@@ -188,23 +232,46 @@ export async function fetchVessels(): Promise<VesselDto[]> {
 
         // 3) construir lista de vessels APENAS com VVN accepted
         const acceptedVessels: VesselDto[] = [];
+        const now = Date.now();
 
         for (const vessel of allVessels) {
             const imoKey = normalizeImo(vessel.imoNumber);
             const vvn = vvnByImo.get(imoKey);
-            if (!vvn) continue; // sem VVN accepted → não aparece na cena 3D
+            if (!vvn) continue;
 
-            // mapear tasks (podem vir null/undefined)
-            const tasks = Array.isArray(vvn.tasks)
-                ? vvn.tasks.map((t: any) => ({
+            // --- mapear tasks + “inventar” tempos se vierem a 0 ---
+            const rawTasks = Array.isArray(vvn.tasks) ? vvn.tasks : [];
+            const tasks = rawTasks.map((t: any) => {
+                let start = t.startTime as string | null | undefined;
+                let end   = t.endTime   as string | null | undefined;
+
+                if (isDefaultDateStr(start)) start = null;
+                if (isDefaultDateStr(end))   end   = null;
+
+                return {
                     id: str(t.id),
                     code: str(t.code),
-                    type: str(t.type),       // TaskType enum -> string
-                    status: str(t.status),   // TaskStatus enum -> string
-                    startTime: t.startTime ?? null,
-                    endTime: t.endTime ?? null,
-                }))
-                : [];
+                    type: str(t.type),
+                    status: str(t.status),
+                    startTime: start,
+                    endTime: end,
+                };
+            });
+
+            // se não tiver start/end válidos, criamos nós:
+            tasks.forEach((t: { startTime: string; endTime: string; }, idx: number) => {
+                if (!t.startTime && !t.endTime) {
+                    const offsetSec = idx * 15; // escalonados 15s
+                    const durSec = 30 + Math.floor(Math.random() * 90); // 30–120s
+
+                    const startMs = now + offsetSec * 1000;
+                    const endMs = startMs + durSec * 1000;
+                    t.startTime = new Date(startMs).toISOString();
+                    t.endTime = new Date(endMs).toISOString();
+                }
+            });
+
+            const operationalStatus = computeOperationalStatus(vvn, tasks);
 
             (vessel as any).visit = {
                 vvnId: str(vvn.id),
@@ -218,12 +285,13 @@ export async function fetchVessels(): Promise<VesselDto[]> {
                 status: str(vvn.status),
                 dockCode: vvn.dock ?? null,
                 tasks,
+                operationalStatus,
             };
 
             acceptedVessels.push(vessel);
         }
 
-        // 4) posicionamento no plano (igual ao que já tinhas, mas só para os aceites)
+        // 4) posicionamento no plano (igual, mas só para aceites)
         let row0X = -acceptedVessels.reduce((s, x) => s + Math.max(30, x.lengthMeters ?? 70), 0) / 2;
         let row1X = row0X;
 
@@ -251,6 +319,7 @@ export async function fetchVessels(): Promise<VesselDto[]> {
         return [];
     }
 }
+
 
 
 export async function fetchContainers(): Promise<ContainerDto[]> {

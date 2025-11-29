@@ -59,6 +59,14 @@ export interface StorageAreaDto {
     positionX?: number; positionY?: number; positionZ?: number;
 }
 
+export type VesselOperationalStatus =
+    | "Waiting"
+    | "Loading"
+    | "Unloading"
+    | "Loading & Unloading"
+    | "Completed";
+
+
 export interface VesselDto {
     id: UUID;
     imoNumber: string;      // unwrap ImoNumber
@@ -94,6 +102,7 @@ export interface VesselDto {
             startTime?: string | null;
             endTime?: string | null;
         }[];
+        operationalStatus?: VesselOperationalStatus;
     };
 }
 

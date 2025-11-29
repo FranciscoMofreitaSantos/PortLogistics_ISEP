@@ -45,6 +45,17 @@ export type LayerVis = Partial<{
     decoratives?: boolean;
 }>;
 
+function vesselStatusColorHex(status?: string): number {
+    switch (status) {
+        case "Loading":              return 0x22c55e; // verde
+        case "Unloading":            return 0xf97316; // laranja
+        case "Loading & Unloading":  return 0xa855f7; // roxo
+        case "Completed":            return 0x3b82f6; // azul
+        case "Waiting":
+        default:                     return 0x9ca3af; // cinza
+    }
+}
+
 export class PortScene {
     container: HTMLDivElement;
     renderer: THREE.WebGLRenderer;
@@ -394,6 +405,27 @@ export class PortScene {
         this.selectedObj = obj;
     }
 
+    private applyVesselStatusVisual(node: THREE.Object3D, status?: string) {
+        if (!status) return;
+
+        const col = new THREE.Color(vesselStatusColorHex(status));
+
+        node.traverse((o: any) => {
+            if (!o.isMesh) return;
+            const mats = Array.isArray(o.material) ? o.material : [o.material];
+
+            mats.forEach((m: any) => {
+                if (!m) return;
+
+                if ("emissive" in m) {
+                    if (!m.emissive) m.emissive = new THREE.Color(0x000000);
+                    m.emissive.lerp(col, 0.8);
+                } else if ("color" in m) {
+                    m.color.lerp(col, 0.4);
+                }
+            });
+        });
+    }
 
     /** Recentra a câmara horizontalmente no centro do objeto. */
     private focusCameraOnObject(obj: THREE.Object3D) {
@@ -472,9 +504,17 @@ export class PortScene {
 
         for (const v of layoutResult.vessels) {
             const node = makeVessel(v as any);
+
+            const status = (v as any).visit?.operationalStatus as string | undefined;
+            this.applyVesselStatusVisual(node, status);
+
+            // guardar também no userData (útil para overlay / debug)
+            node.userData.operationalStatus = status;
+
             this.gVessels.add(node);
             this.pickables.push(node);
         }
+
 
         // decor “layout-based”
         for (const deco of layoutResult.decoratives) {
