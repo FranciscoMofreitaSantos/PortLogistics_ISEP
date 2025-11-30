@@ -55,7 +55,7 @@ public class UserController : ControllerBase
     }
 
     
-    [HttpGet("{id}")]
+    [HttpGet("id/{id:guid}")]
     public async Task<ActionResult<UserDto>> GetById(Guid id)
     {
         _logger.LogInformation("API Request: Get User by ID = {Id}", id);

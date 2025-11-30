@@ -5,6 +5,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useAppStore } from "../app/store";
 import { Roles } from "../app/types";
 import { useTranslation } from "react-i18next";
+import {webApi} from "../services/api.tsx";
 
 export default function RoleLauncher() {
     const { t } = useTranslation();
@@ -34,7 +35,7 @@ export default function RoleLauncher() {
         try {
             const token = await getAccessTokenSilently();
             const res = await fetch(
-                `http://localhost:5008/api/user/email/${encodeURIComponent(authUser.email)}`,
+                `${webApi}/api/user/email/${encodeURIComponent(authUser.email)}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

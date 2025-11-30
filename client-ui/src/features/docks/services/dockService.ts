@@ -1,6 +1,4 @@
-﻿// src/docks/services/dockService.ts
-
-import api from "../../../services/api";
+﻿import {webApi} from "../../../services/api";
 import type {
     DockDto,
     CreateDockRequestDto,
@@ -10,22 +8,22 @@ import type { Dock } from "../domain/dock";
 import { mapDockDto } from "../mappers/dockMapper";
 
 export async function getDocks(): Promise<Dock[]> {
-    const res = await api.get<DockDto[]>("/api/Dock");
+    const res = await webApi.get<DockDto[]>("/api/Dock");
     return res.data.map(mapDockDto);
 }
 
 export async function getDockById(id: string): Promise<Dock> {
-    const res = await api.get<DockDto>(`/api/Dock/id/${id}`);
+    const res = await webApi.get<DockDto>(`/api/Dock/id/${id}`);
     return mapDockDto(res.data);
 }
 
 export async function getDockByCode(code: string): Promise<Dock> {
-    const res = await api.get<DockDto>(`/api/Dock/code/${encodeURIComponent(code)}`);
+    const res = await webApi.get<DockDto>(`/api/Dock/code/${encodeURIComponent(code)}`);
     return mapDockDto(res.data);
 }
 
 export async function getDocksByVesselType(vesselTypeId: string): Promise<Dock[]> {
-    const res = await api.get<DockDto[]>(
+    const res = await webApi.get<DockDto[]>(
         `/api/Dock/vesseltype/${encodeURIComponent(vesselTypeId)}`
     );
     return res.data.map(mapDockDto);
@@ -38,19 +36,19 @@ export async function filterDocks(params: {
     query?: string;
     status?: string;
 }): Promise<Dock[]> {
-    const res = await api.get<DockDto[]>("/api/Dock/filter", { params });
+    const res = await webApi.get<DockDto[]>("/api/Dock/filter", { params });
     return res.data.map(mapDockDto);
 }
 
 export async function getDocksByLocation(location: string): Promise<Dock[]> {
-    const res = await api.get<DockDto[]>("/api/Dock/location", {
+    const res = await webApi.get<DockDto[]>("/api/Dock/location", {
         params: { value: location },
     });
     return res.data.map(mapDockDto);
 }
 
 export async function createDock(data: CreateDockRequestDto): Promise<Dock> {
-    const res = await api.post<DockDto>("/api/Dock", data);
+    const res = await webApi.post<DockDto>("/api/Dock", data);
     return mapDockDto(res.data);
 }
 
@@ -58,7 +56,7 @@ export async function patchDockByCode(
     code: string,
     data: UpdateDockRequestDto
 ): Promise<Dock> {
-    const res = await api.patch<DockDto>(
+    const res = await webApi.patch<DockDto>(
         `/api/Dock/code/${encodeURIComponent(code)}`,
         data
     );
@@ -66,13 +64,13 @@ export async function patchDockByCode(
 }
 
 export async function getDockByPhysicalResourceCode(code: string): Promise<Dock> {
-    const res = await api.get<DockDto>(
+    const res = await webApi.get<DockDto>(
         `/api/Dock/physical-code/${encodeURIComponent(code)}`
     );
     return mapDockDto(res.data);
 }
 
 export async function getAllDockCodes(): Promise<string[]> {
-    const res = await api.get<string[]>("/api/Dock/codes");
+    const res = await webApi.get<string[]>("/api/Dock/codes");
     return res.data;
 }

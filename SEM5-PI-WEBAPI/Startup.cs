@@ -46,14 +46,13 @@ using SEM5_PI_WEBAPI.Seed;
 using SEM5_PI_WEBAPI.utils;
 using SEM5_PI_WEBAPI.Api.Config;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
-using SEM5_PI_WEBAPI.Api.Middleware; 
-
+using SEM5_PI_WEBAPI.Api.Middleware;
 
 namespace SEM5_PI_WEBAPI
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment _env;   
+        private readonly IWebHostEnvironment _env;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
@@ -88,7 +87,8 @@ namespace SEM5_PI_WEBAPI
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("AdminOnly", policy => policy.RequireRole(Roles.Administrator.ToString()));
+                options.AddPolicy("AdminOnly", policy =>
+                    policy.RequireRole(Roles.Administrator.ToString()));
             });
 
             services.AddCors(options =>
@@ -100,7 +100,8 @@ namespace SEM5_PI_WEBAPI
                             "http://localhost:5173",
                             "http://localhost:3000",
                             "http://10.9.23.188",
-                            "http://10.9.23.188:5173"
+                            "http://10.9.23.188:5173",
+                            "http://10.9.21.228"  // NGINX (para chamadas do frontend em prod)
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -108,33 +109,33 @@ namespace SEM5_PI_WEBAPI
                 });
             });
 
-
             services.AddHealthChecks();
             services.Configure<NetworkAccessOptions>(Configuration.GetSection("NetworkAccess"));
 
             if (_env.IsEnvironment("Testing"))
             {
-                // Provider para testes: InMemory
                 services.AddDbContext<DddSample1DbContext>(opt =>
                     opt.UseInMemoryDatabase("SEM5_PI_WEBAPI_SystemTests")
                         .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
             }
             else
             {
-                // Provider normal: Postgres
                 services.AddDbContext<DddSample1DbContext>(opt =>
                     opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
                         .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
             }
 
-
-
             ConfigureMyServices(services);
 
-
             services.AddControllers()
-                .AddNewtonsoftJson(options => { options.SerializerSettings.Converters.Add(new StringEnumConverter()); })
-                .AddJsonOptions(o => { o.JsonSerializerOptions.PropertyNameCaseInsensitive = true; });
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                })
+                .AddJsonOptions(o =>
+                {
+                    o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -163,29 +164,17 @@ namespace SEM5_PI_WEBAPI
             {
                 endpoints.MapControllers();
                 endpoints.MapHealthChecks("/api/health");
+
+                // ✅ ENDPOINT RAIZ PARA TESTE VIA NGINX
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("WEBAPI ONLINE");
+                });
             });
         }
 
-
-
         private void ConfigureMyServices(IServiceCollection services)
         {
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowSPA", builder =>
-                    builder
-                        .WithOrigins(
-                            "http://localhost:5173", 
-                            "http://localhost:3000", 
-                            "http://10.9.23.188", 
-                            "http://10.9.23.188:5173" 
-                        )
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials()
-                );
-            });
-
             services.AddTransient<IUnitOfWork, UnitOfWork>();
 
             services.AddTransient<IQualificationRepository, QualificationRepository>();
@@ -206,7 +195,6 @@ namespace SEM5_PI_WEBAPI
             services.AddTransient<IShippingAgentRepresentativeRepository, ShippingAgentRepresentativeRepository>();
             services.AddScoped<IShippingAgentRepresentativeService, ShippingAgentRepresentativeService>();
 
-
             services.AddTransient<IStorageAreaRepository, StorageAreaRepository>();
             services.AddScoped<IStorageAreaService, StorageAreaService>();
 
@@ -214,10 +202,8 @@ namespace SEM5_PI_WEBAPI
             services.AddScoped<IDockService, DockService>();
 
             services.AddTransient<ICargoManifestRepository, CargoManifestRepository>();
-
             services.AddTransient<IContainerRepository, ContainerRepository>();
             services.AddScoped<IContainerService, ContainerService>();
-
             services.AddTransient<ICargoManifestEntryRepository, CargoManifestEntryRepository>();
 
             services.AddTransient<IPhysicalResourceRepository, PhysicalResourceRepository>();
@@ -227,9 +213,7 @@ namespace SEM5_PI_WEBAPI
             services.AddScoped<IVesselVisitNotificationService, VesselVisitNotificationService>();
 
             services.AddTransient<ICrewMemberRepository, CrewMemberRepository>();
-
             services.AddTransient<ICrewManifestRepository, CrewManifestRepository>();
-
             services.AddTransient<ITaskRepository, TaskRepository>();
 
             services.AddTransient<Bootstrap>();

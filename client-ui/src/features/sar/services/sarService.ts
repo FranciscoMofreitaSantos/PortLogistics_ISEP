@@ -1,4 +1,4 @@
-import api from "../../../services/api";
+import {webApi} from "../../../services/api";
 import type {
     CreateSARDTO,
     UpdateSARDTO,
@@ -11,17 +11,17 @@ import type{
 
 
 export async function getSARs(): Promise<sarDTO[]> {
-  const res = await api.get("/api/ShippingAgentRepresentative");
+  const res = await webApi.get("/api/ShippingAgentRepresentative");
   return res.data;
 }
 
 export async function getById(id: string): Promise<sarDTO> {
-  const res = await api.get(`/api/ShippingAgentRepresentative/${id}`);
+  const res = await webApi.get(`/api/ShippingAgentRepresentative/${id}`);
   return res.data;
 }
 
 export async function getByName(name: string): Promise<sarDTO[]> {
-  const res = await api.get(`/api/ShippingAgentRepresentative/name/${encodeURIComponent(name)}`);
+  const res = await webApi.get(`/api/ShippingAgentRepresentative/name/${encodeURIComponent(name)}`);
   const data = res.data;
 
   if (Array.isArray(data)) return data;      // caso devolva lista
@@ -31,7 +31,7 @@ export async function getByName(name: string): Promise<sarDTO[]> {
 }
 
 export async function getByEmail(email: { address: string }): Promise<sarDTO> {
-  const res = await api.get(
+  const res = await webApi.get(
     `/api/ShippingAgentRepresentative/email/${encodeURIComponent(email.address)}`
   );
   return res.data;
@@ -39,28 +39,28 @@ export async function getByEmail(email: { address: string }): Promise<sarDTO> {
 
 
 export async function getByStatus(status: Status): Promise<sarDTO[]> {
-  const res = await api.get(`/api/ShippingAgentRepresentative/status/${status}`);
+  const res = await webApi.get(`/api/ShippingAgentRepresentative/status/${status}`);
   return res.data;
 }
 
 
 export async function createSAR(data: CreateSARDTO): Promise<sarDTO> {
-  const res = await api.post("/api/ShippingAgentRepresentative", data);
+  const res = await webApi.post("/api/ShippingAgentRepresentative", data);
   return res.data;
 }
 
 export async function updateSAR(email: string, data: UpdateSARDTO): Promise<sarDTO> {
-  const res = await api.patch(`/api/ShippingAgentRepresentative/update/${encodeURIComponent(email)}`, data);
+  const res = await webApi.patch(`/api/ShippingAgentRepresentative/update/${encodeURIComponent(email)}`, data);
   return res.data;
 }
 
 export async function addNotification(name: string, vvnCode: string): Promise<sarDTO> {
-  const res = await api.post(`/api/ShippingAgentRepresentative/${encodeURIComponent(name)}/notifications`, vvnCode, {
+  const res = await webApi.post(`/api/ShippingAgentRepresentative/${encodeURIComponent(name)}/notifications`, vvnCode, {
     headers: { "Content-Type": "application/json" },
   });
   return res.data;
 }
 
 export async function deleteSAR(id: string): Promise<void> {
-    await api.delete(`/api/ShippingAgentRepresentative/${id}`);
+    await webApi.delete(`/api/ShippingAgentRepresentative/${id}`);
 }

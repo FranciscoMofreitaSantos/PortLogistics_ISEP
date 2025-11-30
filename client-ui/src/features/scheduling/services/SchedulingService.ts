@@ -2,6 +2,7 @@ import type {
     DailyScheduleResultDto,
 } from '../dtos/scheduling.dtos';
 
+
 export type ScheduleResponse = {
     algorithm: 'optimal' | 'greedy' | 'local_search';
     schedule: DailyScheduleResultDto;
@@ -10,8 +11,7 @@ export type ScheduleResponse = {
 
 export type AlgorithmType = 'optimal' | 'greedy' | 'local_search';
 
-const BASE_URL = import.meta.env.VITE_Planning_API_BASE_URL ?? "http://localhost:5296";
-
+const BASE_URL = import.meta.env.VITE_PLANNING_URL;
 
 export const SchedulingService = {
     async getDailySchedule(
@@ -31,6 +31,4 @@ export const SchedulingService = {
         const result: ScheduleResponse = await response.json();
         return result;
     },
-
-
 };

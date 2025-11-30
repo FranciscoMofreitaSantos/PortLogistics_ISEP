@@ -1,5 +1,5 @@
-import api from "../../../services/api";
-import type { SceneData, DockDto, StorageAreaDto, VesselDto, ContainerDto, PhysicalResourceDTO, VesselOperationalStatus } from "../types";
+import {webApi} from "../../../services/api";
+import type { SceneData, DockDto, StorageAreaDto, VesselDto, ContainerDto, PhysicalResourceDTO } from "../types";
 
 /** -------- helpers -------- */
 const TEU_LENGTH = 6.06;
@@ -95,7 +95,7 @@ function computeOperationalStatus(vvn: any, tasks: { startTime?: string | null; 
 
 export async function fetchDocks(): Promise<DockDto[]> {
     try {
-        const { data } = await api.get("/api/dock");
+        const { data } = await webApi.get("/api/dock");
         const base = (data as any[]).map((d) => ({
             id: str(d.id),
             code: str(d.code),
@@ -131,7 +131,7 @@ export async function fetchDocks(): Promise<DockDto[]> {
 
 export async function fetchStorageAreas(): Promise<StorageAreaDto[]> {
     try {
-        const { data } = await api.get("/api/storageareas");
+        const { data } = await webApi.get("/api/storageareas");
         const items = (data as any[]).map((sa) => {
             const maxBays  = num(sa.maxBays, 6);
             const maxRows  = num(sa.maxRows, 4);
@@ -189,8 +189,8 @@ export async function fetchVessels(): Promise<VesselDto[]> {
     try {
         // 1) ir buscar TODOS os vessels + TODOS os VVNs accepted
         const [vesselRes, vvnRes] = await Promise.all([
-            api.get("/api/vessel"),
-            api.get("/api/VesselVisitNotification/all/accepted"),
+            webapi.get("/api/vessel"),
+            webapi.get("/api/VesselVisitNotification/all/accepted"),
         ]);
 
         const allVessels: VesselDto[] = (vesselRes.data as any[]).map((v) => ({
@@ -324,7 +324,7 @@ export async function fetchVessels(): Promise<VesselDto[]> {
 
 export async function fetchContainers(): Promise<ContainerDto[]> {
     try {
-        const { data } = await api.get("/api/container");
+        const { data } = await webApi.get("/api/container");
         const items = (data as any[]).slice(0, 300).map((c) => ({
             id: str(c.id),
             isoCode: str(c.isoCode),
@@ -359,7 +359,7 @@ export async function fetchContainers(): Promise<ContainerDto[]> {
 
 export async function fetchPhysicalResources(): Promise<PhysicalResourceDTO[]> {
     try {
-        const { data } = await api.get("/api/physicalresource");
+        const { data } = await webApi.get("/api/physicalresource");
         const items = (data as any[]).map((r) => ({
             id: str(r.id),
             code: str(r.code),

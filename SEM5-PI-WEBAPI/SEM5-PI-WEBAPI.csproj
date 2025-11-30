@@ -364,6 +364,25 @@
       <_ContentIncludedByDefault Remove="publish\publish\SEM5-PI-WEBAPI.deps.json" />
       <_ContentIncludedByDefault Remove="publish\publish\SEM5-PI-WEBAPI.runtimeconfig.json" />
       <_ContentIncludedByDefault Remove="publish\publish\SEM5-PI-WEBAPI.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="publish\web.config" />
+      <_ContentIncludedByDefault Remove="publish\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="publish\appsettings.json" />
+      <_ContentIncludedByDefault Remove="publish\appsettings.Production.json" />
+      <_ContentIncludedByDefault Remove="publish\publish\appsettings.Production.json" />
+      <_ContentIncludedByDefault Remove="publish\publish\publish\appsettings.Production.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\Docks.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\PhysicalResource.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\Qualifications.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\ShippingAgentsOrganizations.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\ShippingAgentsRepresentative.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\StaffMembers.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\StorageAreas.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\Vessels.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\VesselsTypes.json" />
+      <_ContentIncludedByDefault Remove="publish\Seed\VesselVisitNotifications.json" />
+      <_ContentIncludedByDefault Remove="publish\SEM5-PI-WEBAPI.deps.json" />
+      <_ContentIncludedByDefault Remove="publish\SEM5-PI-WEBAPI.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="publish\SEM5-PI-WEBAPI.staticwebassets.endpoints.json" />
     </ItemGroup>
 
 </Project>

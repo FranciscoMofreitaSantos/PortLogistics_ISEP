@@ -180,3 +180,56 @@
         padding: 1.3rem;
     }
 }
+
+html[data-theme="dark"] .gd-container {
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .gd-header-light {
+    background: #020617;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme="dark"] .gd-avatar-placeholder {
+    background: #020617;
+    color: #93c5fd;
+}
+
+html[data-theme="dark"] .gd-user-name {
+    color: #f9fafb;
+}
+
+html[data-theme="dark"] .gd-user-email {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .gd-section-title {
+    color: #e5e7eb;
+}
+
+/* CARDS */
+html[data-theme="dark"] .gd-link-item {
+    background: #020617;
+    border-color: #1e293b;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .gd-link-item:hover {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+/* TEXT */
+html[data-theme="dark"] .gd-link-body h3 {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .gd-link-body p {
+    color: #94a3b8;
+}
+
+/* EMPTY MESSAGE */
+html[data-theme="dark"] .gd-empty {
+    color: #94a3b8;
+}

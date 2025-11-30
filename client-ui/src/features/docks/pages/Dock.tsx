@@ -29,6 +29,7 @@ import { DockCardGrid } from "../components/DockCardGrid";
 import { DockSearchBar } from "../components/DockSearchBar";
 import { DockSlidePanel } from "../components/DockSlidePanel";
 import { val, vals } from "../utils/dockValueHelpers";
+import {webApi} from "../../../services/api.tsx";
 
 const MIN_LOADING_TIME = 500;
 const guidRegex =
@@ -79,7 +80,7 @@ type RegisterDockDtoFE = {
 
 async function checkDockCodeExists(code: string): Promise<boolean> {
     const res = await fetch(
-        `http://localhost:5008/api/Dock/code/${encodeURIComponent(code)}`,
+        `${webApi}/api/Dock/code/${encodeURIComponent(code)}`,
         { credentials: "include" }
     );
 

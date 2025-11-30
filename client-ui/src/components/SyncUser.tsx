@@ -1,6 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useAppStore } from "../app/store";
 import { useEffect, useRef } from "react";
+import {API_WEBAPI} from "../config/api.ts";
+
 
 export default function SyncUser() {
     const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -23,7 +25,7 @@ export default function SyncUser() {
                     Picture: user.picture,
                 };
 
-                const response = await fetch("http://localhost:5008/api/user/sync", {
+                const response = await fetch(`${API_WEBAPI}/api/user/sync`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

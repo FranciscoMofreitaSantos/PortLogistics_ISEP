@@ -1,4 +1,4 @@
-import api from "../../../services/api";
+import {webApi} from "../../../services/api";
 import type {
     CreatingStorageAreaDto,
     StorageAreaDto,
@@ -9,19 +9,19 @@ import type {
 
 /** Get all storage areas */
 export async function getAllStorageAreas(): Promise<StorageAreaDto[]> {
-    const response = await api.get("/api/storageAreas");
+    const response = await webApi.get("/api/storageAreas");
     return response.data;
 }
 
 /** Get storage area by ID (GUID) */
 export async function getStorageAreaById(id: string): Promise<StorageAreaDto> {
-    const response = await api.get(`/api/storageAreas/id/${id}`);
+    const response = await webApi.get(`/api/storageAreas/id/${id}`);
     return response.data;
 }
 
 /** Get storage area by name */
 export async function getStorageAreaByName(name: string): Promise<StorageAreaDto> {
-    const response = await api.get(`/api/storageAreas/name/${name}`);
+    const response = await webApi.get(`/api/storageAreas/name/${name}`);
     return response.data;
 }
 
@@ -34,7 +34,7 @@ export async function getStorageAreaDistances(
     if (id) params.id = id;
     if (name) params.name = name;
 
-    const response = await api.get("/api/storageAreas/distances", { params });
+    const response = await webApi.get("/api/storageAreas/distances", { params });
     return response.data;
 }
 
@@ -47,7 +47,7 @@ export async function getStorageAreaResources(
     if (id) params.id = id;
     if (name) params.name = name;
 
-    const response = await api.get("/api/storageAreas/physicalresources", { params });
+    const response = await webApi.get("/api/storageAreas/physicalresources", { params });
     return response.data;
 }
 
@@ -55,7 +55,7 @@ export async function getStorageAreaResources(
 export async function createStorageArea(
     data: CreatingStorageAreaDto
 ): Promise<StorageAreaDto> {
-    const response = await api.post("/api/storageAreas", data);
+    const response = await webApi.post("/api/storageAreas", data);
     return response.data;
 }
 
@@ -63,7 +63,7 @@ export async function createStorageArea(
 export async function getStorageAreaGrid(
     id: string
 ): Promise<StorageAreaGridDto> {
-    const response = await api.get(`/api/storageAreas/${id}/grid`);
+    const response = await webApi.get(`/api/storageAreas/${id}/grid`);
     return response.data;
 }
 
@@ -74,7 +74,7 @@ export async function getContainerAtPosition(
     row: number,
     tier: number
 ): Promise<ContainerDto> {
-    const res = await api.get(`/api/storageAreas/${storageAreaId}/container`, {
+    const res = await webApi.get(`/api/storageAreas/${storageAreaId}/container`, {
         params: { bay, row, tier },
     });
 

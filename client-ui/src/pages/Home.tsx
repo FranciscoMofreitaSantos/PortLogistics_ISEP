@@ -8,6 +8,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { FaShip, FaWarehouse, FaTasks, FaUsersCog } from "react-icons/fa";
 import "./css/home.css";
+import {API_WEBAPI} from "../config/api.ts";
 
 export default function Home() {
     const { t } = useTranslation();
@@ -22,7 +23,7 @@ export default function Home() {
             try {
                 const token = await getAccessTokenSilently();
                 const res = await fetch(
-                    `http://localhost:5008/api/user/email/${encodeURIComponent(authUser.email)}`,
+                    `${API_WEBAPI}/api/user/email/${encodeURIComponent(authUser.email)}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
