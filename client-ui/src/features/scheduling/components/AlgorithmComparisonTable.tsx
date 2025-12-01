@@ -75,7 +75,7 @@ const ComparisonRow: React.FC<{
 
 const AlgorithmComparisonTable: React.FC<AlgorithmComparisonTableProps> = ({ allResults, t }) => {
 
-    const algorithmTypes: AlgorithmType[] = ['optimal', 'greedy', 'local-search'];
+    const algorithmTypes: AlgorithmType[] = ['optimal', 'greedy', 'local_search'];
 
     const computedDelays = Object.values(allResults)
         .map(r => r?.prolog?.total_delay)

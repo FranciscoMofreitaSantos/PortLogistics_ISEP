@@ -21,17 +21,17 @@ public class SchedulingOperationDto
     public List<StaffAssignmentDto> StaffAssignments { get; set; }
     public string Crane { get; set; } = string.Empty;
 
-    // Multi-crane Real
     public int CraneCountUsed { get; set; } = 1;
+    
+    public int TotalCranesOnDock { get; set; }
+
     public int OptimizedOperationDuration { get; set; }
     public int RealDepartureTime { get; set; }
     public int DepartureDelay { get; set; }
-
-    // Multi-crane Hypothetical (Resource Analysis)
+    
     public int? TheoreticalRequiredCranes { get; set; }
-    public string? ResourceSuggestion { get; set; } // Ex: "Requires 3 cranes to minimize delay (Only 1 available)"
+    public string? ResourceSuggestion { get; set; }
 }
-
 
 public class MultiCraneComparisonResultDto
 {
@@ -47,7 +47,6 @@ public class MultiCraneComparisonResultDto
     public int SingleCraneHours { get; set; }
     public int MultiCraneHours { get; set; }
 
-    // History of the optimization process for the UI
     public List<OptimizationStepDto> OptimizationSteps { get; set; } = new();
 }
 
@@ -67,10 +66,8 @@ public class OptimizationStepDto
     public string ChangeDescription { get; set; } = string.Empty;
 }
 
-
 public class PrologOperationResultDto
 {
-    
     [JsonPropertyName("vessel")]
     public string Vessel { get; set; } = string.Empty;
 
@@ -81,10 +78,8 @@ public class PrologOperationResultDto
     public int EndTime { get; set; }
 }
 
-
 public class PrologFullResultDto
 {
-
     [JsonPropertyName("algorithm")]
     public string Algorithm { get; set; } = string.Empty;
     

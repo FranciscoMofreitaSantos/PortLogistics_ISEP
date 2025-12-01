@@ -19,7 +19,7 @@ import {
     Space,
     Container,
     Center,
-    // Garanta que <Table> esteja importado se o mantive na sua app
+    Select
 } from '@mantine/core';
 
 import {
@@ -29,7 +29,10 @@ import {
     IconSearch,
     IconAlertTriangle,
     IconClockHour3,
-    IconShip
+    IconShip,
+    IconCpu,
+    IconAnalyze,
+    IconSettings
 } from '@tabler/icons-react';
 
 import {notifyLoading, notifySuccess, notifyError} from "../../../utils/notify";
@@ -37,7 +40,6 @@ import {
     SchedulingService,
     type AlgorithmType,
     type ScheduleResponse,
-
 } from '../services/SchedulingService';
 
 import type {
@@ -45,9 +47,8 @@ import type {
     StaffAssignmentDto,
 } from '../dtos/scheduling.dtos.ts';
 
-
 import AlgorithmComparisonTable from '../components/AlgorithmComparisonTable';
-
+import { MultiCraneAnalysis } from '../components/MultiCraneAnalysis';
 
 function HtmlDateInput({
                            value,
@@ -58,7 +59,6 @@ function HtmlDateInput({
     onChange: (v: string | null) => void;
     label: string;
 }) {
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         onChange(val || null);
@@ -67,7 +67,6 @@ function HtmlDateInput({
     return (
         <div style={{display: "flex", flexDirection: "column", gap: 6}}>
             <Text size="lg" fw={600}>{label}</Text>
-
             <input
                 type="date"
                 value={value ?? ""}
@@ -84,19 +83,7 @@ function HtmlDateInput({
     );
 }
 
-
 const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, locale: string }) => {
-    const formatTime = (iso: string) => {
-        try {
-            return new Date(iso).toLocaleTimeString(
-                locale === "pt" ? "pt-PT" : "en-US",
-                {hour: "2-digit", minute: "2-digit"}
-            );
-        } catch {
-            return "N/A";
-        }
-    };
-
     const isDelayed = op.departureDelay > 0;
 
     return (
@@ -125,7 +112,12 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
 
                 <Grid.Col span={{base: 6, md: 3}}>
                     <Text size="xs" c="dimmed">{t('planningScheduling.craneUsed')}</Text>
-                    <Text>{op.crane} (x{op.craneCountUsed})</Text>
+                    <Group gap={4}>
+                        <Text>{op.crane}</Text>
+                        {op.craneCountUsed > 1 && (
+                            <Badge size="xs" color="teal">x{op.craneCountUsed}</Badge>
+                        )}
+                    </Group>
                 </Grid.Col>
 
                 <Grid.Col span={{base: 6, md: 3}}>
@@ -151,7 +143,7 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
                 </Group>
             </Card>
 
-            {op.staffAssignments.length > 0 && (
+            {op.staffAssignments && op.staffAssignments.length > 0 && (
                 <Stack mt="md">
                     <Text fw={600}>{t('planningScheduling.staffAssignments')}</Text>
                     <Grid gutter="xs">
@@ -169,24 +161,22 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
     );
 };
 
-
-// COMPONENTE PRINCIPAL
 export default function SchedulePage() {
     const {t, i18n} = useTranslation();
 
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
-    // MANTIDO: O algoritmo que o utilizador SELECIONA para CALCULAR
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<AlgorithmType>('greedy');
+
+    const [multiCraneAlgorithm, setMultiCraneAlgorithm] = useState<string>('greedy');
+
+    const [showComparisonAnalysis, setShowComparisonAnalysis] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // NOVO ESTADO: Armazena o último resultado de CADA algoritmo calculado
     const [allResults, setAllResults] =
         useState<Partial<Record<AlgorithmType, ScheduleResponse>>>({});
 
-    // NOVO ESTADO: Qual algoritmo foi o último a ser calculado e deve ser exibido nos detalhes
     const [lastComputedAlgorithm, setLastComputedAlgorithm] =
         useState<AlgorithmType | null>(null);
 
@@ -196,19 +186,17 @@ export default function SchedulePage() {
         {value: 'optimal', label: t('planningScheduling.optimal'), icon: IconStar},
         {value: 'greedy', label: t('planningScheduling.greedy'), icon: IconBolt},
         {value: 'local_search', label: t('planningScheduling.localSearch'), icon: IconSearch},
+        {value: 'multi_crane', label: 'Multi Crane (AI)', icon: IconCpu},
     ];
 
     const getAlgoName = useCallback(
         (algo: AlgorithmType | null) =>
             algorithms.find(a => a.value === algo)?.label ?? "",
-        [t]
+        [t, algorithms]
     );
 
-    // Variável para obter os dados do algoritmo que será mostrado nos detalhes
     const scheduleToDisplay = allResults[lastComputedAlgorithm as AlgorithmType];
 
-
-    // MUDANÇA NA LÓGICA DE FETCH
     const fetchSchedule = async () => {
         if (!selectedDate) {
             notifyError(t('planningScheduling.noDateSelected'));
@@ -216,27 +204,35 @@ export default function SchedulePage() {
         }
 
         const currentAlgo = selectedAlgorithm;
-
         const loadingId = notifyLoading(t('planningScheduling.scheduleLoading'));
         setIsLoading(true);
         setError(null);
-        // Não limpamos allResults, apenas atualizamos
 
         try {
-            const response = await SchedulingService.getDailySchedule(selectedDate, currentAlgo);
+            const response = await SchedulingService.getDailySchedule(
+                selectedDate,
+                currentAlgo,
+                multiCraneAlgorithm
+            );
 
-            // 1. Armazena o novo resultado no mapa, mantendo os anteriores
-            setAllResults(prev => ({
-                ...prev,
+            const newResults = {
+                ...allResults,
                 [currentAlgo]: response
-            }));
+            };
 
-            // 2. Define este algoritmo como o último calculado para a vista detalhada
+            setAllResults(newResults);
             setLastComputedAlgorithm(currentAlgo);
+
+            if (currentAlgo === 'multi_crane') {
+                setShowComparisonAnalysis(true);
+            } else {
+                setShowComparisonAnalysis(false);
+            }
 
             toast.dismiss(loadingId);
             notifySuccess(t('planningScheduling.scheduleSuccess'));
         } catch (e) {
+            console.error(e);
             toast.dismiss(loadingId);
             setError(
                 e instanceof Error && e.message.includes("404")
@@ -251,12 +247,10 @@ export default function SchedulePage() {
 
     return (
         <Container size="xl" py="xl" className="bg-gray-50 min-h-screen">
-
             {/* HEADER */}
             <Group justify="space-between" mb="xl" pb="md" style={{borderBottom: "1px solid #ddd"}}>
                 <Group gap="sm">
                     <Link to="/dashboard" className="pr-back-button">‹</Link>
-
                     <Stack gap={0}>
                         <Title order={2}>
                             <Group gap="sm">
@@ -264,9 +258,9 @@ export default function SchedulePage() {
                                 {t('planningScheduling.title')}
                             </Group>
                         </Title>
-
+                        {/* Proteção contra undefined com ?. */}
                         <Text size="sm" c="gray.6">
-                            {t('planningScheduling.totalOperations')}: {scheduleToDisplay?.schedule.operations.length ?? 0}
+                            {t('planningScheduling.totalOperations')}: {scheduleToDisplay?.schedule?.operations?.length ?? 0}
                         </Text>
                     </Stack>
                 </Group>
@@ -275,40 +269,59 @@ export default function SchedulePage() {
             {/* FILTERS */}
             <Card shadow="lg" radius="xl" p="xl" withBorder mb="xl">
                 <Grid gutter="xl">
-
-                    {/* HTML DATE INPUT NATIVO */}
                     <Grid.Col span={{base: 12, md: 4}}>
                         <HtmlDateInput
                             value={selectedDate}
                             onChange={(v) => {
                                 setSelectedDate(v);
                                 setError(null);
+                                setAllResults({});
                             }}
                             label={t('planningScheduling.selectDay')}
                         />
                     </Grid.Col>
 
-                    {/* ALGORITHM SELECTOR (MANTIDO) */}
                     <Grid.Col span={{base: 12, md: 8}}>
                         <Text fw={600} mb="xs">{t('planningScheduling.selectAlgorithm')}</Text>
-
-                        <SegmentedControl
-                            fullWidth
-                            radius="md"
-                            value={selectedAlgorithm}
-                            onChange={(v) => setSelectedAlgorithm(v as AlgorithmType)}
-                            data={algorithms.map(a => ({
-                                value: a.value,
-                                label: (
-                                    <Center style={{display: "flex", flexDirection: "column", padding: 8}}>
-                                        <a.icon size={20}/>
-                                        <Text size="sm">{a.label}</Text>
-                                    </Center>
-                                )
-                            }))}
-                        />
+                        <Group align="flex-start">
+                            <Box style={{ flex: 1 }}>
+                                <SegmentedControl
+                                    fullWidth
+                                    radius="md"
+                                    value={selectedAlgorithm}
+                                    onChange={(v) => setSelectedAlgorithm(v as AlgorithmType)}
+                                    data={algorithms.map(a => ({
+                                        value: a.value,
+                                        label: (
+                                            <Center style={{display: "flex", flexDirection: "column", padding: 8}}>
+                                                <a.icon size={20} color={a.value === 'multi_crane' ? 'var(--mantine-color-blue-6)' : undefined}/>
+                                                <Text size="sm" fw={a.value === 'multi_crane' ? 700 : 400}>
+                                                    {a.label}
+                                                </Text>
+                                            </Center>
+                                        )
+                                    }))}
+                                />
+                            </Box>
+                            {selectedAlgorithm === 'multi_crane' && (
+                                <Box w={200} className="animate-fade-in">
+                                    <Select
+                                        label="Método de Comparação"
+                                        placeholder="Escolha..."
+                                        radius="md"
+                                        leftSection={<IconSettings size={16}/>}
+                                        data={[
+                                            { value: 'greedy', label: 'Greedy' },
+                                            { value: 'local_search', label: 'Local Search' },
+                                            { value: 'optimal', label: 'Optimal' }
+                                        ]}
+                                        value={multiCraneAlgorithm}
+                                        onChange={(val) => setMultiCraneAlgorithm(val || 'greedy')}
+                                    />
+                                </Box>
+                            )}
+                        </Group>
                     </Grid.Col>
-
                 </Grid>
 
                 <Button
@@ -319,83 +332,92 @@ export default function SchedulePage() {
                     loading={isLoading}
                     disabled={!selectedDate}
                     leftSection={<IconBolt size={20}/>}
-                    variant="gradient"
-                    gradient={{from: "indigo", to: "blue"}}
+                    variant={selectedAlgorithm === 'multi_crane' ? "gradient" : "filled"}
+                    gradient={selectedAlgorithm === 'multi_crane' ? {from: "blue", to: "cyan"} : undefined}
+                    color={selectedAlgorithm !== 'multi_crane' ? "indigo" : undefined}
                 >
-                    {/* Mudar o texto do botão para ser específico do algoritmo selecionado */}
-                    {t('planningScheduling.computeScheduleFor', {algo: getAlgoName(selectedAlgorithm)})}
+                    {selectedAlgorithm === 'multi_crane'
+                        ? `Rodar Multi-Crane (${algorithms.find(a=>a.value === multiCraneAlgorithm)?.label || multiCraneAlgorithm})`
+                        : t('planningScheduling.computeScheduleFor', {algo: getAlgoName(selectedAlgorithm)})
+                    }
                 </Button>
             </Card>
 
             {/* ERROR */}
             {error && (
-                <Notification
-                    icon={<IconAlertTriangle size={20}/>}
-                    color="red"
-                    radius="md"
-                    mb="xl"
-                >
+                <Notification icon={<IconAlertTriangle size={20}/>} color="red" radius="md" mb="xl">
                     {error}
                 </Notification>
             )}
 
             {/* RESULTS */}
-            {/* O bloco de resultados é exibido se houver pelo menos 1 resultado calculado */}
             {Object.keys(allResults).length > 0 && !isLoading && (
                 <Box mt="xl">
 
-                    {/* 1. TABELA DE COMPARAÇÃO */}
-                    <AlgorithmComparisonTable
-                        allResults={allResults}
-                        t={t}
-                    />
+                    {allResults['multi_crane']?.comparisonData && (
+                        <Group justify="center" mb="lg">
+                            <SegmentedControl
+                                value={showComparisonAnalysis ? 'analysis' : 'standard'}
+                                onChange={(v) => setShowComparisonAnalysis(v === 'analysis')}
+                                data={[
+                                    { value: 'standard', label: 'Visão Padrão' },
+                                    { value: 'analysis', label: (
+                                            <Group gap={6}>
+                                                <IconAnalyze size={16}/>
+                                                <Text fw={700} c="blue">Comparação & IA</Text>
+                                            </Group>
+                                        )}
+                                ]}
+                            />
+                        </Group>
+                    )}
 
-                    {/* 2. VISUALIZAÇÃO DETALHADA DO ÚLTIMO ALGORITMO CALCULADO */}
-                    {scheduleToDisplay && (
+                    {showComparisonAnalysis && allResults['multi_crane']?.comparisonData ? (
+                        <MultiCraneAnalysis
+                            data={allResults['multi_crane'].comparisonData!}
+                        />
+                    ) : (
                         <>
-                            <Title order={3} mb="xl" style={{borderBottom: "2px solid #eef"}}>
-                                {t('planningScheduling.scheduleResult', {algo: getAlgoName(lastComputedAlgorithm!)})}
-                            </Title>
+                            <AlgorithmComparisonTable allResults={allResults} t={t} />
 
-                            {/* Cartão de Resumo */}
-                            <Card shadow="md" radius="lg" p="lg" withBorder mb="xl" bg="indigo.8" c="white">
-                                <Group justify="space-between">
-                                    <Stack gap={4}>
-                                        <Text fw={500}>{t('planningScheduling.totalOperations')}</Text>
-                                        <Text size="xl" fw={700}>{scheduleToDisplay.schedule.operations.length}</Text>
+                            {scheduleToDisplay && scheduleToDisplay.schedule && (
+                                <>
+                                    <Title order={3} mb="xl" mt="xl" style={{borderBottom: "2px solid #eef"}}>
+                                        {t('planningScheduling.scheduleResult', {algo: getAlgoName(lastComputedAlgorithm!)})}
+                                    </Title>
+
+                                    <Card shadow="md" radius="lg" p="lg" withBorder mb="xl" bg="indigo.8" c="white">
+                                        <Group justify="space-between">
+                                            <Stack gap={4}>
+                                                <Text fw={500}>{t('planningScheduling.totalOperations')}</Text>
+                                                <Text size="xl" fw={700}>{scheduleToDisplay.schedule.operations?.length || 0}</Text>
+                                            </Stack>
+                                            <Stack gap={4} align="flex-end">
+                                                <Text fw={500}>{t('planningScheduling.totalDelay')}</Text>
+                                                <Badge size="xl" radius="md" variant="filled"
+                                                       color={(scheduleToDisplay.prolog?.total_delay || 0) > 0 ? "red" : "green"}>
+                                                    {scheduleToDisplay.prolog?.total_delay || 0}{t('planningScheduling.hours')}
+                                                </Badge>
+                                            </Stack>
+                                        </Group>
+                                    </Card>
+
+                                    <Stack gap="md">
+                                        {scheduleToDisplay.schedule.operations?.map((op) => (
+                                            <OperationRow key={op.vvnId} op={op} t={t} locale={locale}/>
+                                        ))}
                                     </Stack>
 
-                                    <Stack gap={4} align="flex-end">
-                                        <Text fw={500}>{t('planningScheduling.totalDelay')}</Text>
-                                        <Badge size="xl" radius="md" variant="filled"
-                                               color={scheduleToDisplay.prolog.total_delay > 0 ? "red" : "green"}>
-                                            {scheduleToDisplay.prolog.total_delay}{t('planningScheduling.hours')}
-                                        </Badge>
-                                    </Stack>
-                                </Group>
-                            </Card>
-
-                            {/* Lista de Operações */}
-                            <Stack gap="md">
-                                {scheduleToDisplay.schedule.operations.map(op => (
-                                    <OperationRow key={op.vvnId} op={op} t={t} locale={locale}/>
-                                ))}
-                            </Stack>
-
-                            {/* JSON RAW do Prolog */}
-                            <Box mt="xl" pt="xl" style={{borderTop: "1px solid #ddd"}}>
-                                <Title order={4} mb="md">{t('planningScheduling.prologRaw')}</Title>
-                                <Box component="pre" style={{
-                                    background: "#111",
-                                    color: "#4be34b",
-                                    padding: 15,
-                                    borderRadius: 8,
-                                    maxHeight: 400,
-                                    overflowX: "auto"
-                                }}>
-                                    {JSON.stringify(scheduleToDisplay.prolog, null, 2)}
-                                </Box>
-                            </Box>
+                                    <Box mt="xl" pt="xl" style={{borderTop: "1px solid #ddd"}}>
+                                        <Title order={4} mb="md">{t('planningScheduling.prologRaw')}</Title>
+                                        <Box component="pre" style={{
+                                            background: "#111", color: "#4be34b", padding: 15, borderRadius: 8, maxHeight: 400, overflowX: "auto"
+                                        }}>
+                                            {JSON.stringify(scheduleToDisplay.prolog, null, 2)}
+                                        </Box>
+                                    </Box>
+                                </>
+                            )}
                         </>
                     )}
                 </Box>

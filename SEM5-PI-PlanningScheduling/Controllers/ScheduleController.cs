@@ -31,9 +31,7 @@ public class ScheduleController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
-
-    // Endpoint that triggers Prolog (Optimal)
-    // CHANGED: From HttpPost to HttpGet to match legacy requests
+    
     [HttpGet("daily/optimal")]
     public async Task<IActionResult> GetOptimalSchedule([FromQuery] DateOnly day)
     {
@@ -103,8 +101,7 @@ public class ScheduleController : ControllerBase
             }
         }
 
-    // Comparison Endpoint
-    // Allows selecting algorithm via query parameter (default = greedy)
+
     [HttpGet("daily/multi-crane-comparison")]
     public async Task<ActionResult<MultiCraneComparisonResultDto>> GetMultiCraneComparison(
         [FromQuery] DateOnly day,
