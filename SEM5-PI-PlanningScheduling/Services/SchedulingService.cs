@@ -1,9 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using SEM5_PI_DecisionEngineAPI.DTOs;
 using SEM5_PI_DecisionEngineAPI.Exceptions;
 
@@ -11,8 +6,9 @@ namespace SEM5_PI_DecisionEngineAPI.Services;
 
 public class SchedulingService
 {
+
     const float MinP = 0.4f;
-    const float MaxP = 0.8f;
+    const float MaxP = 0.4f;
 
     private readonly QualificationServiceClient _qualificationService;
     private readonly VesselVisitNotificationServiceClient _vvnClient;
@@ -59,6 +55,9 @@ public class SchedulingService
         return ComputeDailyScheduleInternalAsync(day, useMultiCrane: false);
     }
 
+    // =================================================================================
+    // MULTI CRANE COMPARISON (Lógica "Perfeita")
+    // =================================================================================
     public async Task<MultiCraneComparisonResultDto> ComputeDailyScheduleWithPrologComparisonAsync(
         DateOnly day,
         string algorithmType)
@@ -97,7 +96,7 @@ public class SchedulingService
             "optimal" => SendScheduleToPrologOptimal,
             _ => SendScheduleToPrologGreedy
         };
-        
+
         var (realSchedule, realProlog, realAllocations, realSteps) = await RunOptimizationLoop(
             day,
             vvnsForDay,
@@ -110,21 +109,25 @@ public class SchedulingService
 
         // Single Crane Baseline
         var singleCraneSchedule = await ComputeScheduleFromAllocationsAsync(
-            day, 
-            vvnsForDay, 
-            vvnsForDay.ToDictionary(v => v.Id, v => 1), 
-            preCalculatedWork, 
+            day,
+            vvnsForDay,
+            vvnsForDay.ToDictionary(v => v.Id, v => 1),
+            preCalculatedWork,
             realDockCapacities
         );
 
         var singleCraneProlog = await sendToProlog(singleCraneSchedule);
-        
+
         UpdateScheduleFromPrologResult(realSchedule, realProlog);
         UpdateScheduleFromPrologResult(singleCraneSchedule, singleCraneProlog);
+        
+        await AssignStaffToScheduleAsync(realSchedule, day, vvnsForDay);
+        await AssignStaffToScheduleAsync(singleCraneSchedule, day, vvnsForDay);
 
         var singleDelay = ExtractTotalDelay(singleCraneProlog);
         var realTotalDelay = ExtractTotalDelay(realProlog);
-        var virtualDockCapacities = realDockCapacities.Keys.ToDictionary(k => k, k => 99, StringComparer.OrdinalIgnoreCase);
+        var virtualDockCapacities =
+            realDockCapacities.Keys.ToDictionary(k => k, k => 99, StringComparer.OrdinalIgnoreCase);
 
         var (idealSchedule, _, idealAllocations, _) = await RunOptimizationLoop(
             day,
@@ -135,7 +138,7 @@ public class SchedulingService
             algorithmType,
             ignoreConstraints: true
         );
-        
+
         foreach (var realOp in realSchedule.Operations)
         {
             string dockKey = realOp.Dock.Trim();
@@ -146,9 +149,10 @@ public class SchedulingService
             {
                 realOp.TheoreticalRequiredCranes = idealCranes;
                 if (idealCranes > realOp.CraneCountUsed)
-                    realOp.ResourceSuggestion = $"Optimal: {idealCranes} cranes. Dock Limit: {physicalLimit}. Used: {realOp.CraneCountUsed}.";
+                    realOp.ResourceSuggestion =
+                        $"Optimal: {idealCranes} cranes. Dock Limit: {physicalLimit}. Used: {realOp.CraneCountUsed}.";
                 else
-                     realOp.ResourceSuggestion = $"Optimal: {idealCranes}. Dock Limit: {physicalLimit}. (Maximizado)";
+                    realOp.ResourceSuggestion = $"Optimal: {idealCranes}. Dock Limit: {physicalLimit}. (Maximizado)";
             }
         }
 
@@ -158,34 +162,73 @@ public class SchedulingService
         return new MultiCraneComparisonResultDto
         {
             SingleCraneSchedule = singleCraneSchedule,
-            SingleCraneProlog   = singleCraneProlog!, 
-            MultiCraneSchedule  = realSchedule,
-            MultiCraneProlog    = realProlog!,
-            SingleTotalDelay    = singleDelay,
-            MultiTotalDelay     = realTotalDelay,
-            SingleCraneHours    = singleCraneHours,
-            MultiCraneHours     = multiCraneHours,
-            OptimizationSteps   = realSteps
+            SingleCraneProlog = singleCraneProlog!,
+            MultiCraneSchedule = realSchedule,
+            MultiCraneProlog = realProlog!,
+            SingleTotalDelay = singleDelay,
+            MultiTotalDelay = realTotalDelay,
+            SingleCraneHours = singleCraneHours,
+            MultiCraneHours = multiCraneHours,
+            OptimizationSteps = realSteps
         };
     }
+
+    // =================================================================================
+    // GENERIC ALGORITHM SCHEDULING (Recuperado para o Controller)
+    // =================================================================================
+    public async Task<(DailyScheduleResultDto Schedule, PrologFullResultDto Prolog)> ComputeScheduleWithAlgorithmAsync(
+        DateOnly day, 
+        string algorithmType)
+    {
+        var vvns = await _vvnClient.GetVisitNotifications();
+        var vvnsForDay = vvns
+            .Where(v => DateOnly.FromDateTime(v.EstimatedTimeArrival.Date) == day)
+            .ToList();
+
+        if (vvnsForDay.Count == 0)
+            throw new PlanningSchedulingException($"No visits for {day}");
+        
+        var schedule = await ComputeDailyScheduleAsync(day);
+        
+        Func<DailyScheduleResultDto, Task<PrologFullResultDto?>> sendToProlog = algorithmType.ToLower() switch
+        {
+            "greedy" => SendScheduleToPrologGreedy,
+            "local_search" => SendScheduleToPrologLocalSearch,
+            "optimal" => SendScheduleToPrologOptimal,
+            _ => SendScheduleToPrologGreedy 
+        };
+        
+        var prologResult = await sendToProlog(schedule);
+        
+        schedule = UpdateScheduleFromPrologResult(schedule, prologResult);
+        
+        await AssignStaffToScheduleAsync(schedule, day, vvnsForDay);
+
+        return (schedule, prologResult!);
+    }
+
+    // =================================================================================
+    // CORE LOGIC
+    // =================================================================================
 
     private async Task<(
         DailyScheduleResultDto BestSchedule,
         PrologFullResultDto? BestProlog,
         Dictionary<string, int> BestAllocations,
         List<OptimizationStepDto> Steps
-    )> RunOptimizationLoop(
+        )> RunOptimizationLoop(
         DateOnly day,
         List<VesselVisitNotificationPSDto> vvnsForDay,
         Dictionary<string, int> capacities,
         Dictionary<string, (int, int)> preCalcWork,
-        Func<DailyScheduleResultDto, Task<PrologFullResultDto?>> sendToProlog, 
+        Func<DailyScheduleResultDto, Task<PrologFullResultDto?>> sendToProlog,
         string algorithmType,
         bool ignoreConstraints)
     {
         var currentAllocations = vvnsForDay.ToDictionary(v => v.Id, v => 1);
 
-        var bestSchedule = await ComputeScheduleFromAllocationsAsync(day, vvnsForDay, currentAllocations, preCalcWork, capacities);
+        var bestSchedule =
+            await ComputeScheduleFromAllocationsAsync(day, vvnsForDay, currentAllocations, preCalcWork, capacities);
         var bestProlog = await sendToProlog(bestSchedule);
         var bestDelay = ExtractTotalDelay(bestProlog);
 
@@ -195,7 +238,8 @@ public class SchedulingService
         if (!ignoreConstraints)
         {
             var capsLog = string.Join("; ", capacities.Select(kv => $"{kv.Key}={kv.Value}"));
-            steps.Add(new OptimizationStepDto {
+            steps.Add(new OptimizationStepDto
+            {
                 StepNumber = 0,
                 TotalDelay = bestDelay,
                 TotalCranesUsed = currentAllocations.Values.Sum(),
@@ -235,7 +279,8 @@ public class SchedulingService
                 {
                     currentAllocations[op.VvnId]++;
 
-                    var testSchedule = await ComputeScheduleFromAllocationsAsync(day, vvnsForDay, currentAllocations, preCalcWork, capacities);
+                    var testSchedule = await ComputeScheduleFromAllocationsAsync(day, vvnsForDay, currentAllocations,
+                        preCalcWork, capacities);
                     var testProlog = await sendToProlog(testSchedule);
                     var testDelay = ExtractTotalDelay(testProlog);
 
@@ -293,7 +338,7 @@ public class SchedulingService
             .ToList();
 
         var preCalc = new Dictionary<string, (int, int)>();
-        foreach(var v in vvnsForDay) preCalc[v.Id] = GenerateFixedDurationsForVvn(v);
+        foreach (var v in vvnsForDay) preCalc[v.Id] = GenerateFixedDurationsForVvn(v);
 
         var capacities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (var vvn in vvnsForDay.DistinctBy(v => v.Dock))
@@ -303,8 +348,12 @@ public class SchedulingService
         }
 
         var allocation = vvnsForDay.ToDictionary(v => v.Id, v => 1);
+
+        var result = await ComputeScheduleFromAllocationsAsync(day, vvnsForDay, allocation, preCalc, capacities);
         
-        return await ComputeScheduleFromAllocationsAsync(day, vvnsForDay, allocation, preCalc, capacities);
+        await AssignStaffToScheduleAsync(result, day, vvnsForDay);
+
+        return result;
     }
 
     private async Task<DailyScheduleResultDto> ComputeScheduleFromAllocationsAsync(
@@ -315,15 +364,12 @@ public class SchedulingService
         Dictionary<string, int> dockCapacities)
     {
         var cranes = await GetCranesForVvnsAsync(vvnsForDay);
-        var craneQualifications = await GetCraneQualificationsAsync(cranes);
-        var staffByVvn = await GetQualifiedStaffForVvnsAsync(craneQualifications);
-
+        
         var result = new DailyScheduleResultDto();
 
         foreach (var vvn in vvnsForDay)
         {
             var crane = cranes[vvn.Id];
-            var staff = staffByVvn[vvn.Id];
             var vessel = await GetCachedVesselAsync(vvn.VesselImo);
 
             var (loadHours, unloadHours) = preCalculatedTimes[vvn.Id];
@@ -334,7 +380,7 @@ public class SchedulingService
             int optimizedDuration = (int)Math.Ceiling((double)totalDuration / assignedCranes);
 
             int scaledLoad = (int)Math.Floor((double)loadHours / assignedCranes);
-            int scaledUnload = optimizedDuration - scaledLoad; 
+            int scaledUnload = optimizedDuration - scaledLoad;
 
             int etaHours = DateTimeToInteger(day, vvn.EstimatedTimeArrival);
             int plannedEtdHours = DateTimeToInteger(day, vvn.EstimatedTimeDeparture);
@@ -349,12 +395,13 @@ public class SchedulingService
                 VvnId = vvn.Id,
                 Vessel = vessel!.Name,
                 Dock = vvn.Dock,
-                StartTime = etaHours,
+                StartTime = etaHours, 
+                RealArrivalTime = etaHours, 
                 EndTime = plannedEtdHours,
                 LoadingDuration = scaledLoad,
                 UnloadingDuration = scaledUnload,
                 Crane = crane.Code.Value,
-                StaffAssignments = BuildStaffAssignmentsForVvn(vvn, staff),
+                StaffAssignments = new List<StaffAssignmentDto>(),
                 CraneCountUsed = assignedCranes,
                 TotalCranesOnDock = limitOnDock,
                 OptimizedOperationDuration = optimizedDuration,
@@ -366,6 +413,92 @@ public class SchedulingService
         }
 
         return result;
+    }
+
+    // =================================================================================
+    // STAFF ASSIGNMENT 
+    // =================================================================================
+
+    public async Task AssignStaffToScheduleAsync(
+        DailyScheduleResultDto schedule, 
+        DateOnly day, 
+        List<VesselVisitNotificationPSDto> vvns)
+    {
+        var cranes = await GetCranesForVvnsAsync(vvns);
+        var craneQualifications = await GetCraneQualificationsAsync(cranes);
+        var staffByVvn = await GetQualifiedStaffForVvnsAsync(craneQualifications);
+
+        foreach (var op in schedule.Operations)
+        {
+            if (staffByVvn.TryGetValue(op.VvnId, out var staffList))
+            {
+                int startHour = op.RealArrivalTime;
+                int endHour = op.RealDepartureTime;
+                
+                // Fallback caso não tenha sido inicializado
+                if (startHour == 0 && endHour == 0)
+                {
+                    startHour = op.StartTime;
+                    endHour = op.EndTime;
+                }
+
+                var startDt = IntegerToDateTime(day, startHour);
+                var endDt = IntegerToDateTime(day, endHour);
+
+                op.StaffAssignments = BuildStaffAssignments(startDt, endDt, staffList);
+            }
+        }
+    }
+
+    private List<StaffAssignmentDto> BuildStaffAssignments(
+        DateTime opStart, 
+        DateTime opEnd,
+        List<StaffMemberDto> staffForVvn)
+    {
+        if (staffForVvn == null || staffForVvn.Count == 0) return new List<StaffAssignmentDto>();
+
+        var assignments = new List<StaffAssignmentDto>();
+        var currentDay = DateOnly.FromDateTime(opStart);
+        var lastDay = DateOnly.FromDateTime(opEnd);
+
+        while (currentDay <= lastDay)
+        {
+            var dayStart = currentDay.ToDateTime(TimeOnly.MinValue);
+            var dayEnd = dayStart.AddDays(1);
+            
+            var effectiveStart = opStart > dayStart ? opStart : dayStart;
+            var effectiveEnd = opEnd < dayEnd ? opEnd : dayEnd;
+
+            if (effectiveEnd > effectiveStart)
+            {
+                var shifts = new[] { "Night", "Morning", "Evening" };
+                foreach (var shift in shifts)
+                {
+                    var (shiftStart, shiftEnd) = GetShiftWindow(currentDay, shift);
+                    var intervalStart = effectiveStart > shiftStart ? effectiveStart : shiftStart;
+                    var intervalEnd = effectiveEnd < shiftEnd ? effectiveEnd : shiftEnd;
+
+                    if (intervalEnd > intervalStart)
+                    {
+                        var assigned = staffForVvn.FirstOrDefault(s =>
+                            WorksOnDay(s, currentDay) && IsStaffAvailableForShift(s, shift));
+                        if (assigned != null)
+                        {
+                            assignments.Add(new StaffAssignmentDto
+                            {
+                                StaffMemberName = assigned.ShortName,
+                                IntervalStart = intervalStart,
+                                IntervalEnd = intervalEnd
+                            });
+                        }
+                    }
+                }
+            }
+
+            currentDay = currentDay.AddDays(1);
+        }
+
+        return assignments;
     }
 
     // =================================================================================
@@ -388,10 +521,10 @@ public class SchedulingService
     }
 
     public DailyScheduleResultDto UpdateScheduleFromPrologResult(
-        DailyScheduleResultDto schedule, 
-        PrologFullResultDto? prologResult) 
+        DailyScheduleResultDto schedule,
+        PrologFullResultDto? prologResult)
     {
-        if (prologResult?.BestSequence == null) return schedule; 
+        if (prologResult?.BestSequence == null) return schedule;
 
         var scheduleOpsDict = schedule.Operations.ToDictionary(op => op.Vessel, op => op);
         var reorderedOperations = new List<SchedulingOperationDto>();
@@ -400,15 +533,21 @@ public class SchedulingService
         {
             if (scheduleOpsDict.TryGetValue(pOp.Vessel, out var op))
             {
-                op.StartTime = pOp.StartTime; 
+                op.RealArrivalTime = pOp.StartTime; 
+                Console.WriteLine($"Do metodo pica START {op.RealArrivalTime}");
                 op.RealDepartureTime = pOp.EndTime;
+                Console.WriteLine($"Do metodo pica END {op.RealDepartureTime}");
                 op.OptimizedOperationDuration = (pOp.EndTime - pOp.StartTime) + 1;
-                op.DepartureDelay = Math.Max(0, op.RealDepartureTime - op.EndTime + 1);
-                
+
+                op.DepartureDelay = Math.Max(0, op.RealDepartureTime - op.EndTime);
+
+                if (op.DepartureDelay > 0)
+                    op.DepartureDelay += 1;
+
                 reorderedOperations.Add(op);
             }
         }
-        
+
         schedule.Operations = reorderedOperations;
         return schedule;
     }
@@ -454,6 +593,7 @@ public class SchedulingService
         if (vessel != null) _cacheVessels[imo] = vessel;
         return vessel;
     }
+
     private (int Load, int Unload) GenerateFixedDurationsForVvn(VesselVisitNotificationPSDto vvn)
     {
         var loadingDuration = TimeSpan.Zero;
@@ -469,6 +609,7 @@ public class SchedulingService
             loadingDuration = load;
             unloadingDuration = unload;
         }
+
         return (TimeSpanToInteger(loadingDuration), TimeSpanToInteger(unloadingDuration));
     }
 
@@ -505,6 +646,7 @@ public class SchedulingService
             unloading = TimeSpan.FromTicks((long)(total.Ticks * MinP));
             remaining = total - unloading;
         }
+
         var loading = GenerateRandomTimeFromSpan(remaining);
         return (loading, unloading);
     }
@@ -521,7 +663,8 @@ public class SchedulingService
         return (int)Math.Floor(span.TotalHours);
     }
 
-    private async Task<Dictionary<string, PhysicalResourceDto>> GetCranesForVvnsAsync(List<VesselVisitNotificationPSDto> vvns)
+    private async Task<Dictionary<string, PhysicalResourceDto>> GetCranesForVvnsAsync(
+        List<VesselVisitNotificationPSDto> vvns)
     {
         var result = new Dictionary<string, PhysicalResourceDto>();
         foreach (var vvn in vvns)
@@ -530,23 +673,28 @@ public class SchedulingService
             if (cranes.Count == 0) throw new PlanningSchedulingException($"Dock '{vvn.Dock}' has no available crane.");
             result[vvn.Id] = cranes.First();
         }
+
         return result;
     }
 
-    private async Task<Dictionary<string, QualificationDto>> GetCraneQualificationsAsync(Dictionary<string, PhysicalResourceDto> cranes)
+    private async Task<Dictionary<string, QualificationDto>> GetCraneQualificationsAsync(
+        Dictionary<string, PhysicalResourceDto> cranes)
     {
         var result = new Dictionary<string, QualificationDto>();
         foreach (var (vvnId, crane) in cranes)
         {
-            if (crane.QualificationID == null) throw new PlanningSchedulingException($"Crane '{crane.Code.Value}' has no QualificationID.");
+            if (crane.QualificationID == null)
+                throw new PlanningSchedulingException($"Crane '{crane.Code.Value}' has no QualificationID.");
             var q = await GetCachedQualificationAsync(crane.QualificationID.Value);
             if (q == null) throw new PlanningSchedulingException($"Qualification not found.");
             result[vvnId] = q;
         }
+
         return result;
     }
 
-    private async Task<Dictionary<string, List<StaffMemberDto>>> GetQualifiedStaffForVvnsAsync(Dictionary<string, QualificationDto> craneQualifications)
+    private async Task<Dictionary<string, List<StaffMemberDto>>> GetQualifiedStaffForVvnsAsync(
+        Dictionary<string, QualificationDto> craneQualifications)
     {
         var result = new Dictionary<string, List<StaffMemberDto>>();
         var qualificationCodes = craneQualifications.Values.Select(q => q.Code).Distinct().ToList();
@@ -565,53 +713,8 @@ public class SchedulingService
             else
                 result[vvnId] = staffList;
         }
+
         return result;
-    }
-    
-    private List<StaffAssignmentDto> BuildStaffAssignmentsForVvn(VesselVisitNotificationPSDto vvn, List<StaffMemberDto> staffForVvn)
-    {
-        if (staffForVvn == null || staffForVvn.Count == 0) return new List<StaffAssignmentDto>();
-        
-        var assignments = new List<StaffAssignmentDto>();
-        var eta = vvn.EstimatedTimeArrival;
-        var etd = vvn.EstimatedTimeDeparture;
-        var currentDay = DateOnly.FromDateTime(eta);
-        var lastDay = DateOnly.FromDateTime(etd);
-
-        while (currentDay <= lastDay)
-        {
-            var dayStart = currentDay.ToDateTime(TimeOnly.MinValue);
-            var dayEnd = dayStart.AddDays(1);
-            var opStart = eta < dayStart ? dayStart : eta;
-            var opEnd = etd > dayEnd ? dayEnd : etd;
-
-            if (opEnd > opStart)
-            {
-                var shifts = new[] { "Night", "Morning", "Evening" };
-                foreach (var shift in shifts)
-                {
-                    var (shiftStart, shiftEnd) = GetShiftWindow(currentDay, shift);
-                    var intervalStart = opStart > shiftStart ? opStart : shiftStart;
-                    var intervalEnd = opEnd < shiftEnd ? opEnd : shiftEnd;
-
-                    if (intervalEnd > intervalStart)
-                    {
-                        var assigned = staffForVvn.FirstOrDefault(s => WorksOnDay(s, currentDay) && IsStaffAvailableForShift(s, shift));
-                        if (assigned != null)
-                        {
-                            assignments.Add(new StaffAssignmentDto
-                            {
-                                StaffMemberName = assigned.ShortName,
-                                IntervalStart = intervalStart,
-                                IntervalEnd = intervalEnd
-                            });
-                        }
-                    }
-                }
-            }
-            currentDay = currentDay.AddDays(1);
-        }
-        return assignments;
     }
 
     private (DateTime Start, DateTime End) GetShiftWindow(DateOnly day, string shift)
@@ -625,66 +728,28 @@ public class SchedulingService
             _ => (dayStart, dayStart)
         };
     }
-    
+
     private bool IsStaffAvailableForShift(StaffMemberDto staff, string requiredShift)
     {
-        return staff.Schedule != null && string.Equals(staff.Schedule.Shift, requiredShift, StringComparison.OrdinalIgnoreCase);
+        return staff.Schedule != null &&
+               string.Equals(staff.Schedule.Shift, requiredShift, StringComparison.OrdinalIgnoreCase);
     }
-    
+
     private bool WorksOnDay(StaffMemberDto staff, DateOnly day)
     {
-        if (staff.Schedule == null || string.IsNullOrWhiteSpace(staff.Schedule.DaysOfWeek) || staff.Schedule.DaysOfWeek.Length != 7) return false;
-        int offset = day.DayOfWeek switch { DayOfWeek.Monday => 0, DayOfWeek.Tuesday => 1, DayOfWeek.Wednesday => 2, DayOfWeek.Thursday => 3, DayOfWeek.Friday => 4, DayOfWeek.Saturday => 5, DayOfWeek.Sunday => 6, _ => 0 };
+        if (staff.Schedule == null || string.IsNullOrWhiteSpace(staff.Schedule.DaysOfWeek) ||
+            staff.Schedule.DaysOfWeek.Length != 7) return false;
+        int offset = day.DayOfWeek switch
+        {
+            DayOfWeek.Monday => 0, DayOfWeek.Tuesday => 1, DayOfWeek.Wednesday => 2, DayOfWeek.Thursday => 3,
+            DayOfWeek.Friday => 4, DayOfWeek.Saturday => 5, DayOfWeek.Sunday => 6, _ => 0
+        };
         return staff.Schedule.DaysOfWeek[staff.Schedule.DaysOfWeek.Length - 1 - offset] == '1';
     }
-    
-    public DailyScheduleResultDto UpdateScheduleFromPrologResult(
-    DailyScheduleResultDto schedule, 
-    object? prologResponse)
+
+    public DateTime IntegerToDateTime(DateOnly day, int hoursSinceStart)
     {
-        if (prologResponse is JsonElement json)
-        {
-            try
-            {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-                
-                var prologResult = json.Deserialize<PrologFullResultDto>(options);
-
-                if (prologResult?.BestSequence == null) return schedule; 
-
-                var scheduleOpsDict = schedule.Operations
-                    .ToDictionary(op => op.Vessel, op => op);
-                
-                var reorderedOperations = new List<SchedulingOperationDto>();
-
-                foreach (var pOp in prologResult.BestSequence)
-                {
-                    if (scheduleOpsDict.TryGetValue(pOp.Vessel, out var op))
-                    {
-                        op.StartTime = pOp.StartTime; 
-                        op.RealDepartureTime = pOp.EndTime;
-                        op.OptimizedOperationDuration = (pOp.EndTime - pOp.StartTime) + 1;
-                        
-                        op.DepartureDelay = Math.Max(0, op.RealDepartureTime - op.EndTime);
-                        
-                        if (op.DepartureDelay > 0)
-                            op.DepartureDelay += 1;
-                        
-                        reorderedOperations.Add(op);
-                    }
-                }
-                
-                schedule.Operations = reorderedOperations;
-            }
-            catch (JsonException ex)
-            {
-                Console.WriteLine($"Erro ao desserializar resposta do Prolog: {ex.Message}");
-            }
-        }
-
-        return schedule;
+        var baseDateTime = day.ToDateTime(TimeOnly.MinValue);
+        return baseDateTime.AddHours(hoursSinceStart);
     }
 }

@@ -1,13 +1,15 @@
 import type {
     DailyScheduleResultDto,
-    MultiCraneComparisonResultDto
+    MultiCraneComparisonResultDto,
+    PrologFullResultDto,
 } from '../dtos/scheduling.dtos';
+
 
 
 export type ScheduleResponse = {
     algorithm: 'optimal' | 'greedy' | 'local_search' | 'multi_crane' | 'genetic';
     schedule: DailyScheduleResultDto;
-    prolog: any;
+    prolog: PrologFullResultDto;
     comparisonData?: MultiCraneComparisonResultDto;
 };
 
@@ -22,15 +24,20 @@ export const SchedulingService = {
         comparisonAlgorithm: string = 'greedy'
     ): Promise<ScheduleResponse> {
 
-        let endpoint = `api/schedule/daily/${algorithm}`;
+        // A chave de URL para o backend deve ser 'local_search'
+        const baseEndpoint = `api/schedule/daily/${algorithm}`;
+        let endpointUrl = baseEndpoint.replace('-', '_'); // Fixa local-search -> local_search
         let queryParams = `?day=${day}`;
 
         if (algorithm === 'multi_crane') {
-            endpoint = `api/schedule/daily/multi-crane-comparison`;
-            queryParams += `&algorithm=${comparisonAlgorithm}`;
+            const multiCraneEndpoint = `api/schedule/daily/multi-crane-comparison`;
+            // Correção para o parâmetro do algoritmo
+            const algorithmParam = comparisonAlgorithm.replace('-', '_');
+            queryParams += `&algorithm=${algorithmParam}`;
+            endpointUrl = multiCraneEndpoint; // O endpoint é o de comparação
         }
 
-        const url = `${BASE_URL}/${endpoint}${queryParams}`;
+        const url = `${BASE_URL}/${endpointUrl}${queryParams}`;
 
         try {
             const response = await fetch(url);
@@ -42,26 +49,36 @@ export const SchedulingService = {
 
             const rawResult = await response.json();
 
+            // Bloco de tratamento para a comparação multi_crane
             if (algorithm === 'multi_crane' && rawResult.multiCraneSchedule) {
                 const comparisonDto = rawResult as MultiCraneComparisonResultDto;
 
                 return {
                     algorithm: 'multi_crane',
                     schedule: comparisonDto.multiCraneSchedule,
-                    prolog: comparisonDto.multiCraneProlog,
+                    // Conversão explícita para o tipo PrologFullResultDto
+                    prolog: comparisonDto.multiCraneProlog as PrologFullResultDto,
                     comparisonData: comparisonDto
                 };
             }
 
+            // Bloco de tratamento para algoritmos individuais (Optimal, Greedy, Local Search)
             if (rawResult.schedule) {
-                return rawResult as ScheduleResponse;
+
+                // Mapeia o resultado geral do backend para o tipo ScheduleResponse
+                return {
+                    ...rawResult,
+                    // Garante que o campo prolog tem o tipo correto
+                    prolog: rawResult.prolog as PrologFullResultDto
+                } as ScheduleResponse;
             }
 
+            // Fallback para respostas não estruturadas
             if (rawResult.operations) {
                 return {
                     algorithm: algorithm as any,
                     schedule: rawResult as DailyScheduleResultDto,
-                    prolog: {}
+                    prolog: { total_delay: 0, best_sequence: [], status: 'partial' } as PrologFullResultDto
                 };
             }
 

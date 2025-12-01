@@ -1017,7 +1017,7 @@
     "totalOperations": "Total de Operações",
     "totalDelay": "Atraso Total (Prolog)",
     "hours": "h",
-    "prologRaw": "Resposta Raw do Prolog",
+    "prologRaw": "Resposta do Prolog",
     "vessel": "Navio",
     "dock": "Cais",
     "window": "Janela (ETA/ETD)",
@@ -1034,8 +1034,13 @@
     "computeScheduleFor" : "Gerar",
     "algorithm" : "Algoritmo",
     "totalCraneHours" : "Total de horas/gruas",
+    "computationalTime" : "Tempo Computacional",
     "notComputed" : "Não gerado ainda...",
-    "comparisonTitle" : "Tabela de comparação"
+    "comparisonTitle" : "Tabela de comparação",
+    "prologSequenceTitle": "Sequencia de operações",
+    "startTime" : "Entrada",
+    "endTime" : "Saída",
+    "duration": "Duração"
   },
     "common": {
       "cancel": "Cancelar",

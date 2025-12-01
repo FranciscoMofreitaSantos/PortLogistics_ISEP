@@ -20,6 +20,7 @@ export interface SchedulingOperationDto {
 
     optimizedOperationDuration: number;
     realDepartureTime: number;
+    realArrivalTime: number;
     departureDelay: number;
 
     theoreticalRequiredCranes?: number;
@@ -52,4 +53,19 @@ export interface MultiCraneComparisonResultDto {
     multiCraneHours: number;
 
     optimizationSteps: OptimizationStepDto[];
+}
+
+
+export interface PrologOperationResultDto {
+    vessel: string;
+    start: number;
+    end: number;
+}
+
+
+export interface PrologFullResultDto {
+    algorithm: string;
+    total_delay: number;
+    best_sequence: PrologOperationResultDto[];
+    status: string;
 }

@@ -1055,6 +1055,7 @@
     "noDateSelected": "Please select a date to calculate.",
     "scheduleResult": "Schedule Result (Algorithm: {{algo}})",
     "totalOperations": "Total Operations",
+    "computationalTime": "Computational Time",
     "totalDelay": "Total Delay (Prolog)",
     "hours": "h",
     "prologRaw": "Prolog Raw Response",
@@ -1064,7 +1065,7 @@
     "work": "Work (Loading/Unloading)",
     "craneUsed": "Crane Used",
     "optimizedDuration": "Total Duration",
-    "realDeparture": "Real Departure",
+    "realDeparture": "Real departure",
     "delay": "Delay",
     "staffAssignments": "Staff Assignments",
     "noOperations": "There are no operations for the selected day.",
@@ -1075,7 +1076,11 @@
     "algorithm" : "Algorithm",
     "totalCraneHours" : "Total of hours/crane",
     "notComputed" : "Not generated yet...",
-    "comparisonTitle" : "Comparison table"
+    "comparisonTitle" : "Comparison table",
+    "prologSequenceTitle": "Operations sequence",
+    "startTime" : "Entrace",
+    "endTime" : "Departure",
+    "duration": "Duration"
   },
   "common": {
     "cancel": "Cancel",

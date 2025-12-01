@@ -18,7 +18,7 @@ public class SchedulingOperationDto
     public int EndTime { get; set; }
     public int LoadingDuration { get; set; }
     public int UnloadingDuration { get; set; }
-    public List<StaffAssignmentDto> StaffAssignments { get; set; }
+    public List<StaffAssignmentDto>? StaffAssignments { get; set; }
     public string Crane { get; set; } = string.Empty;
 
     public int CraneCountUsed { get; set; } = 1;
@@ -27,6 +27,7 @@ public class SchedulingOperationDto
 
     public int OptimizedOperationDuration { get; set; }
     public int RealDepartureTime { get; set; }
+    public int RealArrivalTime { get; set; }
     public int DepartureDelay { get; set; }
     
     public int? TheoreticalRequiredCranes { get; set; }

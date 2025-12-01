@@ -6,6 +6,7 @@ import {
     Title,
     Group,
     Stack,
+    Text
 } from '@mantine/core';
 import { IconStar } from '@tabler/icons-react';
 
@@ -14,21 +15,22 @@ import {
     type AlgorithmType
 } from '../services/SchedulingService';
 
+
+type ScheduleResponseWithTime = ScheduleResponse & { executionTime?: number };
+
 interface AlgorithmComparisonTableProps {
-    allResults: Partial<Record<AlgorithmType, ScheduleResponse>>;
+    allResults: Partial<Record<AlgorithmType, ScheduleResponseWithTime>>;
     t: (key: string, options?: any) => string;
 }
 
 const ComparisonRow: React.FC<{
     algo: AlgorithmType;
-    result?: ScheduleResponse;
+    result?: ScheduleResponseWithTime;
     minDelay: number | null;
     t: (key: string, options?: any) => string;
 }> = ({ algo, result, minDelay, t }) => {
 
-
     const hasData = !!result;
-
 
     const totalCraneHours = hasData
         ? result.schedule.operations.reduce(
@@ -40,6 +42,10 @@ const ComparisonRow: React.FC<{
     const delay = hasData ? result.prolog.total_delay ?? 0 : '-';
     const operations = hasData ? result.schedule.operations.length : '-';
 
+    // --- MUDANÇA: Ler o tempo de execução ---
+    const execTime = hasData && result.executionTime !== undefined
+        ? `${result.executionTime.toFixed(0)} ms`
+        : '-';
 
     const isBest = hasData && minDelay !== null && delay === minDelay && minDelay >= 0;
     const isNotComputed = !hasData;
@@ -68,6 +74,10 @@ const ComparisonRow: React.FC<{
             </Table.Td>
             <Table.Td style={{textAlign: 'right'}}>{totalCraneHours !== 0 ? totalCraneHours : '-'}</Table.Td>
             <Table.Td style={{textAlign: 'right'}}>{operations}</Table.Td>
+            {/* --- MUDANÇA: Exibir o tempo --- */}
+            <Table.Td style={{textAlign: 'right'}}>
+                <Text fw={500} size="sm">{execTime}</Text>
+            </Table.Td>
         </Table.Tr>
     );
 }
@@ -96,6 +106,7 @@ const AlgorithmComparisonTable: React.FC<AlgorithmComparisonTableProps> = ({ all
                             <Table.Th style={{textAlign: 'right'}}>{t('planningScheduling.totalDelay')}</Table.Th>
                             <Table.Th style={{textAlign: 'right'}}>{t('planningScheduling.totalCraneHours')}</Table.Th>
                             <Table.Th style={{textAlign: 'right'}}>{t('planningScheduling.totalOperations')}</Table.Th>
+                            <Table.Th style={{textAlign: 'right'}}>{t('planningScheduling.computationalTime')}</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>

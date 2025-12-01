@@ -31,75 +31,33 @@ public class ScheduleController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
-    
-    [HttpGet("daily/optimal")]
-    public async Task<IActionResult> GetOptimalSchedule([FromQuery] DateOnly day)
+
+    [HttpGet("daily/{algorithm}")]
+    public async Task<IActionResult> GetDailySchedule(string algorithm, [FromQuery] DateOnly day)
     {
         try
         {
-            var schedule = await _schedulingService.ComputeDailyScheduleAsync(day);
-            var prologResult = await _schedulingService.SendScheduleToPrologOptimal(schedule);
+            var validAlgorithms = new[] { "greedy", "optimal", "local_search" };
+            if (!validAlgorithms.Contains(algorithm.ToLower()))
+            {
+                return BadRequest(new
+                    { error = $"Invalid algorithm. Supported: {string.Join(", ", validAlgorithms)}" });
+            }
             
-            _schedulingService.UpdateScheduleFromPrologResult(schedule, prologResult);
+            var result = await _schedulingService.ComputeScheduleWithAlgorithmAsync(day, algorithm);
 
-            return Ok(new {
-                algorithm = "optimal",
-                schedule = schedule, 
-                prolog = prologResult
+            return Ok(new
+            {
+                algorithm = algorithm,
+                schedule = result.Schedule,
+                prolog = result.Prolog
             });
         }
-        
-        catch (PlanningSchedulingException e) 
+        catch (PlanningSchedulingException e)
         {
             return BadRequest(new { error = e.Message });
         }
     }
-
-        
-        [HttpGet("daily/greedy")]
-        public async Task<IActionResult> GetGreedySchedule([FromQuery] DateOnly day)
-        {
-            try
-            {
-                var schedule = await _schedulingService.ComputeDailyScheduleAsync(day);
-                var prologResult = await _schedulingService.SendScheduleToPrologGreedy(schedule);
-                
-                _schedulingService.UpdateScheduleFromPrologResult(schedule, prologResult);
-
-                return Ok(new {
-                    algorithm = "greedy",
-                    schedule = schedule,
-                    prolog = prologResult
-                });
-            }
-            catch (PlanningSchedulingException e)
-            {
-                return BadRequest(new { error = e.Message });
-            }
-        }
-
-        [HttpGet("daily/local_search")]
-        public async Task<IActionResult> GetLocalSearchSchedule([FromQuery] DateOnly day)
-        {
-            try
-            {
-                var schedule = await _schedulingService.ComputeDailyScheduleAsync(day);
-                var prologResult = await _schedulingService.SendScheduleToPrologLocalSearch(schedule);
-
-                
-                _schedulingService.UpdateScheduleFromPrologResult(schedule, prologResult);
-
-                return Ok(new {
-                    algorithm = "local_search",
-                    schedule = schedule,
-                    prolog = prologResult
-                });
-            }
-            catch (PlanningSchedulingException e)
-            {
-                return BadRequest(new { error = e.Message });
-            }
-        }
 
 
     [HttpGet("daily/multi-crane-comparison")]

@@ -19,7 +19,8 @@ import {
     Space,
     Container,
     Center,
-    Select
+    Select,
+    Table
 } from '@mantine/core';
 
 import {
@@ -31,7 +32,8 @@ import {
     IconClockHour3,
     IconShip,
     IconCpu,
-    IconSettings
+    IconSettings,
+    IconListDetails
 } from '@tabler/icons-react';
 
 import {notifyLoading, notifySuccess, notifyError} from "../../../utils/notify";
@@ -44,10 +46,14 @@ import {
 import type {
     SchedulingOperationDto,
     StaffAssignmentDto,
+    PrologOperationResultDto
 } from '../dtos/scheduling.dtos.ts';
 
 import AlgorithmComparisonTable from '../components/AlgorithmComparisonTable';
 import { MultiCraneAnalysis } from '../components/MultiCraneAnalysis';
+
+
+export type ScheduleResponseWithTime = ScheduleResponse & { executionTime?: number };
 
 function HtmlDateInput({
                            value,
@@ -84,6 +90,36 @@ function HtmlDateInput({
 
 const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, locale: string }) => {
     const isDelayed = op.departureDelay > 0;
+
+    const formatTimeOnly = (isoString: string): string => {
+        try {
+            return new Date(isoString).toLocaleTimeString(locale === "pt" ? "pt-PT" : "en-US", {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'UTC'
+            });
+        } catch {
+            return 'N/A';
+        }
+    };
+
+    const formatTimeInterval = (startIso: string, endIso: string): string => {
+        const startDate = new Date(startIso);
+        const endDate = new Date(endIso);
+
+        const startTime = formatTimeOnly(startIso);
+        const endTime = formatTimeOnly(endIso);
+
+
+        const isSameDay = startDate.toISOString().split('T')[0] === endDate.toISOString().split('T')[0];
+
+        if (isSameDay) {
+            return `${startTime} - ${endTime}`;
+        } else {
+            return `${startTime} - ${endTime}`;
+        }
+    }
+
 
     return (
         <Card withBorder radius="md" p="md" shadow="sm" mb="lg">
@@ -149,7 +185,7 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
                         {op.staffAssignments.map((s: StaffAssignmentDto, idx: number) => (
                             <Grid.Col span={6} key={idx}>
                                 <Badge fullWidth variant="light">
-                                    {s.staffMemberName}
+                                    {s.staffMemberName}: {formatTimeInterval(s.intervalStart, s.intervalEnd)}
                                 </Badge>
                             </Grid.Col>
                         ))}
@@ -159,6 +195,47 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
         </Card>
     );
 };
+
+
+const PrologSequenceTable: React.FC<{ sequence: PrologOperationResultDto[] }> = ({ sequence }) => {
+    const { t } = useTranslation();
+
+    const rows = sequence.map((item, index) => (
+        <Table.Tr key={item.vessel}>
+            <Table.Td>{index + 1}</Table.Td>
+            <Table.Td fw={500}>{item.vessel}</Table.Td>
+            <Table.Td c="blue.7" fw={600}>{item.start}</Table.Td>
+            <Table.Td c="green.7">{item.end}</Table.Td>
+            <Table.Td c="orange.7">{item.end - item.start}</Table.Td>
+        </Table.Tr>
+    ));
+
+    return (
+        <Box my="xl">
+            <Title order={4} mb="md">
+                <Group gap="xs">
+                    <IconListDetails size={20} />
+                    {t('planningScheduling.prologSequenceTitle')}
+                </Group>
+            </Title>
+            <Card withBorder radius="md" p="md" shadow="sm">
+                <Table horizontalSpacing="md" verticalSpacing="xs" striped highlightOnHover>
+                    <Table.Thead>
+                        <Table.Tr>
+                            <Table.Th>#</Table.Th>
+                            <Table.Th>{t('planningScheduling.vessel')}</Table.Th>
+                            <Table.Th>{t('planningScheduling.startTime')}</Table.Th>
+                            <Table.Th>{t('planningScheduling.endTime')}</Table.Th>
+                            <Table.Th>{t('planningScheduling.duration')}</Table.Th>
+                        </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>{rows}</Table.Tbody>
+                </Table>
+            </Card>
+        </Box>
+    );
+};
+
 
 export default function SchedulePage() {
     const {t, i18n} = useTranslation();
@@ -171,10 +248,11 @@ export default function SchedulePage() {
     const [showComparisonAnalysis, setShowComparisonAnalysis] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
+
     const [error, setError] = useState<string | null>(null);
 
     const [allResults, setAllResults] =
-        useState<Partial<Record<AlgorithmType, ScheduleResponse>>>({});
+        useState<Partial<Record<AlgorithmType, ScheduleResponseWithTime>>>({});
 
     const [lastComputedAlgorithm, setLastComputedAlgorithm] =
         useState<AlgorithmType | null>(null);
@@ -207,6 +285,9 @@ export default function SchedulePage() {
         setIsLoading(true);
         setError(null);
 
+
+        const startTime = performance.now();
+
         try {
             const response = await SchedulingService.getDailySchedule(
                 selectedDate,
@@ -214,9 +295,14 @@ export default function SchedulePage() {
                 multiCraneAlgorithm
             );
 
+
+            const endTime = performance.now();
+            const durationMs = endTime - startTime;
+
+
             const newResults = {
                 ...allResults,
-                [currentAlgo]: response
+                [currentAlgo]: { ...response, executionTime: durationMs }
             };
 
             setAllResults(newResults);
@@ -257,7 +343,6 @@ export default function SchedulePage() {
                                 {t('planningScheduling.title')}
                             </Group>
                         </Title>
-                        {/* Proteção contra undefined com ?. */}
                         <Text size="sm" c="gray.6">
                             {t('planningScheduling.totalOperations')}: {scheduleToDisplay?.schedule?.operations?.length ?? 0}
                         </Text>
@@ -375,47 +460,51 @@ export default function SchedulePage() {
                             data={allResults['multi_crane'].comparisonData!}
                         />
                     ) : (
+                        <AlgorithmComparisonTable allResults={allResults} t={t} />
+                    )}
+
+                    {!showComparisonAnalysis && scheduleToDisplay && scheduleToDisplay.schedule && (
                         <>
-                            <AlgorithmComparisonTable allResults={allResults} t={t} />
+                            <Title order={3} mb="xl" mt="xl" style={{borderBottom: "2px solid #eef"}}>
+                                {t('planningScheduling.scheduleResult', {algo: getAlgoName(lastComputedAlgorithm!)})}
+                            </Title>
 
-                            {scheduleToDisplay && scheduleToDisplay.schedule && (
-                                <>
-                                    <Title order={3} mb="xl" mt="xl" style={{borderBottom: "2px solid #eef"}}>
-                                        {t('planningScheduling.scheduleResult', {algo: getAlgoName(lastComputedAlgorithm!)})}
-                                    </Title>
-
-                                    <Card shadow="md" radius="lg" p="lg" withBorder mb="xl" bg="indigo.8" c="white">
-                                        <Group justify="space-between">
-                                            <Stack gap={4}>
-                                                <Text fw={500}>{t('planningScheduling.totalOperations')}</Text>
-                                                <Text size="xl" fw={700}>{scheduleToDisplay.schedule.operations?.length || 0}</Text>
-                                            </Stack>
-                                            <Stack gap={4} align="flex-end">
-                                                <Text fw={500}>{t('planningScheduling.totalDelay')}</Text>
-                                                <Badge size="xl" radius="md" variant="filled"
-                                                       color={(scheduleToDisplay.prolog?.total_delay || 0) > 0 ? "red" : "green"}>
-                                                    {scheduleToDisplay.prolog?.total_delay || 0}{t('planningScheduling.hours')}
-                                                </Badge>
-                                            </Stack>
-                                        </Group>
-                                    </Card>
-
-                                    <Stack gap="md">
-                                        {scheduleToDisplay.schedule.operations?.map((op) => (
-                                            <OperationRow key={op.vvnId} op={op} t={t} locale={locale}/>
-                                        ))}
+                            <Card shadow="md" radius="lg" p="lg" withBorder mb="xl" bg="indigo.8" c="white">
+                                <Group justify="space-between">
+                                    <Stack gap={4}>
+                                        <Text fw={500}>{t('planningScheduling.totalOperations')}</Text>
+                                        <Text size="xl" fw={700}>{scheduleToDisplay.schedule.operations?.length || 0}</Text>
                                     </Stack>
+                                    <Stack gap={4} align="flex-end">
+                                        <Text fw={500}>{t('planningScheduling.totalDelay')}</Text>
+                                        <Badge size="xl" radius="md" variant="filled"
+                                               color={(scheduleToDisplay.prolog?.total_delay || 0) > 0 ? "red" : "green"}>
+                                            {scheduleToDisplay.prolog?.total_delay || 0}{t('planningScheduling.hours')}
+                                        </Badge>
+                                    </Stack>
+                                </Group>
+                            </Card>
 
-                                    <Box mt="xl" pt="xl" style={{borderTop: "1px solid #ddd"}}>
-                                        <Title order={4} mb="md">{t('planningScheduling.prologRaw')}</Title>
-                                        <Box component="pre" style={{
-                                            background: "#111", color: "#4be34b", padding: 15, borderRadius: 8, maxHeight: 400, overflowX: "auto"
-                                        }}>
-                                            {JSON.stringify(scheduleToDisplay.prolog, null, 2)}
-                                        </Box>
-                                    </Box>
-                                </>
+                            {scheduleToDisplay.prolog?.best_sequence && (
+                                <PrologSequenceTable
+                                    sequence={scheduleToDisplay.prolog.best_sequence}
+                                />
                             )}
+
+                            <Stack gap="md">
+                                {scheduleToDisplay.schedule.operations?.map((op) => (
+                                    <OperationRow key={op.vvnId} op={op} t={t} locale={locale}/>
+                                ))}
+                            </Stack>
+
+                            <Box mt="xl" pt="xl" style={{borderTop: "1px solid #ddd"}}>
+                                <Title order={4} mb="md">{t('planningScheduling.prologRaw')}</Title>
+                                <Box component="pre" style={{
+                                    background: "#111", color: "#4be34b", padding: 15, borderRadius: 8, maxHeight: 400, overflowX: "auto"
+                                }}>
+                                    {JSON.stringify(scheduleToDisplay.prolog, null, 2)}
+                                </Box>
+                            </Box>
                         </>
                     )}
                 </Box>
