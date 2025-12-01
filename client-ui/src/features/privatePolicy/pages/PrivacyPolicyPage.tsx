@@ -11,8 +11,7 @@ import {
 } from "../services/privacyPolicyService";
 
 import { PrivacyPolicyCardGrid } from "../components/PrivacyPolicyCardGrid";
-// import { PrivacyPolicyCreateModal } from "../components/PrivacyPolicyCreateModal"; // se quiseres modal
-
+import { useAppStore } from "../../../app/store";
 import "../style/privacypolicy.css";
 
 const MIN_LOADING_TIME = 500;
@@ -31,6 +30,16 @@ async function runWithLoading<T>(promise: Promise<T>, text: string) {
     }
 }
 
+export async function getCurrentAdminEmail(): Promise<string | null> {
+    const user = useAppStore.getState().user;
+
+    if (!user) {
+        toast.error("No such user");
+        return null;
+    }
+
+    return user.email;
+}
 export default function PrivacyPolicyPage() {
     const { t } = useTranslation();
 
@@ -122,14 +131,31 @@ export default function PrivacyPolicyPage() {
             next.effectiveFrom = t("PrivacyPolicy.errors.effectiveFromRequired", {
                 defaultValue: "Data de entrada em vigor é obrigatória",
             });
-        if (!createData.createdByAdmin.trim())
-            next.createdByAdmin = t("PrivacyPolicy.errors.createdByRequired", {
-                defaultValue: "Nome do administrador é obrigatório",
-            });
 
         setCreateErrors(next);
         return Object.keys(next).length === 0;
     }
+    
+    const handleOpenCreate = async () => {
+        setCreateErrors({});
+
+        const email = await getCurrentAdminEmail();
+        if (!email) {
+            // já mostrámos toast em getCurrentAdminEmail
+            return;
+        }
+
+        setCreateData({
+            titleEn: "",
+            titlePT: "",
+            contentEn: "",
+            contentPT: "",
+            effectiveFrom: "",
+            createdByAdmin: email,   // <-- preenchido automaticamente
+        });
+
+        setIsCreateOpen(true);
+    };
 
     async function handleCreate() {
         if (!validateCreate()) {
@@ -214,15 +240,13 @@ export default function PrivacyPolicyPage() {
                 </div>
                 <button
                     className="pp-primary-btn"
-                    onClick={() => {
-                        setCreateErrors({});
-                        setIsCreateOpen(true);
-                    }}
+                    onClick={handleOpenCreate}
                 >
                     {t("PrivacyPolicy.actions.add", {
                         defaultValue: "Nova Política",
                     })}
                 </button>
+
             </header>
 
             <PrivacyPolicyCardGrid
@@ -317,24 +341,6 @@ export default function PrivacyPolicyPage() {
                                 {createErrors.effectiveFrom && (
                                     <small className="pp-error">
                                         {createErrors.effectiveFrom}
-                                    </small>
-                                )}
-                            </label>
-
-                            <label>
-                                <span>Criada por</span>
-                                <input
-                                    value={createData.createdByAdmin}
-                                    onChange={(e) =>
-                                        setCreateData((p) => ({
-                                            ...p,
-                                            createdByAdmin: e.target.value,
-                                        }))
-                                    }
-                                />
-                                {createErrors.createdByAdmin && (
-                                    <small className="pp-error">
-                                        {createErrors.createdByAdmin}
                                     </small>
                                 )}
                             </label>
