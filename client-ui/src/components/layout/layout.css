@@ -300,14 +300,34 @@ html, body {
 
 
 /* === FOOTER === */
-.sidebar-footer {
-    padding: 20px 15px;
-    margin-top: auto; /* 🔹 cola no fundo */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+.footer {
+    background-color: var(--footer-bg);
+    color: #666;
+    padding: 16px 24px;
+    border-top: 1px solid #e5e5e5;
+    font-size: 0.85rem;
+    margin-top: auto;
+    transition: background-color 0.4s ease, color 0.3s ease;
+
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
+
+.footer-text {
+    opacity: 0.85;
+}
+
+/* Em ecrãs pequenos volta ao centro */
+@media (max-width: 600px) {
+    .footer {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
 
 /* === PROFILE === */
 .profile-in-sidebar {
@@ -527,4 +547,105 @@ html, body {
     font-weight: 500;
     border-radius: 6px;
     padding: 4px 10px;
+}
+.footer-pp-btn {
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 4px 0;
+    border-radius: 6px;
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+}
+
+.footer-pp-btn:hover {
+    color: var(--accent-light);
+    background-color: rgba(45, 127, 249, 0.08);
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .footer-pp-btn {
+    color: var(--accent-light);
+}
+/* Overlay específico da Política de Privacidade */
+.pp-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 1100; /* acima do sidebar (999) e overlay (998) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.25s ease;
+}
+
+/* Caixa do modal */
+.pp-modal {
+    width: min(900px, 92vw);
+    max-height: 80vh;
+    background: var(--card-bg);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    overflow-y: auto;
+    animation: fadeSlideDown 0.28s ease;
+}
+
+/* Título da PP */
+.pp-title {
+    margin: 0 0 10px;
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+/* Conteúdo da PP (respeita quebras de linha) */
+.pp-content {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+/* Botão fechar */
+.pp-close-btn {
+    margin-top: 16px;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pp-close-btn:hover {
+    background-color: var(--accent-light);
+    transform: translateY(-1px);
+    box-shadow: 0 9px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .pp-modal {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
 }

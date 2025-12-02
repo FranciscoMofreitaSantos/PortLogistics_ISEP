@@ -1,5 +1,3 @@
-
-
 import type { FC } from "react";
 import type { PrivacyPolicy } from "../domain/privacyPolicy";
 import { useTranslation } from "react-i18next";

@@ -7,7 +7,8 @@ import "./layout.css";
 import { useAppStore } from "../../app/store";
 import { Roles } from "../../app/types";
 import RoleLauncher from "../RoleLaucher";
-
+import { getCurrentPrivacyPolicy } from "../../features/privatePolicy/services/privacyPolicyService";
+import type { PrivacyPolicy } from "../../features/privatePolicy/domain/privacyPolicy";
 
 export default function AppLayout() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -18,14 +19,9 @@ export default function AppLayout() {
     const toggleTheme = useAppStore((state) => state.toggleTheme);
     const isDarkMode = theme === "dark"; 
 
-
-    /*
-    const toggleTheme = () => {
-        const newTheme = dark ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", newTheme);
-        setDark(!dark);
-    };
-    */
+    // PP
+    const [privacyPolicy, setPrivacyPolicy] = useState<PrivacyPolicy | null>(null);
+    const [showPrivacy, setShowPrivacy] = useState(false);
 
     const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -42,6 +38,19 @@ export default function AppLayout() {
         };
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    // carregar política atual ao montar layout
+    useEffect(() => {
+        async function loadPrivacyPolicy() {
+            try {
+                const pp = await getCurrentPrivacyPolicy();
+                setPrivacyPolicy(pp);
+            } catch (e) {
+                console.error("Erro a carregar política de privacidade", e);
+            }
+        }
+        loadPrivacyPolicy();
     }, []);
 
     return (
@@ -124,7 +133,53 @@ export default function AppLayout() {
 
             {/* FOOTER */}
             <footer className="footer">
-                © 2025 ThPA S.A. — Smart Port Operations Platform
+    <span className="footer-text">
+        © 2025 ThPA S.A. — Smart Port Operations Platform
+    </span>
+
+                {privacyPolicy && (
+                    <>
+                        <button
+                            type="button"
+                            className="footer-pp-btn"
+                            onClick={() => setShowPrivacy(true)}
+                        >
+                            {t("layout.privacyPolicy", "Política de Privacidade")}
+                        </button>
+
+                        {showPrivacy && (
+                            <div
+                                className="pp-overlay"
+                                onClick={() => setShowPrivacy(false)}
+                            >
+                                <div
+                                    className="pp-modal"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <h2 className="pp-title">
+                                        {i18n.language.startsWith("pt")
+                                            ? privacyPolicy.titlePT
+                                            : privacyPolicy.titleEn}
+                                    </h2>
+
+                                    <div className="pp-content">
+                                        {i18n.language.startsWith("pt")
+                                            ? privacyPolicy.contentPT
+                                            : privacyPolicy.contentEn}
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className="pp-close-btn"
+                                        onClick={() => setShowPrivacy(false)}
+                                    >
+                                        {t("common.close", "Fechar")}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
             </footer>
         </div>
     );
