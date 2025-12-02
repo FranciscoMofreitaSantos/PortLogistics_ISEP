@@ -97,7 +97,7 @@ function UserManagementPage() {
         <Table.Tr key={u.id}>
             <Table.Td>{u.name ?? "—"}</Table.Td>
             <Table.Td>{u.email}</Table.Td>
-            <Table.Td>{u.role ?? t("users.roles.none")}</Table.Td>
+            <Table.Td>{u.role ?? t("roles.none")}</Table.Td>
             <Table.Td>
                 <Badge color={u.isActive ? "green" : "red"} variant="light">
                     {u.isActive

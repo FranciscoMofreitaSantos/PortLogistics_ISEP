@@ -34,11 +34,10 @@ export default function App() {
 
     if (!isAuthenticated) {
         return (
-            <main style={{ textAlign: "center", marginTop: "3rem" }}>
-                <h1>Auth0 Login</h1>
+            <>
                 <LoginButton />
                 <Toaster position="top-right" toastOptions={{ style: { zIndex: 2147483647 } }} />
-            </main>
+            </>
         );
     }
 

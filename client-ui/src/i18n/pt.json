@@ -84,6 +84,7 @@
     "lastLogin": "Último acesso",
     "justNow": "agora mesmo",
     "roles": "Perfis",
+    "vvn" : "VVN",
     "physicalResources": "Gerir Recursos Físicos",
     "physicalResourcesDesc": "Gira guindastes, camiões e outros equipamentos usados nas operações portuárias.",
     "qualifications": "Gerir Qualificações",
@@ -1041,14 +1042,6 @@
     "startTime" : "Entrada",
     "endTime" : "Saída",
     "duration": "Duração"
-  },
-    "common": {
-      "cancel": "Cancelar",
-      "save": "Guardar",
-      "confirm": "Confirmar",
-      "close": "Fechar",
-      "loading": "A carregar...",
-      "noResults": "Sem resultados."
-    }
+  }
 
 }
