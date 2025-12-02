@@ -3,7 +3,6 @@ html, body {
     padding: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden;
     background-color: #050f14;
     font-family: 'Courier New', monospace;
 }
@@ -25,7 +24,6 @@ html, body {
     position: relative;
     width: 100vw;
     height: 100vh;
-    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -134,7 +132,6 @@ html, body {
     font-family: inherit;
     font-weight: bold;
     cursor: pointer;
-    overflow: hidden;
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -168,7 +165,6 @@ html, body {
     height: 100%;
     pointer-events: none;
     z-index: 5;
-    overflow: hidden;
 }
 
 .ship-silhouette {

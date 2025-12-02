@@ -10,14 +10,13 @@ FRONTEND_DIR="./client-ui"
 
 echo "FRONTEND DEPLOY STARTED"
 
-
 cd "$FRONTEND_DIR" || { 
   echo "Frontend directory not found: $FRONTEND_DIR"
   exit 1
 }
 
 if [ ! -f package.json ]; then
-  echo "package.json not found. Are you inside the frontend folder?"
+  echo "package.json not found."
   exit 1
 fi
 
@@ -30,23 +29,23 @@ npm run build || {
 echo "Build completed successfully."
 
 for SERVER in "${SERVERS[@]}"; do
-  echo "Uploading files to $SERVER..."
+  echo "Deploying to $SERVER"
 
-  ssh $SERVER "mkdir -p $WEB_DIR"
+  ssh $SERVER "rm -rf $WEB_DIR/* && mkdir -p $WEB_DIR"
 
   scp -r dist/* "$SERVER:$WEB_DIR/" || {
     echo "UPLOAD FAILED on $SERVER"
     exit 1
   }
 
-  echo "Reloading nginx on $SERVER..."
+  echo "Reloading nginx..."
   ssh $SERVER "nginx -t && systemctl reload nginx" || {
-    echo "NGINX RELOAD FAILED on $SERVER"
+    echo "NGINX ERROR on $SERVER"
     exit 1
   }
 
   echo "Deploy completed on $SERVER"
-  echo "--------------------------------"
+  echo "-----------------------------"
 done
 
-echo "FRONTEND DEPLOY COMPLETED SUCCESSFULLY ON ALL SERVERS"
+echo "SUCCESS ON ALL SERVERS"
