@@ -14,83 +14,11 @@ import { PrivacyPolicyCardGrid } from "../components/PrivacyPolicyCardGrid";
 import { useAppStore } from "../../../app/store";
 import "../style/privacypolicy.css";
 import { PrivacyPolicySlidePanel } from "../components/PrivacyPolicySlidePanel";
-const PRIVACY_TEMPLATE_PT = `1. Introdução
-Descreve, de forma simples, o objetivo da política e o contexto da aplicação.
+import {PRIVACY_TEMPLATE_EN, PRIVACY_TEMPLATE_PT,} from "../config/privacyPolicyTemplates";
+import { validatePrivacyContent } from "../utils/privacyPolicyValidation";
 
-2. Dados pessoais que tratamos
-Lista os tipos de dados pessoais (ex.: identificação, contacto, login, logs técnicos, etc.).
 
-3. Finalidades e base legal
-Explica para que usamos os dados (ex.: gestão de conta, cumprimento de obrigações legais)
-e qual a base legal (ex.: execução de contrato, obrigação legal, interesse legítimo).
 
-4. Partilha de dados
-Indica se há partilha com terceiros (ex.: fornecedores de infraestruturas, entidades públicas)
-e em que condições.
-
-5. Conservação dos dados
-Define prazos ou critérios de conservação (ex.: enquanto a conta estiver ativa, prazos legais).
-
-6. Direitos dos titulares
-Explica os direitos (acesso, retificação, apagamento, oposição, portabilidade, reclamação)
-e como podem ser exercidos.
-
-7. Contactos e reclamações
-Indica contactos para questões de proteção de dados (ex.: email de suporte ou DPO)
-e referência à autoridade de controlo (ex.: CNPD em Portugal).
-
-8. Atualizações desta política
-Indica como e quando a política pode ser atualizada e como os utilizadores serão informados.`;
-
-const PRIVACY_TEMPLATE_EN = `1. Introduction
-Briefly describe the purpose of this policy and the context of the application.
-
-2. Personal data we process
-List the categories of personal data (e.g. identification, contact, login, technical logs, etc.).
-
-3. Purposes and legal basis
-Explain what we use the data for (e.g. account management, legal obligations)
-and the legal basis (e.g. contract performance, legal obligation, legitimate interest).
-
-4. Data sharing
-Indicate whether data is shared with third parties (e.g. infrastructure providers, public authorities)
-and under which conditions.
-
-5. Data retention
-Define retention periods or criteria (e.g. as long as the account is active, legal time limits).
-
-6. Data subjects’ rights
-Explain the rights (access, rectification, erasure, objection, portability, complaint)
-and how they can be exercised.
-
-7. Contacts and complaints
-Provide contacts for data protection issues (e.g. support or DPO email)
-and reference to the supervisory authority.
-
-8. Updates to this policy
-Indicate how and when this policy may be updated and how users will be informed.`;
-
-const REQUIRED_SECTIONS_PT = [
-    "1. Introdução",
-    "2. Dados pessoais que tratamos",
-    "3. Finalidades e base legal",
-    "4. Partilha de dados",
-    "5. Conservação dos dados",
-    "6. Direitos dos titulares",
-    "7. Contactos e reclamações",
-    "8. Atualizações desta política",
-];
-
-const REQUIRED_SECTIONS_EN = [
-    "1. Introduction",
-    "2. Personal data we process",
-    "3. Purposes and legal basis",
-    "4. Data sharing",
-    "5. Data retention",
-    "6. Data subjects’ rights",
-    "7. Contacts and complaints",
-    "8. Updates to this policy",
-];
 
 const MIN_LOADING_TIME = 500;
 
@@ -212,10 +140,8 @@ export default function PrivacyPolicyPage() {
                 defaultValue: "Data de entrada em vigor é obrigatória",
             });
 
-        const contentPtLower = createData.contentPT.toLowerCase();
-        const missingPt = REQUIRED_SECTIONS_PT.filter(
-            (s) => !contentPtLower.includes(s.toLowerCase())
-        );
+        const {missingPt, missingEn} = validatePrivacyContent(createData.contentPT,createData.contentEn);
+        
         if (missingPt.length > 0) {
             next.contentPT =
                 t("PrivacyPolicy.errors.contentPtStructure", {
@@ -226,10 +152,6 @@ export default function PrivacyPolicyPage() {
                 missingPt.join(", ");
         }
 
-        const contentEnLower = createData.contentEn.toLowerCase();
-        const missingEn = REQUIRED_SECTIONS_EN.filter(
-            (s) => !contentEnLower.includes(s.toLowerCase())
-        );
         if (missingEn.length > 0) {
             next.contentEn =
                 t("PrivacyPolicy.errors.contentEnStructure", {
