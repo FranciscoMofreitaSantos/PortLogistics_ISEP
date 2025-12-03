@@ -1,3 +1,4 @@
+using SEM5_PI_WEBAPI.Domain.ConfirmationsUserReadPPs;
 using SEM5_PI_WEBAPI.Domain.PrivacyPolicies.DTOs;
 using SEM5_PI_WEBAPI.Domain.Shared;
 
@@ -7,11 +8,13 @@ public class PrivacyPolicyService : IPrivacyPolicyService
 {
     private readonly IPrivacyPolicyRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IConfirmationRepository _confirmationRepository;
 
-    public PrivacyPolicyService(IPrivacyPolicyRepository repository, IUnitOfWork unitOfWork)
+    public PrivacyPolicyService(IPrivacyPolicyRepository repository, IUnitOfWork unitOfWork, IConfirmationRepository confirmationRepository)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _confirmationRepository = confirmationRepository;
     }
     
     public async Task<List<PrivacyPolicyDto>> GetAllPrivacyPolicies()
@@ -55,18 +58,51 @@ public class PrivacyPolicyService : IPrivacyPolicyService
     
     public async Task SyncCurrentFlagsAsync()
     {
-        var nowUtc = DateTime.UtcNow;
 
         var all = await _repository.GetAllTrackedAsync();
 
         var newCurrent = await _repository.GetCurrentByTimePrivacyPolicy();
+        var oldCurrent = await _repository.GetCurrentByStatusPrivacyPolicy();
+        
+        // Se ainda não há política “por tempo”, limpa o flag e sai
+        if (newCurrent == null)
+        {
+            foreach (var pp in all)
+                pp.IsCurrent = false;
 
+            await _unitOfWork.CommitAsync();
+            return;
+        }
+
+        // Se não há “oldCurrent”, simplesmente marca a newCurrent como atual
+        if (oldCurrent == null)
+        {
+            foreach (var pp in all)
+                pp.IsCurrent = pp.Id.Value.Equals(newCurrent.Id.Value);
+
+            // talvez aqui ainda não queiras mexer nas confirmações
+            await _unitOfWork.CommitAsync();
+            return;
+        }
+
+        
+        if (newCurrent.Version.Equals(oldCurrent.Version)) return;
+
+        
         foreach (var pp in all)
         {
             var shouldBeCurrent = newCurrent != null && pp.Id.Value.Equals(newCurrent.Id.Value);
             pp.IsCurrent = shouldBeCurrent;
         }
+        
+        
+        var listConfirmationsUpdated = await _confirmationRepository.GetAllAsync();
 
+        foreach (var confirmation in listConfirmationsUpdated)
+        {
+            confirmation.Reset(newCurrent.Version);
+        }
+        
         await _unitOfWork.CommitAsync();
     }
 

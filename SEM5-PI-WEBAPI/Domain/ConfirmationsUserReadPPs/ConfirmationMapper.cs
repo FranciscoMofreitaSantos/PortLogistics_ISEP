@@ -6,7 +6,7 @@ namespace SEM5_PI_WEBAPI.Domain.ConfirmationsUserReadPPs;
 public class ConfirmationMapper
 {
 
-    public ConfirmationDto MapConfirmationToDto(ConfirmationPrivacyPolicy pp)
+    public static ConfirmationDto MapConfirmationToDto(ConfirmationPrivacyPolicy pp)
     {
         return new ConfirmationDto {
             Id = pp.Id.AsGuid(),

@@ -24,7 +24,9 @@ public class ConfirmationPrivacyPolicy : Entity<ConfirmationPrivacyPolicyId>, IA
     }
 
 
-    public bool IsAccepted() { return IsAcceptedPrivacyPolicy; }
+    public bool IsAccepted() { return IsAcceptedPrivacyPolicy && AcceptedAtTime != null; }
+    public bool IsDeclined() {return !IsAcceptedPrivacyPolicy && AcceptedAtTime != null;}
+    public bool NoAnswerYet() {return !IsAcceptedPrivacyPolicy && AcceptedAtTime == null;}
 
     public bool Accept(string version)
     {
@@ -39,9 +41,17 @@ public class ConfirmationPrivacyPolicy : Entity<ConfirmationPrivacyPolicyId>, IA
     {
         this.VersionPrivacyPolicy = version;
         this.IsAcceptedPrivacyPolicy = false;
+        this.AcceptedAtTime = new ClockTime(DateTime.UtcNow);
+        
+        return IsAcceptedPrivacyPolicy;
+    }
+
+    public bool Reset(string version)
+    {
+        this.VersionPrivacyPolicy = version;
+        this.IsAcceptedPrivacyPolicy = false;
         this.AcceptedAtTime = null;
         
         return IsAcceptedPrivacyPolicy;
     }
-    
 }
