@@ -1,6 +1,6 @@
 @import "@fontsource/poppins";
 
-/* === CORES BASE === */
+/* === 1. VARIÁVEIS & CORES BASE === */
 :root {
     --header-bg-start: #131820;
     --header-bg-end: #1d2a3a;
@@ -29,7 +29,7 @@
     --blur-bg: rgba(11, 14, 17, 0.8);
 }
 
-/* === GLOBAL === */
+/* === 2. GLOBAL === */
 html, body {
     margin: 0;
     padding: 0;
@@ -42,14 +42,24 @@ html, body {
     transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* === HEADER === */
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
+}
+
+/* === 3. HEADER === */
 .header {
     display: flex;
     justify-content: center;
     background: transparent;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 100; /* Z-index baixo para o Header ficar atrás da modal */
     padding: 14px 0;
     transition: all 0.3s ease;
 }
@@ -96,7 +106,7 @@ html, body {
     gap: 22px;
 }
 
-/* === BOTÕES HEADER === */
+/* === 4. BOTÕES HEADER & USER === */
 .lang-switch,
 .theme-btn,
 .menu-btn,
@@ -125,18 +135,122 @@ html, body {
 
 .login-icon:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    color:  rgb(68, 223, 57);
+    color: rgb(68, 223, 57);
     transform: scale(1.07);
 }
 
-.logout-icon:hover{
+.logout-icon:hover {
     background-color: rgba(255, 255, 255, 0.1);
     color: rgba(232, 0, 0, 0.92);
     transform: scale(1.07);
 }
 
+.user-launcher-btn {
+    background: transparent;
+    border: none;
+    color: #e0e0e0;
+    cursor: pointer;
+    padding: 8px 5px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
 
-/* === SIDEBAR === */
+.user-launcher-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--accent-light);
+    transform: scale(1.07);
+}
+
+.user-launcher-btn img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-light);
+    transition: transform 0.2s ease;
+}
+
+.user-launcher-btn:hover img {
+    transform: scale(1.07);
+}
+
+/* === 5. PRIVACY NOTIFICATION BUTTON (HEADER) === */
+.pp-notification-btn {
+    position: relative;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    outline: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #f87171;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pp-notification-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.8);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.25), inset 0 0 10px rgba(239, 68, 68, 0.1);
+}
+
+.pp-notification-icon {
+    font-size: 1.1rem;
+    filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.4));
+    transition: transform 0.3s ease;
+}
+
+.pp-notification-btn:hover .pp-notification-icon {
+    transform: scale(1.1);
+}
+
+.pp-notification-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+    pointer-events: none;
+}
+
+.pp-notification-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background-color: inherit;
+    border-radius: inherit;
+    transform: translate(-50%, -50%);
+    opacity: 0.6;
+    animation: pp-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+[data-theme="dark"] .pp-notification-btn {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+[data-theme="dark"] .pp-notification-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+}
+
+/* === 6. SIDEBAR === */
 .sidebar {
     position: fixed;
     top: 0;
@@ -160,7 +274,6 @@ html, body {
     left: 0;
 }
 
-/* === CONTEÚDO === */
 .sidebar-content {
     display: flex;
     flex-direction: column;
@@ -170,7 +283,6 @@ html, body {
     overflow-y: auto;
 }
 
-/* === NAVEGAÇÃO === */
 .sidebar nav {
     flex: 1;
 }
@@ -209,7 +321,6 @@ html, body {
     opacity: 0.8;
 }
 
-/* LINHA AZUL */
 .sidebar nav ul li a::before {
     content: "";
     position: absolute;
@@ -249,87 +360,7 @@ html, body {
     gap: 15px;
 }
 
-/* PROFILE */
-.profile-in-sidebar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #4fa3ff;
-}
-
-.profile-in-sidebar img {
-    border-radius: 50%;
-    width: 42px;
-    height: 42px;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.profile-info h4 {
-    font-size: 0.9rem;
-    margin: 0;
-    color: white;
-}
-
-.profile-info p {
-    font-size: 0.75rem;
-    opacity: 0.7;
-    margin: 0;
-}
-
-/* LOGOUT BUTTON */
-.logout-button {
-    background: transparent;
-    border: none;
-    color: #e0e0e0;
-    cursor: pointer;
-    padding: 10px 15px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.logout-button:hover {
-    background-color: rgba(232, 0, 0, 0.15);
-    color: rgba(255, 100, 100, 0.95);
-}
-
-
-/* === FOOTER === */
-.footer {
-    background-color: var(--footer-bg);
-    color: #666;
-    padding: 16px 24px;
-    border-top: 1px solid #e5e5e5;
-    font-size: 0.85rem;
-    margin-top: auto;
-    transition: background-color 0.4s ease, color 0.3s ease;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.footer-text {
-    opacity: 0.85;
-}
-
-/* Em ecrãs pequenos volta ao centro */
-@media (max-width: 600px) {
-    .footer {
-        flex-direction: column;
-        text-align: center;
-    }
-}
-
-
-/* === PROFILE === */
+/* Sidebar Profile */
 .profile-in-sidebar {
     display: flex;
     align-items: center;
@@ -339,6 +370,8 @@ html, body {
 
 .profile-in-sidebar img {
     border-radius: 50%;
+    width: 42px;
+    height: 42px;
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.3);
 }
@@ -366,7 +399,6 @@ html, body {
     text-overflow: ellipsis;
 }
 
-/* === LOGOUT === */
 .logout-button {
     background: transparent;
     border: none;
@@ -380,7 +412,6 @@ html, body {
     transition: all 0.3s ease;
     font-weight: 500;
     font-size: 0.9rem;
-    font-family: "Poppins", system-ui, sans-serif;
     width: 100%;
 }
 
@@ -389,50 +420,203 @@ html, body {
     color: rgba(255, 100, 100, 0.95);
 }
 
-.logout-button svg {
-    font-size: 1.1rem;
-}
-
-
-
-/* === OVERLAY === */
-.overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.45);
-    z-index: 998;
-    animation: fadeIn 0.3s ease;
-}
-
-/* === FOOTER === */
+/* === 7. FOOTER MODERNO (CORRIGIDO) === */
 .footer {
-    background-color: var(--footer-bg);
-    color: #666;
-    text-align: center;
-    padding: 16px;
-    border-top: 1px solid #e5e5e5;
+    /* LIGHT MODE (Padrão) */
+    background-color: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    color: #64748b;
     font-size: 0.9rem;
-    margin-top: auto; /* garante que o footer fica no fim */
-    transition: background-color 0.4s;
+    padding: 60px 0 20px;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* === ANIMAÇÕES === */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.footer-container {
+    max-width: 1400px;
+    width: 94%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-@keyframes fadeSlideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-15px);
+/* === CORREÇÃO DOS TÍTULOS DO FOOTER === */
+/* Em Light Mode, força a cor preta/escura */
+.footer-heading {
+    color: #111827 !important; /* Força cor escura no fundo branco */
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-heading::after {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 3px;
+    background: var(--accent);
+    margin-top: 8px;
+    border-radius: 2px;
+}
+
+/* Se tiveres um H3 dentro da marca no footer, remove o inline style e usa esta classe */
+.footer-brand-title {
+    color: #111827 !important;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-link {
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.footer-link:hover {
+    color: var(--accent);
+    transform: translateX(4px);
+}
+
+.footer-desc {
+    color: #64748b;
+    line-height: 1.6;
+    font-size: 0.85rem;
+    max-width: 300px;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.contact-icon {
+    color: var(--accent);
+    margin-top: 3px;
+    font-size: 1rem;
+}
+
+/* System Status Badge */
+.system-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    padding: 6px 12px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    width: fit-content;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    margin-top: 10px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #34d399;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #34d399;
+    animation: pulseStatus 2s infinite;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    padding-top: 25px;
+    text-align: center;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 94%;
+    max-width: 1400px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 15px;
+    color: #64748b;
+}
+
+/* === DARK MODE OVERRIDES PARA FOOTER === */
+[data-theme="dark"] .footer {
+    background-color: #0f141c;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .footer-container {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Títulos ficam brancos no Dark Mode */
+[data-theme="dark"] .footer-heading,
+[data-theme="dark"] .footer-brand-title {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .footer-link,
+[data-theme="dark"] .contact-item,
+[data-theme="dark"] .footer-desc,
+[data-theme="dark"] .footer-bottom {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .footer-link:hover {
+    color: var(--accent-light);
+}
+
+[data-theme="dark"] .system-status {
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.15);
+}
+
+/* Responsivo Footer */
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
     }
 }
-/* === ROLE BADGE === */
+
+/* === 8. ROLE BADGES === */
 .role-badge {
     display: inline-flex;
     align-items: center;
@@ -457,7 +641,6 @@ html, body {
     box-shadow: 0 8px 24px var(--shadow);
 }
 
-
 .role-badge--admin {
     background: linear-gradient(135deg, rgba(232, 0, 0, 0.2), rgba(232, 0, 0, 0.08));
     border-color: rgba(232, 0, 0, 0.35);
@@ -478,11 +661,15 @@ html, body {
     border-color: rgba(255, 165, 0, 0.35);
 }
 
+.role-badge--none {
+    background: #aaa;
+    color: white;
+}
+
 [data-theme="dark"] .role-badge {
     color: var(--brand-color);
 }
 
-/* responsivo: encolhe um pouco em telas muito pequenas */
 @media (max-width: 420px) {
     .role-badge {
         font-size: 0.74rem;
@@ -490,129 +677,67 @@ html, body {
     }
 }
 
-.user-launcher-btn img {
-    border: 2px solid var(--accent-light);
-}
+/* === 9. PRIVACY POLICY MODAL (CORRIGIDA) === */
 
-.user-launcher-btn {
-    background: transparent;
-    border: none;
-    color: #e0e0e0;
-    cursor: pointer;
-    padding: 8px 5px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-
-.user-launcher-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--accent-light);
-    transform: scale(1.07);
-}
-
-
-.user-launcher-btn .login-icon {
-    color: inherit;
-    transition: color 0.3s ease, transform 0.2s ease;
-}
-
-
-.user-launcher-btn img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: none;
-    outline: none;
-    background: transparent;
-    transition: transform 0.2s ease;
-}
-
-.user-launcher-btn:hover img {
-    transform: scale(1.07);
-}
-
-.user-launcher-btn:focus {
-    outline: none;
-    box-shadow: none;
-}
-
-.role-badge--none {
-    background: #aaa;
-    color: white;
-    font-weight: 500;
-    border-radius: 6px;
-    padding: 4px 10px;
-}
-.footer-pp-btn {
-    border: none;
-    background: transparent;
-    color: var(--accent);
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: underline;
-    padding: 4px 0;
-    border-radius: 6px;
-    transition: color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
-}
-
-.footer-pp-btn:hover {
-    color: var(--accent-light);
-    background-color: rgba(45, 127, 249, 0.08);
-    transform: translateY(-1px);
-}
-
-[data-theme="dark"] .footer-pp-btn {
-    color: var(--accent-light);
-}
-/* Overlay específico da Política de Privacidade */
+/* Overlay: Agora tem Z-Index gigante e BLUR */
 .pp-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 1100; /* acima do sidebar (999) e overlay (998) */
+    /* Cor preta semi-transparente para dimming */
+    background: rgba(0, 0, 0, 0.6);
+    /* Efeito de BLUR no que está atrás */
+    backdrop-filter: blur(8px);
+    /* Z-Index Altíssimo para ficar em cima do header (que é 100) */
+    z-index: 9999;
+
     display: flex;
     align-items: center;
     justify-content: center;
     animation: fadeIn 0.25s ease;
 }
 
-/* Caixa do modal */
 .pp-modal {
     width: min(900px, 92vw);
     max-height: 80vh;
-    background: var(--card-bg);
-    color: var(--text);
+
+    /* FUNDO SÓLIDO BRANCO (para não misturar texto) */
+    background-color: #ffffff;
+    color: #1e293b;
+
     border-radius: 14px;
-    padding: 20px 22px;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(12px);
+    padding: 30px 35px;
+    /* Sombra pesada para destacar */
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     overflow-y: auto;
     animation: fadeSlideDown 0.28s ease;
+    opacity: 1;
 }
 
-/* Título da PP */
 .pp-title {
-    margin: 0 0 10px;
-    font-size: 1.15rem;
-    font-weight: 600;
+    margin: 0 0 15px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
 }
 
-/* Conteúdo da PP (respeita quebras de linha) */
 .pp-content {
-    margin-top: 8px;
-    font-size: 0.9rem;
-    line-height: 1.6;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    line-height: 1.7;
     white-space: pre-wrap;
+    color: #475569;
 }
 
-/* Botão fechar */
+.pp-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
 .pp-close-btn {
     margin-top: 16px;
     margin-left: auto;
@@ -628,275 +753,270 @@ html, body {
     background: var(--accent);
     color: white;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .pp-close-btn:hover {
     background-color: var(--accent-light);
     transform: translateY(-1px);
-    box-shadow: 0 9px 24px rgba(0, 0, 0, 0.4);
 }
 
-[data-theme="dark"] .pp-modal {
-    border-color: rgba(255, 255, 255, 0.08);
-}
-.app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.content {
-    flex: 1;
-}
-/* === TOAST DE AVISO (Política de Privacidade pendente) === */
-.footer-alert {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    z-index: 1300;
-
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-
-    padding: 10px 16px;
-    border-radius: 999px;
-
-    background: linear-gradient(135deg, #f97316, #facc15);
-    color: #111827;
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(8px);
-
-    animation: toastSlideUp 0.35s ease-out, toastPulse 1.4s ease-in-out 0.35s infinite;
-}
-
-/* Dark mode: cores ligeiramente ajustadas */
-[data-theme="dark"] .footer-alert {
-    background: linear-gradient(135deg, #f97316, #facc15);
-    color: #020617;
-}
-
-/* Animação de entrada do toast */
-@keyframes toastSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(14px) translateX(4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) translateX(0);
-    }
-}
-
-/* Leve “pulsar” para chamar atenção */
-@keyframes toastPulse {
-    0% {
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-        transform: translateY(0);
-    }
-    50% {
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-        transform: translateY(-1px);
-    }
-    100% {
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-        transform: translateY(0);
-    }
-}
-/* === AÇÕES NA MODAL DA POLÍTICA DE PRIVACIDADE === */
-.pp-actions {
-    margin-top: 18px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* Botão base (shared) */
-.pp-accept-btn,
-.pp-reject-btn {
+.pp-accept-btn, .pp-reject-btn {
     min-width: 110px;
-    padding: 7px 16px;
+    padding: 8px 18px;
     border-radius: 999px;
     border: none;
     cursor: pointer;
-
     font-size: 0.85rem;
     font-weight: 600;
-    letter-spacing: 0.2px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    transition:
-            background-color 0.2s ease,
-            transform 0.15s ease,
-            box-shadow 0.2s ease,
-            opacity 0.2s ease;
+    transition: all 0.2s ease;
+    color: #fff;
 }
 
-/* Aceitar = cor de sucesso/accent */
 .pp-accept-btn {
     background: linear-gradient(135deg, #16a34a, #22c55e);
-    color: #f9fafb;
-    box-shadow: 0 8px 20px rgba(22, 163, 74, 0.45);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
 
 .pp-accept-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, #22c55e, #4ade80);
     transform: translateY(-1px);
-    box-shadow: 0 11px 28px rgba(22, 163, 74, 0.6);
 }
 
-.pp-accept-btn:disabled {
-    opacity: 0.6;
-    cursor: default;
-    box-shadow: none;
-}
-
-/* Rejeitar = mais “peligroso” */
 .pp-reject-btn {
     background: linear-gradient(135deg, #b91c1c, #ef4444);
-    color: #fee2e2;
-    box-shadow: 0 8px 20px rgba(185, 28, 28, 0.5);
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
 }
 
 .pp-reject-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, #dc2626, #f97373);
     transform: translateY(-1px);
-    box-shadow: 0 11px 28px rgba(185, 28, 28, 0.65);
 }
 
-.pp-reject-btn:disabled {
+.pp-accept-btn:disabled, .pp-reject-btn:disabled {
     opacity: 0.6;
     cursor: default;
-    box-shadow: none;
 }
 
-/* Dark theme pequenos ajustes (se quiseres afinar) */
-[data-theme="dark"] .pp-accept-btn,
-[data-theme="dark"] .pp-reject-btn {
-    color: #f9fafb;
-}/* === AVISO DE POLÍTICA DE PRIVACIDADE NO HEADER (MODERNO) === */
+/* Dark Mode Modal Override */
+[data-theme="dark"] .pp-modal {
+    background-color: #1e293b; /* Fundo Sólido Escuro */
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
 
-.pp-notification-btn {
-    position: relative;
-    border: 1px solid rgba(239, 68, 68, 0.3); /* Borda vermelha subtil */
-    outline: none;
-    cursor: pointer;
+[data-theme="dark"] .pp-title {
+    color: #ffffff;
+}
 
+[data-theme="dark"] .pp-content {
+    color: #cbd5e1;
+}
+
+/* === 10. ANIMAÇÕES & OUTROS === */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    z-index: 998;
+    animation: fadeIn 0.3s ease;
+}
+
+.footer-alert {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1300;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f97316, #facc15);
+    color: #111827;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+    animation: toastSlideUp 0.35s ease-out, toastPulse 1.4s ease-in-out 0.35s infinite;
+}
+
+[data-theme="dark"] .footer-alert {
+    color: #020617;
+}
+/* === MODAL POLÍTICA DE PRIVACIDADE === */
+
+/* Overlay: tapa tudo, faz blur e fica acima do header */
+.pp-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);      /* escurece o fundo */
+    backdrop-filter: blur(8px);          /* blur no que está atrás */
+    z-index: 9999;                       /* acima do header e sidebar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.25s ease;
+}
+
+/* Caixa da modal */
+.pp-modal {
+    width: min(900px, 92vw);
+    max-height: 80vh;
+
+    /* FUNDO SÓLIDO (para não ver texto por baixo) */
+    background-color: #ffffff;
+    color: #1e293b;
+
+    border-radius: 14px;
+    padding: 30px 35px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+
+    animation: fadeSlideDown 0.28s ease;
+}
+
+/* Título da PP */
+.pp-title {
+    margin: 0 0 15px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+}
+
+/* Corpo da PP */
+.pp-content {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: #475569;
+}
+
+/* Zona dos botões (Aceitar / Rejeitar) */
+.pp-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Botão de Fechar (quando já está aceite) */
+.pp-close-btn {
+    margin-top: 16px;
+    margin-left: auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    /* Tamanho e Forma */
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-
-    /* Fundo Glass com tom de alerta */
-    background: rgba(239, 68, 68, 0.08);
-    color: #f87171; /* Cor do ícone (vermelho claro) */
-
-    backdrop-filter: blur(4px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    transition: all 0.2s ease;
 }
 
-/* Efeito Hover: O botão "acende" */
-.pp-notification-btn:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.8);
-    color: #fff; /* Ícone fica branco */
-    transform: translateY(-2px);
-    box-shadow:
-            0 6px 20px rgba(239, 68, 68, 0.25),
-            inset 0 0 10px rgba(239, 68, 68, 0.1);
+.pp-close-btn:hover {
+    background-color: var(--accent-light);
+    transform: translateY(-1px);
 }
 
-.pp-notification-icon {
-    font-size: 1.1rem;
-    filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.4));
-    transition: transform 0.3s ease;
+/* Botões Aceitar / Rejeitar (base) */
+.pp-accept-btn,
+.pp-reject-btn {
+    min-width: 110px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    color: #fff;
 }
 
-.pp-notification-btn:hover .pp-notification-icon {
-    transform: scale(1.1);
+/* Aceitar */
+.pp-accept-btn {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
 
-/* O ponto de notificação (Red Dot) */
-.pp-notification-dot {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #ef4444;
-    box-shadow: 0 0 8px #ef4444;
-    pointer-events: none;
+.pp-accept-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    transform: translateY(-1px);
 }
 
-/* Animação de Onda (Ping) que sai do ponto */
-.pp-notification-dot::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    background-color: inherit;
-    border-radius: inherit;
-    transform: translate(-50%, -50%);
+/* Rejeitar */
+.pp-reject-btn {
+    background: linear-gradient(135deg, #b91c1c, #ef4444);
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+}
+
+.pp-reject-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626, #f97373);
+    transform: translateY(-1px);
+}
+
+/* Estado disabled */
+.pp-accept-btn:disabled,
+.pp-reject-btn:disabled {
     opacity: 0.6;
-    animation: pp-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    cursor: default;
 }
 
-@keyframes pp-ping {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.8;
-    }
-    75%, 100% {
-        transform: translate(-50%, -50%) scale(3);
-        opacity: 0;
-    }
-}
-
-/* Ajuste Dark Mode */
-[data-theme="dark"] .pp-notification-btn {
-    background: rgba(239, 68, 68, 0.15);
-    border-color: rgba(239, 68, 68, 0.4);
-}
-
-[data-theme="dark"] .pp-notification-btn:hover {
-    background: rgba(239, 68, 68, 0.3);
-    box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
-}
-/* === CORREÇÃO DA MODAL EM DARK MODE === */
+/* Dark mode da modal */
 [data-theme="dark"] .pp-modal {
-    /* Força o fundo escuro (cinza muito escuro/azulado) */
     background-color: #1e293b;
-    /* Ou podes usar a tua variável: background-color: var(--card-bg); */
-
-    /* Garante que o texto fica bem claro */
     color: #e2e8f0;
-
-    /* Adiciona uma borda subtil para separar a modal do fundo escuro */
     border: 1px solid rgba(255, 255, 255, 0.1);
-
-    /* Sombra mais forte para dar profundidade no escuro */
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Opcional: Destacar o título a branco puro */
 [data-theme="dark"] .pp-title {
     color: #ffffff;
+}
+
+[data-theme="dark"] .pp-content {
+    color: #cbd5e1;
+}
+
+/* Animações usadas pela modal (se ainda não existirem) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastSlideUp {
+    from { opacity: 0; transform: translateY(14px) translateX(4px); }
+    to { opacity: 1; transform: translateY(0) translateX(0); }
+}
+@keyframes toastPulse {
+    0% { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35); transform: translateY(0); }
+    50% { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); transform: translateY(-1px); }
+    100% { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35); transform: translateY(0); }
+}
+@keyframes pulseStatus {
+    0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; }
+}
+@keyframes pp-ping {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    75%, 100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
 }

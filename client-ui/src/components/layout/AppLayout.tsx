@@ -1,11 +1,7 @@
 import { Outlet } from "react-router-dom";
 import {
-    FaShip,
-    FaSun,
-    FaMoon,
-    FaBars,
-    FaTimes,
-    FaShieldAlt, 
+    FaShip, FaSun, FaMoon, FaBars, FaTimes, FaShieldAlt,
+    FaMapMarkerAlt, FaPhoneAlt, FaEnvelope
 } from "react-icons/fa";
 
 import { useState, useEffect } from "react";
@@ -121,10 +117,11 @@ export default function AppLayout() {
             {/* HEADER */}
             <header className="header">
                 <div className="header-inner">
-                    <div className="brand">
-                        <FaShip size={32} color="#4fa3ff" />
-                        <h1>ThPA Port Management</h1>
+                    <div className="brand" style={{ marginBottom: "10px" }}>
+                        <FaShip size={24} color="#4fa3ff" />
+                        <h3 className="footer-brand-title">ThPA Management</h3>
                     </div>
+
 
                     <div className="header-right">
                         {/* Aviso de Política de Privacidade pendente */}
@@ -210,76 +207,140 @@ export default function AppLayout() {
 
             {/* FOOTER */}
             <footer className="footer">
-                <span className="footer-text">
-                    © 2025 ThPA S.A. — Smart Port Operations Platform
+                <div className="footer-container">
+
+                    {/* Coluna 1: Sobre / Marca */}
+                    <div className="footer-col">
+                        <div className="brand" style={{ marginBottom: '10px' }}>
+                            <FaShip size={24} color="#4fa3ff" />
+                            <h3 className="footer-brand-title">ThPA Management</h3>
+                        </div>
+
+                        <p className="footer-desc">
+                            {t("footer.desc", "Plataforma integrada para gestão portuária inteligente, otimização logística e controlo de operações marítimas.")}
+                        </p>
+                        <div className="system-status">
+                            <span className="status-dot"></span>
+                            {t("footer.systemOperational", "Todos os sistemas operacionais")}
+                        </div>
+                    </div>
+
+                    {/* Coluna 2: Navegação / Acesso Rápido */}
+                    <div className="footer-col">
+                        <h4 className="footer-heading">{t("footer.navigation", "Navegação")}</h4>
+                        <ul className="footer-links">
+                            <li><a href="#" className="footer-link">{t("nav.dashboard", "Dashboard")}</a></li>
+                            <li><a href="#" className="footer-link">{t("nav.operations", "Operações")}</a></li>
+                            <li><a href="#" className="footer-link">{t("nav.schedule", "Escalas")}</a></li>
+                            <li><a href="#" className="footer-link">{t("nav.reports", "Relatórios")}</a></li>
+                        </ul>
+                    </div>
+
+                    {/* Coluna 3: Contactos / Suporte */}
+                    <div className="footer-col">
+                        <h4 className="footer-heading">{t("footer.contact", "Suporte Operacional")}</h4>
+                        <div className="contact-item">
+                            <FaMapMarkerAlt className="contact-icon" />
+                            <span>
+                    Terminal de Contentores, Edifício 4<br />
+                    4450-000, Leixões, Portugal
                 </span>
+                        </div>
+                        <div className="contact-item">
+                            <FaPhoneAlt className="contact-icon" />
+                            <span>+351 220 000 000</span>
+                        </div>
+                        <div className="contact-item">
+                            <FaEnvelope className="contact-icon" />
+                            <span>suporte@thpa.pt</span>
+                        </div>
+                    </div>
 
-                {privacyPolicy && (
-                    <>
-                        <button
-                            type="button"
-                            className="footer-pp-btn"
-                            onClick={() => setShowPrivacy(true)}
+                    {/* Coluna 4: Legal / Versão */}
+                    <div className="footer-col">
+                        <h4 className="footer-heading">{t("footer.legal", "Legal & Versão")}</h4>
+                        <ul className="footer-links">
+                            {privacyPolicy && (
+                                <li>
+                                    <button
+                                        type="button"
+                                        className="footer-link"
+                                        onClick={() => setShowPrivacy(true)}
+                                    >
+                                        {t("layout.privacyPolicy", "Política de Privacidade")}
+                                    </button>
+                                </li>
+                            )}
+                            <li>
+                                <a href="#" className="footer-link">
+                                    {t("footer.terms", "Termos de Serviço")}
+                                </a>
+                            </li>
+                            <li style={{ marginTop: '10px', fontSize: '0.8rem', opacity: 0.5 }}>
+                                v2.4.0-stable (Build 2025)
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                {/* Barra Inferior */}
+                <div className="footer-bottom">
+                    <span>© 2025 ThPA S.A. — Smart Port Operations Platform. All rights reserved.</span>
+
+                    {/* Aqui mantemos a lógica da modal, mas escondida visualmente até ser ativada */}
+                    {showPrivacy && privacyPolicy && (
+                        <div
+                            className="pp-overlay"
+                            onClick={() => setShowPrivacy(false)}
                         >
-                            {t("layout.privacyPolicy", "Política de Privacidade")}
-                        </button>
-
-                        {showPrivacy && (
                             <div
-                                className="pp-overlay"
-                                onClick={() => setShowPrivacy(false)}
+                                className="pp-modal"
+                                onClick={(e) => e.stopPropagation()}
                             >
-                                <div
-                                    className="pp-modal"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <h2 className="pp-title">
-                                        {i18n.language.startsWith("pt")
-                                            ? privacyPolicy.titlePT
-                                            : privacyPolicy.titleEn}
-                                    </h2>
+                                <h2 className="pp-title">
+                                    {i18n.language.startsWith("pt")
+                                        ? privacyPolicy.titlePT
+                                        : privacyPolicy.titleEn}
+                                </h2>
 
-                                    <div className="pp-content">
-                                        {i18n.language.startsWith("pt")
-                                            ? privacyPolicy.contentPT
-                                            : privacyPolicy.contentEn}
-                                    </div>
+                                <div className="pp-content">
+                                    {i18n.language.startsWith("pt")
+                                        ? privacyPolicy.contentPT
+                                        : privacyPolicy.contentEn}
+                                </div>
 
-                                    {/* Se o utilizador ainda não aceitou, mostra botões de ação */}
-                                    {confirmation && !confirmation.isAccepted ? (
-                                        <div className="pp-actions">
-                                            <button
-                                                type="button"
-                                                className="pp-accept-btn"
-                                                onClick={handleAcceptPrivacy}
-                                                disabled={checkingConfirmation}
-                                            >
-                                                {t("layout.acceptPrivacy", "Aceitar")}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="pp-reject-btn"
-                                                onClick={handleRejectPrivacy}
-                                                disabled={checkingConfirmation}
-                                            >
-                                                {t("layout.rejectPrivacy", "Rejeitar")}
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        // Caso já esteja aceite ou não haja confirmação, apenas botão fechar
+                                {confirmation && !confirmation.isAccepted ? (
+                                    <div className="pp-actions">
                                         <button
                                             type="button"
-                                            className="pp-close-btn"
-                                            onClick={() => setShowPrivacy(false)}
+                                            className="pp-accept-btn"
+                                            onClick={handleAcceptPrivacy}
+                                            disabled={checkingConfirmation}
                                         >
-                                            {t("common.close", "Fechar")}
+                                            {t("layout.acceptPrivacy", "Aceitar")}
                                         </button>
-                                    )}
-                                </div>
+                                        <button
+                                            type="button"
+                                            className="pp-reject-btn"
+                                            onClick={handleRejectPrivacy}
+                                            disabled={checkingConfirmation}
+                                        >
+                                            {t("layout.rejectPrivacy", "Rejeitar")}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="pp-close-btn"
+                                        onClick={() => setShowPrivacy(false)}
+                                    >
+                                        {t("common.close", "Fechar")}
+                                    </button>
+                                )}
                             </div>
-                        )}
-                    </>
-                )}
+                        </div>
+                    )}
+                </div>
             </footer>
         </div>
     );
