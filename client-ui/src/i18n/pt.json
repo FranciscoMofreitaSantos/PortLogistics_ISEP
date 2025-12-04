@@ -69,11 +69,18 @@
     "vvnResponse": "Responder VVN",
     "docks": "Docks",
     "sar": "Representates de Agentes de Transporte",
-    "planningScheduling" : "Planeamento"
+    "planningScheduling" : "Planeamento",
+    "pp" : "Políticas de Privacidade"
   },
   "layout": {
     "light": "Modo claro",
-    "dark": "Modo escuro"
+    "dark": "Modo escuro",
+    "privacyAccepted": "Política de Privacidade aceite. Clique para rever.",
+    "privacyPending": "Ação necessária: rever e aceitar a Política de Privacidade.",
+    "privacyAcceptedTooltip": "Política de Privacidade aceite. Clique para consultar.",
+    "privacyPolicy": "Política de Privacidade",
+    "acceptPrivacy": "Aceitar",
+    "rejectPrivacy": "Rejeitar"
   },
   "dashboard": {
     "welcome": "Bem-vindo, Operador Logístico",
@@ -1042,6 +1049,19 @@
     "startTime" : "Entrada",
     "endTime" : "Saída",
     "duration": "Duração"
+  },
+  "footer": {
+    "desc": "Plataforma integrada para gestão portuária inteligente, otimização logística e controlo de operações marítimas.",
+    "systemOperational": "Todos os sistemas operacionais",
+    "navigation": "Navegação",
+    "contact": "Suporte Operacional",
+    "legal": "Legal & Versão",
+    "terms": "Termos de Serviço"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "operations": "Operações",
+    "schedule": "Escalas",
+    "reports": "Relatórios"
   }
-
 }

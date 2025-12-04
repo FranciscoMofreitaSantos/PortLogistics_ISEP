@@ -72,12 +72,19 @@
     "sao": "Shipping Agent Organizations",
     "vvnResponse": "VVN Response",
     "docks" : "Docks",
-    "planningScheduling" : "Planning"
+    "planningScheduling" : "Planning",
+    "pp" : "Privacy Policies"
   },
-
+  
   "layout": {
     "light": "Light mode",
-    "dark": "Dark mode"
+    "dark": "Dark mode",
+    "privacyAccepted": "Privacy Policy accepted. Click to review.",
+    "privacyPending": "Action required: review and accept the Privacy Policy.",
+    "privacyAcceptedTooltip": "Privacy Policy accepted. Click to view.",
+    "privacyPolicy": "Privacy Policy",
+    "acceptPrivacy": "Accept",
+    "rejectPrivacy": "Reject"
   },
 
   "dashboard": {
@@ -608,7 +615,6 @@
     "dock": "Dock",
     "downloadTemplate": "Download template"
   },
-
   "vvn": {
     "title": "Vessel Visit Notifications",
     "new": "VVN",
@@ -1083,12 +1089,18 @@
     "endTime" : "Departure",
     "duration": "Duration"
   },
-  "common": {
-    "cancel": "Cancel",
-    "save": "Save",
-    "confirm": "Confirm",
-    "close": "Close",
-    "loading": "Loading...",
-    "noResults": "No results."
+  "footer": {
+    "desc": "Integrated platform for smart port management, logistics optimization, and maritime operations control.",
+    "systemOperational": "All systems operational",
+    "navigation": "Navigation",
+    "contact": "Operational Support",
+    "legal": "Legal & Version",
+    "terms": "Terms of Service"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "operations": "Operations",
+    "schedule": "Schedules",
+    "reports": "Reports"
   }
 }

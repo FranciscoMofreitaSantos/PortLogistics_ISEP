@@ -19,7 +19,7 @@ import {
     FiLayers, FiMapPin,
 } from "react-icons/fi";
 import {FaShip} from "react-icons/fa";
-import { FaCalendarAlt } from 'react-icons/fa'; // Importar um ícone para Agendamento
+import { FaCalendarAlt } from 'react-icons/fa';
 
 type NavProps = {
     isOpen: boolean;
@@ -33,7 +33,6 @@ export default function Nav({ isOpen }: NavProps) {
     const baseMenu = [
         { label: t("menu.home"), path: "/", icon: <FiHome /> },
         { label: t("menu.3dView"), path: "/3dSecene", icon: <FiLayers /> },
-        { label: t("menu.pp"), path: "/pp", icon: <FiSettings /> },
 
     ];
 
@@ -41,6 +40,7 @@ export default function Nav({ isOpen }: NavProps) {
         ? [
             { label: t("menu.admin"), path: "/users", icon: <FiSettings /> },
             { label: t("menu.vvn"), path: "/vvn", icon: <FiFileText /> },
+            { label: t("menu.pp"), path: "/pp", icon: <FaCalendarAlt /> },
         ]
         : [];
 

@@ -381,11 +381,16 @@ export default function AppLayout() {
                                 className="pp-modal"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <h2 className="pp-title">
-                                    {i18n.language.startsWith("pt")
+                                <h4 className="pp-title">
+                                    Title : {i18n.language.startsWith("pt")
                                         ? privacyPolicy.titlePT
                                         : privacyPolicy.titleEn}
+                                </h4>
+                                
+                                <h2 className="pp-title">
+                                    Version : {privacyPolicy.version}
                                 </h2>
+               
 
                                 <div className="pp-content">
                                     {i18n.language.startsWith("pt")
