@@ -36,11 +36,11 @@ export async function getConfirmationByUser(email:string): Promise<Confirmation>
 }
 
 export async function acceptConfirmationByUser(email:string): Promise<Confirmation> {
-    const res = await webApi.get<ConfirmationDto>(`/api/Confirmation/confirmation/accept/pp/user/email/${email}`);
+    const res = await webApi.patch<ConfirmationDto>(`/api/Confirmation/confirmation/accept/pp/user/email/${email}`);
     return mapConfirmationDto(res.data);
 }
 
 export async function rejectConfirmationByUser(email:string): Promise<Confirmation> {
-    const res = await webApi.get<ConfirmationDto>(`/api/Confirmation/confirmation/reject/pp/user/email/${email}`);
+    const res = await webApi.patch<ConfirmationDto>(`/api/Confirmation/confirmation/reject/pp/user/email/${email}`);
     return mapConfirmationDto(res.data);
 }

@@ -6,7 +6,7 @@ export function mapConfirmationDto(dto:ConfirmationDto): Confirmation{
         id: dto.id,
         userEmail: dto.userEmail,
         versionPrivacyPolicy : dto.versionPrivacyPolicy,
-        isAccepted: dto.isAccepted,
-        accpetedAtTime: dto.accpetedAtTime ? new Date(dto.accpetedAtTime) : null
+        isAccepted: dto.isAcceptedPrivacyPolicy,
+        accpetedAtTime: dto.acceptedAtTime ? new Date(dto.acceptedAtTime) : null
     }
 }

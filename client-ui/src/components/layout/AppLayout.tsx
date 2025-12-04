@@ -1,7 +1,14 @@
 import { Outlet } from "react-router-dom";
 import {
-    FaShip, FaSun, FaMoon, FaBars, FaTimes, FaShieldAlt,
-    FaMapMarkerAlt, FaPhoneAlt, FaEnvelope
+    FaShip,
+    FaSun,
+    FaMoon,
+    FaBars,
+    FaTimes,
+    FaShieldAlt,
+    FaMapMarkerAlt,
+    FaPhoneAlt,
+    FaEnvelope,
 } from "react-icons/fa";
 
 import { useState, useEffect } from "react";
@@ -11,6 +18,7 @@ import "./layout.css";
 import { useAppStore } from "../../app/store";
 import { Roles } from "../../app/types";
 import RoleLauncher from "../RoleLaucher";
+
 import type { PrivacyPolicy } from "../../features/privatePolicy/domain/privacyPolicy";
 import type { Confirmation } from "../../features/privatePolicy/domain/confirmation";
 import {
@@ -29,14 +37,13 @@ export default function AppLayout() {
     const toggleTheme = useAppStore((state) => state.toggleTheme);
     const isDarkMode = theme === "dark";
 
-    // PP
+    // Política de Privacidade atual
     const [privacyPolicy, setPrivacyPolicy] = useState<PrivacyPolicy | null>(null);
     const [showPrivacy, setShowPrivacy] = useState(false);
 
     // Confirmação da PP do utilizador
     const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
     const [checkingConfirmation, setCheckingConfirmation] = useState(false);
-
 
     const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -45,6 +52,7 @@ export default function AppLayout() {
         i18n.changeLanguage(newLang);
     };
 
+    // Efeito de shrink no header ao fazer scroll
     useEffect(() => {
         const header = document.querySelector(".header");
         const handleScroll = () => {
@@ -55,31 +63,30 @@ export default function AppLayout() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // carregar política atual ao montar layout
+    // Carregar política de privacidade atual
     useEffect(() => {
         async function loadPrivacyPolicy() {
             try {
                 const pp = await getCurrentPrivacyPolicy();
                 setPrivacyPolicy(pp);
             } catch (e) {
-                console.error("Erro a carregar política de privacidade", e);
+                console.error("Erro ao carregar política de privacidade", e);
             }
         }
         loadPrivacyPolicy();
     }, []);
 
-    // carregar confirmação da PP para o utilizador atual
+    // Carregar confirmação da PP para o utilizador atual
     useEffect(() => {
         async function loadConfirmation() {
-            if (!user?.email) return; // se não há user, não faz nada
+            if (!user?.email) return;
 
             try {
                 setCheckingConfirmation(true);
                 const conf = await getConfirmationByUser(user.email);
                 setConfirmation(conf);
-                
             } catch (e) {
-                console.error("Erro a carregar confirmação de privacidade", e);
+                console.error("Erro ao carregar confirmação de privacidade", e);
             } finally {
                 setCheckingConfirmation(false);
             }
@@ -88,25 +95,26 @@ export default function AppLayout() {
         loadConfirmation();
     }, [user?.email]);
 
+    // Aceitar PP
     const handleAcceptPrivacy = async () => {
         if (!user?.email) return;
         try {
             const updated = await acceptConfirmationByUser(user.email);
-            setConfirmation(updated);
+            setConfirmation(updated); // isAccepted -> true
             setShowPrivacy(false);
         } catch (e) {
             console.error("Erro ao aceitar política de privacidade", e);
         }
     };
 
+    // Rejeitar PP
     const handleRejectPrivacy = async () => {
         if (!user?.email) return;
         try {
             const updated = await rejectConfirmationByUser(user.email);
             setConfirmation(updated);
             setShowPrivacy(false);
-            // aqui podias, por exemplo, fazer logout ou mostrar aviso
-            // tipo: "Não pode usar a plataforma sem aceitar a política."
+            // aqui podes forçar logout ou bloquear navegação, se quiseres
         } catch (e) {
             console.error("Erro ao rejeitar política de privacidade", e);
         }
@@ -122,20 +130,54 @@ export default function AppLayout() {
                         <h3 className="footer-brand-title">ThPA Management</h3>
                     </div>
 
-
                     <div className="header-right">
-                        {/* Aviso de Política de Privacidade pendente */}
-                        {confirmation && !confirmation.isAccepted && (
-                            <button
-                                type="button"
-                                className="pp-notification-btn"
-                                onClick={() => setShowPrivacy(true)}
-                                title={t("layout.privacyPending", "Ação Necessária: Rever Política de Privacidade")}
-                            >
-                                <FaShieldAlt className="pp-notification-icon" />
-                                {/* O ponto animado fica aqui dentro */}
-                                <span className="pp-notification-dot" />
-                            </button>
+                        
+                        {/* Botão de notificação da Política de Privacidade */}
+                        {confirmation && (
+                            <div className="pp-status-wrapper">
+                                <button
+                                    type="button"
+                                    className={
+                                        confirmation.isAccepted
+                                            ? "pp-notification-btn pp-notification-btn--ok"
+                                            : "pp-notification-btn"
+                                    }
+                                    onClick={() => setShowPrivacy(true)}
+                                    title={
+                                        confirmation.isAccepted
+                                            ? t(
+                                                "layout.privacyAccepted",
+                                                "Política de Privacidade aceite. Clique para rever."
+                                            )
+                                            : t(
+                                                "layout.privacyPending",
+                                                "Ação necessária: rever e aceitar a Política de Privacidade."
+                                            )
+                                    }
+                                >
+                                    <FaShieldAlt
+                                        className={
+                                            confirmation.isAccepted
+                                                ? "pp-notification-icon pp-notification-icon--ok"
+                                                : "pp-notification-icon"
+                                        }
+                                    />
+                                    {/* Ponto vermelho pulsante só se ainda não estiver aceite */}
+                                    {!confirmation.isAccepted && (
+                                        <span className="pp-notification-dot" />
+                                    )}
+                                </button>
+
+                                {/* Tooltip textual quando já está aceite */}
+                                {confirmation.isAccepted && (
+                                    <span className="pp-status-tooltip">
+                                        {t(
+                                            "layout.privacyAcceptedTooltip",
+                                            "Política de Privacidade aceite. Clique para consultar."
+                                        )}
+                                    </span>
+                                )}
+                            </div>
                         )}
 
                         {/* Lang Switch */}
@@ -186,6 +228,7 @@ export default function AppLayout() {
                         )}
 
                         <RoleLauncher />
+
                         {/* Mobile Menu */}
                         <button className="menu-btn" onClick={toggleMenu} title="Menu">
                             {menuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
@@ -198,7 +241,7 @@ export default function AppLayout() {
             <Nav isOpen={menuOpen} />
 
             {/* OVERLAY para fechar o menu em mobile */}
-            {menuOpen && <div className="overlay" onClick={toggleMenu}></div>}
+            {menuOpen && <div className="overlay" onClick={toggleMenu} />}
 
             {/* MAIN */}
             <main className="content">
@@ -211,40 +254,67 @@ export default function AppLayout() {
 
                     {/* Coluna 1: Sobre / Marca */}
                     <div className="footer-col">
-                        <div className="brand" style={{ marginBottom: '10px' }}>
+                        <div className="brand" style={{ marginBottom: "10px" }}>
                             <FaShip size={24} color="#4fa3ff" />
                             <h3 className="footer-brand-title">ThPA Management</h3>
                         </div>
 
                         <p className="footer-desc">
-                            {t("footer.desc", "Plataforma integrada para gestão portuária inteligente, otimização logística e controlo de operações marítimas.")}
+                            {t(
+                                "footer.desc",
+                                "Plataforma integrada para gestão portuária inteligente, otimização logística e controlo de operações marítimas."
+                            )}
                         </p>
                         <div className="system-status">
                             <span className="status-dot"></span>
-                            {t("footer.systemOperational", "Todos os sistemas operacionais")}
+                            {t(
+                                "footer.systemOperational",
+                                "Todos os sistemas operacionais"
+                            )}
                         </div>
                     </div>
 
                     {/* Coluna 2: Navegação / Acesso Rápido */}
                     <div className="footer-col">
-                        <h4 className="footer-heading">{t("footer.navigation", "Navegação")}</h4>
+                        <h4 className="footer-heading">
+                            {t("footer.navigation", "Navegação")}
+                        </h4>
                         <ul className="footer-links">
-                            <li><a href="#" className="footer-link">{t("nav.dashboard", "Dashboard")}</a></li>
-                            <li><a href="#" className="footer-link">{t("nav.operations", "Operações")}</a></li>
-                            <li><a href="#" className="footer-link">{t("nav.schedule", "Escalas")}</a></li>
-                            <li><a href="#" className="footer-link">{t("nav.reports", "Relatórios")}</a></li>
+                            <li>
+                                <a href="#" className="footer-link">
+                                    {t("nav.dashboard", "Dashboard")}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="footer-link">
+                                    {t("nav.operations", "Operações")}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="footer-link">
+                                    {t("nav.schedule", "Escalas")}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="footer-link">
+                                    {t("nav.reports", "Relatórios")}
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
                     {/* Coluna 3: Contactos / Suporte */}
                     <div className="footer-col">
-                        <h4 className="footer-heading">{t("footer.contact", "Suporte Operacional")}</h4>
+                        <h4 className="footer-heading">
+                            {t("footer.contact", "Suporte Operacional")}
+                        </h4>
                         <div className="contact-item">
                             <FaMapMarkerAlt className="contact-icon" />
                             <span>
-                    Terminal de Contentores, Edifício 4<br />
-                    4450-000, Leixões, Portugal
-                </span>
+                                Terminal de Contentores, Edifício 4
+                                <br />
+                                4450-000, Leixões, Portugal
+                            </span>
                         </div>
                         <div className="contact-item">
                             <FaPhoneAlt className="contact-icon" />
@@ -258,7 +328,9 @@ export default function AppLayout() {
 
                     {/* Coluna 4: Legal / Versão */}
                     <div className="footer-col">
-                        <h4 className="footer-heading">{t("footer.legal", "Legal & Versão")}</h4>
+                        <h4 className="footer-heading">
+                            {t("footer.legal", "Legal & Versão")}
+                        </h4>
                         <ul className="footer-links">
                             {privacyPolicy && (
                                 <li>
@@ -267,7 +339,10 @@ export default function AppLayout() {
                                         className="footer-link"
                                         onClick={() => setShowPrivacy(true)}
                                     >
-                                        {t("layout.privacyPolicy", "Política de Privacidade")}
+                                        {t(
+                                            "layout.privacyPolicy",
+                                            "Política de Privacidade"
+                                        )}
                                     </button>
                                 </li>
                             )}
@@ -276,7 +351,13 @@ export default function AppLayout() {
                                     {t("footer.terms", "Termos de Serviço")}
                                 </a>
                             </li>
-                            <li style={{ marginTop: '10px', fontSize: '0.8rem', opacity: 0.5 }}>
+                            <li
+                                style={{
+                                    marginTop: "10px",
+                                    fontSize: "0.8rem",
+                                    opacity: 0.5,
+                                }}
+                            >
                                 v2.4.0-stable (Build 2025)
                             </li>
                         </ul>
@@ -285,9 +366,12 @@ export default function AppLayout() {
 
                 {/* Barra Inferior */}
                 <div className="footer-bottom">
-                    <span>© 2025 ThPA S.A. — Smart Port Operations Platform. All rights reserved.</span>
+                    <span>
+                        © 2025 ThPA S.A. — Smart Port Operations Platform. All rights
+                        reserved.
+                    </span>
 
-                    {/* Aqui mantemos a lógica da modal, mas escondida visualmente até ser ativada */}
+                    {/* Modal da Política de Privacidade */}
                     {showPrivacy && privacyPolicy && (
                         <div
                             className="pp-overlay"

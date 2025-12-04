@@ -24,6 +24,7 @@ export interface ConfirmationDto {
     id: string;
     userEmail: string;
     versionPrivacyPolicy: string;
-    isAccepted: boolean;
-    accpetedAtTime: string | null;
+    isAcceptedPrivacyPolicy: boolean;
+    acceptedAtTime: string | null;
 }
+

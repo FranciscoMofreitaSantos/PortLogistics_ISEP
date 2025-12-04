@@ -1020,3 +1020,132 @@ html, body {
     0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
     75%, 100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
 }
+/* Wrapper para botão + tooltip */
+.pp-status-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+/* BOTÃO DE NOTIFICAÇÃO (estado PENDENTE = vermelho) */
+.pp-notification-btn {
+    position: relative;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    outline: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #f87171;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pp-notification-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.8);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.25),
+    inset 0 0 10px rgba(239, 68, 68, 0.1);
+}
+
+.pp-notification-icon {
+    font-size: 1.1rem;
+    filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.4));
+    transition: transform 0.3s ease;
+}
+
+.pp-notification-btn:hover .pp-notification-icon {
+    transform: scale(1.1);
+}
+
+/* Ponto vermelho pulsante (só quando NÃO está aceite) */
+.pp-notification-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+    pointer-events: none;
+}
+
+.pp-notification-dot::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background-color: inherit;
+    border-radius: inherit;
+    transform: translate(-50%, -50%);
+    opacity: 0.6;
+    animation: pp-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ESTADO OK (ACEITE) – botão verde */
+.pp-notification-btn--ok {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.6);
+    color: #22c55e;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+}
+
+.pp-notification-btn--ok:hover {
+    background: rgba(34, 197, 94, 0.22);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+    color: #bbf7d0;
+}
+
+/* Ícone no estado OK (puxar um pouco mais para o verde) */
+.pp-notification-icon--ok {
+    filter: drop-shadow(0 0 2px rgba(34, 197, 94, 0.6));
+}
+
+/* Tooltip textual quando já está aceite */
+.pp-status-tooltip {
+    font-size: 0.76rem;
+    color: #6b7280;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.18);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    backdrop-filter: blur(4px);
+    white-space: nowrap;
+}
+
+/* Dark mode overrides opcionais */
+[data-theme="dark"] .pp-status-tooltip {
+    color: #e5e7eb;
+    background: rgba(31, 41, 55, 0.85);
+    border-color: rgba(75, 85, 99, 0.9);
+}
+
+[data-theme="dark"] .pp-notification-btn--ok {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.7);
+    color: #bbf7d0;
+}
+
+/* animação já usada para o ping */
+@keyframes pp-ping {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    75%,
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
