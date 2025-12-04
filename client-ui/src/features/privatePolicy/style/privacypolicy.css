@@ -864,3 +864,104 @@
     flex-direction: column;
     animation: pp-slide-in 0.25s ease-out forwards;
 }
+/* =========================
+   DARK MODE OVERRIDES
+   Baseado no padrão [data-theme="dark"]
+   ========================= */
+
+/* 1. Fundo da Página (Baseado no teu exemplo .callout) */
+[data-theme="dark"] .pp-page {
+    /* Substitui o radial-gradient claro pelo linear-gradient escuro do teu exemplo */
+    background: linear-gradient(135deg, #162133 0%, #1e2b44 100%);
+    color: #f3f4f6; /* Texto claro */
+}
+
+/* 2. Botão de Voltar (ajuste para contraste) */
+[data-theme="dark"] .pp-back-btn {
+    color: #9ca3af;
+}
+[data-theme="dark"] .pp-back-btn:hover {
+    color: #ffffff;
+}
+
+/* 3. Secções e Headers (para não ficarem brancos estourados) */
+[data-theme="dark"] .pp-section-current,
+[data-theme="dark"] .pp-section-history,
+[data-theme="dark"] .pp-modal,
+[data-theme="dark"] .pp-slide {
+    background: rgba(30, 41, 59, 0.7); /* Slate-800 com transparência */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .pp-header h1,
+[data-theme="dark"] .pp-section-header h2,
+[data-theme="dark"] .pp-card-title,
+[data-theme="dark"] .pp-current-title,
+[data-theme="dark"] .pp-slide-title,
+[data-theme="dark"] .pp-slide-text {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .pp-header p,
+[data-theme="dark"] .pp-section-header p,
+[data-theme="dark"] .pp-created-by-hint,
+[data-theme="dark"] .pp-empty-history,
+[data-theme="dark"] .pp-empty-current {
+    color: #cbd5e1; /* Cinza claro */
+}
+
+/* 4. Cartão Principal (Destaque) */
+[data-theme="dark"] .pp-current-card {
+    /* Gradiente ajustado para dark mode */
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.15) 0, rgba(30, 41, 59, 0.6) 55%);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .pp-current-card:hover {
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.25) 0, rgba(30, 41, 59, 0.8) 65%);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* 5. Cartões do Histórico (Grid) */
+[data-theme="dark"] .pp-card {
+    background-color: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .pp-card:hover {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(51, 65, 85, 0.8));
+    border-color: rgba(147, 197, 253, 0.3); /* Azul claro subtil */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* 6. Inputs e Pesquisa */
+[data-theme="dark"] .pp-search input,
+[data-theme="dark"] .pp-form input,
+[data-theme="dark"] .pp-form textarea {
+    background-color: rgba(15, 23, 42, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+[data-theme="dark"] .pp-search input:focus,
+[data-theme="dark"] .pp-form input:focus,
+[data-theme="dark"] .pp-form textarea:focus {
+    border-color: #3b82f6;
+    background-color: rgba(15, 23, 42, 0.9);
+}
+
+/* 7. Etiquetas e Chips */
+[data-theme="dark"] .pp-chip {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .pp-badge-gray,
+[data-theme="dark"] .pp-pill-muted {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    border-color: rgba(255, 255, 255, 0.1);
+}

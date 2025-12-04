@@ -39,6 +39,7 @@ public class PrivacyPolicyService : IPrivacyPolicyService
             throw new BusinessRuleValidationException("Privacy Policy with this version already exist.");
 
         await _repository.AddAsync(pp);
+        await _unitOfWork.CommitAsync();
         await SyncCurrentFlagsAsync();
 
         return PrivacyPolicyMappers.ProduceDto(pp);

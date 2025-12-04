@@ -145,9 +145,6 @@
     transition: background 0.4s ease;
 }
 
-/* Efeito no modo dark */
-[data-theme="dark"] .callout {
-    background: linear-gradient(135deg, #162133 0%, #1e2b44 100%);
-}
+
 
 

@@ -55,7 +55,9 @@ public class PrivacyPolicyController: ControllerBase
     {
         try
         {
+            Console.WriteLine("Creating new Privacy Policy");
             var createdDto = await _privacyPolicyService.CreatePrivacyPolicy(dto);
+            Console.WriteLine("Finished Creating new Privacy Policy");
             return Ok(createdDto);
         }
         catch (Exception e)
