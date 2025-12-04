@@ -27,6 +27,7 @@ import {
     acceptConfirmationByUser,
     rejectConfirmationByUser,
 } from "../../features/privatePolicy/services/privacyPolicyService";
+import toast from "react-hot-toast";
 
 export default function AppLayout() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -76,24 +77,49 @@ export default function AppLayout() {
         loadPrivacyPolicy();
     }, []);
 
-    // Carregar confirmação da PP para o utilizador atual
+// Carregar confirmação da PP para o utilizador atual
     useEffect(() => {
         async function loadConfirmation() {
             if (!user?.email) return;
 
+            // 1. Iniciar Loading e guardar o ID
+            const loadingId = toast.loading(t("common.loading", "A verificar estado da política..."));
+
             try {
                 setCheckingConfirmation(true);
+
+                // 2. Atraso forçado de 5 segundos
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+
                 const conf = await getConfirmationByUser(user.email);
                 setConfirmation(conf);
+
+                // 3. Remover o Loading
+                toast.dismiss(loadingId);
+
+                // 4. Se não estiver aceite, mostrar o alerta
+                if (!conf.isAccepted) {
+                    toast(t("privacyUpdate.toast", "Importante: A Política de Privacidade foi alterada."), {
+                        icon: '⚠️',
+                        duration: 6000,
+                        style: {
+                            borderRadius: '10px',
+                            background: '#333',
+                            color: '#fff',
+                        },
+                    });
+                }
+
             } catch (e) {
                 console.error("Erro ao carregar confirmação de privacidade", e);
+                toast.dismiss(loadingId);
             } finally {
                 setCheckingConfirmation(false);
             }
         }
 
         loadConfirmation();
-    }, [user?.email]);
+    }, [user?.email, t]); // Adiciona 't' às dependências
 
     // Aceitar PP
     const handleAcceptPrivacy = async () => {
@@ -267,10 +293,7 @@ export default function AppLayout() {
                         </p>
                         <div className="system-status">
                             <span className="status-dot"></span>
-                            {t(
-                                "footer.systemOperational",
-                                "Todos os sistemas operacionais"
-                            )}
+                            {t("footer.systemOperational", "Todos os sistemas operacionais")}
                         </div>
                     </div>
 

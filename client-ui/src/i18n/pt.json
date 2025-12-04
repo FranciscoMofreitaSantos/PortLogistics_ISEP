@@ -1113,5 +1113,14 @@
     "actions": {
       "add": "Nova Política"
     }
+  },
+  "privacyUpdate": {
+    "toast": "A nossa Política de Privacidade foi atualizada. Por favor, consulte a versão mais recente.",
+    "modalTitle": "Atualização da Política de Privacidade",
+    "modalBody": "Atualizámos a nossa Política de Privacidade para garantir os mais elevados padrões de segurança e transparência relativos aos seus dados. Por favor, reveja e aceite as alterações para continuar a utilizar a plataforma.",
+    "blockingMessage": "Importante: A Política de Privacidade foi alterada. A aceitação é obrigatória para aceder a esta funcionalidade.",
+    "reviewNow": "Rever agora",
+    "remindLater": "Lembrar mais tarde"
   }
+  
 }

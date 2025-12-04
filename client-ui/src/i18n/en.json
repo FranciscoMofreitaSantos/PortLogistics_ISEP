@@ -1115,5 +1115,13 @@
     "searchPlaceholder": "Search by title, version or author...",
     "noSearchResults": "No policies found for this search.",
     "noHistory": "No previous versions yet."
+  },
+  "privacyUpdate": {
+    "toast": "Our Privacy Policy has been updated. Please review the latest version.",
+    "modalTitle": "Privacy Policy Update",
+    "modalBody": "We have updated our Privacy Policy to ensure the highest standards of security and transparency regarding your data. Please review and accept the changes to continue using the platform.",
+    "blockingMessage": "Important: The Privacy Policy has changed. Acceptance is required to access this feature.",
+    "reviewNow": "Review Now",
+    "remindLater": "Remind me later"
   }
 }
