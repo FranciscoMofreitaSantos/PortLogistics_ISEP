@@ -5,6 +5,7 @@ using SEM5_PI_WEBAPI.Domain.ConfirmationsUserReadPPs;
 using SEM5_PI_WEBAPI.Domain.Containers;
 using SEM5_PI_WEBAPI.Domain.CrewManifests;
 using SEM5_PI_WEBAPI.Domain.CrewMembers;
+using SEM5_PI_WEBAPI.Domain.DataRigthsRequests;
 using SEM5_PI_WEBAPI.Domain.Dock;
 using SEM5_PI_WEBAPI.Domain.PhysicalResources;
 using SEM5_PI_WEBAPI.Domain.PrivacyPolicies;
@@ -24,10 +25,10 @@ using SEM5_PI_WEBAPI.Infraestructure.ConfirmationsPrivacyPolicies;
 using SEM5_PI_WEBAPI.Infraestructure.Containers;
 using SEM5_PI_WEBAPI.Infraestructure.CrewManifests;
 using SEM5_PI_WEBAPI.Infraestructure.CrewMembers;
+using SEM5_PI_WEBAPI.Infraestructure.DataRightsRequests;
 using SEM5_PI_WEBAPI.Infraestructure.Docks;
 using SEM5_PI_WEBAPI.Infraestructure.PhysicalResources;
 using SEM5_PI_WEBAPI.Infraestructure.PrivatePolicies;
-using SEM5_PI_WEBAPI.Infraestructure.Qualifications;
 using SEM5_PI_WEBAPI.Infraestructure.StaffMembers;
 using SEM5_PI_WEBAPI.Infraestructure.StorageAreas;
 using SEM5_PI_WEBAPI.Infraestructure.Vessels;
@@ -60,6 +61,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure
         public DbSet<VesselVisitNotification> VesselVisitNotification { get; set; }
         public DbSet<PrivacyPolicy>  PrivacyPolicy { get; set; }
         public DbSet<ConfirmationPrivacyPolicy>  ConfirmationPrivacyPolicies { get; set; }
+        public DbSet<DataRightRequest>  DataRightRequest { get; set; }
         public DbSet<User> Users { get; set; }
 
 
@@ -88,6 +90,7 @@ namespace SEM5_PI_WEBAPI.Infraestructure
             modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PrivacyPolicyEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ConfirmationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DataRightsRequestEntityTypeConfiguration());
         }
     }
 }

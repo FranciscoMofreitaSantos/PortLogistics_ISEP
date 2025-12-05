@@ -48,8 +48,10 @@ using SEM5_PI_WEBAPI.Api.Config;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
 using SEM5_PI_WEBAPI.Api.Middleware;
 using SEM5_PI_WEBAPI.Domain.ConfirmationsUserReadPPs;
+using SEM5_PI_WEBAPI.Domain.DataRigthsRequests;
 using SEM5_PI_WEBAPI.Domain.PrivacyPolicies;
 using SEM5_PI_WEBAPI.Infraestructure.ConfirmationsPrivacyPolicies;
+using SEM5_PI_WEBAPI.Infraestructure.DataRightsRequests;
 using SEM5_PI_WEBAPI.Infraestructure.PrivatePolicies;
 
 namespace SEM5_PI_WEBAPI
@@ -221,6 +223,9 @@ namespace SEM5_PI_WEBAPI
             
             services.AddTransient<IConfirmationRepository, ConfirmationRepository>();
             services.AddScoped<IConfirmationService, ConfirmationService>();
+            
+            services.AddTransient<IDataRightRequestRepository, DataRightsRequestRepository>();
+            services.AddScoped<IDataRightRequestService, DataRightRequestService>();
             
             services.AddTransient<ICrewMemberRepository, CrewMemberRepository>();
             services.AddTransient<ICrewManifestRepository, CrewManifestRepository>();
