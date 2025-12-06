@@ -14,5 +14,5 @@ public interface IDataRightRequestService
     Task<List<DataRightsRequestDto>> GetAllDataRightRequestsWithStatusWaitingForAssignment();
     Task<List<DataRightsRequestDto>> GetAllDataRightRequestsForResponsible(string responsibleEmail);
     Task<DataRightsRequestDto> ResponseDataRightRequestTypeAccessAsync(string requestId);
-    
+    Task<bool> DeleteDataRightRequestAsync(string requestId);
 }

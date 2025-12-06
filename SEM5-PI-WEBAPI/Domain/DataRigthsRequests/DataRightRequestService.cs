@@ -5,6 +5,8 @@ using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.ShippingAgentRepresentatives;
 using SEM5_PI_WEBAPI.Domain.Users;
 using SEM5_PI_WEBAPI.Domain.ValueObjects;
+using SEM5_PI_WEBAPI.utils;
+using SEM5_PI_WEBAPI.utils.EmailTemplates;
 
 namespace SEM5_PI_WEBAPI.Domain.DataRigthsRequests;
 
@@ -15,14 +17,16 @@ public class DataRightRequestService : IDataRightRequestService
     private readonly IShippingAgentRepresentativeRepository _representativeRepository;
     private readonly IConfirmationRepository _confirmationRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailSender _emailSender;
 
-    public DataRightRequestService(IDataRightRequestRepository repository, IUnitOfWork unitOfWork, IUserRepository userRepository, IShippingAgentRepresentativeRepository representativeRepository, IConfirmationRepository confirmationRepository)
+    public DataRightRequestService(IDataRightRequestRepository repository,IEmailSender emailSender,IUnitOfWork unitOfWork, IUserRepository userRepository, IShippingAgentRepresentativeRepository representativeRepository, IConfirmationRepository confirmationRepository)
     {
        this._repository = repository;
        this._userRepository = userRepository;
        this._representativeRepository = representativeRepository;
        this._confirmationRepository = confirmationRepository;
        this._unitOfWork = unitOfWork;
+       this._emailSender = emailSender;
     }
 
     public async Task<DataRightsRequestDto> CreateDataRightRequest(DataRightsRequestDto dto)
@@ -131,6 +135,57 @@ public class DataRightRequestService : IDataRightRequestService
         await _unitOfWork.CommitAsync();
 
         return DataRightsRequestMapper.CreateDataRightsRequestDto(requestFromDb);
+    }
+
+    public async Task<bool> DeleteDataRightRequestAsync(string requestId)
+    {
+        var requestFromDb = await _repository.GetRequestByIdentifier(requestId);
+
+        if (requestFromDb == null)
+            throw new BusinessRuleValidationException(
+                $"The request {requestId} cannot be deleted because it was not found in DB.");
+
+        var userFromDb = await _userRepository.GetByEmailAsync(requestFromDb.UserEmail);
+        if (userFromDb == null)
+            throw new BusinessRuleValidationException(
+                $"The request {requestId} cannot be deleted because no user with email {requestFromDb.UserEmail} was found in DB.");
+
+        ShippingAgentRepresentative? sar = null;
+        if (userFromDb.Role == Roles.ShippingAgentRepresentative)
+        {
+            sar = await _representativeRepository.GetByEmailAsync(new EmailAddress(requestFromDb.UserEmail));
+        }
+
+        var confirmation = await _confirmationRepository.FindByUserEmailAsync(requestFromDb.UserEmail);
+
+        // ⚠️ Aqui decides a tua política: apagar hard ou anonimizar.
+        // Exemplo 1: hard delete (se o projeto permitir):
+        if (confirmation != null)
+        {
+            _confirmationRepository.Remove(confirmation);
+        }
+
+        if (sar != null)
+        {
+            _representativeRepository.Remove(sar);
+        }
+
+        _userRepository.Remove(userFromDb);
+        _repository.Remove(requestFromDb);
+
+        await _unitOfWork.CommitAsync();
+
+        var exportDto = DataRightsRequestFactory.PrepareResponseDto(userFromDb, sar, confirmation);
+        var html = UpcomingDeletionDetailedEmailTemplate.Build(exportDto, requestFromDb.RequestId);
+
+        await _emailSender.SendEmailAsync(
+            userFromDb.Email,
+            "Aviso de eliminação de dados pessoais / Personal data deletion notice",
+            html
+        );
+
+
+        return true;
     }
 
 }

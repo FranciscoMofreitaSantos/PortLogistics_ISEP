@@ -18,6 +18,8 @@ public class DataRigthsRequestController : ControllerBase
         _responsesToFrontend = responsesToFrontend;
     }
 
+    
+    
     // --- Users
     
     [HttpPost]
@@ -53,7 +55,10 @@ public class DataRigthsRequestController : ControllerBase
     
     
     
+    
     // ----- For Admin
+    
+    
     [HttpGet("requests/status/waitingforassignment")]
     public async Task<ActionResult<List<DataRightsRequestDto>>> WaitingForAssignment()
     {
@@ -118,9 +123,24 @@ public class DataRigthsRequestController : ControllerBase
             return _responsesToFrontend.ProblemResponse(
                 "Problem responding to Access DataRightsRequest", 
                 e.Message, 
-                StatusCodes.Status400BadRequest);        }
+                StatusCodes.Status400BadRequest);
+        }
     }
-    
-    
-    
+
+    [HttpDelete("response/request/type/deletion/{requestId}")]
+    public async Task<ActionResult> DeleteDataRightRequestTypeAsync([FromRoute] string requestId)
+    {
+        try
+        {
+            await _service.DeleteDataRightRequestAsync(requestId);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return _responsesToFrontend.ProblemResponse(
+                "Problem deleting Data Rights Request", 
+                e.Message, 
+                StatusCodes.Status400BadRequest);
+        }
+    }
 }
