@@ -12,6 +12,9 @@ public class ShippingAgentRepresentativeExportDto
     public string Sao { get; set; }
 
     public List<string> VvnCodes { get; set; }   // Notifs.Select(n => n.Code)
+    
+    
+    public ShippingAgentRepresentativeExportDto(){}
 }
 
 

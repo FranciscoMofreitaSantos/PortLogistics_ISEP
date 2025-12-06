@@ -34,6 +34,22 @@ public class DataRigthsRequestController : ControllerBase
         }
     }
 
+    [HttpGet("request/all/user/{userEmail}")]
+    public async Task<ActionResult<List<DataRightsRequestDto>>> AllDataRightsRequestsForUser(string userEmail)
+    {
+        try
+        {
+            var listRequestDto = await _service.GetAllDataRightsRequestsForUser(userEmail);
+            return Ok(listRequestDto);
+        }
+        catch (Exception e)
+        {
+            return _responsesToFrontend.ProblemResponse(
+                "Problem fetching DataRightsRequests for user", 
+                e.Message, 
+                StatusCodes.Status400BadRequest);
+        }
+    }
     
     
     
@@ -52,9 +68,27 @@ public class DataRigthsRequestController : ControllerBase
         }
     }
 
-    [HttpPatch("assignResponsible/{email}")]
-    public async Task<ActionResult<DataRightsRequestDto>> AssignResponsibleToRequestAsync(string requestId,
-        string responsibleEmail)
+    [HttpGet("request/all/responsible/{email}")]
+    public async Task<ActionResult<List<DataRightsRequestDto>>> AllDataRightsRequestsForResponsible(string email)
+    {
+        try
+        {
+            var listRequestDto = await _service.GetAllDataRightRequestsForResponsible(email);
+            return Ok(listRequestDto);
+        }
+        catch (Exception e)
+        {
+            return _responsesToFrontend.ProblemResponse(
+                "Problem fetching DataRightsRequests for responsible", 
+                e.Message, 
+                StatusCodes.Status400BadRequest);        }
+    }
+
+    
+    [HttpPatch("assignResponsible/{requestId}")]
+    public async Task<ActionResult<DataRightsRequestDto>> AssignResponsibleToRequestAsync(
+        [FromRoute] string requestId,
+        [FromQuery] string responsibleEmail)
     {
         try
         {
@@ -63,8 +97,30 @@ public class DataRigthsRequestController : ControllerBase
         }
         catch (Exception e)
         {
-            return _responsesToFrontend.ProblemResponse("Problem Assigning resposible to Request", e.Message, StatusCodes.Status400BadRequest);
+            return _responsesToFrontend.ProblemResponse(
+                "Problem Assigning responsible to Request", 
+                e.Message, 
+                StatusCodes.Status400BadRequest);
         }
     }
+
+
+    [HttpPatch("response/request/type/access/{requestId}")]
+    public async Task<ActionResult<DataRightsRequestDto>> ResponseDataRightRequestTypeAccessAsync(string requestId)
+    {
+        try
+        {
+            var updatedRequestDto = await _service.ResponseDataRightRequestTypeAccessAsync(requestId);
+            return Ok(updatedRequestDto);
+        }
+        catch (Exception e)
+        {
+            return _responsesToFrontend.ProblemResponse(
+                "Problem responding to Access DataRightsRequest", 
+                e.Message, 
+                StatusCodes.Status400BadRequest);        }
+    }
+    
+    
     
 }

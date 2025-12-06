@@ -28,8 +28,8 @@ public class DataRightRequest : Entity<DataRightRequestId>, IAggregateRoot
     public RequestType Type { get;}
     public RequestStatus Status { get; private set; }
 
-    public string? Payload { get;}
-    
+    public string? Payload { get; private set; }
+
     public ClockTime CreatedOn { get;}
     public ClockTime? UpdatedOn { get; private set; }
     
@@ -117,6 +117,9 @@ public class DataRightRequest : Entity<DataRightRequestId>, IAggregateRoot
     {
         if (string.IsNullOrWhiteSpace(processedBy))
             throw new BusinessRuleValidationException("ProcessedBy cannot be empty.");
+       
+        if (IsCompleted() || IsRejected())
+            throw new BusinessRuleValidationException("Cannot (re)assign responsible to a closed request.");
 
         this.ProcessedBy = processedBy;
         MarkAsInProgress();
@@ -124,5 +127,13 @@ public class DataRightRequest : Entity<DataRightRequestId>, IAggregateRoot
         return this.RequestId;
     }
 
-    
+
+    public void AttachSystemGeneratedPayload(string payload)
+    {
+        if (string.IsNullOrWhiteSpace(payload))
+            throw new BusinessRuleValidationException("Payload cannot be empty.");
+
+        this.Payload = payload;
+    }
+
 }
