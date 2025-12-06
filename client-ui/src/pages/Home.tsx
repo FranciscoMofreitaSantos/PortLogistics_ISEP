@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../app/store";
@@ -8,13 +8,22 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { FaShip, FaWarehouse, FaTasks, FaUsersCog } from "react-icons/fa";
 import "./css/home.css";
-import {API_WEBAPI} from "../config/api.ts";
+import { API_WEBAPI } from "../config/api.ts";
+
+
+const backgroundImages = [
+    "v1.png",
+    "v2.png",
+    "v3.png",
+    "v4.png"
+];
 
 export default function Home() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { user: authUser, getAccessTokenSilently, isAuthenticated } = useAuth0();
     const { user, setUser } = useAppStore();
+    const [heroBg, setHeroBg] = useState("");
 
     useEffect(() => {
         const fetchUserFromBackend = async () => {
@@ -48,6 +57,11 @@ export default function Home() {
 
     useEffect(() => {
         AOS.init({ duration: 1000, once: true });
+
+        const randomIndex = Math.floor(Math.random() * backgroundImages.length);
+        const selectedImage = backgroundImages[randomIndex];
+
+        setHeroBg(`/homePageImages/${selectedImage}`);
     }, []);
 
     const handleAccess = () => {
@@ -87,8 +101,11 @@ export default function Home() {
 
     return (
         <>
-            {/* HERO */}
-            <section className="hero" data-aos="fade-up">
+            <section
+                className="hero"
+                data-aos="fade-up"
+                style={{ backgroundImage: `url('${heroBg}')` }}
+            >
                 <div className="hero-content">
                     <h2>{t("welcomeTitle")}</h2>
                     <p>{t("welcomeText")}</p>
