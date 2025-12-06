@@ -31,9 +31,24 @@ public class DataRightRequestService : IDataRightRequestService
 
     public async Task<DataRightsRequestDto> CreateDataRightRequest(DataRightsRequestDto dto)
     {
-        var hasOneInProcess = await _repository.CheckIfUserHasANonFinishRequestByType(dto.UserEmail,dto.Type);
+        var hasOneInProcess = await _repository.CheckIfUserHasANonFinishRequestByType(dto.UserEmail, dto.Type);
 
         if (hasOneInProcess != null) throw new BusinessRuleValidationException($"Request not created. User {dto.UserEmail} already has one request of type {dto.Type} being processed ({hasOneInProcess.Status})-> {hasOneInProcess.RequestId}.");
+
+        if (dto.Type == RequestType.Rectification)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Payload)) throw new BusinessRuleValidationException("Rectification request must have a payload.");
+
+            // Valida formato JSON
+            try
+            {
+                _ = JsonSerializer.Deserialize<RectificationPayloadDto>(dto.Payload);
+            }
+            catch (Exception)
+            {
+                throw new BusinessRuleValidationException("Rectification payload is not in a valid format.");
+            }
+        }
 
         var createdRequest = DataRightsRequestFactory.ConvertDtoToEntity(dto);
         
@@ -42,6 +57,7 @@ public class DataRightRequestService : IDataRightRequestService
         
         return DataRightsRequestMapper.CreateDataRightsRequestDto(createdRequest);
     }
+
 
     public async Task<List<DataRightsRequestDto>> GetAllDataRightsRequestsForUser(string userEmail)
     {
@@ -157,9 +173,19 @@ public class DataRightRequestService : IDataRightRequestService
         }
 
         var confirmation = await _confirmationRepository.FindByUserEmailAsync(requestFromDb.UserEmail);
+        
+        // 1) Tirar snapshot dos dados ANTES de apagar
+        var exportDto = DataRightsRequestFactory.PrepareResponseDto(userFromDb, sar, confirmation);
+        var html = UpcomingDeletionDetailedEmailTemplate.Build(exportDto, requestFromDb.RequestId);
 
-        // ⚠️ Aqui decides a tua política: apagar hard ou anonimizar.
-        // Exemplo 1: hard delete (se o projeto permitir):
+        // 2) Enviar email a avisar o que vai ser apagado
+        await _emailSender.SendEmailAsync(
+            userFromDb.Email,
+            "Aviso de eliminação de dados pessoais / Personal data deletion notice",
+            html
+        );
+
+        // 3) Agora sim, eliminar/anonimizar os dados na BD
         if (confirmation != null)
         {
             _confirmationRepository.Remove(confirmation);
@@ -175,17 +201,138 @@ public class DataRightRequestService : IDataRightRequestService
 
         await _unitOfWork.CommitAsync();
 
-        var exportDto = DataRightsRequestFactory.PrepareResponseDto(userFromDb, sar, confirmation);
-        var html = UpcomingDeletionDetailedEmailTemplate.Build(exportDto, requestFromDb.RequestId);
-
-        await _emailSender.SendEmailAsync(
-            userFromDb.Email,
-            "Aviso de eliminação de dados pessoais / Personal data deletion notice",
-            html
-        );
-
-
         return true;
     }
 
+    public async Task<DataRightsRequestDto> ResponseDataRightRequestTypeRectificationAsync(RectificationApplyDto dto)
+    {
+        var requestFromDb = await _repository.GetRequestByIdentifier(dto.RequestId);
+
+        if (requestFromDb == null)
+            throw new BusinessRuleValidationException($"No request was found in DB, with id {dto.RequestId}");
+
+        if (requestFromDb.Type != RequestType.Rectification)
+            throw new BusinessRuleValidationException($"Request {dto.RequestId} is not of type Rectification.");
+
+        if (requestFromDb.IsCompleted() || requestFromDb.IsRejected())
+            throw new BusinessRuleValidationException($"Request {dto.RequestId} is already closed.");
+
+        if (requestFromDb.ProcessedBy == null)
+            throw new BusinessRuleValidationException(
+                $"Request {dto.RequestId} must have a responsible assigned before applying changes.");
+
+        var userFromDb = await _userRepository.GetByEmailAsync(requestFromDb.UserEmail);
+        if (userFromDb == null)
+            throw new BusinessRuleValidationException(
+                $"User with email {requestFromDb.UserEmail} does not exist in DB. Contact an 'admin'.");
+
+        ShippingAgentRepresentative? sar = null;
+        if (userFromDb.Role == Roles.ShippingAgentRepresentative)
+        {
+            sar = await _representativeRepository.GetByEmailAsync(new EmailAddress(userFromDb.Email));
+            if (sar == null)
+                throw new BusinessRuleValidationException(
+                    $"User {userFromDb.Email} has SAR role but no SAR entity was found. Contact an 'admin'.");
+        }
+        var confirmation = await _confirmationRepository.FindByUserEmailAsync(requestFromDb.UserEmail);
+
+        // Payload original pedido pelo user
+        var requestedPayload = JsonSerializer.Deserialize<RectificationPayloadDto>(requestFromDb.Payload!)
+                               ?? new RectificationPayloadDto();
+
+        if (dto.RejectEntireRequest)
+        {
+            // Não alteramos nada, apenas marcamos como rejeitado
+            requestFromDb.MarkAsRejected();
+            await _unitOfWork.CommitAsync();
+
+            var htmlRejected = RectificationResultEmailTemplate.Build(
+                userFromDb.Name,
+                userFromDb.Email,
+                requestFromDb.RequestId,
+                requestedPayload,
+                dto
+            );
+
+            await _emailSender.SendEmailAsync(
+                userFromDb.Email,
+                "Resultado do pedido de retificação de dados / Data rectification request result",
+                htmlRejected
+            );
+
+            return DataRightsRequestMapper.CreateDataRightsRequestDto(requestFromDb);
+        }
+
+        // ===== APLICAR ALTERAÇÕES (apenas exemplo – ajusta aos métodos de domínio que tens) =====
+
+        // USER
+        if (!string.IsNullOrWhiteSpace(dto.FinalName))
+        {
+
+            userFromDb.Name =  dto.FinalName;
+            if(sar != null)
+                sar.Name = dto.FinalName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.FinalEmail) && dto.FinalEmail != userFromDb.Email)
+        {
+            userFromDb.Email = dto.FinalEmail;
+            if (sar != null)
+                sar.Email = new EmailAddress(userFromDb.Email);
+            requestFromDb.UserEmail =  userFromDb.Email;
+            if(confirmation != null)
+                confirmation.UserEmail =  userFromDb.Email;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.FinalPicture))
+        {
+            userFromDb.Picture = Convert.FromBase64String(dto.FinalPicture);
+        }
+
+        if (dto.FinalIsActive.HasValue)
+        {
+            userFromDb.IsActive = dto.FinalIsActive.Value;
+        }
+
+        // SAR
+        if (sar != null)
+        {
+            if (!string.IsNullOrWhiteSpace(dto.FinalPhoneNumber))
+            {
+                sar.PhoneNumber = new PhoneNumber(dto.FinalPhoneNumber);
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.FinalNationality))
+            {
+                sar.Nationality = Enum.Parse<Nationality>(dto.FinalNationality);
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.FinalCitizenId))
+            {
+                sar.CitizenId =  new CitizenId(dto.FinalCitizenId);
+            }
+        }
+
+        // Marca o pedido como concluído
+        requestFromDb.MarkAsCompleted();
+        await _unitOfWork.CommitAsync();
+
+        // ===== Enviar email com tabela pedido vs aplicado =====
+        var html = RectificationResultEmailTemplate.Build(
+            userFromDb.Name,
+            userFromDb.Email,
+            requestFromDb.RequestId,
+            requestedPayload,
+            dto
+        );
+
+        await _emailSender.SendEmailAsync(
+            userFromDb.Email,
+            "Resultado do pedido de retificação de dados / Data rectification request result",
+            html
+        );
+
+        return DataRightsRequestMapper.CreateDataRightsRequestDto(requestFromDb);
+    }
+    
 }

@@ -5,7 +5,7 @@ namespace SEM5_PI_WEBAPI.Domain.ConfirmationsUserReadPPs;
 
 public class ConfirmationPrivacyPolicy : Entity<ConfirmationPrivacyPolicyId>, IAggregateRoot
 {
-    public string UserEmail { get; private set; }
+    public string UserEmail { get; set; }
     public string VersionPrivacyPolicy { get; private set; }
     
     public bool IsAcceptedPrivacyPolicy { get; private set; }

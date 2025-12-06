@@ -6,8 +6,8 @@ namespace SEM5_PI_WEBAPI.Domain.Users;
 public class User : Entity<UserId>, IAggregateRoot
 {
     public string Auth0UserId { get; private set; }
-    public string Name { get; private set; }
-    public string Email { get; private set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
     public bool IsActive { get; set; }
     public bool Eliminated { get; set; }
     public Roles? Role { get; set; }

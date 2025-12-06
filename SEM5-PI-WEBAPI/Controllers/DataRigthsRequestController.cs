@@ -133,12 +133,29 @@ public class DataRigthsRequestController : ControllerBase
         try
         {
             await _service.DeleteDataRightRequestAsync(requestId);
-            return Ok();
+            return NoContent();
         }
         catch (Exception e)
         {
             return _responsesToFrontend.ProblemResponse(
                 "Problem deleting Data Rights Request", 
+                e.Message, 
+                StatusCodes.Status400BadRequest);
+        }
+    }
+
+    [HttpPatch("response/request/status/retification")]
+    public async Task<ActionResult<DataRightsRequestDto>> ResponseDataRightRequestStatusRetificationAsync(RectificationApplyDto dto)
+    {
+        try
+        {
+            var response = await _service.ResponseDataRightRequestTypeRectificationAsync(dto);
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            return _responsesToFrontend.ProblemResponse(
+                "Problem ratification Data Rights Request", 
                 e.Message, 
                 StatusCodes.Status400BadRequest);
         }

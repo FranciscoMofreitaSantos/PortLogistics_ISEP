@@ -15,7 +15,7 @@ public enum Status
 public class ShippingAgentRepresentative : Entity<ShippingAgentRepresentativeId>, IAggregateRoot
 {
     public string Name { get; set; }
-    public CitizenId CitizenId { get; private set; }
+    public CitizenId CitizenId { get; set; }
     public Nationality Nationality { get; set; }
     public EmailAddress Email { get; set; }
     public PhoneNumber PhoneNumber { get; set; }
