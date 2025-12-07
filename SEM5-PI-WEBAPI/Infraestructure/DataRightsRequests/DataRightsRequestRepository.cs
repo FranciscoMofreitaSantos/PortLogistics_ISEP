@@ -28,6 +28,11 @@ public class DataRightsRequestRepository : BaseRepository<DataRightRequest, Data
         );
     }
 
+    public async Task<List<DataRightRequest>> GetAllDataRightRequestsForUser(string userEmail)
+    {
+        return await _context.Where(r => r.UserEmail == userEmail).ToListAsync();
+    }
+
     public async Task<DataRightRequest?> GetRequestByIdentifier(string requestIdentifier)
     {
         return await _context.FirstOrDefaultAsync(r => r.RequestId.Equals(requestIdentifier));
@@ -36,5 +41,15 @@ public class DataRightsRequestRepository : BaseRepository<DataRightRequest, Data
     public async Task<List<DataRightRequest>> GetAllDataRightRequestsWithStatusWaitingForAssignment()
     {
         return await _context.Where(r => r.Status == RequestStatus.WaitingForAssignment).ToListAsync(); 
+    }
+
+    public async Task<List<DataRightRequest>> GetAllDataRightRequestsForResponsible(string responsibleEmail)
+    {
+        return await _context.Where(r => r.ProcessedBy != null && r.ProcessedBy.Equals(responsibleEmail)).ToListAsync();
+    }
+
+    public async Task<DataRightRequest?> GetRequestById(string requestId)
+    {
+        return await _context.FirstOrDefaultAsync(r => r.RequestId.Equals(requestId));
     }
 }

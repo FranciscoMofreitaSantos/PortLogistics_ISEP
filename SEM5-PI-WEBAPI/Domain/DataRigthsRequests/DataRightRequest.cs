@@ -23,13 +23,13 @@ public class DataRightRequest : Entity<DataRightRequestId>, IAggregateRoot
     public string RequestId { get; }
     
     public string UserId { get;}
-    public string UserEmail { get;}
-    
+    public string UserEmail { get; set; }
+
     public RequestType Type { get;}
     public RequestStatus Status { get; private set; }
 
-    public string? Payload { get;}
-    
+    public string? Payload { get; private set; }
+
     public ClockTime CreatedOn { get;}
     public ClockTime? UpdatedOn { get; private set; }
     
@@ -53,7 +53,11 @@ public class DataRightRequest : Entity<DataRightRequestId>, IAggregateRoot
         this.Type = requestType;
         this.Status = RequestStatus.WaitingForAssignment;
         
-        if(Type == RequestType.Access && payload != null) throw new BusinessRuleValidationException("An 'Access' type request does not accept payload information.");
+        if (Type == RequestType.Access && payload != null)
+            throw new BusinessRuleValidationException("An 'Access' type request does not accept payload information.");
+
+        if (Type == RequestType.Rectification && string.IsNullOrWhiteSpace(payload))
+            throw new BusinessRuleValidationException("A 'Rectification' type request must contain a payload with the requested changes.");
         
         this.Payload = payload;
         
@@ -117,6 +121,9 @@ public class DataRightRequest : Entity<DataRightRequestId>, IAggregateRoot
     {
         if (string.IsNullOrWhiteSpace(processedBy))
             throw new BusinessRuleValidationException("ProcessedBy cannot be empty.");
+       
+        if (IsCompleted() || IsRejected())
+            throw new BusinessRuleValidationException("Cannot (re)assign responsible to a closed request.");
 
         this.ProcessedBy = processedBy;
         MarkAsInProgress();
@@ -124,5 +131,14 @@ public class DataRightRequest : Entity<DataRightRequestId>, IAggregateRoot
         return this.RequestId;
     }
 
-    
+
+    public void AttachSystemGeneratedPayload(string payload)
+    {
+        if (string.IsNullOrWhiteSpace(payload))
+            throw new BusinessRuleValidationException("Payload cannot be empty.");
+        UpdatedOn = new ClockTime(DateTime.UtcNow);
+        
+        this.Payload = payload;
+    }
+
 }
