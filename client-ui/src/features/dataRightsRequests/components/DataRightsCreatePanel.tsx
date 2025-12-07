@@ -1,3 +1,5 @@
+// src/features/dataRightsRequests/components/DataRightsCreatePanel.tsx
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
     CreatingDataRightsRequest,
@@ -7,10 +9,273 @@ import type {
 type Props = {
     creating: CreatingDataRightsRequest;
     setType: (t: RequestType) => void;
-    updateRectification: (p: Partial<CreatingDataRightsRequest["rectification"]>) => void;
+    updateRectification: (
+        p: Partial<CreatingDataRightsRequest["rectification"]>,
+    ) => void;
     setCreating: (c: CreatingDataRightsRequest) => void;
     onSubmit: () => void;
 };
+
+/* ===== PHONE HELPERS ===== */
+
+const PHONE_CODES: string[] = [
+    "+351", // PT
+    "+34",  // ES
+    "+33",  // FR
+    "+44",  // UK
+    "+49",  // DE
+    "+39",  // IT
+    "+30",  // GR
+    "+1",   // US / CA
+    "+55",  // BR
+    "+52",  // MX
+    "+54",  // AR
+    "+81",  // JP
+    "+82",  // KR
+    "+86",  // CN
+    "+91",  // IN
+    "+61",  // AU
+    "+64",  // NZ
+    "+27",  // ZA
+];
+
+function buildPhoneE164(code: string, rawNumber: string): string {
+    const digits = rawNumber.replace(/\D/g, "");
+    if (!code || !digits) return "";
+    return `${code}${digits}`;
+}
+
+/* ===== NATIONALITIES (mesmos nomes do enum do backend) ===== */
+
+const NATIONALITY_VALUES: string[] = [
+    "Usa",
+    "Afghanistan",
+    "Albania",
+    "Algeria",
+    "Andorra",
+    "Angola",
+    "AntiguaDeps",
+    "Argentina",
+    "Armenia",
+    "Australia",
+    "Austria",
+    "Azerbaijan",
+    "Bahamas",
+    "Bahrain",
+    "Bangladesh",
+    "Barbados",
+    "Belarus",
+    "Belgium",
+    "Belize",
+    "Benin",
+    "Bhutan",
+    "Bolivia",
+    "BosniaHerzegovina",
+    "Botswana",
+    "Brazil",
+    "Brunei",
+    "Bulgaria",
+    "Burkina",
+    "Burma",
+    "Burundi",
+    "Cambodia",
+    "Cameroon",
+    "Canada",
+    "CapeVerde",
+    "CentralAfricanRep",
+    "Chad",
+    "Chile",
+    "China",
+    "RepublicOfChina",
+    "Colombia",
+    "Comoros",
+    "DemocraticRepublicOfTheCongo",
+    "RepublicOfTheCongo",
+    "CostaRica",
+    "Croatia",
+    "Cuba",
+    "Cyprus",
+    "CzechRepublic",
+    "Danzig",
+    "Denmark",
+    "Djibouti",
+    "Dominica",
+    "DominicanRepublic",
+    "EastTimor",
+    "Ecuador",
+    "Egypt",
+    "ElSalvador",
+    "EquatorialGuinea",
+    "Eritrea",
+    "Estonia",
+    "Ethiopia",
+    "Fiji",
+    "Finland",
+    "France",
+    "Gabon",
+    "GazaStrip",
+    "TheGambia",
+    "Georgia",
+    "Germany",
+    "Ghana",
+    "Greece",
+    "Grenada",
+    "Guatemala",
+    "Guinea",
+    "GuineaBissau",
+    "Guyana",
+    "Haiti",
+    "HolyRomanEmpire",
+    "Honduras",
+    "Hungary",
+    "Iceland",
+    "India",
+    "Indonesia",
+    "Iran",
+    "Iraq",
+    "RepublicOfIreland",
+    "Israel",
+    "Italy",
+    "IvoryCoast",
+    "Jamaica",
+    "Japan",
+    "Jordan",
+    "Kazakhstan",
+    "Kenya",
+    "Kiribati",
+    "NorthKorea",
+    "SouthKorea",
+    "Kosovo",
+    "Kuwait",
+    "Kyrgyzstan",
+    "Laos",
+    "Latvia",
+    "Lebanon",
+    "Lesotho",
+    "Liberia",
+    "Libya",
+    "Liechtenstein",
+    "Lithuania",
+    "Luxembourg",
+    "Macedonia",
+    "Madagascar",
+    "Malawi",
+    "Malaysia",
+    "Maldives",
+    "Mali",
+    "Malta",
+    "MarshallIslands",
+    "Mauritania",
+    "Mauritius",
+    "Mexico",
+    "Micronesia",
+    "Moldova",
+    "Monaco",
+    "Mongolia",
+    "Montenegro",
+    "Morocco",
+    "Mozambique",
+    "Namibia",
+    "Nauru",
+    "Nepal",
+    "Newfoundland",
+    "Netherlands",
+    "NewZealand",
+    "Nicaragua",
+    "Niger",
+    "Nigeria",
+    "Norway",
+    "Oman",
+    "Pakistan",
+    "Palau",
+    "Panama",
+    "PapuaNewGuinea",
+    "Paraguay",
+    "Peru",
+    "Philippines",
+    "Poland",
+    "Portugal",
+    "Qatar",
+    "Romania",
+    "RussianFederation",
+    "Rwanda",
+    "Samoa",
+    "SanMarino",
+    "SaoTomePrincipe",
+    "SaudiArabia",
+    "Senegal",
+    "Serbia",
+    "Seychelles",
+    "SierraLeone",
+    "Singapore",
+    "Slovakia",
+    "Slovenia",
+    "SolomonIslands",
+    "Somalia",
+    "SouthAfrica",
+    "Spain",
+    "SriLanka",
+    "Sudan",
+    "Suriname",
+    "Swaziland",
+    "Sweden",
+    "Switzerland",
+    "Syria",
+    "Tajikistan",
+    "Tanzania",
+    "Thailand",
+    "Togo",
+    "Tonga",
+    "TrinidadTobago",
+    "Tunisia",
+    "Turkey",
+    "Turkmenistan",
+    "Tuvalu",
+    "Uganda",
+    "Ukraine",
+    "UnitedArabEmirates",
+    "UnitedKingdom",
+    "Uruguay",
+    "Uzbekistan",
+    "Vanuatu",
+    "VaticanCity",
+    "Venezuela",
+    "Vietnam",
+    "Yemen",
+    "Zambia",
+    "Zimbabwe",
+];
+
+function nationalityLabel(value: string): string {
+    if (value === "Usa") return "USA";
+    if (value === "CapeVerde") return "Cape Verde";
+    if (value === "CentralAfricanRep") return "Central African Rep.";
+    if (value === "CzechRepublic") return "Czech Republic";
+    if (value === "DominicanRepublic") return "Dominican Republic";
+    if (value === "HolyRomanEmpire") return "Holy Roman Empire";
+    if (value === "IvoryCoast") return "Ivory Coast";
+    if (value === "PapuaNewGuinea") return "Papua New Guinea";
+    if (value === "RussianFederation") return "Russian Federation";
+    if (value === "SaoTomePrincipe") return "São Tomé & Príncipe";
+    if (value === "SaudiArabia") return "Saudi Arabia";
+    if (value === "SolomonIslands") return "Solomon Islands";
+    if (value === "SouthAfrica") return "South Africa";
+    if (value === "SriLanka") return "Sri Lanka";
+    if (value === "TrinidadTobago") return "Trinidad & Tobago";
+    if (value === "UnitedArabEmirates") return "United Arab Emirates";
+    if (value === "UnitedKingdom") return "United Kingdom";
+    if (value === "VaticanCity") return "Vatican City";
+
+    // Default: quebra CamelCase em palavras
+    return value.replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+
+const NATIONALITIES = NATIONALITY_VALUES.map(v => ({
+    value: v,
+    label: nationalityLabel(v),
+}));
+
+/* ===== COMPONENTE ===== */
 
 export function DataRightsCreatePanel({
                                           creating,
@@ -20,8 +285,47 @@ export function DataRightsCreatePanel({
                                           onSubmit,
                                       }: Props) {
     const { t } = useTranslation();
-
     const type = creating.type;
+
+    // estado local para o telefone SAR (prefixo + número)
+    const [phoneCode, setPhoneCode] = useState<string>("");
+    const [phoneNumber, setPhoneNumber] = useState<string>("");
+
+    // Sempre que o payload já tiver um número (ex: edição futura),
+    // desmonta-o nos dois campos.
+    useEffect(() => {
+        const full = creating.rectification.newPhoneNumber ?? "";
+        if (!full) {
+            setPhoneCode("");
+            setPhoneNumber("");
+            return;
+        }
+
+        const match = PHONE_CODES.find(c => full.startsWith(c));
+        if (match) {
+            setPhoneCode(match);
+            setPhoneNumber(full.slice(match.length));
+        } else {
+            setPhoneCode("");
+            setPhoneNumber(full.replace(/^\+/, ""));
+        }
+    }, [creating.rectification.newPhoneNumber]);
+
+    function handlePhoneCodeChange(newCode: string) {
+        setPhoneCode(newCode);
+        const combined = buildPhoneE164(newCode, phoneNumber);
+        updateRectification({
+            newPhoneNumber: combined || null,
+        });
+    }
+
+    function handlePhoneNumberChange(newNumber: string) {
+        setPhoneNumber(newNumber);
+        const combined = buildPhoneE164(phoneCode, newNumber);
+        updateRectification({
+            newPhoneNumber: combined || null,
+        });
+    }
 
     return (
         <div className="dr-create-panel slide-in-up">
@@ -31,7 +335,7 @@ export function DataRightsCreatePanel({
             <p className="dr-card-subtitle">
                 {t(
                     "dataRights.create.subtitle",
-                    "Choose the type of request and fill in the details below."
+                    "Choose the type of request and fill in the details below.",
                 )}
             </p>
 
@@ -63,14 +367,15 @@ export function DataRightsCreatePanel({
                     <p>
                         {t(
                             "dataRights.create.accessInfo",
-                            "We will send you a summary of the personal data we store about you."
+                            "We will send you a summary of the personal data we store about you.",
                         )}
                     </p>
                     <p className="dr-note">
-                        ℹ️ {t(
-                        "dataRights.create.accessNote",
-                        "No additional information is required for this request."
-                    )}
+                        ℹ️{" "}
+                        {t(
+                            "dataRights.create.accessNote",
+                            "No additional information is required for this request.",
+                        )}
                     </p>
                 </div>
             )}
@@ -80,7 +385,7 @@ export function DataRightsCreatePanel({
                     <label className="dr-label">
                         {t(
                             "dataRights.create.deletionReason",
-                            "Reason for deletion (optional but recommended)"
+                            "Reason for deletion (optional but recommended)",
                         )}
                     </label>
                     <textarea
@@ -88,7 +393,7 @@ export function DataRightsCreatePanel({
                         rows={3}
                         placeholder={t(
                             "dataRights.create.deletionReason_PH",
-                            "Example: I no longer use the platform and want my data removed."
+                            "Example: I no longer use the platform and want my data removed.",
                         )}
                         value={creating.deletionReason}
                         onChange={e =>
@@ -102,7 +407,7 @@ export function DataRightsCreatePanel({
                         ⚠️{" "}
                         {t(
                             "dataRights.create.deletionWarning",
-                            "Some data may need to be kept for legal or security reasons."
+                            "Some data may need to be kept for legal or security reasons.",
                         )}
                     </p>
                 </div>
@@ -122,7 +427,7 @@ export function DataRightsCreatePanel({
                             }
                             placeholder={t(
                                 "dataRights.create.newName_PH",
-                                "Only fill if you want to change"
+                                "Only fill if you want to change",
                             )}
                         />
                     </div>
@@ -138,20 +443,25 @@ export function DataRightsCreatePanel({
                             }
                             placeholder={t(
                                 "dataRights.create.newEmail_PH",
-                                "Only fill if you want to change"
+                                "Only fill if you want to change",
                             )}
                         />
                     </div>
 
                     <div>
                         <label className="dr-label">
-                            {t("dataRights.create.newPicture", "New profile picture URL")}
+                            {t(
+                                "dataRights.create.newPicture",
+                                "New profile picture URL",
+                            )}
                         </label>
                         <input
                             className="dr-input"
                             value={creating.rectification.newPicture ?? ""}
                             onChange={e =>
-                                updateRectification({ newPicture: e.target.value })
+                                updateRectification({
+                                    newPicture: e.target.value,
+                                })
                             }
                             placeholder="https://..."
                         />
@@ -159,7 +469,10 @@ export function DataRightsCreatePanel({
 
                     <div>
                         <label className="dr-label">
-                            {t("dataRights.create.isActive", "Mark account as active?")}
+                            {t(
+                                "dataRights.create.isActive",
+                                "Mark account as active?",
+                            )}
                         </label>
                         <select
                             className="dr-input"
@@ -184,60 +497,106 @@ export function DataRightsCreatePanel({
                             }}
                         >
                             <option value="">
-                                {t("dataRights.create.keepAsIs", "Keep as is")}
+                                {t(
+                                    "dataRights.create.keepAsIs",
+                                    "Keep as is",
+                                )}
                             </option>
                             <option value="true">
-                                {t("dataRights.create.setActive", "Set as active")}
+                                {t(
+                                    "dataRights.create.setActive",
+                                    "Set as active",
+                                )}
                             </option>
                             <option value="false">
-                                {t("dataRights.create.setInactive", "Set as inactive")}
+                                {t(
+                                    "dataRights.create.setInactive",
+                                    "Set as inactive",
+                                )}
                             </option>
+                        </select>
+                    </div>
+
+                    {/* PHONE (SAR) */}
+                    <div>
+                        <label className="dr-label">
+                            {t(
+                                "dataRights.create.newPhoneNumber",
+                                "New phone number (SAR)",
+                            )}
+                        </label>
+                        <div className="dr-phone-row">
+                            <select
+                                className="dr-input dr-phone-code"
+                                value={phoneCode}
+                                onChange={e =>
+                                    handlePhoneCodeChange(e.target.value)
+                                }
+                            >
+                                <option value="">
+                                    {t(
+                                        "dataRights.create.phoneCode",
+                                        "+ code",
+                                    )}
+                                </option>
+                                {PHONE_CODES.map(code => (
+                                    <option key={code} value={code}>
+                                        {code}
+                                    </option>
+                                ))}
+                            </select>
+                            <input
+                                className="dr-input dr-phone-number"
+                                value={phoneNumber}
+                                onChange={e =>
+                                    handlePhoneNumberChange(e.target.value)
+                                }
+                                placeholder={t(
+                                    "dataRights.create.phoneNumber_PH",
+                                    "912345678",
+                                )}
+                                inputMode="tel"
+                            />
+                        </div>
+                    </div>
+
+                    {/* NATIONALITY (SAR) */}
+                    <div>
+                        <label className="dr-label">
+                            {t(
+                                "dataRights.create.newNationality",
+                                "New nationality (SAR)",
+                            )}
+                        </label>
+                        <select
+                            className="dr-input"
+                            value={creating.rectification.newNationality ?? ""}
+                            onChange={e =>
+                                updateRectification({
+                                    newNationality:
+                                        e.target.value || null,
+                                })
+                            }
+                        >
+                            <option value="">
+                                {t(
+                                    "dataRights.create.keepAsIs",
+                                    "Keep as is",
+                                )}
+                            </option>
+                            {NATIONALITIES.map(n => (
+                                <option key={n.value} value={n.value}>
+                                    {n.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
                     <div>
                         <label className="dr-label">
                             {t(
-                                "dataRights.create.newPhoneNumber",
-                                "New phone number (SAR)"
-                            )}
-                        </label>
-                        <input
-                            className="dr-input"
-                            value={creating.rectification.newPhoneNumber ?? ""}
-                            onChange={e =>
-                                updateRectification({
-                                    newPhoneNumber: e.target.value,
-                                })
-                            }
-                            placeholder="+3519..."
-                        />
-                    </div>
-
-                    <div>
-                        <label className="dr-label">
-                            {t(
-                                "dataRights.create.newNationality",
-                                "New nationality (SAR)"
-                            )}
-                        </label>
-                        <input
-                            className="dr-input"
-                            value={creating.rectification.newNationality ?? ""}
-                            onChange={e =>
-                                updateRectification({
-                                    newNationality: e.target.value,
-                                })
-                            }
-                            placeholder="Portugal, Spain..."
-                        />
-                    </div>
-
-                    <div>
-                        <label className="dr-label">
-                            {t(
                                 "dataRights.create.newCitizenId",
-                                "New citizen ID / passport (SAR)"
+                                "New citizen ID / passport (SAR)",
                             )}
                         </label>
                         <input
@@ -249,6 +608,8 @@ export function DataRightsCreatePanel({
                                 })
                             }
                             placeholder="AB1234567"
+                            maxLength={9}
+                            pattern="[A-Za-z0-9]{6,9}"
                         />
                     </div>
 
@@ -256,7 +617,7 @@ export function DataRightsCreatePanel({
                         <label className="dr-label">
                             {t(
                                 "dataRights.create.reason",
-                                "Why do you want these changes?"
+                                "Why do you want these changes?",
                             )}
                         </label>
                         <textarea
@@ -270,7 +631,7 @@ export function DataRightsCreatePanel({
                             }
                             placeholder={t(
                                 "dataRights.create.reason_PH",
-                                "Briefly explain why these corrections are needed."
+                                "Briefly explain why these corrections are needed.",
                             )}
                         />
                     </div>
@@ -289,7 +650,7 @@ export function DataRightsCreatePanel({
                     🔒{" "}
                     {t(
                         "dataRights.create.footerNote",
-                        "Your request will be handled by our privacy team and you will be notified by email."
+                        "Your request will be handled by our privacy team and you will be notified by email.",
                     )}
                 </p>
             </div>

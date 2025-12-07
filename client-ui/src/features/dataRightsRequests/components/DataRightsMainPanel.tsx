@@ -1,9 +1,64 @@
-import type { DataRightsRequest } from "../domain/dataRights";
+// src/features/dataRightsRequests/components/DataRightsMainPanel.tsx
 import { useTranslation } from "react-i18next";
+import type { DataRightsRequest, RequestStatus } from "../domain/dataRights";
 
 type Props = {
     selected: DataRightsRequest | null;
 };
+
+type StepState = "done" | "active" | "pending";
+
+const STATUS_ORDER: RequestStatus[] = [
+    "WaitingForAssignment",
+    "InProgress",
+    "Completed",
+    "Rejected",
+];
+
+const STATUS_STEPS: {
+    id: RequestStatus;
+    icon: string;
+    labelKey: string;
+    defaultLabel: string;
+}[] = [
+    {
+        id: "WaitingForAssignment",
+        icon: "⏳",
+        labelKey: "dataRights.timeline.waiting",
+        defaultLabel: "Waiting for assignment",
+    },
+    {
+        id: "InProgress",
+        icon: "🛠️",
+        labelKey: "dataRights.timeline.inProgress",
+        defaultLabel: "In progress",
+    },
+    {
+        id: "Completed",
+        icon: "✅",
+        labelKey: "dataRights.timeline.completed",
+        defaultLabel: "Completed",
+    },
+    {
+        id: "Rejected",
+        icon: "❌",
+        labelKey: "dataRights.timeline.rejected",
+        defaultLabel: "Rejected",
+    },
+];
+
+function getStepState(step: RequestStatus, current: RequestStatus): StepState {
+    if (step === current) return "active";
+
+    // regra especial: se está Rejected, o Completed não fica "done"
+    if (current === "Rejected" && step === "Completed") return "pending";
+
+    const stepIndex = STATUS_ORDER.indexOf(step);
+    const currentIndex = STATUS_ORDER.indexOf(current);
+
+    if (stepIndex === -1 || currentIndex === -1) return "pending";
+    return currentIndex > stepIndex ? "done" : "pending";
+}
 
 export function DataRightsMainPanel({ selected }: Props) {
     const { t } = useTranslation();
@@ -16,7 +71,7 @@ export function DataRightsMainPanel({ selected }: Props) {
                     <p>
                         {t(
                             "dataRights.main.selectHint",
-                            "Select a request above to see the details."
+                            "Select a request above to see the details.",
                         )}
                     </p>
                 </div>
@@ -25,11 +80,11 @@ export function DataRightsMainPanel({ selected }: Props) {
     }
 
     const created = new Date(
-        (selected.createdOn as any).value ?? selected.createdOn
+        (selected.createdOn as any).value ?? selected.createdOn,
     ).toLocaleString();
     const updated = selected.updatedOn
         ? new Date(
-            (selected.updatedOn as any).value ?? selected.updatedOn
+            (selected.updatedOn as any).value ?? selected.updatedOn,
         ).toLocaleString()
         : "-";
 
@@ -62,7 +117,9 @@ export function DataRightsMainPanel({ selected }: Props) {
                         <span className="dr-label">
                             {t("dataRights.main.status", "Status")}
                         </span>
-                        <span className={`dr-value dr-pill dr-${selected.status}`}>
+                        <span
+                            className={`dr-value dr-pill dr-${selected.status}`}
+                        >
                             {selected.status}
                         </span>
                     </div>
@@ -91,16 +148,49 @@ export function DataRightsMainPanel({ selected }: Props) {
                     </div>
                 </div>
 
+                {/* TIMELINE DE ESTADO */}
+                <div className="dr-status-timeline">
+                    {STATUS_STEPS.map(step => {
+                        const state = getStepState(step.id, selected.status);
+                        const isRejectStep = step.id === "Rejected";
+
+                        return (
+                            <div
+                                key={step.id}
+                                className={[
+                                    "dr-status-step",
+                                    `dr-status-${state}`,
+                                    isRejectStep ? "dr-status-step-reject" : "",
+                                ]
+                                    .filter(Boolean)
+                                    .join(" ")}
+                            >
+                                <div className="dr-status-dot">
+                                    <span className="dr-status-icon">
+                                        {step.icon}
+                                    </span>
+                                </div>
+                                <span className="dr-status-label">
+                                    {t(step.labelKey, step.defaultLabel)}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+
                 {selected.payload && (
                     <div className="dr-payload-box">
                         <h3 className="dr-label">
-                            {t("dataRights.main.payload", "Payload / system data")}
+                            {t(
+                                "dataRights.main.payload",
+                                "Payload / system data",
+                            )}
                         </h3>
                         <pre className="dr-payload">
                             {JSON.stringify(
                                 JSON.parse(selected.payload),
                                 null,
-                                2
+                                2,
                             )}
                         </pre>
                     </div>
