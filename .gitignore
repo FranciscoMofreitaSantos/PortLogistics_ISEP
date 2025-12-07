@@ -20,3 +20,5 @@ identifier.sqlite-shm
 identifier.sqlite-wal
 
 SEM5-PI-WEBAPI.sln.DotSettings.user
+
+sem5-pi-operations_execution/.env

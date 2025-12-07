@@ -1,14 +1,22 @@
-import app from "./app";
-import { connectToDatabase } from "./config/database";
+import 'reflect-metadata';
+import app from './app';
+import loaders from './loaders';
+import config from './config'; // Importar o config para usar a porta definida lá
 
-const PORT = process.env.PORT || 3000;
+async function startServer() {
 
-async function start() {
-    await connectToDatabase();
+    await loaders({ expressApp: app });
 
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
+    app.listen(config.port, () => {
+        console.log(`
+      ################################################
+      🛡️  Server listening on port: ${config.port} 🛡️ 
+      ################################################
+    `);
+    }).on('error', err => {
+        console.error(err);
+        process.exit(1);
     });
 }
 
-start();
+startServer();
