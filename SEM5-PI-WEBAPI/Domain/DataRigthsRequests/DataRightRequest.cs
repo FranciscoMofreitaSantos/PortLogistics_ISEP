@@ -136,7 +136,8 @@ public class DataRightRequest : Entity<DataRightRequestId>, IAggregateRoot
     {
         if (string.IsNullOrWhiteSpace(payload))
             throw new BusinessRuleValidationException("Payload cannot be empty.");
-
+        UpdatedOn = new ClockTime(DateTime.UtcNow);
+        
         this.Payload = payload;
     }
 

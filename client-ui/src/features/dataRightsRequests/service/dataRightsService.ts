@@ -4,7 +4,6 @@ import type {
     CreateDataRightsRequestDto,
 } from "../dto/dataRightsDtos";
 
-/** Lista todos os pedidos de um user (email) */
 export async function getRequestsForUser(
     email: string
 ): Promise<DataRightsRequestDto[]> {
@@ -14,7 +13,6 @@ export async function getRequestsForUser(
     return res.data;
 }
 
-/** Cria um novo pedido */
 export async function createRequest(
     dto: CreateDataRightsRequestDto
 ): Promise<DataRightsRequestDto> {

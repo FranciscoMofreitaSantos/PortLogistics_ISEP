@@ -1,3 +1,4 @@
+// src/features/dataRightsRequests/hooks/useDataRightsRequests.ts
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -13,6 +14,21 @@ import type {
 
 // Se usares Auth0:
 import { useAuth0 } from "@auth0/auth0-react";
+
+/** Extrai uma mensagem legível do erro (compatível com ProblemDetails) */
+function getErrorMessage(e: any, fallback: string): string {
+    const data = e?.response?.data;
+
+    if (data && typeof data === "object") {
+        if (data.detail) return data.detail;
+        if (data.title) return data.title;
+        if (data.message) return data.message;
+    }
+
+    if (typeof data === "string") return data;
+
+    return e?.message || fallback;
+}
 
 function emptyRectification(): RectificationPayload {
     return {
@@ -47,7 +63,7 @@ export function useDataRightsRequests() {
     const [creating, setCreating] = useState<CreatingDataRightsRequest>(
         emptyCreating()
     );
-    const [isCreateOpen, setIsCreateOpen] = useState(true); // painel “Novo pedido”
+    const [isCreateOpen, setIsCreateOpen] = useState(false); // modal “Novo pedido”
 
     const email = user?.email;
     const userId = user?.sub ?? ""; // ou o teu auth0UserId
@@ -61,10 +77,12 @@ export function useDataRightsRequests() {
             setItems(mapped);
             if (mapped.length && !selected) setSelected(mapped[0]);
         } catch (e: any) {
-            toast.error(
-                e?.response?.data ??
+            const msg = getErrorMessage(
+                e,
                 t("dataRights.toast.listError", "Error loading your requests")
             );
+            // o interceptor já mostra um toast, mas aqui garantimos string
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -80,8 +98,7 @@ export function useDataRightsRequests() {
         const q = query.toLowerCase();
 
         return items.filter(r => {
-            const txt =
-                `${r.requestId} ${r.type} ${r.status} ${r.userEmail}`.toLowerCase();
+            const txt = `${r.requestId} ${r.type} ${r.status} ${r.userEmail}`.toLowerCase();
             return txt.includes(q);
         });
     }, [items, query]);
@@ -98,16 +115,12 @@ export function useDataRightsRequests() {
             let payload: string | undefined = undefined;
 
             if (creating.type === "Rectification") {
-                const p = { ...creating.rectification };
+                const p: RectificationPayload = { ...creating.rectification };
 
                 // limpar campos vazios para não mandar lixo
                 Object.keys(p).forEach(k => {
                     const key = k as keyof RectificationPayload;
-                    if (
-                        p[key] === "" ||
-                        p[key] === undefined ||
-                        p[key] === null
-                    ) {
+                    if (p[key] === "" || p[key] === undefined || p[key] === null) {
                         delete p[key];
                     }
                 });
@@ -139,7 +152,9 @@ export function useDataRightsRequests() {
             } as const;
 
             const created = await dataRightsService.createRequest(dto);
-            const mapped = mapRequestDto(created);
+
+            // Se tiveres um mapper mais sofisticado, usa-o aqui
+            const mapped: DataRightsRequest = { ...created };
 
             setItems(prev => [mapped, ...prev]);
             setSelected(mapped);
@@ -150,14 +165,17 @@ export function useDataRightsRequests() {
                     "Your data rights request has been created ✅"
                 )
             );
+            setIsCreateOpen(false);
         } catch (e: any) {
-            toast.error(
-                e?.response?.data ??
+            const msg = getErrorMessage(
+                e,
                 t(
                     "dataRights.toast.createError",
                     "Error creating data rights request"
                 )
             );
+            // evita mandar object -> react child
+            toast.error(msg);
         }
     }
 
@@ -202,9 +220,4 @@ export function useDataRightsRequests() {
         // util
         reload,
     };
-}
-
-function mapRequestDto(dto: any): DataRightsRequest {
-    // helper local (se quiseres, usa o mapper partilhado)
-    return { ...dto };
 }

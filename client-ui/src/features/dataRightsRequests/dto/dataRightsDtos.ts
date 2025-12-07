@@ -18,9 +18,8 @@ export interface DataRightsRequestDto {
     processedBy?: string | null;
 }
 
-/** DTO que enviamos para o POST */
+/** DTO que enviamos para o POST (alinha com backend) */
 export interface CreateDataRightsRequestDto {
-    userId: string;
     userEmail: string;
     type: RequestType;
     payload?: string | null;

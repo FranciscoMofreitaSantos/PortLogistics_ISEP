@@ -19,27 +19,35 @@ public class DataRightRequestService : IDataRightRequestService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailSender _emailSender;
 
-    public DataRightRequestService(IDataRightRequestRepository repository,IEmailSender emailSender,IUnitOfWork unitOfWork, IUserRepository userRepository, IShippingAgentRepresentativeRepository representativeRepository, IConfirmationRepository confirmationRepository)
+    public DataRightRequestService(
+        IDataRightRequestRepository repository,
+        IEmailSender emailSender,
+        IUnitOfWork unitOfWork,
+        IUserRepository userRepository,
+        IShippingAgentRepresentativeRepository representativeRepository,
+        IConfirmationRepository confirmationRepository)
     {
-       this._repository = repository;
-       this._userRepository = userRepository;
-       this._representativeRepository = representativeRepository;
-       this._confirmationRepository = confirmationRepository;
-       this._unitOfWork = unitOfWork;
-       this._emailSender = emailSender;
+        _repository = repository;
+        _userRepository = userRepository;
+        _representativeRepository = representativeRepository;
+        _confirmationRepository = confirmationRepository;
+        _unitOfWork = unitOfWork;
+        _emailSender = emailSender;
     }
 
-    public async Task<DataRightsRequestDto> CreateDataRightRequest(DataRightsRequestDto dto)
+    public async Task<DataRightsRequestDto> CreateDataRightRequest(CreatingDataRigthsRequestDto dto)
     {
         var hasOneInProcess = await _repository.CheckIfUserHasANonFinishRequestByType(dto.UserEmail, dto.Type);
 
-        if (hasOneInProcess != null) throw new BusinessRuleValidationException($"Request not created. User {dto.UserEmail} already has one request of type {dto.Type} being processed ({hasOneInProcess.Status})-> {hasOneInProcess.RequestId}.");
+        if (hasOneInProcess != null)
+            throw new BusinessRuleValidationException(
+                $"Request not created. User {dto.UserEmail} already has one request of type {dto.Type} being processed ({hasOneInProcess.Status})-> {hasOneInProcess.RequestId}.");
 
         if (dto.Type == RequestType.Rectification)
         {
-            if (string.IsNullOrWhiteSpace(dto.Payload)) throw new BusinessRuleValidationException("Rectification request must have a payload.");
+            if (string.IsNullOrWhiteSpace(dto.Payload))
+                throw new BusinessRuleValidationException("Rectification request must have a payload.");
 
-            // Valida formato JSON
             try
             {
                 _ = JsonSerializer.Deserialize<RectificationPayloadDto>(dto.Payload);
@@ -50,54 +58,63 @@ public class DataRightRequestService : IDataRightRequestService
             }
         }
 
-        var createdRequest = DataRightsRequestFactory.ConvertDtoToEntity(dto);
-        
+        var userFromDb = await _userRepository.GetByEmailAsync(dto.UserEmail);
+        if (userFromDb == null)
+            throw new BusinessRuleValidationException("User not found.");
+
+        var createdRequest = DataRightsRequestFactory.ConvertDtoToEntity(dto, userFromDb.Auth0UserId);
+
         await _repository.AddAsync(createdRequest);
         await _unitOfWork.CommitAsync();
-        
+
         return DataRightsRequestMapper.CreateDataRightsRequestDto(createdRequest);
     }
-
 
     public async Task<List<DataRightsRequestDto>> GetAllDataRightsRequestsForUser(string userEmail)
     {
         var existUserInDb = await _userRepository.GetByEmailAsync(userEmail);
 
-        if (existUserInDb == null) throw new BusinessRuleValidationException(
-            $"User with email {userEmail} does not found in DB. Contact an 'admin'.");
+        if (existUserInDb == null)
+            throw new BusinessRuleValidationException(
+                $"User with email {userEmail} does not found in DB. Contact an 'admin'.");
 
         var listRequestByUser = await _repository.GetAllDataRightRequestsForUser(userEmail);
-        
-        return listRequestByUser.Select(r => DataRightsRequestMapper.CreateDataRightsRequestDto(r)).ToList();
+
+        return listRequestByUser.Select(DataRightsRequestMapper.CreateDataRightsRequestDto).ToList();
     }
 
-
     // ---Admin
-    public async Task<DataRightsRequestDto> AssignResponsibleToDataRightRequestAsync(string requestId, string responsibleEmail)
+
+    public async Task<DataRightsRequestDto> AssignResponsibleToDataRightRequestAsync(
+        string requestId,
+        string responsibleEmail)
     {
         var existUserInDb = await _userRepository.GetByEmailAsync(responsibleEmail);
 
         if (existUserInDb == null)
             throw new BusinessRuleValidationException(
                 $"Cannot associate responsible to request {requestId} because the specified responsible dont exist. Contact an 'admin'.");
-        
+
         var existRequestInDb = await _repository.GetRequestByIdentifier(requestId);
-        
-        if (existRequestInDb == null) throw new BusinessRuleValidationException(
-            $"Cannot associate responsible {existUserInDb.Name} to request {requestId} because the specified 'request id' does not exist. Contact an 'admin'.");
+
+        if (existRequestInDb == null)
+            throw new BusinessRuleValidationException(
+                $"Cannot associate responsible {existUserInDb.Name} to request {requestId} because the specified 'request id' does not exist. Contact an 'admin'.");
 
         existRequestInDb.AssignResponsibleToRequest(responsibleEmail);
         await _unitOfWork.CommitAsync();
-        
-        return  DataRightsRequestMapper.CreateDataRightsRequestDto(existRequestInDb);
+
+        return DataRightsRequestMapper.CreateDataRightsRequestDto(existRequestInDb);
     }
 
     public async Task<List<DataRightsRequestDto>> GetAllDataRightRequestsWithStatusWaitingForAssignment()
     {
         var listRequestWithStatusWaitingForAssignment =
             await _repository.GetAllDataRightRequestsWithStatusWaitingForAssignment();
-        
-        return listRequestWithStatusWaitingForAssignment.Select(r => DataRightsRequestMapper.CreateDataRightsRequestDto(r)).ToList();
+
+        return listRequestWithStatusWaitingForAssignment
+            .Select(DataRightsRequestMapper.CreateDataRightsRequestDto)
+            .ToList();
     }
 
     public async Task<List<DataRightsRequestDto>> GetAllDataRightRequestsForResponsible(string responsibleEmail)
@@ -109,8 +126,8 @@ public class DataRightRequestService : IDataRightRequestService
                 $"Cannot get list of associate request to {responsibleEmail} because the specified responsible dont exist. Contact an 'admin'.");
 
         var listFromDb = await _repository.GetAllDataRightRequestsForResponsible(responsibleEmail);
-        
-        return listFromDb.Select(r => DataRightsRequestMapper.CreateDataRightsRequestDto(r)).ToList();
+
+        return listFromDb.Select(DataRightsRequestMapper.CreateDataRightsRequestDto).ToList();
     }
 
     public async Task<DataRightsRequestDto> ResponseDataRightRequestTypeAccessAsync(string requestId)
@@ -119,6 +136,9 @@ public class DataRightRequestService : IDataRightRequestService
 
         if (requestFromDb == null)
             throw new BusinessRuleValidationException($"No request was found in DB, with id {requestId}");
+
+        if (requestFromDb.Type != RequestType.Access)
+            throw new BusinessRuleValidationException($"Request {requestId} is not of type Access.");
 
         var userFromDb = await _userRepository.GetByEmailAsync(requestFromDb.UserEmail);
         if (userFromDb == null)
@@ -137,8 +157,6 @@ public class DataRightRequestService : IDataRightRequestService
 
         var confirmationFromDb = await _confirmationRepository.FindByUserEmailAsync(userFromDb.Email);
 
-        // Aqui tens 2 hipóteses:
-        // 1) Obrigas a existir confirmação → se null, erro:
         if (confirmationFromDb == null)
             throw new BusinessRuleValidationException(
                 $"No Privacy Policy confirmation found for user {userFromDb.Email}.");
@@ -161,6 +179,10 @@ public class DataRightRequestService : IDataRightRequestService
             throw new BusinessRuleValidationException(
                 $"The request {requestId} cannot be deleted because it was not found in DB.");
 
+        if (requestFromDb.Type != RequestType.Deletion)
+            throw new BusinessRuleValidationException(
+                $"The request {requestId} is not of type Deletion.");
+
         var userFromDb = await _userRepository.GetByEmailAsync(requestFromDb.UserEmail);
         if (userFromDb == null)
             throw new BusinessRuleValidationException(
@@ -173,8 +195,8 @@ public class DataRightRequestService : IDataRightRequestService
         }
 
         var confirmation = await _confirmationRepository.FindByUserEmailAsync(requestFromDb.UserEmail);
-        
-        // 1) Tirar snapshot dos dados ANTES de apagar
+
+        // 1) Tirar snapshot dos dados ANTES de apagar (mesmo que não haja confirmação)
         var exportDto = DataRightsRequestFactory.PrepareResponseDto(userFromDb, sar, confirmation);
         var html = UpcomingDeletionDetailedEmailTemplate.Build(exportDto, requestFromDb.RequestId);
 
@@ -204,7 +226,8 @@ public class DataRightRequestService : IDataRightRequestService
         return true;
     }
 
-    public async Task<DataRightsRequestDto> ResponseDataRightRequestTypeRectificationAsync(RectificationApplyDto dto)
+    public async Task<DataRightsRequestDto> ResponseDataRightRequestTypeRectificationAsync(
+        RectificationApplyDto dto)
     {
         var requestFromDb = await _repository.GetRequestByIdentifier(dto.RequestId);
 
@@ -234,6 +257,7 @@ public class DataRightRequestService : IDataRightRequestService
                 throw new BusinessRuleValidationException(
                     $"User {userFromDb.Email} has SAR role but no SAR entity was found. Contact an 'admin'.");
         }
+
         var confirmation = await _confirmationRepository.FindByUserEmailAsync(requestFromDb.UserEmail);
 
         // Payload original pedido pelo user
@@ -242,7 +266,6 @@ public class DataRightRequestService : IDataRightRequestService
 
         if (dto.RejectEntireRequest)
         {
-            // Não alteramos nada, apenas marcamos como rejeitado
             requestFromDb.MarkAsRejected();
             await _unitOfWork.CommitAsync();
 
@@ -263,14 +286,13 @@ public class DataRightRequestService : IDataRightRequestService
             return DataRightsRequestMapper.CreateDataRightsRequestDto(requestFromDb);
         }
 
-        // ===== APLICAR ALTERAÇÕES (apenas exemplo – ajusta aos métodos de domínio que tens) =====
+        // ===== APLICAR ALTERAÇÕES =====
 
         // USER
         if (!string.IsNullOrWhiteSpace(dto.FinalName))
         {
-
-            userFromDb.Name =  dto.FinalName;
-            if(sar != null)
+            userFromDb.Name = dto.FinalName;
+            if (sar != null)
                 sar.Name = dto.FinalName;
         }
 
@@ -279,9 +301,9 @@ public class DataRightRequestService : IDataRightRequestService
             userFromDb.Email = dto.FinalEmail;
             if (sar != null)
                 sar.Email = new EmailAddress(userFromDb.Email);
-            requestFromDb.UserEmail =  userFromDb.Email;
-            if(confirmation != null)
-                confirmation.UserEmail =  userFromDb.Email;
+            requestFromDb.UserEmail = userFromDb.Email;
+            if (confirmation != null)
+                confirmation.UserEmail = userFromDb.Email;
         }
 
         if (!string.IsNullOrWhiteSpace(dto.FinalPicture))
@@ -304,12 +326,16 @@ public class DataRightRequestService : IDataRightRequestService
 
             if (!string.IsNullOrWhiteSpace(dto.FinalNationality))
             {
-                sar.Nationality = Enum.Parse<Nationality>(dto.FinalNationality);
+                if (!Enum.TryParse<Nationality>(dto.FinalNationality, out var parsedNationality))
+                    throw new BusinessRuleValidationException(
+                        $"Invalid nationality '{dto.FinalNationality}'.");
+
+                sar.Nationality = parsedNationality;
             }
 
             if (!string.IsNullOrWhiteSpace(dto.FinalCitizenId))
             {
-                sar.CitizenId =  new CitizenId(dto.FinalCitizenId);
+                sar.CitizenId = new CitizenId(dto.FinalCitizenId);
             }
         }
 
@@ -334,5 +360,4 @@ public class DataRightRequestService : IDataRightRequestService
 
         return DataRightsRequestMapper.CreateDataRightsRequestDto(requestFromDb);
     }
-    
 }

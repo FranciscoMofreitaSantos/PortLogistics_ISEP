@@ -6,7 +6,7 @@ public interface IDataRightRequestService
 {
     
     // ------ Users
-    Task<DataRightsRequestDto> CreateDataRightRequest(DataRightsRequestDto dto);
+    Task<DataRightsRequestDto> CreateDataRightRequest(CreatingDataRigthsRequestDto dto);
     Task<List<DataRightsRequestDto>> GetAllDataRightsRequestsForUser(string userEmail);
     
     // ------ Admin

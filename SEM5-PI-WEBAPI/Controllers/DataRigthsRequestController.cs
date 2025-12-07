@@ -11,19 +11,18 @@ public class DataRigthsRequestController : ControllerBase
 {
     private readonly IDataRightRequestService _service;
     private readonly IResponsesToFrontend _responsesToFrontend;
-    
-    public DataRigthsRequestController(IDataRightRequestService service,  IResponsesToFrontend responsesToFrontend)
+
+    public DataRigthsRequestController(IDataRightRequestService service, IResponsesToFrontend responsesToFrontend)
     {
         _service = service;
         _responsesToFrontend = responsesToFrontend;
     }
 
-    
-    
     // --- Users
-    
+
     [HttpPost]
-    public async Task<ActionResult<DataRightsRequestDto>> CreateDataRightsRequestAsync(DataRightsRequestDto dto)
+    public async Task<ActionResult<DataRightsRequestDto>> CreateDataRightsRequestAsync(
+        CreatingDataRigthsRequestDto dto)
     {
         try
         {
@@ -32,7 +31,10 @@ public class DataRigthsRequestController : ControllerBase
         }
         catch (Exception e)
         {
-            return _responsesToFrontend.ProblemResponse("Problem Creating DataRightsRequest", e.Message, StatusCodes.Status400BadRequest);
+            return _responsesToFrontend.ProblemResponse(
+                "Problem Creating DataRightsRequest",
+                e.Message,
+                StatusCodes.Status400BadRequest);
         }
     }
 
@@ -47,18 +49,14 @@ public class DataRigthsRequestController : ControllerBase
         catch (Exception e)
         {
             return _responsesToFrontend.ProblemResponse(
-                "Problem fetching DataRightsRequests for user", 
-                e.Message, 
+                "Problem fetching DataRightsRequests for user",
+                e.Message,
                 StatusCodes.Status400BadRequest);
         }
     }
-    
-    
-    
-    
+
     // ----- For Admin
-    
-    
+
     [HttpGet("requests/status/waitingforassignment")]
     public async Task<ActionResult<List<DataRightsRequestDto>>> WaitingForAssignment()
     {
@@ -69,7 +67,10 @@ public class DataRigthsRequestController : ControllerBase
         }
         catch (Exception e)
         {
-            return _responsesToFrontend.ProblemResponse("Problem", e.Message, StatusCodes.Status400BadRequest);
+            return _responsesToFrontend.ProblemResponse(
+                "Problem fetching DataRightsRequests with status WaitingForAssignment",
+                e.Message,
+                StatusCodes.Status400BadRequest);
         }
     }
 
@@ -84,12 +85,12 @@ public class DataRigthsRequestController : ControllerBase
         catch (Exception e)
         {
             return _responsesToFrontend.ProblemResponse(
-                "Problem fetching DataRightsRequests for responsible", 
-                e.Message, 
-                StatusCodes.Status400BadRequest);        }
+                "Problem fetching DataRightsRequests for responsible",
+                e.Message,
+                StatusCodes.Status400BadRequest);
+        }
     }
 
-    
     [HttpPatch("assignResponsible/{requestId}")]
     public async Task<ActionResult<DataRightsRequestDto>> AssignResponsibleToRequestAsync(
         [FromRoute] string requestId,
@@ -97,21 +98,22 @@ public class DataRigthsRequestController : ControllerBase
     {
         try
         {
-            var updatedRequestDto = await _service.AssignResponsibleToDataRightRequestAsync(requestId, responsibleEmail);
+            var updatedRequestDto =
+                await _service.AssignResponsibleToDataRightRequestAsync(requestId, responsibleEmail);
             return Ok(updatedRequestDto);
         }
         catch (Exception e)
         {
             return _responsesToFrontend.ProblemResponse(
-                "Problem Assigning responsible to Request", 
-                e.Message, 
+                "Problem assigning responsible to Request",
+                e.Message,
                 StatusCodes.Status400BadRequest);
         }
     }
 
-
     [HttpPatch("response/request/type/access/{requestId}")]
-    public async Task<ActionResult<DataRightsRequestDto>> ResponseDataRightRequestTypeAccessAsync(string requestId)
+    public async Task<ActionResult<DataRightsRequestDto>> ResponseDataRightRequestTypeAccessAsync(
+        [FromRoute] string requestId)
     {
         try
         {
@@ -121,8 +123,8 @@ public class DataRigthsRequestController : ControllerBase
         catch (Exception e)
         {
             return _responsesToFrontend.ProblemResponse(
-                "Problem responding to Access DataRightsRequest", 
-                e.Message, 
+                "Problem responding to Access DataRightsRequest",
+                e.Message,
                 StatusCodes.Status400BadRequest);
         }
     }
@@ -138,14 +140,15 @@ public class DataRigthsRequestController : ControllerBase
         catch (Exception e)
         {
             return _responsesToFrontend.ProblemResponse(
-                "Problem deleting Data Rights Request", 
-                e.Message, 
+                "Problem deleting Data Rights Request",
+                e.Message,
                 StatusCodes.Status400BadRequest);
         }
     }
 
-    [HttpPatch("response/request/status/retification")]
-    public async Task<ActionResult<DataRightsRequestDto>> ResponseDataRightRequestStatusRetificationAsync(RectificationApplyDto dto)
+    [HttpPatch("response/request/status/rectification")]
+    public async Task<ActionResult<DataRightsRequestDto>> ResponseDataRightRequestStatusRectificationAsync(
+        RectificationApplyDto dto)
     {
         try
         {
@@ -155,8 +158,8 @@ public class DataRigthsRequestController : ControllerBase
         catch (Exception e)
         {
             return _responsesToFrontend.ProblemResponse(
-                "Problem ratification Data Rights Request", 
-                e.Message, 
+                "Problem rectification Data Rights Request",
+                e.Message,
                 StatusCodes.Status400BadRequest);
         }
     }
