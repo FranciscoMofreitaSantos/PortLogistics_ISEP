@@ -9,7 +9,7 @@ if (!envFound) {
 
 export default {
 
-    port: parseInt(process.env.PORT as string, 10) || 4000,
+    port: parseInt(process.env.PORT as string, 10) || 3000,
 
     /**
      * That long string from mlab
@@ -20,7 +20,7 @@ export default {
      * Your secret sauce
      */
     jwtSecret: process.env.JWT_SECRET || "my sakdfho2390asjod$%jl)!sdjas0i secret",
-
+    //todo ver depois o secret
     /**
      * Used by winston logger
      */
