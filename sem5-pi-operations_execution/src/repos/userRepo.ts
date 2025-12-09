@@ -6,7 +6,7 @@ import {Document, Model} from 'mongoose';
 import {UserId} from "../domain/userId";
 import {UserMap} from "../mappers/UserMap";
 
-@Service()
+@Service("UserRepo")
 export default class UserRepo implements IUserRepo {
 
     constructor(

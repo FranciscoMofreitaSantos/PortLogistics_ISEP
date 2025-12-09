@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import userRoute from "./routes/userRoute";
 
 export default () => {
     const app = Router();
@@ -7,5 +8,6 @@ export default () => {
         res.json({ result: "Server is alive and using the new arch!" });
     });
 
+    userRoute(app);
     return app;
 }

@@ -12,11 +12,13 @@ export default (app: Router) => {
 
     const ctrl = Container.get(config.controllers.user.name) as IUserController;
 
+
     route.get(
         '/me',
         middlewares.injectUser,
         (req, res, next) => ctrl.getMe(req, res, next)
     );
+
 
     route.post(
         '/sync',
@@ -25,22 +27,12 @@ export default (app: Router) => {
                 email: Joi.string().email().required(),
                 role: Joi.string().required(),
                 auth0UserId: Joi.string().required(),
+                name: Joi.string().optional(),
             }),
         }),
-        (req, res, next) => ctrl.createUser(req, res, next)
+        (req, res, next) => ctrl.createOrSyncUser(req, res, next)
     );
 
-    route.put(
-        '/sync',
-        celebrate({
-            body: Joi.object({
-                email: Joi.string().email().required(),
-                role: Joi.string().required(),
-                auth0UserId: Joi.string().required(),
-            }),
-        }),
-        (req, res, next) => ctrl.updateUser(req, res, next)
-    );
 
     route.post('/logout', (req, res) => res.status(200).end());
 };

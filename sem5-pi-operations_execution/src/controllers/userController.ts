@@ -7,7 +7,7 @@ import { IUserDTO } from "../dto/IUserDTO";
 import { Result } from "../core/logic/Result";
 import config from "../config";
 
-@Service()
+@Service("UserController")
 export default class UserController extends BaseController implements IUserController {
 
     constructor(
@@ -17,37 +17,35 @@ export default class UserController extends BaseController implements IUserContr
         super();
     }
 
-    public async createUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    public async createOrSyncUser(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<Response | void> {
         try {
-            const userOrError = await this.userServiceInstance.createUser(req.body as IUserDTO) as Result<IUserDTO>;
+            const dto = req.body as IUserDTO;
 
-            if (userOrError.isFailure) {
-                return res.status(402).send();
+            const existingOrError = await this.userServiceInstance.getUser(dto.email);
+
+            let result;
+
+            if (existingOrError.isFailure) {
+                result = await this.userServiceInstance.createUser(dto);
+            } else {
+                result = await this.userServiceInstance.updateUser(dto);
             }
 
-            const userDTO = userOrError.getValue();
-            return res.status(201).json(userDTO);
+            if (result.isFailure) {
+                return res.status(400).json({ error: result.errorValue() });
+            }
+
+            return res.status(200).json(result.getValue());
 
         } catch (e) {
             return next(e);
         }
     }
 
-    public async updateUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-        try {
-            const userOrError = await this.userServiceInstance.updateUser(req.body as IUserDTO) as Result<IUserDTO>;
-
-            if (userOrError.isFailure) {
-                return res.status(404).send();
-            }
-
-            const userDTO = userOrError.getValue();
-            return res.status(200).json(userDTO);
-
-        } catch (e) {
-            return next(e);
-        }
-    }
 
     public async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {

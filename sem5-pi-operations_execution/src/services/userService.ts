@@ -8,7 +8,7 @@ import { Result } from "../core/logic/Result";
 import { GenericAppError } from "../core/logic/AppError";
 import { Role } from "../domain/role";
 
-@Service()
+@Service("UserService")
 export default class UserService implements IUserService {
 
     constructor(
@@ -38,6 +38,7 @@ export default class UserService implements IUserService {
             const user = userOrError.getValue();
             const userSaved = await this.userRepo.save(user);
 
+            // @ts-ignore
             const userDTOSaved = UserMap.toDTO(userSaved);
             return Result.ok<IUserDTO>(userDTOSaved);
 
@@ -60,6 +61,7 @@ export default class UserService implements IUserService {
             user.role = userDTO.role as Role;
 
             const userSaved = await this.userRepo.save(user);
+            // @ts-ignore
             const userDTOSaved = UserMap.toDTO(userSaved);
 
             return Result.ok<IUserDTO>(userDTOSaved);
