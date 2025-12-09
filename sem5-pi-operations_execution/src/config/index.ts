@@ -36,17 +36,13 @@ export default {
     },
 
     controllers: {
-        role: {
-            name: "RoleController",
-            path: "../controllers/roleController"
+        user: {
+            name: "UserController",
+            path: "../controllers/userController"
         }
     },
 
     repos: {
-        role: {
-            name: "RoleRepo",
-            path: "../repos/roleRepo"
-        },
         user: {
             name: "UserRepo",
             path: "../repos/userRepo"
