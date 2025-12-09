@@ -3,5 +3,5 @@ import { User } from "../../domain/user";
 
 
 export default interface IUserRepo extends Repo<User> {
-    findByEmail(email: string): Promise<User>;
+    findByEmail(email: string): Promise<User | null>;
 }

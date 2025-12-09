@@ -49,6 +49,22 @@ export default class UserController extends BaseController implements IUserContr
         }
     }
 
+    public async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userDTO = (req as any).currentUser;
+
+            if (!userDTO) {
+                this.unauthorized("No user info available.");
+                return;
+            }
+
+            this.ok(res, userDTO);
+
+        } catch (e: any) {
+            this.fail(e instanceof Error ? e.message : String(e));
+        }
+    }
+
     protected executeImpl(): Promise<void> {
         throw new Error("Method not implemented.");
     }
