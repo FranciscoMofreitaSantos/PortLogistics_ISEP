@@ -117,6 +117,8 @@ namespace SEM5_PI_WEBAPI
 
             services.AddHealthChecks();
             services.Configure<NetworkAccessOptions>(Configuration.GetSection("NetworkAccess"));
+            services.Configure<FrontendOptions>(Configuration.GetSection("Frontend"));
+            
 
             if (_env.IsEnvironment("Testing"))
             {

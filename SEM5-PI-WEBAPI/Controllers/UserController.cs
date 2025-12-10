@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SEM5_PI_WEBAPI.Domain.Shared;
 using SEM5_PI_WEBAPI.Domain.Users;
 using SEM5_PI_WEBAPI.Domain.Users.DTOs;
@@ -16,12 +16,14 @@ public class UserController : ControllerBase
     private readonly IUserService _service;
     private readonly ILogger<UserController> _logger;
     private readonly IEmailSender _emailSender;
+    private readonly IOptions<FrontendOptions> _frontendOptions;
 
-    public UserController(IUserService service, ILogger<UserController> logger, IEmailSender emailSender)
+    public UserController(IUserService service, ILogger<UserController> logger, IEmailSender emailSender, IOptions<FrontendOptions> frontendOptions)
     {
         _service = service;
         _logger = logger;
         _emailSender = emailSender;
+        _frontendOptions = frontendOptions;
     }
 
     
@@ -174,7 +176,8 @@ public class UserController : ControllerBase
             try
             {
                 var subject = "Ativação da Conta / Account Activation";
-                var message = ActivationEmailTemplate.Build(userDto.Name, userDto.Email);
+                var baseUrl = _frontendOptions.Value.BaseUrl;
+                var message = ActivationEmailTemplate.Build(userDto.Name, userDto.Email, baseUrl);
 
                 await _emailSender.SendEmailAsync(userDto.Email!, subject, message);
                 _logger.LogInformation("Activation email sent to {Email}", userDto.Email);

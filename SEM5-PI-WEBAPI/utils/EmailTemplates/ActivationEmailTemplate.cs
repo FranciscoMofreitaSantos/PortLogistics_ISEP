@@ -2,9 +2,9 @@ namespace SEM5_PI_WEBAPI.utils.EmailTemplates;
 
 public static class ActivationEmailTemplate
 {
-    public static string Build(string name, string email)
+    public static string Build(string name, string email, string baseUrl)
     {
-        var activationLink = $"http://localhost:5173/activate?email={Uri.EscapeDataString(email)}";
+      var activationLink = $"{baseUrl}/activate?email={Uri.EscapeDataString(email)}";
 
         return $@"
 <html lang='pt'>

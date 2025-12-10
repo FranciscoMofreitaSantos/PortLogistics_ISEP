@@ -24,27 +24,22 @@ export default class UserRepo implements IUserRepo {
 
     public async save(user: User): Promise<User | null> {
         try {
-            // mapped object from domain to persistence
             const rawUser = UserMap.toPersistence(user);
 
-            // find existing user by email (unique key)
             const existing = await this.userSchema.findOne({ email: rawUser.email });
 
             let persistedDoc;
 
             if (existing) {
-                // update allowed fields
                 existing.name = rawUser.name;
                 existing.role = rawUser.role;
                 existing.auth0UserId = rawUser.auth0UserId;
 
-                // optional update: ensure email synced
                 existing.email = rawUser.email;
 
                 await existing.save();
                 persistedDoc = existing;
             } else {
-                // create new user
                 const created = await this.userSchema.create(rawUser);
                 persistedDoc = created;
             }
