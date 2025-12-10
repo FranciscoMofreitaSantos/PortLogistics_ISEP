@@ -29,12 +29,10 @@ function buildPhoneE164(code: string, rawNumber: string): string {
 const NATIONALITY_VALUES: string[] = [
     "Portugal", "Spain", "France", "Germany", "UnitedKingdom", "UnitedStates", "Brazil", "Angola",
     "Mozambique", "CapeVerde", "Italy", "Greece", "China", "India", "Russia", "Ukraine",
-    // ... Podes adicionar mais países aqui conforme necessário
     "SouthAfrica", "Switzerland", "Luxembourg", "Belgium", "Netherlands"
 ];
 
 function nationalityLabel(value: string): string {
-    // Separa CamelCase em palavras (ex: UnitedKingdom -> United Kingdom)
     return value.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
 
@@ -54,7 +52,7 @@ export function DataRightsCreatePanel({
     const [phoneCode, setPhoneCode] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
 
-    // Sincronizar dados iniciais (se estiver a editar)
+    // Sincronizar dados iniciais
     useEffect(() => {
         const full = creating.rectification.newPhoneNumber ?? "";
         if (!full) { setPhoneCode(""); setPhoneNumber(""); return; }
@@ -68,14 +66,13 @@ export function DataRightsCreatePanel({
         }
     }, [creating.rectification.newPhoneNumber]);
 
-    // Atualiza telefone no objeto principal
     const updatePhone = (c: string, n: string) => {
         setPhoneCode(c);
         setPhoneNumber(n);
         updateRectification({ newPhoneNumber: buildPhoneE164(c, n) || null });
     };
 
-    // UPLOAD DE IMAGEM (Converter para Base64)
+    // UPLOAD DE IMAGEM
     const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -100,8 +97,12 @@ export function DataRightsCreatePanel({
                 onClick={() => { setType("Access"); setStep(2); }}
             >
                 <div className="dr-type-icon-lg">📄</div>
-                <span className="dr-type-title">Access</span>
-                <span className="dr-type-desc">Get a full copy of your data.</span>
+                <span className="dr-type-title">
+                    {t("dataRights.filters.access", "Access")}
+                </span>
+                <span className="dr-type-desc">
+                    {t("dataRights.create.accessDesc", "Get a full copy of your data.")}
+                </span>
             </div>
 
             <div
@@ -109,8 +110,12 @@ export function DataRightsCreatePanel({
                 onClick={() => { setType("Deletion"); setStep(2); }}
             >
                 <div className="dr-type-icon-lg">🧹</div>
-                <span className="dr-type-title">Deletion</span>
-                <span className="dr-type-desc">Request permanent removal of data.</span>
+                <span className="dr-type-title">
+                    {t("dataRights.filters.deletion", "Deletion")}
+                </span>
+                <span className="dr-type-desc">
+                    {t("dataRights.create.delDesc", "Request permanent removal of data.")}
+                </span>
             </div>
 
             <div
@@ -118,8 +123,12 @@ export function DataRightsCreatePanel({
                 onClick={() => { setType("Rectification"); setStep(2); }}
             >
                 <div className="dr-type-icon-lg">✏️</div>
-                <span className="dr-type-title">Rectification</span>
-                <span className="dr-type-desc">Update your profile details.</span>
+                <span className="dr-type-title">
+                    {t("dataRights.filters.rectification", "Rectification")}
+                </span>
+                <span className="dr-type-desc">
+                    {t("dataRights.create.rectDesc", "Update your profile details.")}
+                </span>
             </div>
         </div>
     );
@@ -133,22 +142,26 @@ export function DataRightsCreatePanel({
                         📄 {t("dataRights.create.accessConfirm", "You are about to request a full report of your personal data.")}
                     </p>
                     <p className="dr-note" style={{textAlign: 'center'}}>
-                        Click "Submit Request" to proceed.
+                        {t("dataRights.create.clickSubmit", "Click 'Submit Request' to proceed.")}
                     </p>
                 </div>
             )}
 
             {type === "Deletion" && (
                 <div className="dr-form-section">
-                    <label className="dr-label">Reason (Optional)</label>
+                    <label className="dr-label">
+                        {t("dataRights.create.deletionReason", "Reason (Optional)")}
+                    </label>
                     <textarea
                         className="dr-textarea"
                         rows={4}
-                        placeholder="Why do you want to delete your data?"
+                        placeholder={t("dataRights.create.delPlaceholder", "Why do you want to delete your data?")}
                         value={creating.deletionReason}
                         onChange={e => setCreating({ ...creating, deletionReason: e.target.value })}
                     />
-                    <p className="dr-note">⚠️ Note: Some data may be retained for legal purposes.</p>
+                    <p className="dr-note">
+                        ⚠️ {t("dataRights.create.deletionWarning", "Note: Some data may be retained for legal purposes.")}
+                    </p>
                 </div>
             )}
 
@@ -157,7 +170,9 @@ export function DataRightsCreatePanel({
 
                     {/* UPLOAD IMAGEM */}
                     <div style={{ marginBottom: '1.5rem' }}>
-                        <label className="dr-label">New Profile Picture</label>
+                        <label className="dr-label">
+                            {t("dataRights.create.photo", "New Profile Picture")}
+                        </label>
                         {!creating.rectification.newPicture ? (
                             <div className="dr-upload-box">
                                 <input
@@ -168,8 +183,8 @@ export function DataRightsCreatePanel({
                                 />
                                 <div className="dr-upload-placeholder">
                                     <span className="dr-upload-icon">☁️</span>
-                                    <strong>Click to upload photo</strong>
-                                    <small>JPG, PNG or SVG</small>
+                                    <strong>{t("dataRights.create.uploadClick", "Click to upload photo")}</strong>
+                                    <small>{t("dataRights.create.uploadFormats", "JPG, PNG or SVG")}</small>
                                 </div>
                             </div>
                         ) : (
@@ -182,7 +197,9 @@ export function DataRightsCreatePanel({
                                     />
                                     <button type="button" className="dr-remove-image" onClick={handleRemoveImage}>✕</button>
                                 </div>
-                                <p className="dr-note" style={{marginTop: '0.5rem'}}>Image selected</p>
+                                <p className="dr-note" style={{marginTop: '0.5rem'}}>
+                                    {t("dataRights.create.imageSelected", "Image selected")}
+                                </p>
                             </div>
                         )}
                     </div>
@@ -191,34 +208,40 @@ export function DataRightsCreatePanel({
                     <div className="dr-grid-2">
                         {/* Nome e Email */}
                         <div>
-                            <label className="dr-label">New Name</label>
+                            <label className="dr-label">
+                                {t("dataRights.create.name", "New Name")}
+                            </label>
                             <input
                                 className="dr-input"
                                 value={creating.rectification.newName ?? ""}
                                 onChange={e => updateRectification({ newName: e.target.value })}
-                                placeholder="Full Name"
+                                placeholder={t("dataRights.create.newName_PH", "Full Name")}
                             />
                         </div>
                         <div>
-                            <label className="dr-label">New Email</label>
+                            <label className="dr-label">
+                                {t("dataRights.create.email", "New Email")}
+                            </label>
                             <input
                                 className="dr-input"
                                 value={creating.rectification.newEmail ?? ""}
                                 onChange={e => updateRectification({ newEmail: e.target.value })}
-                                placeholder="email@example.com"
+                                placeholder={t("dataRights.create.newEmail_PH", "email@example.com")}
                             />
                         </div>
 
-                        {/* Telefone (Ocupa largura total para caber bem) */}
+                        {/* Telefone */}
                         <div className="dr-grid-full">
-                            <label className="dr-label">New Phone Number (SAR)</label>
+                            <label className="dr-label">
+                                {t("dataRights.create.newPhoneNumber", "New Phone Number (SAR)")}
+                            </label>
                             <div className="dr-phone-row">
                                 <select
                                     className="dr-select dr-phone-code"
                                     value={phoneCode}
                                     onChange={e => updatePhone(e.target.value, phoneNumber)}
                                 >
-                                    <option value="">Code</option>
+                                    <option value="">{t("dataRights.create.phoneCode", "Code")}</option>
                                     {PHONE_CODES.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                                 <input
@@ -226,29 +249,33 @@ export function DataRightsCreatePanel({
                                     type="tel"
                                     value={phoneNumber}
                                     onChange={e => updatePhone(phoneCode, e.target.value)}
-                                    placeholder="912345678"
+                                    placeholder={t("dataRights.create.phoneNumber_PH", "912345678")}
                                 />
                             </div>
                         </div>
 
                         {/* Citizen ID e Nacionalidade */}
                         <div>
-                            <label className="dr-label">New Citizen ID / Passport</label>
+                            <label className="dr-label">
+                                {t("dataRights.create.newCitizenId", "New Citizen ID / Passport")}
+                            </label>
                             <input
                                 className="dr-input"
                                 value={creating.rectification.newCitizenId ?? ""}
                                 onChange={e => updateRectification({ newCitizenId: e.target.value })}
-                                placeholder="ID Number"
+                                placeholder={t("dataRights.create.idPlaceholder", "ID Number")}
                             />
                         </div>
                         <div>
-                            <label className="dr-label">New Nationality</label>
+                            <label className="dr-label">
+                                {t("dataRights.create.newNationality", "New Nationality")}
+                            </label>
                             <select
                                 className="dr-select"
                                 value={creating.rectification.newNationality ?? ""}
                                 onChange={e => updateRectification({ newNationality: e.target.value || null })}
                             >
-                                <option value="">Select...</option>
+                                <option value="">{t("dataRights.create.selectOption", "Select...")}</option>
                                 {NATIONALITY_VALUES.map(val => (
                                     <option key={val} value={val}>{nationalityLabel(val)}</option>
                                 ))}
@@ -257,7 +284,9 @@ export function DataRightsCreatePanel({
 
                         {/* Estado Ativo */}
                         <div className="dr-grid-full">
-                            <label className="dr-label">Mark Account as Active?</label>
+                            <label className="dr-label">
+                                {t("dataRights.create.isActive", "Mark Account as Active?")}
+                            </label>
                             <select
                                 className="dr-select"
                                 value={
@@ -272,21 +301,23 @@ export function DataRightsCreatePanel({
                                     });
                                 }}
                             >
-                                <option value="">Keep as is</option>
-                                <option value="true">Set as Active</option>
-                                <option value="false">Set as Inactive</option>
+                                <option value="">{t("dataRights.create.keepAsIs", "Keep as is")}</option>
+                                <option value="true">{t("dataRights.create.setActive", "Set as Active")}</option>
+                                <option value="false">{t("dataRights.create.setInactive", "Set as Inactive")}</option>
                             </select>
                         </div>
 
                         {/* Motivo */}
                         <div className="dr-grid-full">
-                            <label className="dr-label">Reason for changes</label>
+                            <label className="dr-label">
+                                {t("dataRights.create.reason", "Reason for changes")}
+                            </label>
                             <textarea
                                 className="dr-textarea"
                                 rows={2}
                                 value={creating.rectification.reason ?? ""}
                                 onChange={e => updateRectification({ reason: e.target.value })}
-                                placeholder="Why are these corrections needed?"
+                                placeholder={t("dataRights.create.reason_PH", "Why are these corrections needed?")}
                             />
                         </div>
                     </div>
@@ -298,19 +329,22 @@ export function DataRightsCreatePanel({
     return (
         <div className="dr-wizard-container">
             <h2 className="dr-card-title">
-                {step === 1 ? "New Data Request" : `New ${type} Request`}
+                {step === 1
+                    ? t("dataRights.create.wizardTitleDefault", "New Data Request")
+                    : t("dataRights.create.wizardTitleType", "New {{type}} Request", { type: type })
+                }
             </h2>
 
             {/* PROGRESSO */}
             <div className="dr-wizard-progress">
                 <div className={`dr-progress-step ${step >= 1 ? "active" : ""}`}>
                     <div className="dr-step-badge">1</div>
-                    <span>Type</span>
+                    <span>{t("dataRights.create.stepType", "Type")}</span>
                 </div>
                 <div className={`dr-progress-line ${step >= 2 ? "filled" : ""}`} />
                 <div className={`dr-progress-step ${step >= 2 ? "active" : ""}`}>
                     <div className="dr-step-badge">2</div>
-                    <span>Details</span>
+                    <span>{t("dataRights.create.stepDetails", "Details")}</span>
                 </div>
             </div>
 
@@ -323,13 +357,13 @@ export function DataRightsCreatePanel({
             <div className="dr-wizard-footer">
                 {step === 2 ? (
                     <button type="button" className="dr-back-btn" onClick={() => setStep(1)}>
-                        ← Back
+                        ← {t("dataRights.create.back", "Back")}
                     </button>
                 ) : <div />}
 
                 {step === 2 && (
                     <button type="button" className="dr-primary-btn" onClick={onSubmit}>
-                        🚀 Submit Request
+                        🚀 {t("dataRights.create.submit", "Submit Request")}
                     </button>
                 )}
             </div>

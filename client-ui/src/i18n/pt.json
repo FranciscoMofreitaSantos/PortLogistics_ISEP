@@ -1123,6 +1123,105 @@
     "blockingMessage": "Importante: A Política de Privacidade foi alterada. A aceitação é obrigatória para aceder a esta funcionalidade.",
     "reviewNow": "Rever agora",
     "remindLater": "Lembrar mais tarde"
+  },
+  "dataRights": {
+    "filters": {
+      "statusLabel": "Estado:",
+      "typeLabel": "Tipo:",
+      "all": "Todos",
+      "waiting": "Em espera",
+      "inProgress": "Em progresso",
+      "completed": "Concluído",
+      "rejected": "Rejeitado",
+      "access": "Acesso",
+      "deletion": "Eliminação",
+      "rectification": "Retificação"
+    },
+    "buttons": {
+      "add": "+ Novo Pedido",
+      "close": "✕ Fechar"
+    },
+    "title": "Os Meus Direitos de Dados",
+    "subtitle": "Gere os teus pedidos de privacidade e histórico.",
+    "count": "{{count}} pedidos encontrados",
+    "search_PH": "Pesquisar por ID...",
+    "newRequest": "Novo Pedido",
+    "timeline": {
+      "waiting": "A aguardar atribuição",
+      "inProgress": "Em progresso",
+      "completed": "Concluído",
+      "rejected": "Rejeitado"
+    },
+    "main": {
+      "selectHint": "Selecione um pedido acima para ver os detalhes.",
+      "details": "Detalhes do pedido",
+      "requestId": "ID do Pedido",
+      "type": "Tipo",
+      "status": "Estado",
+      "createdOn": "Criado em",
+      "updatedOn": "Última atualização",
+      "processedBy": "Processado por",
+      "payload": "Payload / dados do sistema"
+    },
+    "list": {
+      "empty": "Ainda não tens nenhum pedido de direitos de dados."
+    },
+    "create": {
+      "wizardTitleDefault": "Novo Pedido de Dados",
+      "wizardTitleType": "Novo Pedido de {{type}}",
+      "stepType": "Tipo",
+      "stepDetails": "Detalhes",
+      "back": "Voltar",
+      "uploadClick": "Clique para carregar foto",
+      "uploadFormats": "JPG, PNG ou SVG",
+      "imageSelected": "Imagem selecionada",
+      "selectOption": "Selecione...",
+      "idPlaceholder": "Número do Documento",
+      "delPlaceholder": "Porque deseja eliminar os seus dados?",
+
+      "title": "Criar novo pedido",
+      "subtitle": "Escolha o tipo de pedido e preencha os detalhes abaixo.",
+      "accessDesc": "Obtenha uma cópia completa dos seus dados.",
+      "delDesc": "Solicite a remoção permanente dos dados.",
+      "rectDesc": "Atualize os detalhes do seu perfil.",
+      "accessConfirm": "Está prestes a solicitar um relatório completo dos seus dados pessoais.",
+      "clickSubmit": "Clique em 'Submeter Pedido' para prosseguir.",
+      "deletionReason": "Motivo (Opcional)",
+      "deletionWarning": "Nota: Alguns dados podem ser mantidos por motivos legais.",
+      "photo": "Nova Foto de Perfil",
+      "name": "Novo Nome",
+      "newName": "Novo Nome",
+      "newName_PH": "Nome Completo",
+      "email": "Novo Email",
+      "newEmail": "Novo Email",
+      "newEmail_PH": "email@exemplo.com",
+      "newPhoneNumber": "Novo Telemóvel (SAR)",
+      "phoneCode": "Cód.",
+      "phoneNumber_PH": "912345678",
+      "newCitizenId": "Novo Cartão Cidadão / Passaporte",
+      "newNationality": "Nova Nacionalidade",
+      "isActive": "Marcar Conta como Ativa?",
+      "keepAsIs": "Manter como está",
+      "setActive": "Definir como Ativa",
+      "setInactive": "Definir como Inativa",
+      "reason": "Motivo das alterações",
+      "reason_PH": "Porque são necessárias estas correções?",
+      "submit": "Submeter Pedido"
+    },
+    "toast": {
+      "listError": "Erro ao carregar os seus pedidos",
+      "noUser": "Tem de iniciar sessão para criar um pedido",
+      "deletionReasonRequired": "Por favor forneça um motivo para a eliminação",
+      "created": "O seu pedido de direitos de dados foi criado ✅",
+      "createError": "Erro ao criar pedido de direitos de dados"
+    },
+    "stats": {
+      "total": "Total",
+      "waiting": "Em Espera",
+      "inProgress": "Em Progresso",
+      "completed": "Concluído",
+      "rejected": "Rejeitado"
+    }
   }
   
 }

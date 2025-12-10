@@ -1,5 +1,6 @@
 // src/features/dataRightsRequests/pages/DataRightsRequestsPage.tsx
-import { useMemo, useState, useEffect } from "react"; // <--- ADICIONA useEffect AQUI
+import { useMemo, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next"; // <--- Importar o hook
 import "../style/dataRightsStyle.css";
 
 import { useDataRightsRequests } from "../hooks/useDataRightsRequests";
@@ -11,6 +12,8 @@ import { DataRightsCreatePanel } from "../components/DataRightsCreatePanel";
 import type { RequestStatus, RequestType, DataRightsRequest } from "../domain/dataRights";
 
 export default function DataRightsRequestsPage() {
+    const { t } = useTranslation(); // <--- Inicializar o hook
+
     const {
         loading,
         items,
@@ -49,28 +52,19 @@ export default function DataRightsRequestsPage() {
         });
     }, [items, query, statusFilter, typeFilter]);
 
-    // =================================================================
-    //  NOVO: LIMPAR SELEÇÃO QUANDO OS FILTROS MUDAM
-    // =================================================================
+    // --- LIMPAR SELEÇÃO QUANDO OS FILTROS MUDAM ---
     useEffect(() => {
-        // 1. Se não houver nada na lista filtrada, limpa a seleção
         if (filtered.length === 0) {
             if (selected !== null) setSelected(null);
             return;
         }
-
-        // 2. Se a lista tem itens, mas o item selecionado NÃO está lá
-        // (ex: estavas a ver um "Completed" e mudaste o filtro para "Waiting")
         if (selected) {
             const isStillVisible = filtered.find(r => r.id === selected.id);
             if (!isStillVisible) {
-                setSelected(null); // Limpa o painel
-                // OU, se preferires selecionar logo o primeiro da nova lista:
-                // setSelected(filtered[0]); 
+                setSelected(null);
             }
         }
     }, [filtered, selected, setSelected]);
-    // =================================================================
 
 
     // --- ESTATÍSTICAS ---
@@ -101,25 +95,36 @@ export default function DataRightsRequestsPage() {
                 setTypeFilter={setTypeFilter}
             />
 
+            {/* SECÇÃO DE ESTATÍSTICAS (Traduzida) */}
             <section className="dr-stats-row">
                 <div className="dr-stat-card dr-stat-total">
-                    <span className="dr-stat-label">TOTAL</span>
+                    <span className="dr-stat-label">
+                        {t("dataRights.stats.total", "TOTAL")}
+                    </span>
                     <span className="dr-stat-value">{stats.total}</span>
                 </div>
                 <div className="dr-stat-card dr-stat-waiting">
-                    <span className="dr-stat-label">WAITING</span>
+                    <span className="dr-stat-label">
+                        {t("dataRights.stats.waiting", "WAITING")}
+                    </span>
                     <span className="dr-stat-value">{stats.waiting}</span>
                 </div>
                 <div className="dr-stat-card dr-stat-progress">
-                    <span className="dr-stat-label">IN PROGRESS</span>
+                    <span className="dr-stat-label">
+                        {t("dataRights.stats.inProgress", "IN PROGRESS")}
+                    </span>
                     <span className="dr-stat-value">{stats.inProgress}</span>
                 </div>
                 <div className="dr-stat-card dr-stat-completed">
-                    <span className="dr-stat-label">COMPLETED</span>
+                    <span className="dr-stat-label">
+                        {t("dataRights.stats.completed", "COMPLETED")}
+                    </span>
                     <span className="dr-stat-value">{stats.completed}</span>
                 </div>
                 <div className="dr-stat-card dr-stat-rejected">
-                    <span className="dr-stat-label">REJECTED</span>
+                    <span className="dr-stat-label">
+                        {t("dataRights.stats.rejected", "REJECTED")}
+                    </span>
                     <span className="dr-stat-value">{stats.rejected}</span>
                 </div>
             </section>

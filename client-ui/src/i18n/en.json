@@ -1125,5 +1125,104 @@
     "blockingMessage": "Important: The Privacy Policy has changed. Acceptance is required to access this feature.",
     "reviewNow": "Review Now",
     "remindLater": "Remind me later"
+  },
+  "dataRights": {
+    "filters": {
+      "statusLabel": "Status:",
+      "typeLabel": "Type:",
+      "all": "All",
+      "waiting": "Waiting",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "rejected": "Rejected",
+      "access": "Access",
+      "deletion": "Deletion",
+      "rectification": "Rectification"
+    },
+    "buttons": {
+      "add": "+ New Request",
+      "close": "✕ Close"
+    },
+    "title": "My Data Rights",
+    "subtitle": "Manage your privacy requests and history.",
+    "count": "{{count}} requests found",
+    "search_PH": "Search by ID...",
+    "newRequest": "New Request",
+    "timeline": {
+      "waiting": "Waiting for assignment",
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    },
+    "main": {
+      "selectHint": "Select a request above to see the details.",
+      "details": "Request details",
+      "requestId": "Request ID",
+      "type": "Type",
+      "status": "Status",
+      "createdOn": "Created at",
+      "updatedOn": "Last update",
+      "processedBy": "Processed by",
+      "payload": "Payload / system data"
+    },
+    "list": {
+      "empty": "You don't have any data rights requests yet."
+    },
+    "create": {
+      "wizardTitleDefault": "New Data Request",
+      "wizardTitleType": "New {{type}} Request",
+      "stepType": "Type",
+      "stepDetails": "Details",
+      "back": "Back",
+      "uploadClick": "Click to upload photo",
+      "uploadFormats": "JPG, PNG or SVG",
+      "imageSelected": "Image selected",
+      "selectOption": "Select...",
+      "idPlaceholder": "ID Number",
+      "delPlaceholder": "Why do you want to delete your data?",
+
+      "title": "Create a new request",
+      "subtitle": "Choose the type of request and fill in the details below.",
+      "accessDesc": "Get a full copy of your data.",
+      "delDesc": "Request permanent removal of data.",
+      "rectDesc": "Update your profile details.",
+      "accessConfirm": "You are about to request a full report of your personal data.",
+      "clickSubmit": "Click 'Submit Request' to proceed.",
+      "deletionReason": "Reason (Optional)",
+      "deletionWarning": "Note: Some data may be retained for legal purposes.",
+      "photo": "New Profile Picture",
+      "name": "New Name",
+      "newName": "New Name",
+      "newName_PH": "Full Name",
+      "email": "New Email",
+      "newEmail": "New Email",
+      "newEmail_PH": "email@example.com",
+      "newPhoneNumber": "New Phone Number (SAR)",
+      "phoneCode": "Code",
+      "phoneNumber_PH": "912345678",
+      "newCitizenId": "New Citizen ID / Passport",
+      "newNationality": "New Nationality",
+      "isActive": "Mark Account as Active?",
+      "keepAsIs": "Keep as is",
+      "setActive": "Set as Active",
+      "setInactive": "Set as Inactive",
+      "reason": "Reason for changes",
+      "reason_PH": "Why are these corrections needed?",
+      "submit": "Submit Request"
+    },
+    "toast": {
+      "listError": "Error loading your requests",
+      "noUser": "You must be logged in to create a request",
+      "deletionReasonRequired": "Please provide a reason for deletion",
+      "created": "Your data rights request has been created ✅",
+      "createError": "Error creating data rights request"
+    },
+    "stats": {
+      "total": "Total",
+      "waiting": "Waiting",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    }
   }
 }

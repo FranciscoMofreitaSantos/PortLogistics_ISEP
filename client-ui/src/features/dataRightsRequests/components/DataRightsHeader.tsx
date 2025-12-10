@@ -8,8 +8,6 @@ type Props = {
     onQueryChange: (v: string) => void;
     onToggleCreate: () => void;
     isCreateOpen: boolean;
-
-    // --- NOVAS PROPS DE FILTRO ---
     statusFilter: RequestStatus | 'All';
     setStatusFilter: (s: RequestStatus | 'All') => void;
     typeFilter: RequestType | 'All';
@@ -29,7 +27,6 @@ export function DataRightsHeader({
                                  }: Props) {
     const { t } = useTranslation();
 
-    // Pequeno componente interno para evitar repetição de código
     const FilterBtn = ({
                            label,
                            isActive,
@@ -48,7 +45,7 @@ export function DataRightsHeader({
 
     return (
         <header className="dr-header">
-            {/* LINHA SUPERIOR (Títulos e Pesquisa) */}
+            {/* LINHA SUPERIOR */}
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '1rem' }}>
                 <div className="dr-header-left">
                     <h1 className="dr-title">
@@ -74,30 +71,81 @@ export function DataRightsHeader({
                         className="dr-cta-btn"
                         onClick={onToggleCreate}
                     >
-                        {isCreateOpen ? "✕ Close" : "+ New Request"}
+                        {isCreateOpen
+                            ? t("dataRights.buttons.close", "✕ Close")
+                            : t("dataRights.buttons.add", "+ New Request")}
                     </button>
                 </div>
             </div>
 
-            {/* --- BARRA DE FILTROS --- */}
+            {/* BARRA DE FILTROS */}
             <div className="dr-filters-toolbar">
                 {/* GRUPO 1: STATUS */}
                 <div className="dr-filter-group">
-                    <span className="dr-filter-label">Status:</span>
-                    <FilterBtn label="All" isActive={statusFilter === 'All'} onClick={() => setStatusFilter('All')} />
-                    <FilterBtn label="Waiting" icon="⏳" isActive={statusFilter === 'WaitingForAssignment'} onClick={() => setStatusFilter('WaitingForAssignment')} />
-                    <FilterBtn label="In Progress" icon="🛠️" isActive={statusFilter === 'InProgress'} onClick={() => setStatusFilter('InProgress')} />
-                    <FilterBtn label="Completed" icon="✅" isActive={statusFilter === 'Completed'} onClick={() => setStatusFilter('Completed')} />
-                    <FilterBtn label="Rejected" icon="❌" isActive={statusFilter === 'Rejected'} onClick={() => setStatusFilter('Rejected')} />
+                    <span className="dr-filter-label">
+                        {t("dataRights.filters.statusLabel", "Status:")}
+                    </span>
+
+                    <FilterBtn
+                        label={t("dataRights.filters.all", "All")}
+                        isActive={statusFilter === 'All'}
+                        onClick={() => setStatusFilter('All')}
+                    />
+                    <FilterBtn
+                        label={t("dataRights.filters.waiting", "Waiting")}
+                        icon="⏳"
+                        isActive={statusFilter === 'WaitingForAssignment'}
+                        onClick={() => setStatusFilter('WaitingForAssignment')}
+                    />
+                    <FilterBtn
+                        label={t("dataRights.filters.inProgress", "In Progress")}
+                        icon="🛠️"
+                        isActive={statusFilter === 'InProgress'}
+                        onClick={() => setStatusFilter('InProgress')}
+                    />
+                    <FilterBtn
+                        label={t("dataRights.filters.completed", "Completed")}
+                        icon="✅"
+                        isActive={statusFilter === 'Completed'}
+                        onClick={() => setStatusFilter('Completed')}
+                    />
+                    <FilterBtn
+                        label={t("dataRights.filters.rejected", "Rejected")}
+                        icon="❌"
+                        isActive={statusFilter === 'Rejected'}
+                        onClick={() => setStatusFilter('Rejected')}
+                    />
                 </div>
 
                 {/* GRUPO 2: TIPO */}
                 <div className="dr-filter-group">
-                    <span className="dr-filter-label">Type:</span>
-                    <FilterBtn label="All" isActive={typeFilter === 'All'} onClick={() => setTypeFilter('All')} />
-                    <FilterBtn label="Access" icon="📄" isActive={typeFilter === 'Access'} onClick={() => setTypeFilter('Access')} />
-                    <FilterBtn label="Deletion" icon="🧹" isActive={typeFilter === 'Deletion'} onClick={() => setTypeFilter('Deletion')} />
-                    <FilterBtn label="Rectification" icon="✏️" isActive={typeFilter === 'Rectification'} onClick={() => setTypeFilter('Rectification')} />
+                    <span className="dr-filter-label">
+                        {t("dataRights.filters.typeLabel", "Type:")}
+                    </span>
+
+                    <FilterBtn
+                        label={t("dataRights.filters.all", "All")}
+                        isActive={typeFilter === 'All'}
+                        onClick={() => setTypeFilter('All')}
+                    />
+                    <FilterBtn
+                        label={t("dataRights.filters.access", "Access")}
+                        icon="📄"
+                        isActive={typeFilter === 'Access'}
+                        onClick={() => setTypeFilter('Access')}
+                    />
+                    <FilterBtn
+                        label={t("dataRights.filters.deletion", "Deletion")}
+                        icon="🧹"
+                        isActive={typeFilter === 'Deletion'}
+                        onClick={() => setTypeFilter('Deletion')}
+                    />
+                    <FilterBtn
+                        label={t("dataRights.filters.rectification", "Rectification")}
+                        icon="✏️"
+                        isActive={typeFilter === 'Rectification'}
+                        onClick={() => setTypeFilter('Rectification')}
+                    />
                 </div>
             </div>
         </header>

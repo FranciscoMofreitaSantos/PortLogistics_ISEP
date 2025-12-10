@@ -14,13 +14,14 @@ type Props = {
 };
 
 export function DataRightsStrip({ items, loading, selectedId, onSelect }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
+    // Mapeamento de status usando as traduções
     const statusLabels: Record<string, string> = {
-        WaitingForAssignment: "Waiting",
-        InProgress: "In Progress",
-        Completed: "Completed",
-        Rejected: "Rejected",
+        WaitingForAssignment: t("dataRights.filters.waiting", "Waiting"),
+        InProgress: t("dataRights.filters.inProgress", "In Progress"),
+        Completed: t("dataRights.filters.completed", "Completed"),
+        Rejected: t("dataRights.filters.rejected", "Rejected"),
     };
 
     return (
@@ -32,7 +33,7 @@ export function DataRightsStrip({ items, loading, selectedId, onSelect }: Props)
                     ))
                 ) : items.length === 0 ? (
                     <div className="dr-empty">
-                        {" "}
+                        😴{" "}
                         {t(
                             "dataRights.list.empty",
                             "You don't have any data rights requests yet."
@@ -41,9 +42,10 @@ export function DataRightsStrip({ items, loading, selectedId, onSelect }: Props)
                 ) : (
                     items.map(r => {
                         const active = selectedId === r.id;
-                        // Formatar data curta (ex: 10 Dec)
+
+                        // Formatar data curta (usa o idioma atual do i18n)
                         const dateObj = new Date((r.createdOn as any).value ?? r.createdOn);
-                        const dateStr = dateObj.toLocaleDateString(undefined, {
+                        const dateStr = dateObj.toLocaleDateString(i18n.language, {
                             month: 'short',
                             day: 'numeric',
                             hour: '2-digit',
@@ -59,25 +61,27 @@ export function DataRightsStrip({ items, loading, selectedId, onSelect }: Props)
                                 )}
                                 onClick={() => onSelect(r)}
                             >
-                                {/* HEADER: Tipo e Data */}
+                                {/* HEADER: Tipo Traduzido e Data */}
                                 <div className="dr-card-header">
                                     <span className={`dr-badge-type ${r.type}`}>
-                                        {r.type === "Access" && "📄 Access"}
-                                        {r.type === "Deletion" && "🧹 Deletion"}
-                                        {r.type === "Rectification" && "✏️ Rectify"}
+                                        {r.type === "Access" && `📄 ${t("dataRights.filters.access", "Access")}`}
+                                        {r.type === "Deletion" && `🧹 ${t("dataRights.filters.deletion", "Deletion")}`}
+                                        {r.type === "Rectification" && `✏️ ${t("dataRights.filters.rectification", "Rectification")}`}
                                     </span>
                                     <span className="dr-date">{dateStr}</span>
                                 </div>
 
                                 {/* BODY: ID Truncado */}
                                 <div className="dr-card-body">
-                                    <span className="dr-card-label-small">Request ID</span>
+                                    <span className="dr-card-label-small">
+                                        {t("dataRights.main.requestId", "Request ID")}
+                                    </span>
                                     <span className="dr-card-id" title={r.requestId}>
                                         {r.requestId}
                                     </span>
                                 </div>
 
-                                {/* FOOTER: Status */}
+                                {/* FOOTER: Status Traduzido */}
                                 <div className="dr-card-footer">
                                     <div className={`dr-status-badge dr-${r.status}`}>
                                         <div className="dr-status-dot-mini" />
