@@ -7,7 +7,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 import adminDataRightsService from "../service/dataRightsAdminService";
 import { mapRequestsDto } from "../mappers/dataRightsMapper";
-import type { DataRightsRequest } from "../domain/dataRights";
+import type { DataRightsRequest, RequestStatus, RequestType } from "../domain/dataRights";
 
 import { AdminDataRightsHeader } from "../components/admin/AdminDataRightsHeader";
 import { AdminDataRightsStrip } from "../components/admin/AdminDataRightsStrip";
@@ -22,11 +22,15 @@ export default function DataRightsAdminPage() {
     const [loading, setLoading] = useState(true);
     const [busyAction, setBusyAction] = useState(false);
 
+    // --- ESTADOS DE FILTRO ---
     const [query, setQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState<RequestStatus | 'All'>('All');
+    const [typeFilter, setTypeFilter] = useState<RequestType | 'All'>('All');
+
     const [selected, setSelected] = useState<DataRightsRequest | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isRectificationOpen, setIsRectificationOpen] = useState(false);
-    
+
     const email = user?.email ?? "";
 
     async function reload() {
@@ -54,14 +58,7 @@ export default function DataRightsAdminPage() {
                 setSelected(list[0]);
             }
         } catch (e: any) {
-            const msg =
-                e?.response?.data?.detail ??
-                e?.response?.data?.message ??
-                e?.message ??
-                t(
-                    "dataRights.admin.loadError",
-                    "Error loading admin data rights requests",
-                );
+            const msg = e?.response?.data?.detail ?? t("dataRights.admin.loadError", "Error loading requests");
             toast.error(msg);
         } finally {
             setLoading(false);
@@ -73,33 +70,55 @@ export default function DataRightsAdminPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [email]);
 
+    // --- FILTRAGEM COMPLETA ---
     const filtered = useMemo(() => {
-        if (!query.trim()) return items;
-        const q = query.toLowerCase();
-        return items.filter(r => {
-            const txt = `${r.requestId} ${r.userEmail} ${r.type} ${r.status} ${
-                r.processedBy ?? ""
-            }`.toLowerCase();
-            return txt.includes(q);
-        });
-    }, [items, query]);
+        if (!items) return [];
 
+        return items.filter(r => {
+            // 1. Texto (ID, Email, Tipo, Status)
+            const txt = `${r.requestId} ${r.userEmail} ${r.type} ${r.status} ${r.processedBy ?? ""}`.toLowerCase();
+            const matchesQuery = query ? txt.includes(query.toLowerCase()) : true;
+
+            // 2. Status
+            const matchesStatus = statusFilter === 'All' ? true : r.status === statusFilter;
+
+            // 3. Tipo
+            const matchesType = typeFilter === 'All' ? true : r.type === typeFilter;
+
+            return matchesQuery && matchesStatus && matchesType;
+        });
+    }, [items, query, statusFilter, typeFilter]);
+
+    // --- LIMPAR SELEÇÃO SE DESAPARECER DOS FILTROS ---
+    useEffect(() => {
+        if (filtered.length === 0) {
+            // Se lista vazia, fecha o detalhe (opcional) ou limpa seleção
+            // setIsDetailsOpen(false); 
+            // setSelected(null); 
+            return;
+        }
+        if (selected) {
+            const stillVisible = filtered.find(r => r.id === selected.id);
+            if (!stillVisible) {
+                // Se o selecionado já não está na lista filtrada, fecha o modal
+                setIsDetailsOpen(false);
+                setSelected(null);
+            }
+        }
+    }, [filtered, selected]);
+
+
+    // --- ESTATÍSTICAS ---
     const stats = useMemo(() => {
         const total = items.length;
-        const waiting = items.filter(
-            r => r.status === "WaitingForAssignment",
-        ).length;
-        const inProgress = items.filter(
-            r => r.status === "InProgress",
-        ).length;
-        const completed = items.filter(
-            r => r.status === "Completed",
-        ).length;
-        const rejected = items.filter(
-            r => r.status === "Rejected",
-        ).length;
-
-        return { total, waiting, inProgress, completed, rejected };
+        const count = (s: RequestStatus) => items.filter(r => r.status === s).length;
+        return {
+            total,
+            waiting: count("WaitingForAssignment"),
+            inProgress: count("InProgress"),
+            completed: count("Completed"),
+            rejected: count("Rejected")
+        };
     }, [items]);
 
     function handleSelect(r: DataRightsRequest) {
@@ -111,33 +130,12 @@ export default function DataRightsAdminPage() {
         if (!selected || !email) return;
         try {
             setBusyAction(true);
-            const updated = await adminDataRightsService.assignResponsible(
-                selected.requestId,
-                email,
-            );
-            toast.success(
-                t(
-                    "dataRights.admin.assignSuccess",
-                    "Request assigned to you",
-                ),
-            );
-
+            const updated = await adminDataRightsService.assignResponsible(selected.requestId, email);
+            toast.success(t("dataRights.admin.assignSuccess", "Request assigned to you"));
             await reload();
-            setSelected(prev =>
-                prev && prev.requestId === updated.requestId
-                    ? { ...prev, ...updated }
-                    : prev,
-            );
+            setSelected(prev => prev && prev.requestId === updated.requestId ? { ...prev, ...updated } : prev);
         } catch (e: any) {
-            const msg =
-                e?.response?.data?.detail ??
-                e?.response?.data?.message ??
-                e?.message ??
-                t(
-                    "dataRights.admin.assignError",
-                    "Error assigning request",
-                );
-            toast.error(msg);
+            toast.error(t("dataRights.admin.assignError", "Error assigning request"));
         } finally {
             setBusyAction(false);
         }
@@ -145,49 +143,23 @@ export default function DataRightsAdminPage() {
 
     async function handleRespond() {
         if (!selected) return;
-
         if (selected.type === "Rectification"){
             setIsRectificationOpen(true);
             return;
         }
-        
         try {
             setBusyAction(true);
-
             if (selected.type === "Access") {
-                await adminDataRightsService.respondAccess(
-                    selected.requestId,
-                );
-                toast.success(
-                    t(
-                        "dataRights.admin.respondAccessSuccess",
-                        "Access response generated and emailed",
-                    ),
-                );
+                await adminDataRightsService.respondAccess(selected.requestId);
+                toast.success(t("dataRights.admin.respondAccessSuccess", "Access response sent"));
             } else if (selected.type === "Deletion") {
-                await adminDataRightsService.respondDeletion(
-                    selected.requestId,
-                );
-                toast.success(
-                    t(
-                        "dataRights.admin.respondDeletionSuccess",
-                        "Deletion request processed",
-                    ),
-                );
+                await adminDataRightsService.respondDeletion(selected.requestId);
+                toast.success(t("dataRights.admin.respondDeletionSuccess", "Deletion processed"));
             }
-
             await reload();
             setIsDetailsOpen(false);
         } catch (e: any) {
-            const msg =
-                e?.response?.data?.detail ??
-                e?.response?.data?.message ??
-                e?.message ??
-                t(
-                    "dataRights.admin.respondError",
-                    "Error responding to request",
-                );
-            toast.error(msg);
+            toast.error(t("dataRights.admin.respondError", "Error responding"));
         } finally {
             setBusyAction(false);
         }
@@ -199,59 +171,39 @@ export default function DataRightsAdminPage() {
                 stats={stats}
                 query={query}
                 onQueryChange={setQuery}
+                // Passar Props de Filtro
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                typeFilter={typeFilter}
+                setTypeFilter={setTypeFilter}
             />
 
+            {/* CARTÕES DE MÉTRICAS */}
             <div className="dr-metrics-row">
                 <div className="dr-metric-card">
-                    <span className="label">
-                        {t("dataRights.metrics.total", "Total")}
-                    </span>
+                    <span className="label">{t("dataRights.stats.total", "Total")}</span>
                     <span className="value">{stats.total}</span>
                 </div>
                 <div className="dr-metric-card">
-                    <span className="label">
-                        {t(
-                            "dataRights.metrics.waiting",
-                            "Waiting",
-                        )}
-                    </span>
+                    <span className="label">{t("dataRights.stats.waiting", "Waiting")}</span>
                     <span className="value">{stats.waiting}</span>
                 </div>
                 <div className="dr-metric-card">
-                    <span className="label">
-                        {t(
-                            "dataRights.metrics.inProgress",
-                            "In progress",
-                        )}
-                    </span>
+                    <span className="label">{t("dataRights.stats.inProgress", "In progress")}</span>
                     <span className="value">{stats.inProgress}</span>
                 </div>
                 <div className="dr-metric-card">
-                    <span className="label">
-                        {t(
-                            "dataRights.metrics.completed",
-                            "Completed",
-                        )}
-                    </span>
-                    <span className="value success">
-                        {stats.completed}
-                    </span>
+                    <span className="label">{t("dataRights.stats.completed", "Completed")}</span>
+                    <span className="value success">{stats.completed}</span>
                 </div>
                 <div className="dr-metric-card">
-                    <span className="label">
-                        {t(
-                            "dataRights.metrics.rejected",
-                            "Rejected",
-                        )}
-                    </span>
-                    <span className="value danger">
-                        {stats.rejected}
-                    </span>
+                    <span className="label">{t("dataRights.stats.rejected", "Rejected")}</span>
+                    <span className="value danger">{stats.rejected}</span>
                 </div>
             </div>
 
             <AdminDataRightsStrip
-                items={filtered}
+                items={filtered} // Usar lista filtrada
                 loading={loading}
                 selectedId={selected?.id ?? null}
                 onSelect={handleSelect}
@@ -271,10 +223,7 @@ export default function DataRightsAdminPage() {
                 request={selected}
                 onClose={() => setIsRectificationOpen(false)}
                 onApplied={updated => {
-                    // atualizar lista e request selecionado depois de aplicar rectificação
-                    setItems(prev =>
-                        prev.map(r => (r.id === updated.id ? updated : r)),
-                    );
+                    setItems(prev => prev.map(r => (r.id === updated.id ? updated : r)));
                     setSelected(updated);
                     setIsRectificationOpen(false);
                     setIsDetailsOpen(false);

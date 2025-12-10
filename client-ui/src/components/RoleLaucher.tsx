@@ -1,25 +1,40 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useAppStore } from "../app/store";
 import { Roles } from "../app/types";
 import { useTranslation } from "react-i18next";
-import {API_WEBAPI} from "../config/api.ts";
+import { API_WEBAPI } from "../config/api.ts";
 
 export default function RoleLauncher() {
     const { t } = useTranslation();
     const { user: authUser, getAccessTokenSilently, isAuthenticated } = useAuth0();
-    const { user, setUser } = useAppStore();
+    const { user, setUser } = useAppStore(); // 'user' é o estado global vindo do backend
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
-    const avatar = authUser?.picture ?? null;
-    const displayName = authUser?.name ?? user?.name ?? "User";
+    // 1. LÓGICA DE IMAGEM CORRIGIDA
+    // Tenta usar a imagem do Backend primeiro.
+    // Nota: O backend deve enviar a string "data:image/png;base64,..." pronta, 
+    // ou tens de adicionar o prefixo aqui se vier apenas em bytes puros.
+    const avatar = useMemo(() => {
+        if (user?.picture) return user.picture; // Prioridade 1: Backend
+        if (authUser?.picture) return authUser.picture; // Prioridade 2: Auth0
+        return null;
+    }, [user, authUser]);
 
+    const displayName = user?.name ?? authUser?.name ?? "User";
+
+    // 2. BUSCAR DADOS AO INICIAR (MOUNT)
     useEffect(() => {
+        // Se estiver autenticado e ainda não tivermos tentado buscar ou quisermos garantir frescura
+        if (isAuthenticated && authUser?.email) {
+            fetchUserFromBackend();
+        }
+
         const handleClickOutside = (e: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
                 setOpen(false);
@@ -27,22 +42,20 @@ export default function RoleLauncher() {
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+        }, [isAuthenticated, authUser?.email]);
 
     const fetchUserFromBackend = async () => {
         if (!isAuthenticated || !authUser?.email) return;
-        setLoading(true);
+
         try {
             const token = await getAccessTokenSilently();
-            const res = await fetch(
-                `${API_WEBAPI}/api/user/email/${encodeURIComponent(authUser.email)}`,
+            const res = await fetch(`${API_WEBAPI}/api/user/email/${encodeURIComponent(authUser.email)}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 }
             );
-
 
             if (!res.ok) {
                 console.warn("Utilizador não encontrado no backend.");
@@ -51,7 +64,15 @@ export default function RoleLauncher() {
             }
 
             const freshUser = await res.json();
-            setUser(freshUser);
+
+            // TRATAMENTO DA IMAGEM VINDA DO BACKEND
+            // Se o backend enviar bytes puros ou base64 sem cabeçalho,
+            // garante que está formatado para o <img src>
+            if (freshUser.picture && !freshUser.picture.startsWith('http') && !freshUser.picture.startsWith('data:')) {
+                freshUser.picture = `data:image/png;base64,${freshUser.picture}`;
+            }
+
+            setUser(freshUser); // Isto atualiza o estado global e força o re-render com a nova foto
             setLoading(false);
             return freshUser;
         } catch (err) {
@@ -76,25 +97,29 @@ export default function RoleLauncher() {
     };
 
     const onClick = async () => {
-        const freshUser = await fetchUserFromBackend();
-        console.log(freshUser);
-        if (!freshUser) {
+        let currentUser = user;
+
+        if (!currentUser) {
+            currentUser = await fetchUserFromBackend();
+        }
+
+        if (!currentUser) {
             navigate("/login");
             return;
         }
 
-        if (freshUser.eliminated === true) {
+        if (currentUser.eliminated === true) {
             navigate("/deleted");
             return;
         }
 
-        if (freshUser.isActive === false) {
+        if (currentUser.isActive === false) {
             navigate("/inactive");
             return;
         }
 
-        if (freshUser.role) {
-            goToRoleHome(freshUser.role);
+        if (currentUser.role) {
+            goToRoleHome(currentUser.role);
             return;
         }
 
@@ -122,6 +147,7 @@ export default function RoleLauncher() {
                             width: 32,
                             height: 32,
                             borderRadius: "50%",
+                            objectFit: "cover", // Garante que a imagem não fica distorcida
                             opacity: loading ? 0.6 : 1,
                             cursor: loading ? "not-allowed" : "pointer",
                             border:
@@ -135,6 +161,7 @@ export default function RoleLauncher() {
                 )}
             </button>
 
+            {/* Resto do JSX... */}
             {open && !user?.role && (
                 <div
                     className="role-waiting-dropdown"

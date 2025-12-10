@@ -28,7 +28,7 @@ import {
     rejectConfirmationByUser,
 } from "../../features/privatePolicy/services/privacyPolicyService";
 import toast from "react-hot-toast";
-
+import { Link } from "react-router-dom"; 
 export default function AppLayout() {
     const [menuOpen, setMenuOpen] = useState(false);
     const { i18n, t } = useTranslation();
@@ -370,9 +370,14 @@ export default function AppLayout() {
                                 </li>
                             )}
                             <li>
-                                <a href="#" className="footer-link">
+                                <a href="https://www.thpa.gr/terms-of-use/?utm_source=chatgpt.com" className="footer-link">
                                     {t("footer.terms", "Termos de Serviço")}
                                 </a>
+                            </li>
+                            <li>
+                                <Link to="/datarights" className="footer-link">
+                                    {t("footer.datarigths", "Direitos de Dados")}
+                                </Link>
                             </li>
                             <li
                                 style={{

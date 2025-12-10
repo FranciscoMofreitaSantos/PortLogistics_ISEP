@@ -1,7 +1,7 @@
 // src/features/dataRightsRequests/admin/components/AdminRequestDetailsModal.tsx
 
 import { useTranslation } from "react-i18next";
-import type { DataRightsRequest } from "../../domain/dataRights";
+import type { DataRightsRequest, RequestStatus } from "../../domain/dataRights";
 
 type Props = {
     request: DataRightsRequest | null;
@@ -11,6 +11,65 @@ type Props = {
     onRespond: () => void;
     isBusy: boolean;
 };
+
+// Configuração dos passos (igual à página de utilizador)
+const STATUS_STEPS: {
+    id: RequestStatus;
+    icon: string;
+    labelKey: string;
+    defaultLabel: string;
+}[] = [
+    {
+        id: "WaitingForAssignment",
+        icon: "⏳",
+        labelKey: "dataRights.stats.waiting", // Reutiliza as traduções que criámos
+        defaultLabel: "Waiting",
+    },
+    {
+        id: "InProgress",
+        icon: "🛠️",
+        labelKey: "dataRights.stats.inProgress",
+        defaultLabel: "In Progress",
+    },
+    {
+        id: "Completed",
+        icon: "✅",
+        labelKey: "dataRights.stats.completed",
+        defaultLabel: "Completed",
+    },
+    {
+        id: "Rejected",
+        icon: "❌",
+        labelKey: "dataRights.stats.rejected",
+        defaultLabel: "Rejected",
+    },
+];
+
+const STATUS_ORDER: RequestStatus[] = [
+    "WaitingForAssignment",
+    "InProgress",
+    "Completed",
+    "Rejected",
+];
+
+function getStepState(step: RequestStatus, current: RequestStatus) {
+    if (step === current) return "active";
+    // Regra especial: se está Rejected, o Completed fica "pending" (e vice-versa visualmente)
+    if (current === "Rejected" && step === "Completed") return "pending";
+    if (current === "Completed" && step === "Rejected") return "pending";
+
+    const stepIndex = STATUS_ORDER.indexOf(step);
+    const currentIndex = STATUS_ORDER.indexOf(current);
+
+    // Se o passo atual é maior que este passo, então este está "done"
+    // Nota: Rejeitado e Completado estão no fim, tratamos acima.
+    if (stepIndex === -1 || currentIndex === -1) return "pending";
+
+    // Se o pedido está Rejected, Waiting e InProgress estão "done"
+    if (current === "Rejected" && stepIndex < 3) return "done";
+
+    return currentIndex > stepIndex ? "done" : "pending";
+}
 
 export function AdminRequestDetailsModal({
                                              request,
@@ -41,32 +100,7 @@ export function AdminRequestDetailsModal({
             request.type === "Deletion" ||
             request.type === "Rectification");
 
-
-    // timeline – que passos estão done/active
-    const step1Class =
-        request.status === "WaitingForAssignment"
-            ? "dr-status-active"
-            : "dr-status-done";
-
-    const step2Class =
-        request.status === "InProgress"
-            ? "dr-status-active"
-            : request.status === "Completed" ||
-            request.status === "Rejected"
-                ? "dr-status-done"
-                : "";
-
-    const step3Base =
-        request.status === "Rejected"
-            ? "dr-status-step-reject"
-            : "";
-
-    const step3Class =
-        request.status === "Completed" || request.status === "Rejected"
-            ? `${step3Base} dr-status-active dr-status-done`
-            : step3Base;
-
-    // payload pretty-print
+    // Lógica para Payload bonito
     let payloadPretty: string | null = null;
     if (request.payload) {
         try {
@@ -86,11 +120,7 @@ export function AdminRequestDetailsModal({
                 <div className="dr-modal-header">
                     <div>
                         <h2 className="dr-card-title">
-                            🧾{" "}
-                            {t(
-                                "dataRights.admin.detailsTitle",
-                                "Request details",
-                            )}
+                            🧾 {t("dataRights.admin.detailsTitle", "Request details")}
                         </h2>
                         <p className="dr-card-subtitle">
                             ID: <strong>{request.requestId}</strong>
@@ -105,51 +135,35 @@ export function AdminRequestDetailsModal({
                     </button>
                 </div>
 
-                {/* TIMELINE */}
-                <div className="dr-status-timeline">
-                    <div
-                        className={`dr-status-step ${step1Class}`}
-                    >
-                        <div className="dr-status-dot">
-                            <span className="dr-status-icon">
-                                ⏳
-                            </span>
-                        </div>
-                        <div className="dr-status-label">
-                            Waiting for assignment
-                        </div>
-                    </div>
+                {/* --- NOVA TIMELINE (PROCESS TRACKER) --- */}
+                <div className="dr-process-grid">
+                    {STATUS_STEPS.map(step => {
+                        const state = getStepState(step.id, request.status);
 
-                    <div
-                        className={`dr-status-step ${step2Class}`}
-                    >
-                        <div className="dr-status-dot">
-                            <span className="dr-status-icon">
-                                🛠️
-                            </span>
-                        </div>
-                        <div className="dr-status-label">
-                            In progress
-                        </div>
-                    </div>
+                        let className = "dr-process-step";
+                        if (state === "done") className += " done";
+                        if (state === "active") className += " active";
+                        if (state === "pending") className += " pending";
 
-                    <div
-                        className={`dr-status-step ${step3Class}`}
-                    >
-                        <div className="dr-status-dot">
-                            <span className="dr-status-icon">
-                                {request.status === "Rejected"
-                                    ? "❌"
-                                    : "✅"}
-                            </span>
-                        </div>
-                        <div className="dr-status-label">
-                            {request.status === "Rejected"
-                                ? "Rejected"
-                                : "Completed"}
-                        </div>
-                    </div>
+                        // Estilo especial para cartão Rejeitado
+                        if (request.status === "Rejected" && step.id === "Rejected") {
+                            className = "dr-process-step rejected-active";
+                        } else if (step.id === "Rejected" && state === "done") {
+                            // Caso raro se um rejeitado for considerado "passado"
+                            className = "dr-process-step rejected-done";
+                        }
+
+                        return (
+                            <div key={step.id} className={className}>
+                                <span className="dr-process-icon">{step.icon}</span>
+                                <span className="dr-process-label">
+                                    {t(step.labelKey, step.defaultLabel)}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
+                {/* --------------------------------------- */}
 
                 <div className="dr-modal-grid">
                     <div className="dr-field">
@@ -159,8 +173,7 @@ export function AdminRequestDetailsModal({
                         <span className="dr-value dr-pill">
                             {request.type === "Access" && "📄 "}
                             {request.type === "Deletion" && "🧹 "}
-                            {request.type === "Rectification" &&
-                                "✏️ "}
+                            {request.type === "Rectification" && "✏️ "}
                             {request.type}
                         </span>
                     </div>
@@ -169,19 +182,14 @@ export function AdminRequestDetailsModal({
                         <span className="dr-label">
                             {t("dataRights.main.status", "Status")}
                         </span>
-                        <span
-                            className={`dr-value dr-pill dr-${request.status}`}
-                        >
+                        <span className={`dr-value dr-pill dr-${request.status}`}>
                             {request.status}
                         </span>
                     </div>
 
                     <div className="dr-field">
                         <span className="dr-label">
-                            {t(
-                                "dataRights.admin.userEmail",
-                                "User (request owner)",
-                            )}
+                            {t("dataRights.admin.userEmail", "User (request owner)")}
                         </span>
                         <span className="dr-value">
                             {request.userEmail}
@@ -190,10 +198,7 @@ export function AdminRequestDetailsModal({
 
                     <div className="dr-field">
                         <span className="dr-label">
-                            {t(
-                                "dataRights.main.processedBy",
-                                "Processed by",
-                            )}
+                            {t("dataRights.main.processedBy", "Processed by")}
                         </span>
                         <span className="dr-value">
                             {request.processedBy ?? "—"}
@@ -202,40 +207,25 @@ export function AdminRequestDetailsModal({
 
                     <div className="dr-field">
                         <span className="dr-label">
-                            {t(
-                                "dataRights.main.createdOn",
-                                "Created at",
-                            )}
+                            {t("dataRights.main.createdOn", "Created at")}
                         </span>
-                        <span className="dr-value">
-                            {created}
-                        </span>
+                        <span className="dr-value">{created}</span>
                     </div>
 
                     <div className="dr-field">
                         <span className="dr-label">
-                            {t(
-                                "dataRights.main.updatedOn",
-                                "Last update",
-                            )}
+                            {t("dataRights.main.updatedOn", "Last update")}
                         </span>
-                        <span className="dr-value">
-                            {updated}
-                        </span>
+                        <span className="dr-value">{updated}</span>
                     </div>
                 </div>
 
                 {payloadPretty && (
                     <div className="dr-payload-box dr-payload-box-admin">
                         <h3 className="dr-label">
-                            {t(
-                                "dataRights.main.payload",
-                                "Payload / system data",
-                            )}
+                            {t("dataRights.main.payload", "Payload / system data")}
                         </h3>
-                        <pre className="dr-payload">
-                            {payloadPretty}
-                        </pre>
+                        <pre className="dr-payload">{payloadPretty}</pre>
                     </div>
                 )}
 
@@ -247,11 +237,7 @@ export function AdminRequestDetailsModal({
                             className="dr-primary-btn"
                             disabled={isBusy}
                         >
-                            👤{" "}
-                            {t(
-                                "dataRights.admin.assignToMe",
-                                "Assign to me",
-                            )}
+                            👤 {t("dataRights.admin.assignToMe", "Assign to me")}
                         </button>
                     )}
 
@@ -264,19 +250,11 @@ export function AdminRequestDetailsModal({
                         >
                             🚀{" "}
                             {request.type === "Access"
-                                ? t(
-                                    "dataRights.admin.respondAccess",
-                                    "Generate access response",
-                                )
+                                ? t("dataRights.admin.respondAccess", "Generate access response")
                                 : request.type === "Deletion"
-                                    ? t(
-                                        "dataRights.admin.respondDeletion",
-                                        "Perform deletion",
-                                    )
-                                    : t(
-                                        "dataRights.admin.respondRectification",
-                                        "Open rectification decision",
-                                    )}
+                                    ? t("dataRights.admin.respondDeletion", "Perform deletion")
+                                    : t("dataRights.admin.respondRectification", "Open rectification decision")
+                            }
                         </button>
                     )}
 
