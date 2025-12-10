@@ -16,11 +16,11 @@ type Props = {
 export function DataRightsStrip({ items, loading, selectedId, onSelect }: Props) {
     const { t } = useTranslation();
 
-    const statusEmoji: Record<string, string> = {
-        WaitingForAssignment: "⏳",
-        InProgress: "🛠️",
-        Completed: "✅",
-        Rejected: "❌",
+    const statusLabels: Record<string, string> = {
+        WaitingForAssignment: "Waiting",
+        InProgress: "In Progress",
+        Completed: "Completed",
+        Rejected: "Rejected",
     };
 
     return (
@@ -32,7 +32,7 @@ export function DataRightsStrip({ items, loading, selectedId, onSelect }: Props)
                     ))
                 ) : items.length === 0 ? (
                     <div className="dr-empty">
-                        😴{" "}
+                        {" "}
                         {t(
                             "dataRights.list.empty",
                             "You don't have any data rights requests yet."
@@ -41,6 +41,15 @@ export function DataRightsStrip({ items, loading, selectedId, onSelect }: Props)
                 ) : (
                     items.map(r => {
                         const active = selectedId === r.id;
+                        // Formatar data curta (ex: 10 Dec)
+                        const dateObj = new Date((r.createdOn as any).value ?? r.createdOn);
+                        const dateStr = dateObj.toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
                         return (
                             <button
                                 key={r.id}
@@ -50,26 +59,32 @@ export function DataRightsStrip({ items, loading, selectedId, onSelect }: Props)
                                 )}
                                 onClick={() => onSelect(r)}
                             >
-                                <div className="dr-card-mini-top">
-                                    <span className="dr-card-mini-id">
-                                        #{r.requestId}
-                                    </span>
+                                {/* HEADER: Tipo e Data */}
+                                <div className="dr-card-header">
                                     <span className={`dr-badge-type ${r.type}`}>
-                                        {r.type === "Access" && "📄"}
-                                        {r.type === "Deletion" && "🧹"}
-                                        {r.type === "Rectification" && "✏️"}{" "}
-                                        {r.type}
+                                        {r.type === "Access" && "📄 Access"}
+                                        {r.type === "Deletion" && "🧹 Deletion"}
+                                        {r.type === "Rectification" && "✏️ Rectify"}
+                                    </span>
+                                    <span className="dr-date">{dateStr}</span>
+                                </div>
+
+                                {/* BODY: ID Truncado */}
+                                <div className="dr-card-body">
+                                    <span className="dr-card-label-small">Request ID</span>
+                                    <span className="dr-card-id" title={r.requestId}>
+                                        {r.requestId}
                                     </span>
                                 </div>
-                                <div className="dr-card-mini-bottom">
-                                    <span className={`dr-status dr-${r.status}`}>
-                                        {statusEmoji[r.status]} {r.status}
-                                    </span>
-                                    <span className="dr-date">
-                                        {new Date(
-                                            (r.createdOn as any).value ?? r.createdOn
-                                        ).toLocaleString()}
-                                    </span>
+
+                                {/* FOOTER: Status */}
+                                <div className="dr-card-footer">
+                                    <div className={`dr-status-badge dr-${r.status}`}>
+                                        <div className="dr-status-dot-mini" />
+                                        <span>{statusLabels[r.status] ?? r.status}</span>
+                                    </div>
+                                    {/* Seta indicativa subtil */}
+                                    {active && <span style={{fontSize: '1.2rem', color: 'var(--dr-primary)'}}>👉</span>}
                                 </div>
                             </button>
                         );

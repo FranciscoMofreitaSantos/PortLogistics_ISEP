@@ -349,7 +349,7 @@ export function DataRightsMainPanel({ selected }: Props) {
         <div className="dr-main-panel">
             <div className="dr-card-large fade-in">
                 <h2 className="dr-card-title">
-                    🔎 {t("dataRights.main.details", "Request details")}
+                    {t("dataRights.main.details", "Request details")}
                 </h2>
 
                 <p className="dr-card-subtitle">
@@ -405,29 +405,29 @@ export function DataRightsMainPanel({ selected }: Props) {
                     </div>
                 </div>
 
-                {/* TIMELINE DE ESTADO */}
-                <div className="dr-status-timeline">
+                {/* PROCESS TRACKER (NOVA VERSÃO) */}
+                <div className="dr-process-grid">
                     {STATUS_STEPS.map(step => {
                         const state = getStepState(step.id, selected.status);
-                        const isRejectStep = step.id === "Rejected";
+
+                        // Lógica para classes CSS
+                        let className = "dr-process-step";
+                        if (state === "done") className += " done";
+                        if (state === "active") className += " active";
+                        if (state === "pending") className += " pending";
+
+                        // Tratamento especial para Rejected
+                        if (selected.status === "Rejected" && step.id === "Rejected") {
+                            // Se o pedido foi rejeitado, este card fica vermelho
+                            className = "dr-process-step rejected-active";
+                        }
 
                         return (
-                            <div
-                                key={step.id}
-                                className={[
-                                    "dr-status-step",
-                                    `dr-status-${state}`,
-                                    isRejectStep ? "dr-status-step-reject" : "",
-                                ]
-                                    .filter(Boolean)
-                                    .join(" ")}
-                            >
-                                <div className="dr-status-dot">
-                                    <span className="dr-status-icon">
-                                        {step.icon}
-                                    </span>
-                                </div>
-                                <span className="dr-status-label">
+                            <div key={step.id} className={className}>
+                                <span className="dr-process-icon">
+                                    {step.icon}
+                                </span>
+                                <span className="dr-process-label">
                                     {t(step.labelKey, step.defaultLabel)}
                                 </span>
                             </div>

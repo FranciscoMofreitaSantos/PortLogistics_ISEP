@@ -1,5 +1,5 @@
 // src/features/dataRightsRequests/components/DataRightsCreatePanel.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type {
     CreatingDataRightsRequest,
@@ -16,28 +16,8 @@ type Props = {
     onSubmit: () => void;
 };
 
-/* ===== PHONE HELPERS ===== */
-
-const PHONE_CODES: string[] = [
-    "+351", // PT
-    "+34",  // ES
-    "+33",  // FR
-    "+44",  // UK
-    "+49",  // DE
-    "+39",  // IT
-    "+30",  // GR
-    "+1",   // US / CA
-    "+55",  // BR
-    "+52",  // MX
-    "+54",  // AR
-    "+81",  // JP
-    "+82",  // KR
-    "+86",  // CN
-    "+91",  // IN
-    "+61",  // AU
-    "+64",  // NZ
-    "+27",  // ZA
-];
+/* ===== HELPERS: TELEFONE ===== */
+const PHONE_CODES: string[] = ["+351", "+34", "+33", "+44", "+49", "+30", "+1", "+55", "+244", "+41"];
 
 function buildPhoneE164(code: string, rawNumber: string): string {
     const digits = rawNumber.replace(/\D/g, "");
@@ -45,238 +25,20 @@ function buildPhoneE164(code: string, rawNumber: string): string {
     return `${code}${digits}`;
 }
 
-/* ===== NATIONALITIES (mesmos nomes do enum do backend) ===== */
-
+/* ===== HELPERS: NACIONALIDADES ===== */
 const NATIONALITY_VALUES: string[] = [
-    "Usa",
-    "Afghanistan",
-    "Albania",
-    "Algeria",
-    "Andorra",
-    "Angola",
-    "AntiguaDeps",
-    "Argentina",
-    "Armenia",
-    "Australia",
-    "Austria",
-    "Azerbaijan",
-    "Bahamas",
-    "Bahrain",
-    "Bangladesh",
-    "Barbados",
-    "Belarus",
-    "Belgium",
-    "Belize",
-    "Benin",
-    "Bhutan",
-    "Bolivia",
-    "BosniaHerzegovina",
-    "Botswana",
-    "Brazil",
-    "Brunei",
-    "Bulgaria",
-    "Burkina",
-    "Burma",
-    "Burundi",
-    "Cambodia",
-    "Cameroon",
-    "Canada",
-    "CapeVerde",
-    "CentralAfricanRep",
-    "Chad",
-    "Chile",
-    "China",
-    "RepublicOfChina",
-    "Colombia",
-    "Comoros",
-    "DemocraticRepublicOfTheCongo",
-    "RepublicOfTheCongo",
-    "CostaRica",
-    "Croatia",
-    "Cuba",
-    "Cyprus",
-    "CzechRepublic",
-    "Danzig",
-    "Denmark",
-    "Djibouti",
-    "Dominica",
-    "DominicanRepublic",
-    "EastTimor",
-    "Ecuador",
-    "Egypt",
-    "ElSalvador",
-    "EquatorialGuinea",
-    "Eritrea",
-    "Estonia",
-    "Ethiopia",
-    "Fiji",
-    "Finland",
-    "France",
-    "Gabon",
-    "GazaStrip",
-    "TheGambia",
-    "Georgia",
-    "Germany",
-    "Ghana",
-    "Greece",
-    "Grenada",
-    "Guatemala",
-    "Guinea",
-    "GuineaBissau",
-    "Guyana",
-    "Haiti",
-    "HolyRomanEmpire",
-    "Honduras",
-    "Hungary",
-    "Iceland",
-    "India",
-    "Indonesia",
-    "Iran",
-    "Iraq",
-    "RepublicOfIreland",
-    "Israel",
-    "Italy",
-    "IvoryCoast",
-    "Jamaica",
-    "Japan",
-    "Jordan",
-    "Kazakhstan",
-    "Kenya",
-    "Kiribati",
-    "NorthKorea",
-    "SouthKorea",
-    "Kosovo",
-    "Kuwait",
-    "Kyrgyzstan",
-    "Laos",
-    "Latvia",
-    "Lebanon",
-    "Lesotho",
-    "Liberia",
-    "Libya",
-    "Liechtenstein",
-    "Lithuania",
-    "Luxembourg",
-    "Macedonia",
-    "Madagascar",
-    "Malawi",
-    "Malaysia",
-    "Maldives",
-    "Mali",
-    "Malta",
-    "MarshallIslands",
-    "Mauritania",
-    "Mauritius",
-    "Mexico",
-    "Micronesia",
-    "Moldova",
-    "Monaco",
-    "Mongolia",
-    "Montenegro",
-    "Morocco",
-    "Mozambique",
-    "Namibia",
-    "Nauru",
-    "Nepal",
-    "Newfoundland",
-    "Netherlands",
-    "NewZealand",
-    "Nicaragua",
-    "Niger",
-    "Nigeria",
-    "Norway",
-    "Oman",
-    "Pakistan",
-    "Palau",
-    "Panama",
-    "PapuaNewGuinea",
-    "Paraguay",
-    "Peru",
-    "Philippines",
-    "Poland",
-    "Portugal",
-    "Qatar",
-    "Romania",
-    "RussianFederation",
-    "Rwanda",
-    "Samoa",
-    "SanMarino",
-    "SaoTomePrincipe",
-    "SaudiArabia",
-    "Senegal",
-    "Serbia",
-    "Seychelles",
-    "SierraLeone",
-    "Singapore",
-    "Slovakia",
-    "Slovenia",
-    "SolomonIslands",
-    "Somalia",
-    "SouthAfrica",
-    "Spain",
-    "SriLanka",
-    "Sudan",
-    "Suriname",
-    "Swaziland",
-    "Sweden",
-    "Switzerland",
-    "Syria",
-    "Tajikistan",
-    "Tanzania",
-    "Thailand",
-    "Togo",
-    "Tonga",
-    "TrinidadTobago",
-    "Tunisia",
-    "Turkey",
-    "Turkmenistan",
-    "Tuvalu",
-    "Uganda",
-    "Ukraine",
-    "UnitedArabEmirates",
-    "UnitedKingdom",
-    "Uruguay",
-    "Uzbekistan",
-    "Vanuatu",
-    "VaticanCity",
-    "Venezuela",
-    "Vietnam",
-    "Yemen",
-    "Zambia",
-    "Zimbabwe",
+    "Portugal", "Spain", "France", "Germany", "UnitedKingdom", "UnitedStates", "Brazil", "Angola",
+    "Mozambique", "CapeVerde", "Italy", "Greece", "China", "India", "Russia", "Ukraine",
+    // ... Podes adicionar mais países aqui conforme necessário
+    "SouthAfrica", "Switzerland", "Luxembourg", "Belgium", "Netherlands"
 ];
 
 function nationalityLabel(value: string): string {
-    if (value === "Usa") return "USA";
-    if (value === "CapeVerde") return "Cape Verde";
-    if (value === "CentralAfricanRep") return "Central African Rep.";
-    if (value === "CzechRepublic") return "Czech Republic";
-    if (value === "DominicanRepublic") return "Dominican Republic";
-    if (value === "HolyRomanEmpire") return "Holy Roman Empire";
-    if (value === "IvoryCoast") return "Ivory Coast";
-    if (value === "PapuaNewGuinea") return "Papua New Guinea";
-    if (value === "RussianFederation") return "Russian Federation";
-    if (value === "SaoTomePrincipe") return "São Tomé & Príncipe";
-    if (value === "SaudiArabia") return "Saudi Arabia";
-    if (value === "SolomonIslands") return "Solomon Islands";
-    if (value === "SouthAfrica") return "South Africa";
-    if (value === "SriLanka") return "Sri Lanka";
-    if (value === "TrinidadTobago") return "Trinidad & Tobago";
-    if (value === "UnitedArabEmirates") return "United Arab Emirates";
-    if (value === "UnitedKingdom") return "United Kingdom";
-    if (value === "VaticanCity") return "Vatican City";
-
-    // Default: quebra CamelCase em palavras
+    // Separa CamelCase em palavras (ex: UnitedKingdom -> United Kingdom)
     return value.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
 
-const NATIONALITIES = NATIONALITY_VALUES.map(v => ({
-    value: v,
-    label: nationalityLabel(v),
-}));
-
-/* ===== COMPONENTE ===== */
-
+/* ===== COMPONENTE WIZARD ===== */
 export function DataRightsCreatePanel({
                                           creating,
                                           setType,
@@ -285,395 +47,292 @@ export function DataRightsCreatePanel({
                                           onSubmit,
                                       }: Props) {
     const { t } = useTranslation();
+    const [step, setStep] = useState<1 | 2>(1);
     const type = creating.type;
 
-    // estado local para o telefone SAR (prefixo + número)
+    // Estados locais para inputs compostos
     const [phoneCode, setPhoneCode] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
 
-    // Sempre que o payload já tiver um número (ex: edição futura),
-    // desmonta-o nos dois campos.
+    // Sincronizar dados iniciais (se estiver a editar)
     useEffect(() => {
         const full = creating.rectification.newPhoneNumber ?? "";
-        if (!full) {
-            setPhoneCode("");
-            setPhoneNumber("");
-            return;
-        }
+        if (!full) { setPhoneCode(""); setPhoneNumber(""); return; }
 
         const match = PHONE_CODES.find(c => full.startsWith(c));
         if (match) {
             setPhoneCode(match);
             setPhoneNumber(full.slice(match.length));
         } else {
-            setPhoneCode("");
-            setPhoneNumber(full.replace(/^\+/, ""));
+            setPhoneNumber(full);
         }
     }, [creating.rectification.newPhoneNumber]);
 
-    function handlePhoneCodeChange(newCode: string) {
-        setPhoneCode(newCode);
-        const combined = buildPhoneE164(newCode, phoneNumber);
-        updateRectification({
-            newPhoneNumber: combined || null,
-        });
-    }
+    // Atualiza telefone no objeto principal
+    const updatePhone = (c: string, n: string) => {
+        setPhoneCode(c);
+        setPhoneNumber(n);
+        updateRectification({ newPhoneNumber: buildPhoneE164(c, n) || null });
+    };
 
-    function handlePhoneNumberChange(newNumber: string) {
-        setPhoneNumber(newNumber);
-        const combined = buildPhoneE164(phoneCode, newNumber);
-        updateRectification({
-            newPhoneNumber: combined || null,
-        });
-    }
+    // UPLOAD DE IMAGEM (Converter para Base64)
+    const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                updateRectification({ newPicture: base64String });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
-    return (
-        <div className="dr-create-panel slide-in-up">
-            <h2 className="dr-card-title">
-                ✨ {t("dataRights.create.title", "Create a new request")}
-            </h2>
-            <p className="dr-card-subtitle">
-                {t(
-                    "dataRights.create.subtitle",
-                    "Choose the type of request and fill in the details below.",
-                )}
-            </p>
+    const handleRemoveImage = () => {
+        updateRectification({ newPicture: null });
+    };
 
-            {/* Selector de tipo */}
-            <div className="dr-type-switch">
-                <TypeButton
-                    label="Access"
-                    emoji="📄"
-                    active={type === "Access"}
-                    onClick={() => setType("Access")}
-                />
-                <TypeButton
-                    label="Deletion"
-                    emoji="🧹"
-                    active={type === "Deletion"}
-                    onClick={() => setType("Deletion")}
-                />
-                <TypeButton
-                    label="Rectification"
-                    emoji="✏️"
-                    active={type === "Rectification"}
-                    onClick={() => setType("Rectification")}
-                />
+    // --- PASSO 1: SELEÇÃO DE TIPO ---
+    const renderStep1 = () => (
+        <div className="dr-type-grid fade-enter">
+            <div
+                className={`dr-type-card ${type === "Access" ? "selected" : ""}`}
+                onClick={() => { setType("Access"); setStep(2); }}
+            >
+                <div className="dr-type-icon-lg">📄</div>
+                <span className="dr-type-title">Access</span>
+                <span className="dr-type-desc">Get a full copy of your data.</span>
             </div>
 
-            {/* Form consoante o tipo */}
+            <div
+                className={`dr-type-card ${type === "Deletion" ? "selected" : ""}`}
+                onClick={() => { setType("Deletion"); setStep(2); }}
+            >
+                <div className="dr-type-icon-lg">🧹</div>
+                <span className="dr-type-title">Deletion</span>
+                <span className="dr-type-desc">Request permanent removal of data.</span>
+            </div>
+
+            <div
+                className={`dr-type-card ${type === "Rectification" ? "selected" : ""}`}
+                onClick={() => { setType("Rectification"); setStep(2); }}
+            >
+                <div className="dr-type-icon-lg">✏️</div>
+                <span className="dr-type-title">Rectification</span>
+                <span className="dr-type-desc">Update your profile details.</span>
+            </div>
+        </div>
+    );
+
+    // --- PASSO 2: FORMULÁRIO ---
+    const renderStep2 = () => (
+        <div className="fade-enter">
             {type === "Access" && (
                 <div className="dr-form-section">
-                    <p>
-                        {t(
-                            "dataRights.create.accessInfo",
-                            "We will send you a summary of the personal data we store about you.",
-                        )}
+                    <p className="dr-value" style={{textAlign: 'center', marginTop: '3rem'}}>
+                        📄 {t("dataRights.create.accessConfirm", "You are about to request a full report of your personal data.")}
                     </p>
-                    <p className="dr-note">
-                        ℹ️{" "}
-                        {t(
-                            "dataRights.create.accessNote",
-                            "No additional information is required for this request.",
-                        )}
+                    <p className="dr-note" style={{textAlign: 'center'}}>
+                        Click "Submit Request" to proceed.
                     </p>
                 </div>
             )}
 
             {type === "Deletion" && (
                 <div className="dr-form-section">
-                    <label className="dr-label">
-                        {t(
-                            "dataRights.create.deletionReason",
-                            "Reason for deletion (optional but recommended)",
-                        )}
-                    </label>
+                    <label className="dr-label">Reason (Optional)</label>
                     <textarea
                         className="dr-textarea"
-                        rows={3}
-                        placeholder={t(
-                            "dataRights.create.deletionReason_PH",
-                            "Example: I no longer use the platform and want my data removed.",
-                        )}
+                        rows={4}
+                        placeholder="Why do you want to delete your data?"
                         value={creating.deletionReason}
-                        onChange={e =>
-                            setCreating({
-                                ...creating,
-                                deletionReason: e.target.value,
-                            })
-                        }
+                        onChange={e => setCreating({ ...creating, deletionReason: e.target.value })}
                     />
-                    <p className="dr-note">
-                        ⚠️{" "}
-                        {t(
-                            "dataRights.create.deletionWarning",
-                            "Some data may need to be kept for legal or security reasons.",
-                        )}
-                    </p>
+                    <p className="dr-note">⚠️ Note: Some data may be retained for legal purposes.</p>
                 </div>
             )}
 
             {type === "Rectification" && (
-                <div className="dr-form-section dr-grid-2">
-                    <div>
-                        <label className="dr-label">
-                            {t("dataRights.create.newName", "New name")}
-                        </label>
-                        <input
-                            className="dr-input"
-                            value={creating.rectification.newName ?? ""}
-                            onChange={e =>
-                                updateRectification({ newName: e.target.value })
-                            }
-                            placeholder={t(
-                                "dataRights.create.newName_PH",
-                                "Only fill if you want to change",
-                            )}
-                        />
-                    </div>
-                    <div>
-                        <label className="dr-label">
-                            {t("dataRights.create.newEmail", "New email")}
-                        </label>
-                        <input
-                            className="dr-input"
-                            value={creating.rectification.newEmail ?? ""}
-                            onChange={e =>
-                                updateRectification({ newEmail: e.target.value })
-                            }
-                            placeholder={t(
-                                "dataRights.create.newEmail_PH",
-                                "Only fill if you want to change",
-                            )}
-                        />
+                <div className="dr-form-section">
+
+                    {/* UPLOAD IMAGEM */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label className="dr-label">New Profile Picture</label>
+                        {!creating.rectification.newPicture ? (
+                            <div className="dr-upload-box">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="dr-upload-input"
+                                    onChange={handleImageUpload}
+                                />
+                                <div className="dr-upload-placeholder">
+                                    <span className="dr-upload-icon">☁️</span>
+                                    <strong>Click to upload photo</strong>
+                                    <small>JPG, PNG or SVG</small>
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: 'center' }}>
+                                <div className="dr-image-preview-wrapper">
+                                    <img
+                                        src={creating.rectification.newPicture}
+                                        alt="Preview"
+                                        className="dr-image-preview"
+                                    />
+                                    <button type="button" className="dr-remove-image" onClick={handleRemoveImage}>✕</button>
+                                </div>
+                                <p className="dr-note" style={{marginTop: '0.5rem'}}>Image selected</p>
+                            </div>
+                        )}
                     </div>
 
-                    <div>
-                        <label className="dr-label">
-                            {t(
-                                "dataRights.create.newPicture",
-                                "New profile picture URL",
-                            )}
-                        </label>
-                        <input
-                            className="dr-input"
-                            value={creating.rectification.newPicture ?? ""}
-                            onChange={e =>
-                                updateRectification({
-                                    newPicture: e.target.value,
-                                })
-                            }
-                            placeholder="https://..."
-                        />
-                    </div>
+                    {/* DADOS PESSOAIS */}
+                    <div className="dr-grid-2">
+                        {/* Nome e Email */}
+                        <div>
+                            <label className="dr-label">New Name</label>
+                            <input
+                                className="dr-input"
+                                value={creating.rectification.newName ?? ""}
+                                onChange={e => updateRectification({ newName: e.target.value })}
+                                placeholder="Full Name"
+                            />
+                        </div>
+                        <div>
+                            <label className="dr-label">New Email</label>
+                            <input
+                                className="dr-input"
+                                value={creating.rectification.newEmail ?? ""}
+                                onChange={e => updateRectification({ newEmail: e.target.value })}
+                                placeholder="email@example.com"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="dr-label">
-                            {t(
-                                "dataRights.create.isActive",
-                                "Mark account as active?",
-                            )}
-                        </label>
-                        <select
-                            className="dr-input"
-                            value={
-                                creating.rectification.isActive === null ||
-                                creating.rectification.isActive === undefined
-                                    ? ""
-                                    : creating.rectification.isActive
-                                        ? "true"
-                                        : "false"
-                            }
-                            onChange={e => {
-                                const v = e.target.value;
-                                updateRectification({
-                                    isActive:
-                                        v === ""
-                                            ? null
-                                            : v === "true"
-                                                ? true
-                                                : false,
-                                });
-                            }}
-                        >
-                            <option value="">
-                                {t(
-                                    "dataRights.create.keepAsIs",
-                                    "Keep as is",
-                                )}
-                            </option>
-                            <option value="true">
-                                {t(
-                                    "dataRights.create.setActive",
-                                    "Set as active",
-                                )}
-                            </option>
-                            <option value="false">
-                                {t(
-                                    "dataRights.create.setInactive",
-                                    "Set as inactive",
-                                )}
-                            </option>
-                        </select>
-                    </div>
+                        {/* Telefone (Ocupa largura total para caber bem) */}
+                        <div className="dr-grid-full">
+                            <label className="dr-label">New Phone Number (SAR)</label>
+                            <div className="dr-phone-row">
+                                <select
+                                    className="dr-select dr-phone-code"
+                                    value={phoneCode}
+                                    onChange={e => updatePhone(e.target.value, phoneNumber)}
+                                >
+                                    <option value="">Code</option>
+                                    {PHONE_CODES.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                                <input
+                                    className="dr-input dr-phone-number"
+                                    type="tel"
+                                    value={phoneNumber}
+                                    onChange={e => updatePhone(phoneCode, e.target.value)}
+                                    placeholder="912345678"
+                                />
+                            </div>
+                        </div>
 
-                    {/* PHONE (SAR) */}
-                    <div>
-                        <label className="dr-label">
-                            {t(
-                                "dataRights.create.newPhoneNumber",
-                                "New phone number (SAR)",
-                            )}
-                        </label>
-                        <div className="dr-phone-row">
+                        {/* Citizen ID e Nacionalidade */}
+                        <div>
+                            <label className="dr-label">New Citizen ID / Passport</label>
+                            <input
+                                className="dr-input"
+                                value={creating.rectification.newCitizenId ?? ""}
+                                onChange={e => updateRectification({ newCitizenId: e.target.value })}
+                                placeholder="ID Number"
+                            />
+                        </div>
+                        <div>
+                            <label className="dr-label">New Nationality</label>
                             <select
-                                className="dr-input dr-phone-code"
-                                value={phoneCode}
-                                onChange={e =>
-                                    handlePhoneCodeChange(e.target.value)
-                                }
+                                className="dr-select"
+                                value={creating.rectification.newNationality ?? ""}
+                                onChange={e => updateRectification({ newNationality: e.target.value || null })}
                             >
-                                <option value="">
-                                    {t(
-                                        "dataRights.create.phoneCode",
-                                        "+ code",
-                                    )}
-                                </option>
-                                {PHONE_CODES.map(code => (
-                                    <option key={code} value={code}>
-                                        {code}
-                                    </option>
+                                <option value="">Select...</option>
+                                {NATIONALITY_VALUES.map(val => (
+                                    <option key={val} value={val}>{nationalityLabel(val)}</option>
                                 ))}
                             </select>
-                            <input
-                                className="dr-input dr-phone-number"
-                                value={phoneNumber}
-                                onChange={e =>
-                                    handlePhoneNumberChange(e.target.value)
+                        </div>
+
+                        {/* Estado Ativo */}
+                        <div className="dr-grid-full">
+                            <label className="dr-label">Mark Account as Active?</label>
+                            <select
+                                className="dr-select"
+                                value={
+                                    creating.rectification.isActive === null || creating.rectification.isActive === undefined
+                                        ? ""
+                                        : creating.rectification.isActive ? "true" : "false"
                                 }
-                                placeholder={t(
-                                    "dataRights.create.phoneNumber_PH",
-                                    "912345678",
-                                )}
-                                inputMode="tel"
+                                onChange={e => {
+                                    const v = e.target.value;
+                                    updateRectification({
+                                        isActive: v === "" ? null : v === "true"
+                                    });
+                                }}
+                            >
+                                <option value="">Keep as is</option>
+                                <option value="true">Set as Active</option>
+                                <option value="false">Set as Inactive</option>
+                            </select>
+                        </div>
+
+                        {/* Motivo */}
+                        <div className="dr-grid-full">
+                            <label className="dr-label">Reason for changes</label>
+                            <textarea
+                                className="dr-textarea"
+                                rows={2}
+                                value={creating.rectification.reason ?? ""}
+                                onChange={e => updateRectification({ reason: e.target.value })}
+                                placeholder="Why are these corrections needed?"
                             />
                         </div>
                     </div>
-
-                    {/* NATIONALITY (SAR) */}
-                    <div>
-                        <label className="dr-label">
-                            {t(
-                                "dataRights.create.newNationality",
-                                "New nationality (SAR)",
-                            )}
-                        </label>
-                        <select
-                            className="dr-input"
-                            value={creating.rectification.newNationality ?? ""}
-                            onChange={e =>
-                                updateRectification({
-                                    newNationality:
-                                        e.target.value || null,
-                                })
-                            }
-                        >
-                            <option value="">
-                                {t(
-                                    "dataRights.create.keepAsIs",
-                                    "Keep as is",
-                                )}
-                            </option>
-                            {NATIONALITIES.map(n => (
-                                <option key={n.value} value={n.value}>
-                                    {n.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="dr-label">
-                            {t(
-                                "dataRights.create.newCitizenId",
-                                "New citizen ID / passport (SAR)",
-                            )}
-                        </label>
-                        <input
-                            className="dr-input"
-                            value={creating.rectification.newCitizenId ?? ""}
-                            onChange={e =>
-                                updateRectification({
-                                    newCitizenId: e.target.value,
-                                })
-                            }
-                            placeholder="AB1234567"
-                            maxLength={9}
-                            pattern="[A-Za-z0-9]{6,9}"
-                        />
-                    </div>
-
-                    <div className="dr-grid-full">
-                        <label className="dr-label">
-                            {t(
-                                "dataRights.create.reason",
-                                "Why do you want these changes?",
-                            )}
-                        </label>
-                        <textarea
-                            className="dr-textarea"
-                            rows={3}
-                            value={creating.rectification.reason ?? ""}
-                            onChange={e =>
-                                updateRectification({
-                                    reason: e.target.value,
-                                })
-                            }
-                            placeholder={t(
-                                "dataRights.create.reason_PH",
-                                "Briefly explain why these corrections are needed.",
-                            )}
-                        />
-                    </div>
                 </div>
             )}
-
-            <div className="dr-form-actions">
-                <button
-                    type="button"
-                    className="dr-primary-btn"
-                    onClick={onSubmit}
-                >
-                    🚀 {t("dataRights.create.submit", "Submit request")}
-                </button>
-                <p className="dr-note">
-                    🔒{" "}
-                    {t(
-                        "dataRights.create.footerNote",
-                        "Your request will be handled by our privacy team and you will be notified by email.",
-                    )}
-                </p>
-            </div>
         </div>
     );
-}
 
-type TypeButtonProps = {
-    label: string;
-    emoji: string;
-    active: boolean;
-    onClick: () => void;
-};
-
-function TypeButton({ label, emoji, active, onClick }: TypeButtonProps) {
     return (
-        <button
-            type="button"
-            className={`dr-type-btn ${active ? "active" : ""}`}
-            onClick={onClick}
-        >
-            <span className="dr-type-emoji">{emoji}</span>
-            <span>{label}</span>
-        </button>
+        <div className="dr-wizard-container">
+            <h2 className="dr-card-title">
+                {step === 1 ? "New Data Request" : `New ${type} Request`}
+            </h2>
+
+            {/* PROGRESSO */}
+            <div className="dr-wizard-progress">
+                <div className={`dr-progress-step ${step >= 1 ? "active" : ""}`}>
+                    <div className="dr-step-badge">1</div>
+                    <span>Type</span>
+                </div>
+                <div className={`dr-progress-line ${step >= 2 ? "filled" : ""}`} />
+                <div className={`dr-progress-step ${step >= 2 ? "active" : ""}`}>
+                    <div className="dr-step-badge">2</div>
+                    <span>Details</span>
+                </div>
+            </div>
+
+            {/* CONTEÚDO */}
+            <div style={{ flex: 1 }}>
+                {step === 1 ? renderStep1() : renderStep2()}
+            </div>
+
+            {/* RODAPÉ */}
+            <div className="dr-wizard-footer">
+                {step === 2 ? (
+                    <button type="button" className="dr-back-btn" onClick={() => setStep(1)}>
+                        ← Back
+                    </button>
+                ) : <div />}
+
+                {step === 2 && (
+                    <button type="button" className="dr-primary-btn" onClick={onSubmit}>
+                        🚀 Submit Request
+                    </button>
+                )}
+            </div>
+        </div>
     );
 }
