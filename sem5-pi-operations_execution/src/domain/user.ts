@@ -10,6 +10,8 @@ interface UserProps {
     email: string;
     name: string;
     role: Role;
+    isActive: boolean
+    isEliminated: boolean
 }
 
 export class User extends AggregateRoot<UserProps> {
@@ -30,36 +32,53 @@ export class User extends AggregateRoot<UserProps> {
         return this.props.name;
     }
 
-    get role() : Role {
+    get role(): Role {
         return this.props.role;
     }
 
-    get auth0userid() : string {
+    get auth0userid(): string {
         return this.props.auth0UserId;
+    }
+
+    get isActive(): boolean {
+        return this.props.isActive;
+    }
+
+    get isEliminated(): boolean {
+        return this.props.isEliminated;
     }
 
     set role(value: Role) {
         this.props.role = value;
     }
 
-    private constructor(props : UserProps, id?: UniqueEntityID) {
+    set isActive(value: boolean) {
+        this.props.isActive = value;
+    }
+
+    set isEliminated(value: boolean) {
+        this.props.isEliminated = value;
+    }
+
+    private constructor(props: UserProps, id?: UniqueEntityID) {
         super(props, id);
     }
 
-    public static create (props: UserProps, id?: UniqueEntityID): Result<User> {
+    public static create(props: UserProps, id?: UniqueEntityID): Result<User> {
 
         const guardedProps = [
-            { argument: props.name, argumentName: 'name' },
-            { argument: props.email, argumentName: 'email' },
-            { argument: props.role, argumentName: 'role' }
+            {argument: props.name, argumentName: 'name'},
+            {argument: props.email, argumentName: 'email'},
+            {argument: props.role, argumentName: 'role'},
+            {argument: props.isActive, argumentName: 'isActive'},
+            {argument: props.isEliminated, argumentName: 'isEliminated'}
         ];
 
         const guardResult = Guard.againstNullOrUndefinedBulk(guardedProps);
 
         if (!guardResult.succeeded) {
             return Result.fail<User>(guardResult.message)
-        }
-        else {
+        } else {
             const user = new User({
                 ...props
             }, id);
@@ -67,7 +86,5 @@ export class User extends AggregateRoot<UserProps> {
             return Result.ok<User>(user);
         }
     }
-
-
 
 }

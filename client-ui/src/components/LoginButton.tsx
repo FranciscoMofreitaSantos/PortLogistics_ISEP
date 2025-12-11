@@ -45,9 +45,13 @@ export default function LoginPort() {
                     </div>
 
                     <div className="monitoring-data">
-                        <p className="data-line">Developed with &lt;3</p>
-                        <p className="data-line team-flicker">MakeItSimple</p>
-                        <p className="data-line">v3.1.0</p>
+                        <p className="data-line data-line-large">Developed with &lt;3</p>
+                        <p className="team-flicker">
+                            <span>Make</span>
+                            <span className="it-highlight it-uppercase">IT</span>
+                            <span>Simple</span>
+                        </p>
+                        <p className="data-line data-line-large">v3.1.0</p>
                     </div>
 
                     <button onClick={handleLogin} className="activate-btn">

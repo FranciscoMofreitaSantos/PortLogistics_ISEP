@@ -10,7 +10,9 @@ export class UserMap extends Mapper<User> {
             name: user.name,
             auth0UserId: user.auth0userid,
             email: user.email,
-            role: user.role
+            role: user.role,
+            isActive : user.isActive,
+            isEliminated : user.isEliminated
         };
     }
 
@@ -21,7 +23,9 @@ export class UserMap extends Mapper<User> {
                 name: raw.name,
                 auth0UserId: raw.auth0UserId,
                 email: raw.email,
-                role: raw.role
+                role: raw.role,
+                isActive: raw.isActive,
+                isEliminated: raw.isEliminated
             },
             new UniqueEntityID(raw.domainId)
         );
@@ -40,7 +44,9 @@ export class UserMap extends Mapper<User> {
             email: user.email,
             name: user.name,
             auth0UserId: user.auth0userid,
-            role: user.role
+            role: user.role,
+            isActive: user.isActive,
+            isEliminated: user.isEliminated
         };
     }
 }

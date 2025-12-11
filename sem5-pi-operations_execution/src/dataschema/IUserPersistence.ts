@@ -3,5 +3,7 @@ export interface IUserPersistence {
 	name: string;
 	email: string;
 	auth0UserId: string;
-	role: string
+	role: string;
+    isActive: boolean;
+    isEliminated: boolean;
   }

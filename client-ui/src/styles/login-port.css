@@ -209,23 +209,57 @@ html, body {
     padding: 10px 0;
     border-top: 1px dashed var(--glass-border);
     border-bottom: 1px dashed var(--glass-border);
-    text-align: center; /* ALTERADO PARA CENTER */
+    text-align: center;
 }
 
 .data-line {
     margin: 5px 0;
-    padding-left: 0; /* REMOVIDO PARA CENTRAR */
+    padding-left: 0;
 }
 
+/* Nova classe para "Developed with <3" e "v3.1.0" */
+.data-line-large {
+    font-size: 0.9rem;
+    opacity: 1;
+    color: var(--neon-blue);
+}
+
+
+/* Classe principal para "MakeITSimple" */
 .team-flicker {
+    display: block;
+    font-size: 1.5rem;
     color: var(--neon-purple);
-    font-weight: bold;
+    font-weight: 900;
+    letter-spacing: 5px;
     animation: team-data-flicker 2s step-end infinite;
 }
 
+/* Estilo para o "IT" */
+.it-highlight {
+    color: var(--glitch-color);
+    text-shadow: 0 0 8px var(--glitch-color), 0 0 15px var(--glitch-color);
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+/* Força apenas o "IT" a ser maiúsculas */
+.it-uppercase {
+    text-transform: uppercase;
+}
+
+.team-flicker span {
+    /* Garante que Make e Simple não sejam afetados pelo uppercase */
+    text-transform: none;
+}
+
+
 @keyframes team-data-flicker {
     0%, 15%, 17%, 20%, 50%, 52%, 100% {
-        text-shadow: 0 0 5px var(--neon-purple), 0 0 10px var(--neon-blue);
+        text-shadow:
+                0 0 10px var(--neon-purple),
+                0 0 20px var(--neon-purple),
+                0 0 30px var(--neon-blue);
         opacity: 1;
     }
     16%, 51% {

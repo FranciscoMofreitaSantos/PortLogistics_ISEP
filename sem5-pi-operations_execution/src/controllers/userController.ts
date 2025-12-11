@@ -4,8 +4,6 @@ import { BaseController } from "../core/infra/BaseController";
 import IUserService from "../services/IServices/IUserService";
 import { NextFunction, Request, Response } from "express";
 import { IUserDTO } from "../dto/IUserDTO";
-import { Result } from "../core/logic/Result";
-import config from "../config";
 
 @Service()
 export default class UserController extends BaseController implements IUserController {

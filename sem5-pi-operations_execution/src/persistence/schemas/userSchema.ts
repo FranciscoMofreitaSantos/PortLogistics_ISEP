@@ -31,6 +31,16 @@ const User = new mongoose.Schema(
             type: String,
             default: 'NoRole',
         },
+
+        isActive: {
+            type: Boolean,
+            default: false,
+        },
+
+        isEliminated: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: false,

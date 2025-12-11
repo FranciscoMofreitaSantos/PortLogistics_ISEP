@@ -28,6 +28,8 @@ export default (app: Router) => {
                 role: Joi.string().required(),
                 auth0UserId: Joi.string().required(),
                 name: Joi.string().required(),
+                isActive: Joi.boolean().required(),
+                isEliminated: Joi.boolean().required()
             }),
         }),
         (req, res, next) => ctrl.createOrSyncUser(req, res, next)

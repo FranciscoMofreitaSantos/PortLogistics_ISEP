@@ -7,7 +7,6 @@ import { IUserDTO } from "../dto/IUserDTO";
 import { Result } from "../core/logic/Result";
 import { GenericAppError } from "../core/logic/AppError";
 import { Role } from "../domain/role";
-import config from "../config";
 
 @Service()
 export default class UserService implements IUserService {
@@ -29,7 +28,9 @@ export default class UserService implements IUserService {
                 name: userDTO.name,
                 email: userDTO.email,
                 role: userDTO.role as Role,
-                auth0UserId: userDTO.auth0UserId
+                auth0UserId: userDTO.auth0UserId,
+                isActive: userDTO.isActive,
+                isEliminated: userDTO.isEliminated
             });
 
             if (userOrError.isFailure) {
@@ -62,6 +63,8 @@ export default class UserService implements IUserService {
 
 
             user.role = userDTO.role as Role;
+            user.isActive = userDTO.isActive as boolean;
+            user.isEliminated = userDTO.isEliminated as boolean;
 
             const userSaved = await this.userRepo.save(user);
             if (!userSaved) {

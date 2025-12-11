@@ -58,10 +58,12 @@ export default function SyncUser() {
                 });
 
                 const payloadOEM = {
+                    name: user.name,
                     auth0UserId: user.sub,
                     email: user.email,
-                    name: user.name,
                     role: userData.role || "NoRole",
+                    isActive: userData.isActive,
+                    isEliminated: userData.eliminated
                 };
 
                 const responseOEM = await fetch(`${API_OEM}/api/users/sync`, {

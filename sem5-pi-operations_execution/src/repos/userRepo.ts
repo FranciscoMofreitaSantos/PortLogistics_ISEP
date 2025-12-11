@@ -34,8 +34,9 @@ export default class UserRepo implements IUserRepo {
                 existing.name = rawUser.name;
                 existing.role = rawUser.role;
                 existing.auth0UserId = rawUser.auth0UserId;
-
                 existing.email = rawUser.email;
+                existing.isActive = rawUser.isActive;
+                existing.isEliminated = rawUser.isEliminated;
 
                 await existing.save();
                 persistedDoc = existing;
