@@ -107,7 +107,7 @@ namespace SEM5_PI_WEBAPI
                             "http://localhost:3000",
                             "http://10.9.23.188",
                             "http://10.9.23.188:5173",
-                            "http://10.9.21.228"  // NGINX (para chamadas do frontend em prod)
+                            "http://10.9.21.228"  
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -173,7 +173,7 @@ namespace SEM5_PI_WEBAPI
                 endpoints.MapControllers();
                 endpoints.MapHealthChecks("/api/health");
 
-                // ✅ ENDPOINT RAIZ PARA TESTE VIA NGINX
+               
                 endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("WEBAPI ONLINE");

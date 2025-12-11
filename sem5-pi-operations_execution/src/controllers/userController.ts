@@ -8,10 +8,8 @@ import { IUserDTO } from "../dto/IUserDTO";
 @Service()
 export default class UserController extends BaseController implements IUserController {
 
-    constructor(
-        @Inject("UserService")
-        private userServiceInstance: IUserService
-    ) {
+    constructor(@Inject("UserService") private userServiceInstance: IUserService)
+    {
         super();
     }
 
