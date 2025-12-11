@@ -19,6 +19,7 @@ export default class UserService implements IUserService {
     public async createUser(userDTO: IUserDTO): Promise<Result<IUserDTO>> {
         try {
             const userExists = await this.userRepo.findByEmail(userDTO.email);
+            //console.log("DTO RECEBIDO:", userDTO);
 
             if (userExists) {
                 return Result.fail<IUserDTO>("User already exists.");

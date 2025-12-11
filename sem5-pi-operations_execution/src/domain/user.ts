@@ -36,7 +36,7 @@ export class User extends AggregateRoot<UserProps> {
         return this.props.role;
     }
 
-    get auth0userid(): string {
+    get auth0UserId(): string {
         return this.props.auth0UserId;
     }
 
@@ -65,7 +65,7 @@ export class User extends AggregateRoot<UserProps> {
     }
 
     public static create(props: UserProps, id?: UniqueEntityID): Result<User> {
-
+        console.log("USER.CREATE INPUT:", props);
         const guardedProps = [
             {argument: props.name, argumentName: 'name'},
             {argument: props.email, argumentName: 'email'},

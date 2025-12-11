@@ -5,8 +5,10 @@ x-user-email: test@example.com
 x-user-role: Admin
 
 {
-  "auth0UserId": "auth0|123456789",
-  "email": "test@example.com",
-  "name": "John Doey",
-  "role": "PortAuthorityOfficer"
+  "name": "Test User",
+  "auth0UserId": "auth0|123",
+  "email": "test@isep.ipp.pt",
+  "role": "NoRole",
+  "isActive": true,
+  "isEliminated": false
 }

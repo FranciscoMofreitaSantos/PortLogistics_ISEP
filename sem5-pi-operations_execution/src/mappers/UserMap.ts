@@ -8,7 +8,7 @@ export class UserMap extends Mapper<User> {
     public static toDTO(user: User): IUserDTO {
         return {
             name: user.name,
-            auth0UserId: user.auth0userid,
+            auth0UserId: user.auth0UserId,
             email: user.email,
             role: user.role,
             isActive : user.isActive,
@@ -43,7 +43,7 @@ export class UserMap extends Mapper<User> {
             domainId: user.id.toString(),
             email: user.email,
             name: user.name,
-            auth0UserId: user.auth0userid,
+            auth0UserId: user.auth0UserId,
             role: user.role,
             isActive: user.isActive,
             isEliminated: user.isEliminated

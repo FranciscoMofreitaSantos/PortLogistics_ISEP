@@ -2,11 +2,13 @@ import mongoose from "mongoose";
 import config from "../config";
 
 export default async () => {
-    try {
-        await mongoose.connect(config.databaseURL);
-        return mongoose.connection;
-    } catch (e) {
-        console.error("Could not connect to Mongo:", e);
-        throw e;
+    const dbUri = config.databaseURL;
+
+    if (!dbUri) {
+        throw new Error("❌ MONGODB_URI is missing. Check your .env file.");
     }
+
+    await mongoose.connect(dbUri);
+
+    console.log("✌️ DB loaded and connected!");
 };

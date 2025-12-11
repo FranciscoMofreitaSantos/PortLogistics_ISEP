@@ -1,59 +1,55 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
+import path from "path";
 
-process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || "development";
 
-const envFound = dotenv.config();
-if (!envFound) {
-    throw new Error("⚠️  Couldn't find .env.development file  ⚠️");
+const envPath = path.resolve(process.cwd(), `.env.${env}`);
+
+const result = dotenv.config({ path: envPath });
+
+if (result.error) {
+    console.warn(`⚠️  Could not load ${envPath}. Falling back to .env`);
+    dotenv.config();
+}
+
+console.log(`Loaded environment: ${env}`);
+console.log(`Using env file: ${envPath}`);
+
+function required(name: string): string {
+    const value = process.env[name];
+    if (!value) {
+        console.error(`❌ Missing required environment variable: ${name}`);
+        throw new Error(`Missing environment variable: ${name}`);
+    }
+    return value;
 }
 
 export default {
+    port: parseInt(process.env.PORT || "3000", 10),
 
-    port: parseInt(process.env.PORT as string, 10) || 3000,
+    databaseURL: required("MONGODB_URI"),
 
-    /**
-     * That long string from mlab
-     */
-    databaseURL: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/test",
-
-    /**
-     * Your secret sauce
-     */
-    jwtSecret: process.env.JWT_SECRET || "my sakdfho2390asjod$%jl)!sdjas0i secret",
-    //todo ver depois o secret
-
-    /**
-     * Used by winston logger
-     */
     logs: {
-        level: process.env.LOG_LEVEL || 'info',
+        level: process.env.LOG_LEVEL || "info",
     },
 
-    /**
-     * API configs
-     */
     api: {
-        prefix: '/api',
+        prefix: "/api",
     },
+
+    operationsApiUrl: process.env.OPERATIONS_URL || "",
+    planningApiUrl: process.env.PLANNING_URL || "",
+    webApiUrl: process.env.WEBAPI_URL || "",
 
     controllers: {
-        user: {
-            name: "UserController",
-            path: "../controllers/userController"
-        }
+        user: { name: "UserController", path: "../controllers/userController" }
     },
 
     repos: {
-        user: {
-            name: "UserRepo",
-            path: "../repos/userRepo"
-        }
+        user: { name: "UserRepo", path: "../repos/userRepo" }
     },
 
     services: {
-        user: {
-            name: "UserService",
-            path: "../services/userService"
-        }
-    },
+        user: { name: "UserService", path: "../services/userService" }
+    }
 };
