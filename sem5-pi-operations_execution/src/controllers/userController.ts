@@ -1,64 +1,81 @@
 import { Inject, Service } from "typedi";
-import IUserController from "./IControllers/IUserController";
 import { BaseController } from "../core/infra/BaseController";
 import IUserService from "../services/IServices/IUserService";
-import { NextFunction, Request, Response } from "express";
 import { IUserDTO } from "../dto/IUserDTO";
+import { Logger } from "winston";
 
 @Service()
-export default class UserController extends BaseController implements IUserController {
+export default class UserController extends BaseController {
 
-    constructor(@Inject("UserService") private userServiceInstance: IUserService)
-    {
+    constructor(
+        @Inject("UserService") private userService: IUserService,
+        @Inject("logger") private logger: Logger
+    ) {
         super();
     }
 
-    public async createOrSyncUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    protected async executeImpl(): Promise<void> {
+        const dto = this.req.body as IUserDTO;
+
+        this.logger.info("HTTP POST /users/sync", {
+            email: dto?.email
+        });
+
         try {
-            const dto = req.body as IUserDTO;
-            //console.log("REQ BODY:", req.body);
+            const userExists = await this.userService.getUser(dto.email);
 
-            const userExists = await this.userServiceInstance.getUser(dto.email);
+            this.logger.debug("User existence check", {
+                email: dto.email,
+                exists: userExists.isSuccess
+            });
 
-            let result;
-
-            if (userExists.isSuccess) {
-                result = await this.userServiceInstance.updateUser(dto);
-            } else {
-                result = await this.userServiceInstance.createUser(dto);
-            }
+            const result = userExists.isSuccess
+                ? await this.userService.updateUser(dto)
+                : await this.userService.createUser(dto);
 
             if (result.isFailure) {
-                const msg = result.errorValue()?.toString() ?? "Unknown error";
-                return res.status(400).json({ error: msg });
+                this.logger.warn("User sync failed", {
+                    email: dto.email,
+                    reason: result.errorValue()
+                });
+
+                this.clientError(
+                    result.errorValue()?.toString() ?? "Unknown error"
+                );
+                return;
             }
 
-            return res.status(200).json(result.getValue());
+            this.logger.info("User synced successfully", {
+                email: dto.email
+            });
 
-        } catch (e) {
-            console.error("OEM error:", e);
-            return next(e);
+            this.ok(this.res, result.getValue());
+            return;
+
+        } catch (error) {
+            this.logger.error("Unhandled error in UserController", { error });
+            this.fail(error as Error);
+            return;
         }
     }
 
-
-    public async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
+    public async getMe(): Promise<void> {
         try {
-            const userDTO = (req as any).currentUser;
+            const userDTO = (this.req as any).currentUser;
 
             if (!userDTO) {
+                this.logger.warn("GET /users/me without authenticated user");
                 this.unauthorized("No user info available.");
                 return;
             }
 
-            this.ok(res, userDTO);
+            this.ok(this.res, userDTO);
+            return;
 
-        } catch (e: any) {
-            this.fail(e instanceof Error ? e.message : String(e));
+        } catch (error) {
+            this.logger.error("Unhandled error in UserController.getMe", { error });
+            this.fail(error as Error);
+            return;
         }
-    }
-
-    protected executeImpl(): Promise<void> {
-        throw new Error("Method not implemented.");
     }
 }
