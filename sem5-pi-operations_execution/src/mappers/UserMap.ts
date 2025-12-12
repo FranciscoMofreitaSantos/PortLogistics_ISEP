@@ -1,29 +1,30 @@
 import { Mapper } from "../core/infra/Mapper";
 import { IUserDTO } from "../dto/IUserDTO";
-import { User } from "../domain/user";
+import { User } from "../domain/user/user";
 import { UniqueEntityID } from "../core/domain/UniqueEntityID";
+import { IUserPersistence } from "../dataschema/IUserPersistence";
+import { RoleFactory } from "../domain/user/role";
 
-export class UserMap extends Mapper<User> {
+export class UserMap extends Mapper<User, IUserDTO, IUserPersistence> {
 
-    public static toDTO(user: User): IUserDTO {
+    toDTO(user: User): IUserDTO {
         return {
             name: user.name,
             auth0UserId: user.auth0UserId,
             email: user.email,
             role: user.role,
-            isActive : user.isActive,
-            isEliminated : user.isEliminated
+            isActive: user.isActive,
+            isEliminated: user.isEliminated
         };
     }
 
-    public static async toDomain(raw: any): Promise<User | null> {
-
+    toDomain(raw: IUserPersistence): User | null {
         const userOrError = User.create(
             {
                 name: raw.name,
                 auth0UserId: raw.auth0UserId,
                 email: raw.email,
-                role: raw.role,
+                role: RoleFactory.fromString(raw.role),
                 isActive: raw.isActive,
                 isEliminated: raw.isEliminated
             },
@@ -38,11 +39,11 @@ export class UserMap extends Mapper<User> {
         return userOrError.getValue();
     }
 
-    public static toPersistence(user: User): any {
+    toPersistence(user: User): IUserPersistence {
         return {
             domainId: user.id.toString(),
-            email: user.email,
             name: user.name,
+            email: user.email,
             auth0UserId: user.auth0UserId,
             role: user.role,
             isActive: user.isActive,

@@ -1,5 +1,5 @@
 import {Result} from "../../core/logic/Result";
-import {Role} from "../../domain/role";
+import {Role} from "../../domain/user/role";
 import {IUserDTO} from "../../dto/IUserDTO";
 
 export default interface IUserService {

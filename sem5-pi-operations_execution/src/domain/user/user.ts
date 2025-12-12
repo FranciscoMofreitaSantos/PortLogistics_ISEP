@@ -1,9 +1,9 @@
-import {AggregateRoot} from "../core/domain/AggregateRoot";
-import {UniqueEntityID} from "../core/domain/UniqueEntityID";
-import {Result} from "../core/logic/Result";
+import {AggregateRoot} from "../../core/domain/AggregateRoot";
+import {UniqueEntityID} from "../../core/domain/UniqueEntityID";
+import {Result} from "../../core/logic/Result";
 import {UserId} from "./userId";
 import {Role} from "./role";
-import {Guard} from "../core/logic/Guard";
+import {Guard} from "../../core/logic/Guard";
 
 interface UserProps {
     auth0UserId: string;

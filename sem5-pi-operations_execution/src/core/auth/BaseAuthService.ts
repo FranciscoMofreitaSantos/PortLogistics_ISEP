@@ -1,6 +1,6 @@
 import { Service, Inject } from "typedi";
 import IUserRepo from "../../services/IRepos/IUserRepo";
-import { Role } from "../../domain/role";
+import { Role } from "../../domain/user/role";
 import { Result } from "../logic/Result";
 
 @Service()

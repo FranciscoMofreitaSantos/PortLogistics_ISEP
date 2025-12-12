@@ -1,5 +1,6 @@
 import { Container } from 'typedi';
 import Logger from './logger';
+import {UserMap} from "../mappers/UserMap";
 
 interface SchemaConfig {
     name: string;
@@ -21,6 +22,7 @@ interface DependencyInjectorInput {
 export default ({ schemas, controllers, repos, services }: DependencyInjectorInput) => {
     try {
         Container.set("logger", Logger);
+        Container.set("UserMap", new UserMap());
 
         // Load schemas
         schemas.forEach((s: SchemaConfig) => {

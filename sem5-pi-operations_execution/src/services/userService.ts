@@ -1,18 +1,19 @@
 import { Service, Inject } from "typedi";
 import IUserService from "../services/IServices/IUserService";
 import IUserRepo from "../services/IRepos/IUserRepo";
-import { User } from "../domain/user";
+import { User } from "../domain/user/user";
 import { UserMap } from "../mappers/UserMap";
 import { IUserDTO } from "../dto/IUserDTO";
 import { Result } from "../core/logic/Result";
 import { GenericAppError } from "../core/logic/AppError";
-import { Role } from "../domain/role";
+import { Role } from "../domain/user/role";
 
 @Service()
 export default class UserService implements IUserService {
 
     constructor(
         @Inject("UserRepo") private userRepo: IUserRepo,
+        @Inject("UserMap") private userMap: UserMap
     ) {}
 
 
@@ -44,7 +45,7 @@ export default class UserService implements IUserService {
                 return Result.fail<IUserDTO>("Error saving user.");
             }
 
-            const userDTOSaved = UserMap.toDTO(userSaved);
+            const userDTOSaved = this.userMap.toDTO(userSaved);
             return Result.ok<IUserDTO>(userDTOSaved);
 
         } catch (e) {
@@ -73,7 +74,7 @@ export default class UserService implements IUserService {
                 return Result.fail<IUserDTO>("Error updating user.");
             }
 
-            const userDTOSaved = UserMap.toDTO(userSaved);
+            const userDTOSaved = this.userMap.toDTO(userSaved);
 
             return Result.ok<IUserDTO>(userDTOSaved);
 
@@ -92,7 +93,7 @@ export default class UserService implements IUserService {
                 return Result.fail<IUserDTO>("User not found for email: " + email);
             }
 
-            const userDTO = UserMap.toDTO(user);
+            const userDTO = this.userMap.toDTO(user);
             return Result.ok<IUserDTO>(userDTO);
 
         } catch (e) {

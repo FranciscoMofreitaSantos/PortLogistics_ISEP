@@ -1,9 +1,7 @@
-// src/api/middlewares/attachCurrentUser.ts
-
 import { Container } from 'typedi';
 import winston from 'winston';
 import config from '../../config';
-import IUserService from '../../services/IServices/IUserService'; // O Serviço que tem o findByEmail
+import IUserService from '../../services/IServices/IUserService';
 
 
 const attachCurrentUser = async (req: any, res: any, next: any) => {

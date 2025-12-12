@@ -1,6 +1,6 @@
 import IUserRepo from "../services/IRepos/IUserRepo";
 import { Inject, Service } from "typedi";
-import { User } from "../domain/user";
+import { User } from "../domain/user/user";
 import { IUserPersistence } from "../dataschema/IUserPersistence";
 import { Document, Model } from "mongoose";
 import { UserMap } from "../mappers/UserMap";
@@ -11,6 +11,9 @@ export default class UserRepo implements IUserRepo {
     constructor(
         @Inject("userSchema")
         private userSchema: Model<IUserPersistence & Document>,
+
+        @Inject("UserMap")
+        private userMap: UserMap,
 
         @Inject("logger")
         private logger: any
@@ -24,7 +27,7 @@ export default class UserRepo implements IUserRepo {
 
     public async save(user: User): Promise<User | null> {
         try {
-            const rawUser = UserMap.toPersistence(user);
+            const rawUser = this.userMap.toPersistence(user);
 
             const existing = await this.userSchema.findOne({ email: rawUser.email });
 
@@ -45,7 +48,7 @@ export default class UserRepo implements IUserRepo {
                 persistedDoc = created;
             }
 
-            return UserMap.toDomain(persistedDoc);
+            return this.userMap.toDomain(persistedDoc);
 
         } catch (err) {
             this.logger.error("Error in UserRepo.save:", err);
@@ -56,6 +59,6 @@ export default class UserRepo implements IUserRepo {
     public async findByEmail(email: string): Promise<User | null> {
         const userRecord = await this.userSchema.findOne({ email });
 
-        return userRecord ? UserMap.toDomain(userRecord) : null;
+        return userRecord ? this.userMap.toDomain(userRecord) : null;
     }
 }

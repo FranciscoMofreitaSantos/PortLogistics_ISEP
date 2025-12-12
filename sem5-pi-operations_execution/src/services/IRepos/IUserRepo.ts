@@ -1,5 +1,5 @@
 import { Repo } from "../../core/infra/Repo";
-import { User } from "../../domain/user";
+import { User } from "../../domain/user/user";
 
 
 export default interface IUserRepo extends Repo<User> {
