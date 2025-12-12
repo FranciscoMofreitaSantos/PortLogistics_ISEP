@@ -1,7 +1,13 @@
 {
   "dependencies": {
+    "express": "^5.2.1",
     "lil-gui": "^0.21.0",
+    "mongoose": "^9.0.1",
     "react-icons": "^5.5.0",
-    "three": "^0.181.0"
+    "three": "^0.181.0",
+    "typedi": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
   }
 }
