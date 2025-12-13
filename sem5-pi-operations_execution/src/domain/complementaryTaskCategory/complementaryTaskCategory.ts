@@ -1,9 +1,9 @@
 import { AggregateRoot } from "../../core/domain/AggregateRoot";
 import { UniqueEntityID } from "../../core/domain/UniqueEntityID";
-import { Result } from "../../core/logic/Result";
 import { Guard } from "../../core/logic/Guard";
 import { ComplementaryTaskCategoryId } from "./complementaryTaskCategoryId";
 import { Category } from "./category";
+import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
 
 interface ComplementaryTaskCategoryProps {
     code: string;
@@ -19,8 +19,6 @@ interface ComplementaryTaskCategoryProps {
 export class ComplementaryTaskCategory
     extends AggregateRoot<ComplementaryTaskCategoryProps> {
 
-
-
     get id(): UniqueEntityID {
         return this._id;
     }
@@ -28,8 +26,6 @@ export class ComplementaryTaskCategory
     get categoryId(): ComplementaryTaskCategoryId {
         return ComplementaryTaskCategoryId.caller(this.id);
     }
-
-
 
     get code(): string {
         return this.props.code;
@@ -63,7 +59,6 @@ export class ComplementaryTaskCategory
         return this.props.updatedAt;
     }
 
-
     private constructor(
         props: ComplementaryTaskCategoryProps,
         id?: UniqueEntityID
@@ -72,24 +67,20 @@ export class ComplementaryTaskCategory
     }
 
 
-    public changeCode(code: string): Result<void> {
-        if (!ComplementaryTaskCategory.isValidCodeFormat(code)) {
-            return Result.fail<void>(
-                "Code must follow the format CTC###"
-            );
-        }
-
-        this.props.code = code;
-        this.touch();
-        return Result.ok<void>();
-    }
 
     public changeDetails(
         name: string,
         description: string,
         defaultDuration: number | null,
         category: Category
-    ): Result<void> {
+    ): void {
+
+        if (!name || !description) {
+            throw new BusinessRuleValidationError(
+                "Invalid category details",
+                "Name and description are required"
+            );
+        }
 
         this.props.name = name;
         this.props.description = description;
@@ -97,32 +88,37 @@ export class ComplementaryTaskCategory
         this.props.category = category;
 
         this.touch();
-        return Result.ok<void>();
     }
 
-    public deactivate(): Result<void> {
+    public deactivate(): void {
         if (!this.props.isActive) {
-            return Result.fail<void>(
+            throw new BusinessRuleValidationError(
+                "Category already inactive",
                 "Complementary Task Category is already inactive"
             );
         }
 
         this.props.isActive = false;
         this.touch();
-        return Result.ok<void>();
     }
 
-    public activate(): Result<void> {
+    public activate(): void {
+        if (this.props.isActive) {
+            throw new BusinessRuleValidationError(
+                "Category already active",
+                "Complementary Task Category is already active"
+            );
+        }
+
         this.props.isActive = true;
         this.touch();
-        return Result.ok<void>();
     }
 
 
     public static create(
         props: ComplementaryTaskCategoryProps,
         id?: UniqueEntityID
-    ): Result<ComplementaryTaskCategory> {
+    ): ComplementaryTaskCategory {
 
         const guardedProps = [
             { argument: props.code, argumentName: "code" },
@@ -135,28 +131,27 @@ export class ComplementaryTaskCategory
 
         const guardResult = Guard.againstNullOrUndefinedBulk(guardedProps);
         if (!guardResult.succeeded) {
-            return Result.fail<ComplementaryTaskCategory>(
-                guardResult.message ?? "Invalid input"
+            throw new BusinessRuleValidationError(
+                "Invalid input",
+                guardResult.message ?? "Missing required fields"
             );
         }
 
         if (!this.isValidCodeFormat(props.code)) {
-            return Result.fail<ComplementaryTaskCategory>(
+            throw new BusinessRuleValidationError(
+                "Invalid code format",
                 "Code must follow the format CTC###"
             );
         }
 
-        const category = new ComplementaryTaskCategory(
+        return new ComplementaryTaskCategory(
             {
                 ...props,
                 updatedAt: props.updatedAt ?? null
             },
             id
         );
-
-        return Result.ok<ComplementaryTaskCategory>(category);
     }
-
 
 
     private static isValidCodeFormat(code: string): boolean {

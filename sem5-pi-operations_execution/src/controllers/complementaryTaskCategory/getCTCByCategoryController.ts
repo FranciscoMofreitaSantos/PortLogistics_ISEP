@@ -1,11 +1,13 @@
-import {Inject, Service} from "typedi";
-import {BaseController} from "../../core/infra/BaseController";
 import IComplementaryTaskCategoryService from "../../services/IServices/IComplementaryTaskCategoryService";
-import {Logger} from "winston";
-import {Category} from "../../domain/complementaryTaskCategory/category";
+import { BaseController } from "../../core/infra/BaseController";
+import { Inject, Service } from "typedi";
+import { Logger } from "winston";
+import { IComplementaryTaskCategoryDTO } from "../../dto/IComplementaryTaskCategoryDTO";
+import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
 
 @Service()
-export default class GetCTCByCategoryController extends BaseController {
+export default class CreateComplementaryTaskCategoryController
+    extends BaseController {
 
     constructor(
         @Inject("ComplementaryTaskCategoryService")
@@ -16,21 +18,25 @@ export default class GetCTCByCategoryController extends BaseController {
     }
 
     protected async executeImpl(): Promise<void> {
-        const category = this.req.query.category as Category;
+        const dto = this.req.body as IComplementaryTaskCategoryDTO;
 
-        const result = await this.ctcService.getByCategoryAsync(category);
+        try {
+            const result = await this.ctcService.createAsync(dto);
+            this.ok(this.res, result);
+        } catch (e) {
 
-        if (result.isFailure) {
-            const error = result.errorValue();
+            if (e instanceof BusinessRuleValidationError) {
+                this.logger.warn("Business rule violation on create CTC", {
+                    message: e.message,
+                    details: e.details
+                });
 
-            this.clientError(
-                typeof error === "string"
-                    ? error
-                    : "Error getting by category complementary task category"
-            );
-            return;
+                this.clientError(e.message);
+                return;
+            }
+
+            this.logger.error("Unexpected error creating ComplementaryTaskCategory", { e });
+            this.fail("Internal server error");
         }
-
-        this.ok(this.res, result.getValue());
     }
 }

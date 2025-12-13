@@ -1,7 +1,7 @@
-import { CTStatus } from "../domain/complementaryTask/ctstatus";
+import {CTStatus} from "../domain/complementaryTask/ctstatus";
 
-export interface IComplementaryTaskPersistance{
-    _id:string,
+export interface IComplementaryTaskPersistence {
+    domainId: string,
     code: string,
     category: string,
     staff: string,

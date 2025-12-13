@@ -1,3 +1,5 @@
+import {BusinessRuleValidationError} from "../../core/logic/BusinessRuleValidationError";
+
 export const Category = {
     SafetyAndSecurity: "Safety and Security",
     Maintenance: "Maintenance",
@@ -13,6 +15,9 @@ export class CategoryFactory {
             return value as Category;
         }
 
-        throw new Error(`Invalid Category: ${value}`);
+        throw new BusinessRuleValidationError(
+            "Invalid category",
+            `Category '${value}' is not supported`
+        );
     }
 }

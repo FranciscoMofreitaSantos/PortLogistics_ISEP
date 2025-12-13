@@ -1,4 +1,4 @@
-import {IComplementaryTaskCategoryPersistence} from '../../dataschema/IComplementaryTaskCategoryPersistance';
+import {IComplementaryTaskCategoryPersistence} from '../../dataschema/IComplementaryTaskCategoryPersistence';
 import mongoose from 'mongoose';
 
 const ComplementaryTaskCategorySchema = new mongoose.Schema(

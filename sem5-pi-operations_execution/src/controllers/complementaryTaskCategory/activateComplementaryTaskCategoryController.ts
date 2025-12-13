@@ -1,7 +1,8 @@
-import {Inject, Service} from "typedi";
-import {BaseController} from "../../core/infra/BaseController";
+import { Inject, Service } from "typedi";
+import { BaseController } from "../../core/infra/BaseController";
 import IComplementaryTaskCategoryService from "../../services/IServices/IComplementaryTaskCategoryService";
-import {Logger} from "winston";
+import { Logger } from "winston";
+import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
 
 @Service()
 export default class ActivateComplementaryTaskCategoryController
@@ -18,19 +19,28 @@ export default class ActivateComplementaryTaskCategoryController
     protected async executeImpl(): Promise<void> {
         const code = this.req.params.code;
 
-        const result = await this.ctcService.activateAsync(code);
+        try {
+            const dto = await this.ctcService.activateAsync(code);
 
-        if (result.isFailure) {
-            const error = result.errorValue();
+            this.ok(this.res, dto);
+            return;
 
-            this.clientError(
-                typeof error === "string"
-                    ? error
-                    : "Error activating complementary task category"
-            );
+        } catch (e) {
+
+            if (e instanceof BusinessRuleValidationError) {
+                this.logger.warn("Business rule violation", {
+                    message: e.message,
+                    details: e.details
+                });
+
+                this.clientError(e.message);
+                return;
+            }
+
+            this.logger.error("Unexpected error activating category", { e });
+
+            this.fail("Internal server error");
             return;
         }
-
-        this.ok(this.res, result.getValue());
     }
 }

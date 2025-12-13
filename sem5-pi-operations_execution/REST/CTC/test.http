@@ -3,9 +3,9 @@ POST http://localhost:3000/api/complementary-task-categories
 Content-Type: application/json
 
 {
-  "code": "CTC001",
+  "code": "CTC003",
   "name": "Onboard Security Check",
   "description": "Security inspection performed onboard the vessel",
-  "category": "Safety and Security",
+  "category": "Safety and Securityw",
   "defaultDuration": 60
 }

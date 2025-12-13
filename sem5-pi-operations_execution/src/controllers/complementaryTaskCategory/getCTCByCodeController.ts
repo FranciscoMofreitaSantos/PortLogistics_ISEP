@@ -1,7 +1,8 @@
-import {Inject, Service} from "typedi";
-import {BaseController} from "../../core/infra/BaseController";
+import { Inject, Service } from "typedi";
+import { BaseController } from "../../core/infra/BaseController";
 import IComplementaryTaskCategoryService from "../../services/IServices/IComplementaryTaskCategoryService";
-import {Logger} from "winston";
+import { Logger } from "winston";
+import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
 
 @Service()
 export default class GetCTCByCodeController extends BaseController {
@@ -17,19 +18,19 @@ export default class GetCTCByCodeController extends BaseController {
     protected async executeImpl(): Promise<void> {
         const code = this.req.params.code;
 
-        const result = await this.ctcService.getByCodeAsync(code);
-
-        if (result.isFailure) {
-            const error = result.errorValue();
-
-            this.clientError(
-                typeof error === "string"
-                    ? error
-                    : "Error getting by code complementary task category"
-            );
+        try {
+            const result = await this.ctcService.getByCodeAsync(code);
+            this.ok(this.res, result);
             return;
-        }
 
-        this.ok(this.res, result.getValue());
+        } catch (e) {
+            if (e instanceof BusinessRuleValidationError) {
+                this.clientError(e.message);
+                return;
+            }
+
+            this.logger.error("Unexpected error fetching category by code", { e });
+            this.fail("Internal server error");
+        }
     }
 }

@@ -1,8 +1,9 @@
-import {Inject, Service} from "typedi";
-import {BaseController} from "../../core/infra/BaseController";
+import { Inject, Service } from "typedi";
+import { BaseController } from "../../core/infra/BaseController";
 import IComplementaryTaskCategoryService from "../../services/IServices/IComplementaryTaskCategoryService";
-import {Logger} from "winston";
-import {IComplementaryTaskCategoryDTO} from "../../dto/IComplementaryTaskCategoryDTO";
+import { Logger } from "winston";
+import { IComplementaryTaskCategoryDTO } from "../../dto/IComplementaryTaskCategoryDTO";
+import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
 
 @Service()
 export default class UpdateComplementaryTaskCategoryController
@@ -20,19 +21,31 @@ export default class UpdateComplementaryTaskCategoryController
         const code = this.req.params.code;
         const dto = this.req.body as IComplementaryTaskCategoryDTO;
 
-        const result = await this.ctcService.updateAsync(code, dto);
+        try {
+            const updated = await this.ctcService.updateAsync(code, dto);
 
-        if (result.isFailure) {
-            const error = result.errorValue();
-
-            this.clientError(
-                typeof error === "string"
-                    ? error
-                    : "Error updating complementary task category"
-            );
+            this.ok(this.res, updated);
             return;
-        }
 
-        this.ok(this.res, result.getValue());
+        } catch (e) {
+
+            if (e instanceof BusinessRuleValidationError) {
+                this.logger.warn("Business rule violation updating ComplementaryTaskCategory", {
+                    message: e.message,
+                    details: e.details,
+                    code
+                });
+
+                this.clientError(e.message);
+                return;
+            }
+
+            this.logger.error("Unexpected error updating ComplementaryTaskCategory", {
+                code,
+                error: e
+            });
+
+            this.fail("Internal server error");
+        }
     }
 }

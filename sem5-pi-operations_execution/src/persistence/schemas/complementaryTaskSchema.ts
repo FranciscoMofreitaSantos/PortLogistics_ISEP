@@ -1,4 +1,4 @@
-import { IComplementaryTaskPersistance } from '../../dataschema/IComplementaryTaskPersistance';
+import { IComplementaryTaskPersistance } from '../../dataschema/IComplementaryTaskPersistence';
 import mongoose from 'mongoose';
 
 const ComplementaryTask = new mongoose.Schema(

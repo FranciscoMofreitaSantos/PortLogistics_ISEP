@@ -37,6 +37,11 @@ export default {
         prefix: "/api",
     },
 
+
+    operationsApiUrl: process.env.OPERATIONS_URL || "",
+    planningApiUrl: process.env.PLANNING_URL || "",
+    webApiUrl: process.env.WEBAPI_URL || "",
+
     controllers: {
         user: {
             name: "UserController",

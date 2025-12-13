@@ -1,7 +1,8 @@
-import {Inject, Service} from "typedi";
-import {BaseController} from "../../core/infra/BaseController";
+import { Inject, Service } from "typedi";
+import { BaseController } from "../../core/infra/BaseController";
 import IComplementaryTaskCategoryService from "../../services/IServices/IComplementaryTaskCategoryService";
-import {Logger} from "winston";
+import { Logger } from "winston";
+import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
 
 @Service()
 export default class GetCTCByDescriptionController extends BaseController {
@@ -17,19 +18,23 @@ export default class GetCTCByDescriptionController extends BaseController {
     protected async executeImpl(): Promise<void> {
         const description = this.req.query.description as string;
 
-        const result = await this.ctcService.getByDescriptionAsync(description);
+        try {
+            const result = await this.ctcService.getByDescriptionAsync(description);
+            this.ok(this.res, result.getValue());
 
-        if (result.isFailure) {
-            const error = result.errorValue();
+        } catch (e) {
 
-            this.clientError(
-                typeof error === "string"
-                    ? error
-                    : "Error getting by description complementary task category"
-            );
-            return;
+            if (e instanceof BusinessRuleValidationError) {
+                this.logger.warn("Business rule violation on getByDescription", {
+                    message: e.message
+                });
+
+                this.clientError({ message: e.message });
+                return;
+            }
+
+            this.logger.error("Unexpected error fetching categories by description", { e });
+            this.fail("Internal server error");
         }
-
-        this.ok(this.res, result.getValue());
     }
 }

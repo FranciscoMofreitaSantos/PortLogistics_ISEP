@@ -2,7 +2,7 @@ import {Mapper} from "../core/infra/Mapper";
 import {ComplementaryTaskCategory} from "../domain/complementaryTaskCategory/complementaryTaskCategory";
 import {UniqueEntityID} from "../core/domain/UniqueEntityID";
 import {IComplementaryTaskCategoryDTO} from "../dto/IComplementaryTaskCategoryDTO";
-import {IComplementaryTaskCategoryPersistence} from "../dataschema/IComplementaryTaskCategoryPersistance";
+import {IComplementaryTaskCategoryPersistence} from "../dataschema/IComplementaryTaskCategoryPersistence";
 
 export class ComplementaryTaskCategoryMap extends Mapper<ComplementaryTaskCategory, IComplementaryTaskCategoryDTO, IComplementaryTaskCategoryPersistence> {
 
@@ -19,7 +19,7 @@ export class ComplementaryTaskCategoryMap extends Mapper<ComplementaryTaskCatego
     }
 
     toDomain(raw: IComplementaryTaskCategoryPersistence): ComplementaryTaskCategory | null {
-        const categoryOrError = ComplementaryTaskCategory.create(
+        return ComplementaryTaskCategory.create(
             {
                 code: raw.code,
                 name: raw.name,
@@ -32,13 +32,6 @@ export class ComplementaryTaskCategoryMap extends Mapper<ComplementaryTaskCatego
             },
             new UniqueEntityID(raw.domainId)
         );
-
-        if (categoryOrError.isFailure) {
-            console.error(categoryOrError.errorValue());
-            return null;
-        }
-
-        return categoryOrError.getValue();
     }
 
     toPersistence(cat: ComplementaryTaskCategory): IComplementaryTaskCategoryPersistence {

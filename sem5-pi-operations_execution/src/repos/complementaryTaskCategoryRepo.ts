@@ -2,7 +2,7 @@ import {Inject, Service} from "typedi";
 import {Model, Document} from "mongoose";
 import IComplementaryTaskCategoryRepo from "../services/IRepos/IComplementaryTaskCategoryRepo";
 import {ComplementaryTaskCategory} from "../domain/complementaryTaskCategory/complementaryTaskCategory";
-import {IComplementaryTaskCategoryPersistence} from "../dataschema/IComplementaryTaskCategoryPersistance";
+import {IComplementaryTaskCategoryPersistence} from "../dataschema/IComplementaryTaskCategoryPersistence";
 import {ComplementaryTaskCategoryMap} from "../mappers/ComplementaryTaskCategoryMap";
 import {Category} from "../domain/complementaryTaskCategory/category";
 import {User} from "../domain/user/user";

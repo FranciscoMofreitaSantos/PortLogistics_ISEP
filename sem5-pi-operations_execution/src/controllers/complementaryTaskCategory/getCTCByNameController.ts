@@ -1,7 +1,8 @@
-import {Inject, Service} from "typedi";
-import {BaseController} from "../../core/infra/BaseController";
+import { Inject, Service } from "typedi";
+import { BaseController } from "../../core/infra/BaseController";
 import IComplementaryTaskCategoryService from "../../services/IServices/IComplementaryTaskCategoryService";
-import {Logger} from "winston";
+import { Logger } from "winston";
+import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
 
 @Service()
 export default class GetCTCByNameController extends BaseController {
@@ -17,19 +18,25 @@ export default class GetCTCByNameController extends BaseController {
     protected async executeImpl(): Promise<void> {
         const name = this.req.query.name as string;
 
-        const result = await this.ctcService.getByNameAsync(name);
+        try {
+            const result = await this.ctcService.getByNameAsync(name);
 
-        if (result.isFailure) {
-            const error = result.errorValue();
+            this.ok(this.res, result);
+        } catch (e) {
 
-            this.clientError(
-                typeof error === "string"
-                    ? error
-                    : "Error getting by name complementary task category"
-            );
-            return;
+            if (e instanceof BusinessRuleValidationError) {
+                this.logger.warn("Business rule violation while getting CTC by name", {
+                    message: e.message,
+                    details: e.details
+                });
+
+                this.clientError(e.message);
+                return;
+            }
+
+            this.logger.error("Unexpected error getting CTC by name", { e });
+
+            this.fail("Internal server error");
         }
-
-        this.ok(this.res, result.getValue());
     }
 }

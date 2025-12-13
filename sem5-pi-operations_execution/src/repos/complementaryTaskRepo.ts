@@ -1,7 +1,7 @@
 import IComplementaryTaskRepo from "../services/IRepos/IComplementaryTaskRepo";
 import { Inject, Service } from "typedi";
 import { ComplementaryTask } from "../domain/complementaryTask/complementaryTask";
-import { IComplementaryTaskPersistance } from "../dataschema/IComplementaryTaskPersistance";
+import { IComplementaryTaskPersistance } from "../dataschema/IComplementaryTaskPersistence";
 import { Document, Model } from "mongoose";
 import { ComplementaryTaskMap } from "../mappers/ComplementaryTaskMap";
 
