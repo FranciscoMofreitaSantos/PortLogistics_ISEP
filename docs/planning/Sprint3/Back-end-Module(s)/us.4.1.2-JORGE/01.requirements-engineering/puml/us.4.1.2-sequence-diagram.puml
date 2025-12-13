@@ -1,0 +1,31 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+title System Sequence Diagram – Generate & Store Operation Plans (US 4.2.1)
+
+actor "Logistics Operator" as Operator
+boundary "SPA (Operations UI)" as SPA
+boundary "Planning & Scheduling API" as PS
+boundary "OEM API (Operation Plans)" as OEM
+
+== Generate Operation Plans (Preview) ==
+Operator -> SPA : Select targetDay + algorithm
+Operator -> SPA : Click "Generate Operation Plans"
+SPA -> PS : POST /api/planning/operationplans/generate\nBody: GeneratePlansDto(targetDay, algorithmId)
+PS --> SPA : 200 OK\nBody: GenerationResultDto(generationRunId,\nplans[], metrics[], warnings[])\nOR 422 UnprocessableEntity (infeasible)\nOR 503 ServiceUnavailable
+SPA --> Operator : Show preview (summary table + timeline)\nShow infeasibility warnings per VVN
+
+== Store Generated Plans (Batch Save) ==
+Operator -> SPA : Select plans (all feasible / selected)
+Operator -> SPA : Click "Save Plans"
+SPA -> OEM : POST /api/oem/operationplans/batch\nBody: StorePlansDto(generationRunId, targetDay,\nalgorithmId, plans[], createdBy)
+OEM --> SPA : 201 Created\nBody: BatchStoreResultDto(storedCount,\ncreatedPlanIds[], skipped[])\nOR 409 Conflict (duplicate/day already stored)\nOR 400 BadRequest
+SPA --> Operator : Confirm saved plans + show created IDs\nOR show validation/conflict message
+
+== View Stored Plans (Optional) ==
+Operator -> SPA : Open "Operation Plans" list
+SPA -> OEM : GET /api/oem/operationplans?day={targetDay}
+OEM --> SPA : 200 OK\nBody: List<OperationPlanDto>\nOR 404 NotFound
+SPA --> Operator : Display stored plans (by VVN)
+
+@enduml
