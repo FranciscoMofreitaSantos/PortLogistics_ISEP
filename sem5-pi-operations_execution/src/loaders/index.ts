@@ -24,7 +24,8 @@ export default async ({ expressApp }: { expressApp: express.Application }) => {
             config.controllers.complementaryTaskCategory.getByDescription,
             config.controllers.complementaryTaskCategory.getByCategory,
             config.controllers.complementaryTaskCategory.activate,
-            config.controllers.complementaryTaskCategory.deactivate
+            config.controllers.complementaryTaskCategory.deactivate,
+            config.controllers.complementaryTaskCategory.getAll
         ],
         repos: [
             config.repos.user,

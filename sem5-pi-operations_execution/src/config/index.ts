@@ -57,6 +57,10 @@ export default {
                 name: "UpdateComplementaryTaskCategoryController",
                 path: "../controllers/complementaryTaskCategory/updateComplementaryTaskCategoryController"
             },
+            getAll: {
+                name: "GetAllComplementaryTaskCategoryController",
+                path: "../controllers/complementaryTaskCategory/getAllComplementaryTaskCategoryController"
+            },
             getByCode: {
                 name: "GetCTCByCodeController",
                 path: "../controllers/complementaryTaskCategory/getCTCByCodeController"

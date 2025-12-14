@@ -4,6 +4,7 @@ import { Guard } from "../../core/logic/Guard";
 import { ComplementaryTaskCategoryId } from "./complementaryTaskCategoryId";
 import { Category } from "./category";
 import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
+import { CTCError } from "./errors/ctcErrors";
 
 interface ComplementaryTaskCategoryProps {
     code: string;
@@ -77,6 +78,7 @@ export class ComplementaryTaskCategory
 
         if (!name || !description) {
             throw new BusinessRuleValidationError(
+                CTCError.InvalidInput,
                 "Invalid category details",
                 "Name and description are required"
             );
@@ -93,6 +95,7 @@ export class ComplementaryTaskCategory
     public deactivate(): void {
         if (!this.props.isActive) {
             throw new BusinessRuleValidationError(
+                CTCError.AlreadyInactive,
                 "Category already inactive",
                 "Complementary Task Category is already inactive"
             );
@@ -105,6 +108,7 @@ export class ComplementaryTaskCategory
     public activate(): void {
         if (this.props.isActive) {
             throw new BusinessRuleValidationError(
+                CTCError.AlreadyActive,
                 "Category already active",
                 "Complementary Task Category is already active"
             );
@@ -113,6 +117,7 @@ export class ComplementaryTaskCategory
         this.props.isActive = true;
         this.touch();
     }
+
 
 
     public static create(
@@ -132,13 +137,15 @@ export class ComplementaryTaskCategory
         const guardResult = Guard.againstNullOrUndefinedBulk(guardedProps);
         if (!guardResult.succeeded) {
             throw new BusinessRuleValidationError(
+                CTCError.InvalidInput,
                 "Invalid input",
-                guardResult.message ?? "Missing required fields"
+                guardResult.message ?? "Invalid input"
             );
         }
 
         if (!this.isValidCodeFormat(props.code)) {
             throw new BusinessRuleValidationError(
+                CTCError.InvalidCodeFormat,
                 "Invalid code format",
                 "Code must follow the format CTC###"
             );
@@ -152,6 +159,7 @@ export class ComplementaryTaskCategory
             id
         );
     }
+
 
 
     private static isValidCodeFormat(code: string): boolean {

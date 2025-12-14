@@ -3,10 +3,9 @@ import { BaseController } from "../../core/infra/BaseController";
 import IComplementaryTaskCategoryService from "../../services/IServices/IComplementaryTaskCategoryService";
 import { Logger } from "winston";
 import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
-import {Category, CategoryFactory} from "../../domain/complementaryTaskCategory/category";
 
 @Service()
-export default class GetCTCByCategoryController extends BaseController {
+export default class GetAllComplementaryTaskCategoryController extends BaseController {
 
     constructor(
         @Inject("ComplementaryTaskCategoryService")
@@ -18,19 +17,21 @@ export default class GetCTCByCategoryController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const rawCategory = this.req.query.category as string;
-            const category = CategoryFactory.fromString(rawCategory);
-
-            const result = await this.ctcService.getByCategoryAsync(category);
-
+            const result = await this.ctcService.getAllAsync();
             return this.ok(this.res, result.getValue());
 
         } catch (e) {
+
             if (e instanceof BusinessRuleValidationError) {
+                this.logger.warn("Business rule violation on getAll CTC", {
+                    message: e.message,
+                    details: e.details
+                });
+
                 return this.clientError(e.message);
             }
 
-            this.logger.error("Unexpected error getting CTC by category", { e });
+            this.logger.error("Unexpected error fetching all CTCs", { e });
             return this.fail("Internal server error");
         }
     }

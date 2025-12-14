@@ -12,6 +12,7 @@ import GetCTCByDescriptionController from "../../controllers/complementaryTaskCa
 import GetCTCByCategoryController from "../../controllers/complementaryTaskCategory/getCTCByCategoryController";
 import ActivateComplementaryTaskCategoryController from "../../controllers/complementaryTaskCategory/activateComplementaryTaskCategoryController";
 import DeactivateComplementaryTaskCategoryController from "../../controllers/complementaryTaskCategory/deactivateComplementaryTaskCategoryController";
+import GetAllComplementaryTaskCategoryController from "../../controllers/complementaryTaskCategory/getAllComplementaryTaskCategoryController";
 
 const route = Router();
 
@@ -50,6 +51,10 @@ export default (app: Router) => {
         config.controllers.complementaryTaskCategory.deactivate.name
     ) as DeactivateComplementaryTaskCategoryController;
 
+    const getAllCtrl = Container.get(
+        config.controllers.complementaryTaskCategory.getAll.name
+    ) as GetAllComplementaryTaskCategoryController;
+
 
     route.post(
         "/",
@@ -77,6 +82,12 @@ export default (app: Router) => {
             })
         }),
         (req, res) => updateCtrl.execute(req, res)
+    );
+
+
+    route.get(
+        "/",
+        (req, res) => getAllCtrl.execute(req, res)
     );
 
 

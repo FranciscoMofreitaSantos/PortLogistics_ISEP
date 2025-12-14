@@ -8,6 +8,7 @@ import { Result } from "../core/logic/Result";
 import { Category, CategoryFactory } from "../domain/complementaryTaskCategory/category";
 import { Logger } from "winston";
 import { BusinessRuleValidationError } from "../core/logic/BusinessRuleValidationError";
+import { CTCError } from "../domain/complementaryTaskCategory/errors/ctcErrors";
 
 @Service()
 export default class ComplementaryTaskCategoryService
@@ -25,19 +26,18 @@ export default class ComplementaryTaskCategoryService
     ) {}
 
 
-    public async createAsync(dto: IComplementaryTaskCategoryDTO): Promise<Result<IComplementaryTaskCategoryDTO>> {
+    public async createAsync(
+        dto: IComplementaryTaskCategoryDTO
+    ): Promise<Result<IComplementaryTaskCategoryDTO>> {
 
         this.logger.info("Creating ComplementaryTaskCategory", { code: dto.code });
 
         const exists = await this.repo.findByCode(dto.code);
         if (exists) {
-            this.logger.warn("ComplementaryTaskCategory already exists", {
-                code: dto.code
-            });
-
             throw new BusinessRuleValidationError(
+                CTCError.AlreadyExists,
                 "Complementary task category already exists",
-                `Category with code ${dto.code} is already registered`
+                `Code ${dto.code} already exists`
             );
         }
 
@@ -54,19 +54,13 @@ export default class ComplementaryTaskCategoryService
             updatedAt: null
         });
 
-
         const saved = await this.repo.save(ctc);
         if (!saved) {
-            this.logger.error("Failed to persist ComplementaryTaskCategory", {
-                code: dto.code
-            });
-
-            throw new Error("Error saving complementary task category");
+            throw new BusinessRuleValidationError(
+                CTCError.PersistError,
+                "Error saving complementary task category"
+            );
         }
-
-        this.logger.info("ComplementaryTaskCategory created successfully", {
-            code: dto.code
-        });
 
         return Result.ok(this.categoryMap.toDTO(saved));
     }
@@ -77,13 +71,10 @@ export default class ComplementaryTaskCategoryService
         dto: IComplementaryTaskCategoryDTO
     ): Promise<Result<IComplementaryTaskCategoryDTO>> {
 
-        this.logger.info("Updating ComplementaryTaskCategory", { code });
-
         const category = await this.repo.findByCode(code);
         if (!category) {
-            this.logger.warn("Category not found for update", { code });
-
             throw new BusinessRuleValidationError(
+                CTCError.NotFound,
                 "Complementary task category not found",
                 `No category found with code ${code}`
             );
@@ -100,11 +91,11 @@ export default class ComplementaryTaskCategoryService
 
         const saved = await this.repo.save(category);
         if (!saved) {
-            this.logger.error("Failed to update ComplementaryTaskCategory", { code });
-            throw new Error("Error updating complementary task category");
+            throw new BusinessRuleValidationError(
+                CTCError.PersistError,
+                "Error updating complementary task category"
+            );
         }
-
-        this.logger.info("ComplementaryTaskCategory updated", { code });
 
         return Result.ok(this.categoryMap.toDTO(saved));
     }
@@ -114,13 +105,10 @@ export default class ComplementaryTaskCategoryService
         code: string
     ): Promise<Result<IComplementaryTaskCategoryDTO>> {
 
-        this.logger.debug("Fetching ComplementaryTaskCategory by code", { code });
-
         const category = await this.repo.findByCode(code);
         if (!category) {
-            this.logger.warn("Category not found", { code });
-
             throw new BusinessRuleValidationError(
+                CTCError.NotFound,
                 "Complementary task category not found",
                 `No category found with code ${code}`
             );
@@ -134,8 +122,6 @@ export default class ComplementaryTaskCategoryService
         name: string
     ): Promise<Result<IComplementaryTaskCategoryDTO[]>> {
 
-        this.logger.debug("Fetching categories by name", { name });
-
         const categories = await this.repo.findByName(name);
         return Result.ok(categories.map(c => this.categoryMap.toDTO(c)));
     }
@@ -143,8 +129,6 @@ export default class ComplementaryTaskCategoryService
     public async getByDescriptionAsync(
         description: string
     ): Promise<Result<IComplementaryTaskCategoryDTO[]>> {
-
-        this.logger.debug("Fetching categories by description", { description });
 
         const categories = await this.repo.findByDescription(description);
         return Result.ok(categories.map(c => this.categoryMap.toDTO(c)));
@@ -154,9 +138,7 @@ export default class ComplementaryTaskCategoryService
         category: Category
     ): Promise<Result<IComplementaryTaskCategoryDTO[]>> {
 
-        this.logger.debug("Fetching categories by category", { category });
-
-        const categories = await this.repo.findByCategory(category);
+        const categories = await this.repo.findByCategory(CategoryFactory.fromString(category));
         return Result.ok(categories.map(c => this.categoryMap.toDTO(c)));
     }
 
@@ -165,11 +147,10 @@ export default class ComplementaryTaskCategoryService
         code: string
     ): Promise<Result<IComplementaryTaskCategoryDTO>> {
 
-        this.logger.info("Activating ComplementaryTaskCategory", { code });
-
         const category = await this.repo.findByCode(code);
         if (!category) {
             throw new BusinessRuleValidationError(
+                CTCError.NotFound,
                 "Complementary task category not found",
                 `No category found with code ${code}`
             );
@@ -179,21 +160,24 @@ export default class ComplementaryTaskCategoryService
 
         const saved = await this.repo.save(category);
         if (!saved) {
-            throw new Error("Error activating complementary task category");
+            throw new BusinessRuleValidationError(
+                CTCError.ActivateError,
+                "Error activating complementary task category"
+            );
         }
 
         return Result.ok(this.categoryMap.toDTO(saved));
     }
 
+
     public async deactivateAsync(
         code: string
     ): Promise<Result<IComplementaryTaskCategoryDTO>> {
 
-        this.logger.info("Deactivating ComplementaryTaskCategory", { code });
-
         const category = await this.repo.findByCode(code);
         if (!category) {
             throw new BusinessRuleValidationError(
+                CTCError.NotFound,
                 "Complementary task category not found",
                 `No category found with code ${code}`
             );
@@ -203,7 +187,10 @@ export default class ComplementaryTaskCategoryService
 
         const saved = await this.repo.save(category);
         if (!saved) {
-            throw new Error("Error deactivating complementary task category");
+            throw new BusinessRuleValidationError(
+                CTCError.DeactivateError,
+                "Error deactivating complementary task category"
+            );
         }
 
         return Result.ok(this.categoryMap.toDTO(saved));
@@ -211,9 +198,15 @@ export default class ComplementaryTaskCategoryService
 
 
     public async getTotalCategoriesAsync(): Promise<Result<number>> {
-        this.logger.debug("Fetching total number of ComplementaryTaskCategories");
-
         const total = await this.repo.getTotalCategories();
         return Result.ok(total);
+    }
+
+    public async getAllAsync(): Promise<Result<IComplementaryTaskCategoryDTO[]>> {
+        this.logger.debug("Fetching all ComplementaryTaskCategories");
+
+        const categories = await this.repo.findAll();
+
+        return Result.ok(categories.map(c => this.categoryMap.toDTO(c)));
     }
 }

@@ -9,4 +9,5 @@ export default interface IComplementaryTaskCategoryRepo extends Repo<Complementa
     findByDescription(description: string): Promise<ComplementaryTaskCategory[]>;
     findByCategory(category: Category): Promise<ComplementaryTaskCategory[]>;
     getTotalCategories(): Promise<number>;
+    findAll(): Promise<ComplementaryTaskCategory[]>;
 }

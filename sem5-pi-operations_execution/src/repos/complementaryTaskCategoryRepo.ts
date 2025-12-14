@@ -162,4 +162,23 @@ export default class ComplementaryTaskCategoryRepo implements IComplementaryTask
             return 0;
         }
     }
+
+    public async findAll(): Promise<ComplementaryTaskCategory[]> {
+        this.logger.debug("Finding all ComplementaryTaskCategories");
+
+        try {
+            const records = await this.complementaryTaskCategorySchema.find();
+
+            return records
+                .map(r => this.categoryMap.toDomain(r))
+                .filter((c): c is ComplementaryTaskCategory => c !== null);
+
+        } catch (e) {
+            this.logger.error(
+                "Error fetching all ComplementaryTaskCategories",
+                { error: e }
+            );
+            return [];
+        }
+    }
 }

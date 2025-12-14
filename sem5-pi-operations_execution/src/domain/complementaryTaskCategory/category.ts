@@ -1,4 +1,5 @@
 import {BusinessRuleValidationError} from "../../core/logic/BusinessRuleValidationError";
+import {CTCError} from "./errors/ctcErrors";
 
 export const Category = {
     SafetyAndSecurity: "Safety and Security",
@@ -16,6 +17,7 @@ export class CategoryFactory {
         }
 
         throw new BusinessRuleValidationError(
+            CTCError.InvalidCategory,
             "Invalid category",
             `Category '${value}' is not supported`
         );
