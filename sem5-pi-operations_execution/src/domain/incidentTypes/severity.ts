@@ -1,5 +1,5 @@
 import {BusinessRuleValidationError} from "../../core/logic/BusinessRuleValidationError";
-import {SeverityError} from "./errors/severityErrors"
+import {IncidentTypeError} from "./errors/incidentTypeErrors"
 
 export const Severity = {
     Minor: "Minor",
@@ -16,7 +16,7 @@ export class SeverityFactory{
         }
 
         throw new BusinessRuleValidationError(
-            SeverityError.InvalidSeverity,
+            IncidentTypeError.InvalidSeverity,
             "Invalid Severity",
             `Category '${value}' is not supported`
         )

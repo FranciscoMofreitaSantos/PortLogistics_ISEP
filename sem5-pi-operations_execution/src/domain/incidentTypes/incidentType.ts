@@ -3,9 +3,8 @@ import {AggregateRoot} from "../../core/domain/AggregateRoot";
 import {UniqueEntityID} from "../../core/domain/UniqueEntityID";
 import {IncidentTypeId} from "./incidentTypeId"
 import {BusinessRuleValidationError} from "../../core/logic/BusinessRuleValidationError";
-import {SeverityError} from "./errors/severityErrors";
+import {IncidentTypeError} from "./errors/incidentTypeErrors";
 import { Guard } from "../../core/logic/Guard";
-import {CTCError} from "../complementaryTaskCategory/errors/ctcErrors";
 
 interface IncidentTypeProps {
     code :string;
@@ -66,7 +65,7 @@ export class IncidentType
     public changeName(name: string): void {
         if (!name){
             throw new BusinessRuleValidationError(
-                SeverityError.InvalidInput,
+                IncidentTypeError.InvalidInput,
                 "Invalid incident type details",
                 "Name is required"
             )
@@ -75,10 +74,15 @@ export class IncidentType
         this.touch()
     }
 
+    public clearParent(): void {
+        this.props.parent = null;
+        this.touch();
+    }
+
     public changeDescription(description: string): void {
         if (!description){
             throw new BusinessRuleValidationError(
-                SeverityError.InvalidInput,
+                IncidentTypeError.InvalidInput,
                 "Invalid incident type details",
                 "Description is required"
             )
@@ -92,16 +96,21 @@ export class IncidentType
         this.touch()
     }
 
-    public changeParent(parentCode: string): void {
+    public changeParent(parentCode: string | null): void {
+        if (parentCode === null) {
+            this.props.parent = null;
+            this.touch();
+            return;
+        }
         if (!IncidentType.isValidCodeFormat(parentCode)) {
             throw new BusinessRuleValidationError(
-                SeverityError.InvalidCodeFormat,
+                IncidentTypeError.InvalidCodeFormat,
                 "Invalid code format",
                 "Code must follow the format T-INC###"
             )
         }
         this.props.parent = parentCode;
-        this.touch()
+        this.touch();
     }
 
 
@@ -120,7 +129,7 @@ export class IncidentType
         const guardResult = Guard.againstNullOrUndefinedBulk(guardedProps);
         if (!guardResult.succeeded) {
             throw new BusinessRuleValidationError(
-                SeverityError.InvalidInput,
+                IncidentTypeError.InvalidInput,
                 "Invalid incident type details",
                 guardResult.message ?? "Invalid input"
             )
@@ -128,7 +137,7 @@ export class IncidentType
 
         if (!this.isValidCodeFormat(props.code)) {
             throw new BusinessRuleValidationError(
-                SeverityError.InvalidCodeFormat,
+                IncidentTypeError.InvalidCodeFormat,
                 "Invalid code format",
                 "Code must follow the format T-INC###"
             );
@@ -137,7 +146,7 @@ export class IncidentType
         if(props.parent != null) {
             if(!this.isValidCodeFormat(props.parent)) {
                 throw new BusinessRuleValidationError(
-                    SeverityError.InvalidCodeFormat,
+                    IncidentTypeError.InvalidCodeFormat,
                     "Invalid parent code format",
                     "Parent code must follow the format T-INC###"
                 );
