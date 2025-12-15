@@ -13,7 +13,8 @@ export default async ({ expressApp }: { expressApp: express.Application }) => {
     dependencyInjectorLoader({
         schemas: [
             { name: "userSchema", path: "../persistence/schemas/userSchema" },
-            { name: "complementaryTaskCategorySchema", path: "../persistence/schemas/complementaryTaskCategorySchema" }
+            { name: "complementaryTaskCategorySchema", path: "../persistence/schemas/complementaryTaskCategorySchema" },
+            { name: "incidentTypeSchema", path: "../persistence/schemas/incidentTypeSchema" }
         ],
         controllers: [
             config.controllers.user,
@@ -25,15 +26,26 @@ export default async ({ expressApp }: { expressApp: express.Application }) => {
             config.controllers.complementaryTaskCategory.getByCategory,
             config.controllers.complementaryTaskCategory.activate,
             config.controllers.complementaryTaskCategory.deactivate,
-            config.controllers.complementaryTaskCategory.getAll
+
+            // IncidentType controllers
+            config.controllers.complementaryTaskCategory.getAll,
+            config.controllers.incidentType.create,
+            config.controllers.incidentType.update,
+            config.controllers.incidentType.getSubTree,
+            config.controllers.incidentType.getRoot,
+            config.controllers.incidentType.getByCode,
+            config.controllers.incidentType.getByName,
+            config.controllers.incidentType.getDirectChilds
         ],
         repos: [
             config.repos.user,
-            config.repos.complementaryTaskCategory
+            config.repos.complementaryTaskCategory,
+            config.repos.incidentType
         ],
         services: [
             config.services.user,
-            config.services.complementaryTaskCategory
+            config.services.complementaryTaskCategory,
+            config.services.incidentType
         ]
     });
 

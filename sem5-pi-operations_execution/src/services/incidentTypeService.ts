@@ -121,9 +121,7 @@ export default class IncidentTypeService implements IIncidentTypeService {
         incidentType.changeDescription(dto.description);
         incidentType.changeSeverity(parsedSeverity);
 
-        // Requires domain support for null parent (see section 2.1)
-        if (dto.parentCode) incidentType.changeParent(dto.parentCode);
-        else incidentType.clearParent(); // or changeParent(null)
+        incidentType.changeParent(dto.parentCode ?? null);
 
         const saved = await this.repo.save(incidentType);
         if (!saved) {

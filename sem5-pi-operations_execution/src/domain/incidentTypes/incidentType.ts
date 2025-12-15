@@ -97,7 +97,7 @@ export class IncidentType
     }
 
     public changeParent(parentCode: string | null): void {
-        if (parentCode === null) {
+        if (parentCode === null || parentCode.trim() === "") {
             this.props.parent = null;
             this.touch();
             return;

@@ -7,7 +7,7 @@ import { IncidentType } from "../domain/incidentTypes/incidentType";
 import {ComplementaryTaskCategory} from "../domain/complementaryTaskCategory/complementaryTaskCategory";
 
 @Service()
-export default class IncidentTypeRepository implements IIncidentTypeRepository {
+export default class IncidentTypeRepo implements IIncidentTypeRepository {
 
     constructor(
         @Inject("incidentTypeSchema")

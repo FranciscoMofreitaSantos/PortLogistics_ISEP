@@ -48,6 +48,37 @@ export default {
             path: "../controllers/userController"
         },
 
+        incidentType: {
+            create:{
+                name: "CreatedITController",
+                path: "../controllers/incidentType/createdITController"
+            },
+            update:{
+                name: "UpdateITController",
+                path: "../controllers/incidentType/updateITController"
+            },
+            getByCode:{
+                name: "GetITByCodeController",
+                path: "../controllers/incidentType/getITByCodeController"
+            },
+            getByName: {
+                name: "GetITByNameController",
+                path: "../controllers/incidentType/getITByNameController"
+            },
+            getDirectChilds:{
+                name: "GetITDirectChildController",
+                path: "../controllers/incidentType/getITDirectChildController"
+            },
+            getRoot : {
+                name: "GetITRootController",
+                path: "../controllers/incidentType/getITRootController"
+            },
+            getSubTree:{
+                name: "GetITSubTreeController",
+                path: "../controllers/incidentType/getITSubTreeController"
+            }
+        },
+
         complementaryTaskCategory: {
             create: {
                 name: "CreateComplementaryTaskCategoryController",
@@ -93,6 +124,10 @@ export default {
         complementaryTaskCategory: {
             name: "ComplementaryTaskCategoryRepo",
             path: "../repos/complementaryTaskCategoryRepo"
+        },
+        incidentType: {
+            name: "IncidentTypeRepo",
+            path: "../repos/incidentType/incidentTypeRepo"
         }
     },
 
@@ -101,6 +136,10 @@ export default {
         complementaryTaskCategory: {
             name: "ComplementaryTaskCategoryService",
             path: "../services/complementaryTaskCategoryService"
+        },
+        incidentType: {
+            name: "IncidentTypeService",
+            path: "../services/incidentType/incidentTypeService"
         }
     }
 };
