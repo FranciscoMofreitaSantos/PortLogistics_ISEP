@@ -1,55 +1,60 @@
 import { Mapper } from "../core/infra/Mapper";
 import { ComplementaryTask } from "../domain/complementaryTask/complementaryTask";
-import { UniqueEntityID } from "../core/domain/UniqueEntityID";
-import { ComplementaryTaskCategoryMap } from "./ComplementaryTaskCategoryMap";
-import { IComplementaryTaskDTO } from "../dto/IComplementaryTaskDTO";
+import {IComplementaryTaskDTO} from "../dto/IComplementaryTaskDTO";
+import {IComplementaryTaskPersistence} from "../dataschema/IComplementaryTaskPersistence";
+import {ComplementaryTaskCode} from "../domain/complementaryTask/ComplementaryTaskCode";
+import {UniqueEntityID} from "../core/domain/UniqueEntityID";
+import {ComplementaryTaskCategoryId} from "../domain/complementaryTaskCategory/complementaryTaskCategoryId";
+import {VesselVisitExecutionId} from "../domain/vesselVisitExecution/vesselVisitExecutionId";
 
-export class ComplementaryTaskMap extends Mapper<ComplementaryTask> {
 
-    public static toDTO(task: ComplementaryTask): IComplementaryTaskDTO {
+
+export default class ComplementaryTaskMap extends Mapper<ComplementaryTask, IComplementaryTaskDTO, IComplementaryTaskPersistence> {
+
+    toDTO(domain: ComplementaryTask): IComplementaryTaskDTO {
         return {
-            code: task.code,
-            category: task.category,
-            staff: task.staff,
-            timeStart: task.timeStart,
-            timeEnd: task.timeEnd,
-            status: task.status
-            // vve: task.vve
+            id: domain.id.toString(),
+            code : domain.code.value,
+            category: domain.category.toString(),
+            staff: domain.staff,
+            timeStart : domain.timeStart,
+            timeEnd : domain.timeEnd,
+            status : domain.status,
+            vve : domain.vve.toString()
         };
     }
 
-    public static async toDomain(raw: any): Promise<ComplementaryTask | null> {
-
-
-        const taskOrError = ComplementaryTask.create(
+    toDomain(raw: IComplementaryTaskPersistence): ComplementaryTask | null {
+        return ComplementaryTask.create(
             {
-                code: raw.code,
-                category: raw.category,
+                code: ComplementaryTaskCode.createFromString(raw.code),
+                category: ComplementaryTaskCategoryId.create(raw.category),
                 staff: raw.staff,
-                timeStart: new Date(raw.timeStart),
-                timeEnd: new Date(raw.timeEnd),
-                status: raw.status
+                timeStart: raw.timeStart,
+                timeEnd: raw.timeEnd,
+                status: raw.status,
+                vve: VesselVisitExecutionId.create(raw.vve),
+                createdAt: raw.createdAt,
+                updatedAt: raw.updatedAt || null
             },
             new UniqueEntityID(raw.domainId)
-        );
-
-        if (taskOrError.isFailure) {
-            console.error(taskOrError.error);
-            return null;
-        }
-
-        return taskOrError.getValue();
+        )
     }
 
-    public static toPersistence(task: ComplementaryTask): any {
+    toPersistence(domain: ComplementaryTask): IComplementaryTaskPersistence {
         return {
-            domainId: task.id.toString(),
-            code: task.code,
-            category:task.category,
-            staff: task.staff,
-            timeStart: task.timeStart.toISOString(),
-            timeEnd: task.timeEnd.toISOString(),
-            status: task.status
+            domainId : domain.id.toString(),
+            code : domain.code.toString(),
+            category : domain.category.toString(),
+            staff : domain.staff,
+            timeStart : domain.timeStart,
+            timeEnd : domain.timeEnd,
+            status : domain.status,
+            vve : domain.vve.toString(),
+            createdAt : domain.createdAt,
+            updatedAt : domain.updatedAt
         };
     }
+
+
 }

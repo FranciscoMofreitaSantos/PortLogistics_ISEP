@@ -1,63 +1,135 @@
 import IComplementaryTaskRepo from "../services/IRepos/IComplementaryTaskRepo";
 import { Inject, Service } from "typedi";
-import { ComplementaryTask } from "../domain/complementaryTask/complementaryTask";
-import { IComplementaryTaskPersistence } from "../dataschema/IComplementaryTaskPersistence";
 import { Document, Model } from "mongoose";
-import { ComplementaryTaskMap } from "../mappers/ComplementaryTaskMap";
+import ComplementaryTaskMap from "../mappers/ComplementaryTaskMap";
+import { IComplementaryTaskPersistence } from "../dataschema/IComplementaryTaskPersistence";
+import { ComplementaryTask } from "../domain/complementaryTask/complementaryTask";
+import { ComplementaryTaskCategoryId } from "../domain/complementaryTaskCategory/complementaryTaskCategoryId";
+import { ComplementaryTaskCode } from "../domain/complementaryTask/ComplementaryTaskCode";
+import { VesselVisitExecutionId } from "../domain/vesselVisitExecution/vesselVisitExecutionId";
+import { CTStatus } from "../domain/complementaryTask/ctstatus";
 
 @Service()
 export default class ComplementaryTaskRepo implements IComplementaryTaskRepo {
-  constructor(
-    @Inject("complementaryTaskSchema") private complementaryTaskSchema: Model<IComplementaryTaskPersistence & Document>,
-    @Inject("logger") private logger: any
-  ) {}
 
-  public async exists(task: ComplementaryTask): Promise<boolean> {
-    const id = task.id.toString();
-    const record = await this.complementaryTaskSchema.findOne({ domainId: id });
-    return !!record;
-  }
+    constructor(
+        @Inject("complementaryTaskSchema")
+        private complementaryTaskSchema: Model<IComplementaryTaskPersistence & Document>,
 
-  public async save(task: ComplementaryTask): Promise<ComplementaryTask | null> {
-    try {
-      const rawTask = ComplementaryTaskMap.toPersistence(task);
-      const existing = await this.complementaryTaskSchema.findOne({ code: rawTask.code });
-      let persistedDoc;
+        @Inject("ComplementaryTaskMap")
+        private complementaryTaskMap: ComplementaryTaskMap,
 
-      if (existing) {
-        existing.category = rawTask.category;
-        existing.staff = rawTask.staff;
-        existing.timeStart = rawTask.timeStart;
-        existing.timeEnd = rawTask.timeEnd;
-        existing.status = rawTask.status;
-        await existing.save();
-        persistedDoc = existing;
-      } else {
-        const created = await this.complementaryTaskSchema.create(rawTask);
-        persistedDoc = created;
-      }
+        @Inject("logger")
+        private logger: any
+    ) {}
 
-      return ComplementaryTaskMap.toDomain(persistedDoc);
-    } catch (err) {
-      this.logger.error("Error in ComplementaryTaskRepo.save:", err);
-      throw err;
+
+    public async exists(task: ComplementaryTask): Promise<boolean> {
+        const record = await this.complementaryTaskSchema.findOne({
+            domainId: task.id.toString()
+        });
+        return !!record;
     }
-  }
 
-  public async findByCode(code: string): Promise<ComplementaryTask | null> {
-    const taskRecord = await this.complementaryTaskSchema.findOne({ code });
-    return taskRecord ? ComplementaryTaskMap.toDomain(taskRecord) : null;
-  }
+    public async save(task: ComplementaryTask): Promise<ComplementaryTask | null> {
+        const raw = this.complementaryTaskMap.toPersistence(task);
 
-  //to generate ct code
-  public async findLastTaskOfYear(year: number): Promise<ComplementaryTask | null> {
-  const taskRecord = await this.complementaryTaskSchema
-    .findOne({
-      code: { $regex: `^CT-${year}-` }
-    })
-    .sort({ code: -1 }) // highest sequence comes last lexicographically
-    .exec();
+        try {
+            const existing = await this.complementaryTaskSchema.findOne({
+                domainId: raw.domainId
+            });
 
-  return taskRecord ? ComplementaryTaskMap.toDomain(taskRecord) : null;
-}
+            if (existing) {
+                existing.set(raw);
+                await existing.save();
+                return this.complementaryTaskMap.toDomain(existing);
+            }
+
+            const created = await this.complementaryTaskSchema.create(raw);
+            return this.complementaryTaskMap.toDomain(created);
+
+        } catch (e) {
+            this.logger.error("Error saving ComplementaryTask", { e });
+            return null;
+        }
+    }
+
+
+    public async findAll(): Promise<ComplementaryTask[]> {
+        const records = await this.complementaryTaskSchema.find();
+        return records
+            .map(r => this.complementaryTaskMap.toDomain(r))
+            .filter(Boolean) as ComplementaryTask[];
+    }
+
+    public async findByCategory(category: ComplementaryTaskCategoryId): Promise<ComplementaryTask[]> {
+        const records = await this.complementaryTaskSchema.find({
+            category: category.id.toString()
+        });
+
+        return records
+            .map(r => this.complementaryTaskMap.toDomain(r))
+            .filter(Boolean) as ComplementaryTask[];
+    }
+
+    public async findByCode(code: ComplementaryTaskCode): Promise<ComplementaryTask | null> {
+        const record = await this.complementaryTaskSchema.findOne({
+            code: code.value
+        });
+
+        return record ? this.complementaryTaskMap.toDomain(record) : null;
+    }
+
+    public async findByStaff(staff: string): Promise<ComplementaryTask[]> {
+        const records = await this.complementaryTaskSchema.find({ staff });
+        return records
+            .map(r => this.complementaryTaskMap.toDomain(r))
+            .filter(Boolean) as ComplementaryTask[];
+    }
+
+    public async findByVve(vve: VesselVisitExecutionId): Promise<ComplementaryTask[]> {
+        const records = await this.complementaryTaskSchema.find({
+            vve: vve.id.toString()
+        });
+
+        return records
+            .map(r => this.complementaryTaskMap.toDomain(r))
+            .filter(Boolean) as ComplementaryTask[];
+    }
+
+    public async findCompleted(): Promise<ComplementaryTask[]> {
+        return this.findByStatus(CTStatus.Completed);
+    }
+
+    public async findInProgress(): Promise<ComplementaryTask[]> {
+        return this.findByStatus(CTStatus.InProgress);
+    }
+
+    public async findScheduled(): Promise<ComplementaryTask[]> {
+        return this.findByStatus(CTStatus.Scheduled);
+    }
+
+    private async findByStatus(status: CTStatus): Promise<ComplementaryTask[]> {
+        const records = await this.complementaryTaskSchema.find({ status });
+        return records
+            .map(r => this.complementaryTaskMap.toDomain(r))
+            .filter(Boolean) as ComplementaryTask[];
+    }
+
+    public async findInRange(start: Date, end: Date): Promise<ComplementaryTask[]> {
+        const records = await this.complementaryTaskSchema.find({
+            timeStart: { $gte: start },
+            timeEnd: { $lte: end }
+        });
+
+        return records
+            .map(r => this.complementaryTaskMap.toDomain(r))
+            .filter(Boolean) as ComplementaryTask[];
+    }
+
+
+    public async getNextSequenceNumber(): Promise<number> {
+        const count = await this.complementaryTaskSchema.countDocuments();
+        return count + 1;
+    }
 }
