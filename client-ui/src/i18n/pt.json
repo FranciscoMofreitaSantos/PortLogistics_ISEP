@@ -72,7 +72,8 @@
     "planningScheduling": "Planeamento",
     "pp": "Políticas de Privacidade",
     "dataRigths": "Direitos de Dados\n",
-    "dataRigthsAdmin" : "Gerir DDs"
+    "dataRigthsAdmin" : "Gerir DDs",
+    "incidentType" : "Tipos de Incidentes"
   },
   "layout": {
     "light": "Modo claro",

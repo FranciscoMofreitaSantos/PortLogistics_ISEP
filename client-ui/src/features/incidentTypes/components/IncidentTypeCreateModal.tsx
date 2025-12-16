@@ -5,7 +5,12 @@ import toast from "react-hot-toast";
 import "../style/incidentType.css";
 import type { CreateIncidentTypeDTO } from "../dtos/createIncidentTypeDTO";
 import type { Severity, IncidentType } from "../domain/incidentType";
-import { createIncidentType, getIncidentTypeRoots } from "../services/incidentTypeService";
+import {
+    createIncidentType,
+    getIncidentTypeRoots,
+    getIncidentTypesByName,
+    getIncidentTypeByCode,
+} from "../services/incidentTypeService";
 
 interface Props {
     isOpen: boolean;
@@ -23,49 +28,114 @@ const initialData: Partial<CreateIncidentTypeDTO> = {
     parentCode: null,
 };
 
+function dedupeByCode(list: IncidentType[]) {
+    const map = new Map<string, IncidentType>();
+    for (const it of list) map.set(it.code, it);
+    return Array.from(map.values());
+}
+
 function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
     const { t } = useTranslation();
 
     const [step, setStep] = useState<1 | 2>(1);
-    const [roots, setRoots] = useState<IncidentType[]>([]);
-    const [parentSearch, setParentSearch] = useState("");
-    const [selectedParent, setSelectedParent] = useState<IncidentType | null>(null); // null => “Sem Pai / Raiz”
 
+    // Parent selection
+    const [parentSearch, setParentSearch] = useState("");
+    const [selectedParent, setSelectedParent] = useState<IncidentType | null>(null); // null => Root
+    const [parentCandidates, setParentCandidates] = useState<IncidentType[]>([]);
+    const [parentLoading, setParentLoading] = useState(false);
+    const [parentError, setParentError] = useState<string | null>(null);
+
+    // Form
     const [formData, setFormData] = useState<Partial<CreateIncidentTypeDTO>>(initialData);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+    const [submitError, setSubmitError] = useState<Error | null>(null);
 
+    // When modal opens/closes
     useEffect(() => {
         if (!isOpen) {
             setStep(1);
-            setRoots([]);
             setParentSearch("");
             setSelectedParent(null);
+            setParentCandidates([]);
+            setParentLoading(false);
+            setParentError(null);
+
             setFormData(initialData);
-            setError(null);
             setIsLoading(false);
+            setSubmitError(null);
             return;
         }
 
+        // Load default suggestions (roots) for convenience
         (async () => {
+            setParentLoading(true);
+            setParentError(null);
             try {
-                const data = await getIncidentTypeRoots();
-                setRoots(data);
+                const roots = await getIncidentTypeRoots();
+                setParentCandidates(roots);
             } catch {
+                setParentCandidates([]);
+                setParentError(t("incidentType.errors.loadRoots"));
                 toast.error(t("incidentType.errors.loadRoots"));
+            } finally {
+                setParentLoading(false);
             }
         })();
     }, [isOpen, t]);
 
-    const filteredRoots = useMemo(() => {
-        const q = parentSearch.trim().toLowerCase();
-        if (!q) return roots;
+    // Debounced search across ALL incident types (not only roots)
+    useEffect(() => {
+        if (!isOpen) return;
 
-        return roots.filter((r) => {
-            const hay = `${r.code} ${r.name} ${r.description ?? ""}`.toLowerCase();
-            return hay.includes(q);
-        });
-    }, [roots, parentSearch]);
+        const q = parentSearch.trim();
+        const handle = setTimeout(async () => {
+            // If empty, return to roots (quick pick)
+            if (q === "") {
+                setParentLoading(true);
+                setParentError(null);
+                try {
+                    const roots = await getIncidentTypeRoots();
+                    setParentCandidates(roots);
+                } catch {
+                    setParentCandidates([]);
+                    setParentError(t("incidentType.errors.loadRoots"));
+                } finally {
+                    setParentLoading(false);
+                }
+                return;
+            }
+
+            setParentLoading(true);
+            setParentError(null);
+
+            try {
+                const resultsByName = await getIncidentTypesByName(q);
+
+                // If user typed something that looks like a code, also attempt direct lookup
+                let byCode: IncidentType[] = [];
+                const looksLikeCode = /[A-Za-z]-/i.test(q) || q.length <= 12;
+                if (looksLikeCode) {
+                    try {
+                        const one = await getIncidentTypeByCode(q);
+                        if (one) byCode = [one];
+                    } catch {
+                        // ignore code lookup failure; name results still usable
+                    }
+                }
+
+                const merged = dedupeByCode([...byCode, ...resultsByName]);
+                setParentCandidates(merged);
+            } catch (err) {
+                setParentCandidates([]);
+                setParentError((err as Error)?.message ?? t("incidentType.errors.search"));
+            } finally {
+                setParentLoading(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(handle);
+    }, [parentSearch, isOpen, t]);
 
     const parentSummary = useMemo(() => {
         if (!selectedParent) return t("incidentType.parent.none");
@@ -73,28 +143,27 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
     }, [selectedParent, t]);
 
     const handleValueChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setError(null);
+        setSubmitError(null);
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const goToDetails = () => setStep(2);
-
     const goBackToParent = () => setStep(1);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
+        setSubmitError(null);
 
         if (!formData.code || formData.code.trim() === "") {
             const msg = t("incidentType.errors.codeRequired");
-            setError(new Error(msg));
+            setSubmitError(new Error(msg));
             toast.error(msg);
             return;
         }
         if (!formData.name || formData.name.trim() === "") {
             const msg = t("incidentType.errors.nameRequired");
-            setError(new Error(msg));
+            setSubmitError(new Error(msg));
             toast.error(msg);
             return;
         }
@@ -114,7 +183,7 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
             onCreated();
         } catch (err) {
             const apiError = err as Error;
-            setError(apiError);
+            setSubmitError(apiError);
             toast.error(apiError.message || t("incidentType.errors.createFailedGeneric"));
         } finally {
             setIsLoading(false);
@@ -123,12 +192,9 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
 
     if (!isOpen) return null;
 
-    const hasResults = filteredRoots.length > 0;
-
     return (
         <div className="it-modal-overlay">
             <div className="it-modal-content it-modal-content--wide">
-                {/* Header */}
                 <div className="it-modal-header">
                     <div>
                         <h2 className="it-modal-title">{t("incidentType.createModal.title")}</h2>
@@ -136,7 +202,6 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
                     </div>
                 </div>
 
-                {/* Stepper */}
                 <div className="it-stepper">
                     <div className={`it-step ${step === 1 ? "active" : "complete"}`}>
                         <div className="it-step-dot">{step === 1 ? "1" : "✓"}</div>
@@ -155,18 +220,19 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
                     </div>
                 </div>
 
-                {/* Body */}
+                {/* STEP 1 */}
                 {step === 1 && (
                     <div className="it-step-body">
                         <div className="it-parent-header">
                             <div>
                                 <h3 className="it-section-title">{t("incidentType.selectParent")}</h3>
+                                {/* Atualiza este texto nas traduções: agora é “qualquer tipo”, não só roots */}
                                 <p className="it-section-help">{t("incidentType.parent.help")}</p>
                             </div>
 
                             <div className="it-parent-meta">
                 <span className="it-count-pill">
-                  {t("incidentType.parent.resultsCount", { count: filteredRoots.length })}
+                  {t("incidentType.parent.resultsCount", { count: parentCandidates.length })}
                 </span>
                             </div>
                         </div>
@@ -192,6 +258,9 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
                             )}
                         </div>
 
+                        {parentLoading && <p>{t("common.loading")}</p>}
+                        {parentError && <p className="it-error-message">{parentError}</p>}
+
                         <div className="it-parent-grid">
                             {/* Root option */}
                             <button
@@ -206,9 +275,14 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
                                 </div>
                             </button>
 
-                            {/* Existing roots */}
-                            {hasResults ? (
-                                filteredRoots.map((r) => (
+                            {/* Candidates: roots by default; search results can include children */}
+                            {!parentLoading && parentCandidates.length === 0 ? (
+                                <div className="it-parent-empty">
+                                    <div className="it-parent-empty-title">{t("incidentType.parent.noResults")}</div>
+                                    <div className="it-parent-empty-sub">{t("incidentType.parent.noResultsHint")}</div>
+                                </div>
+                            ) : (
+                                parentCandidates.map((r) => (
                                     <button
                                         key={r.id}
                                         type="button"
@@ -222,11 +296,6 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
                                         </div>
                                     </button>
                                 ))
-                            ) : (
-                                <div className="it-parent-empty">
-                                    <div className="it-parent-empty-title">{t("incidentType.parent.noResults")}</div>
-                                    <div className="it-parent-empty-sub">{t("incidentType.parent.noResultsHint")}</div>
-                                </div>
                             )}
                         </div>
 
@@ -241,6 +310,7 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
                     </div>
                 )}
 
+                {/* STEP 2 */}
                 {step === 2 && (
                     <form onSubmit={handleSubmit} className="it-step-body">
                         <div className="it-details-header">
@@ -288,7 +358,11 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
 
                             <div className="it-form-group">
                                 <label>{t("incidentType.form.severity")}</label>
-                                <select name="severity" value={(formData.severity ?? "Minor") as Severity} onChange={handleValueChange}>
+                                <select
+                                    name="severity"
+                                    value={(formData.severity ?? "Minor") as Severity}
+                                    onChange={handleValueChange}
+                                >
                                     {severities.map((s) => (
                                         <option key={s} value={s}>
                                             {t(`incidentType.severity.${s}`)}
@@ -296,14 +370,9 @@ function IncidentTypeCreateModal({ isOpen, onClose, onCreated }: Props) {
                                     ))}
                                 </select>
                             </div>
-
-                            {/* IMPORTANTE:
-                  - Não mostramos o “Código do Pai” como input quando é Sem Pai.
-                  - Mesmo quando há pai, já mostramos a seleção no header (parentSummary), portanto não precisamos de campo extra.
-               */}
                         </div>
 
-                        {error && <p className="it-error-message">{error.message}</p>}
+                        {submitError && <p className="it-error-message">{submitError.message}</p>}
 
                         <div className="it-modal-actions-wizard">
                             <button type="button" onClick={goBackToParent} className="it-cancel-button">

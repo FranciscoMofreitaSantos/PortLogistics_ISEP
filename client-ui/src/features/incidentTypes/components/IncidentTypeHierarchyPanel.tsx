@@ -1,5 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { FaFilePdf, FaSync } from "react-icons/fa"; // Importar ícones (opcional, ou usa texto)
+
 import type { IncidentType, Severity } from "../domain/incidentType";
 import "../style/incidentType.css";
 
@@ -9,23 +13,19 @@ function buildTree(list: IncidentType[], focusCode?: string | null): TreeNode[] 
     const map = new Map<string, TreeNode>();
     list.forEach(it => map.set(it.code, { ...it, children: [] }));
 
-    // attach children
     map.forEach(node => {
         if (node.parentCode && map.has(node.parentCode)) {
             map.get(node.parentCode)!.children.push(node);
         }
     });
 
-    // roots = nodes whose parent not in list OR parentCode null
     const roots: TreeNode[] = [];
     map.forEach(node => {
         if (!node.parentCode || !map.has(node.parentCode)) roots.push(node);
     });
 
-    // if focusCode exists, return that node as single-root (when present)
     if (focusCode && map.has(focusCode)) return [map.get(focusCode)!];
 
-    // sort for stable output
     const sortRec = (n: TreeNode) => {
         n.children.sort((a, b) => a.code.localeCompare(b.code));
         n.children.forEach(sortRec);
@@ -40,8 +40,8 @@ function SeverityPill({ severity }: { severity: Severity }) {
     const { t } = useTranslation();
     return (
         <span className={`severity-pill severity-${severity.toLowerCase()}`}>
-      {t(`incidentType.severity.${severity}`)}
-    </span>
+            {t(`incidentType.severity.${severity}`)}
+        </span>
     );
 }
 
@@ -75,7 +75,6 @@ function TreeItem({
                         e.stopPropagation();
                         if (hasChildren) toggle(node.code);
                     }}
-                    title={hasChildren ? (isExpanded ? "Collapse" : "Expand") : "No children"}
                 >
                     {hasChildren ? (isExpanded ? "▾" : "▸") : "•"}
                 </button>
@@ -84,7 +83,6 @@ function TreeItem({
                     type="button"
                     className="it-tree-main"
                     onClick={() => onSelect(node.code)}
-                    title={`${node.code} — ${node.name}`}
                 >
                     <span className="it-tree-code">{node.code}</span>
                     <span className="it-tree-name">{node.name}</span>
@@ -127,20 +125,17 @@ export default function IncidentTypeHierarchyPanel({
     onRefresh: () => void;
 }) {
     const { t } = useTranslation();
-
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-    const treeRoots = useMemo(() => {
-        // default: focus on selected node as root (tree “centred”)
-        const roots = buildTree(subtree, selected?.code ?? null);
+    // 1. Referência para a área que queremos "imprimir"
+    const treeRef = useRef<HTMLDivElement>(null);
 
-        // auto-expand first level for better UX
+    const treeRoots = useMemo(() => {
+        const roots = buildTree(subtree, selected?.code ?? null);
         const next = new Set<string>();
         roots.forEach(r => next.add(r.code));
         setExpanded(prev => (prev.size ? prev : next));
-
         return roots;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [subtree, selected?.code]);
 
     const toggle = (code: string) => {
@@ -150,6 +145,41 @@ export default function IncidentTypeHierarchyPanel({
             else next.add(code);
             return next;
         });
+    };
+
+    // 2. Função de Exportar PDF
+    const handleDownloadPDF = async () => {
+        if (!treeRef.current || !selected) return;
+
+        try {
+            // Captura a div como canvas
+            const canvas = await html2canvas(treeRef.current, {
+                scale: 2, // Melhora a resolução
+                backgroundColor: "#ffffff", // Garante fundo branco
+            });
+
+            const imgData = canvas.toDataURL("image/png");
+
+            // Cria PDF (A4 por defeito)
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            pdf.internal.pageSize.getHeight();
+// Ajustar imagem ao PDF
+            const imgProps = pdf.getImageProperties(imgData);
+            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            // Título no PDF
+            pdf.setFontSize(16);
+            pdf.text(`Hierarchy: ${selected.code}`, 10, 15);
+
+            // Adicionar a imagem da árvore
+            pdf.addImage(imgData, "PNG", 0, 25, pdfWidth, imgHeight);
+
+            pdf.save(`hierarchy-${selected.code}.pdf`);
+        } catch (err) {
+            console.error("Failed to generate PDF", err);
+            // Podes adicionar um toast de erro aqui se quiseres
+        }
     };
 
     return (
@@ -162,37 +192,42 @@ export default function IncidentTypeHierarchyPanel({
                     </div>
                 </div>
 
-                <button type="button" className="it-hierarchy-refresh" onClick={onRefresh} disabled={!selected || loading}>
-                    {t("incidentType.hierarchy.refresh")}
-                </button>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                    {/* Botão de PDF só aparece se houver seleção */}
+                    {selected && subtree.length > 0 && (
+                        <button
+                            type="button"
+                            className="it-hierarchy-refresh"
+                            onClick={handleDownloadPDF}
+                            title="Download PDF"
+                            style={{ backgroundColor: "#e2e8f0", color: "#475569" }} // Estilo ligeiramente diferente
+                        >
+                            <FaFilePdf /> PDF
+                        </button>
+                    )}
+
+                    <button
+                        type="button"
+                        className="it-hierarchy-refresh"
+                        onClick={onRefresh}
+                        disabled={!selected || loading}
+                    >
+                        <FaSync /> {t("incidentType.hierarchy.refresh")}
+                    </button>
+                </div>
             </div>
 
-            {!selected && (
-                <div className="it-hierarchy-empty">
-                    {t("incidentType.hierarchy.empty")}
-                </div>
-            )}
-
-            {selected && loading && (
-                <div className="it-hierarchy-loading">
-                    {t("incidentType.hierarchy.loading")}
-                </div>
-            )}
-
-            {selected && !loading && error && (
-                <div className="it-hierarchy-error">
-                    {error}
-                </div>
-            )}
-
+            {/* Conteúdo de Erro/Loading/Vazio... */}
+            {!selected && <div className="it-hierarchy-empty">{t("incidentType.hierarchy.empty")}</div>}
+            {selected && loading && <div className="it-hierarchy-loading">{t("incidentType.hierarchy.loading")}</div>}
+            {selected && !loading && error && <div className="it-hierarchy-error">{error}</div>}
             {selected && !loading && !error && subtree.length === 0 && (
-                <div className="it-hierarchy-empty">
-                    {t("incidentType.hierarchy.noSubtree")}
-                </div>
+                <div className="it-hierarchy-empty">{t("incidentType.hierarchy.noSubtree")}</div>
             )}
 
+            {/* 3. Envolvemos a árvore na div com a ref */}
             {selected && !loading && !error && subtree.length > 0 && (
-                <div className="it-tree">
+                <div className="it-tree-container" ref={treeRef} style={{ padding: "1rem", backgroundColor: "white" }}>
                     {treeRoots.map(root => (
                         <TreeItem
                             key={root.code}

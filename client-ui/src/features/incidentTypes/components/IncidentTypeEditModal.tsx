@@ -5,7 +5,12 @@ import toast from "react-hot-toast";
 import "../style/incidentType.css";
 import type { IncidentType, Severity } from "../domain/incidentType";
 import type { UpdateIncidentTypeDTO } from "../dtos/updateIncidentTypeDTO";
-import { updateIncidentType, getIncidentTypeRoots } from "../services/incidentTypeService";
+import {
+    updateIncidentType,
+    getIncidentTypeRoots,
+    getIncidentTypesByName,
+    getIncidentTypeByCode
+} from "../services/incidentTypeService";
 
 interface Props {
     isOpen: boolean;
@@ -18,7 +23,8 @@ const severities: Severity[] = ["Minor", "Major", "Critical"];
 
 function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) {
     const { t } = useTranslation();
-    const [roots, setRoots] = useState<IncidentType[]>([]);
+
+    // Form Data
     const [formData, setFormData] = useState<UpdateIncidentTypeDTO>({
         name: resource.name,
         description: resource.description,
@@ -26,9 +32,16 @@ function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) 
         parentCode: resource.parentCode ?? null
     });
 
+    // Parent Search Logic
+    const [parentSearch, setParentSearch] = useState("");
+    const [parentCandidates, setParentCandidates] = useState<IncidentType[]>([]);
+    const [isSearchingParent, setIsSearchingParent] = useState(false);
+
+    // Loading/Error states
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
+    // Reset when modal opens
     useEffect(() => {
         if (isOpen) {
             setFormData({
@@ -38,28 +51,67 @@ function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) 
                 parentCode: resource.parentCode ?? null
             });
             setError(null);
-
-            (async () => {
-                try {
-                    const data = await getIncidentTypeRoots();
-                    setRoots(data);
-                } catch {
-                    toast.error(t("incidentType.errors.loadRoots"));
-                }
-            })();
+            setParentSearch("");
+            // Load roots initially as suggestions
+            loadDefaultParents();
         }
     }, [isOpen, resource]);
+
+    const loadDefaultParents = async () => {
+        try {
+            const data = await getIncidentTypeRoots();
+            // Filter out self to prevent immediate cycle
+            setParentCandidates(data.filter(i => i.code !== resource.code));
+        } catch {
+            // silent fail or toast
+        }
+    };
+
+    // Debounced Parent Search
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const q = parentSearch.trim();
+        const handle = setTimeout(async () => {
+            if (q === "") {
+                loadDefaultParents();
+                return;
+            }
+
+            setIsSearchingParent(true);
+            try {
+                // Search by Name
+                const resultsByName = await getIncidentTypesByName(q);
+
+                // Try Search by Code if short
+                let resultsByCode: IncidentType[] = [];
+                if (q.length < 10) {
+                    try {
+                        const res = await getIncidentTypeByCode(q);
+                        if (res) resultsByCode = [res];
+                    } catch { /* ignore */ }
+                }
+
+                // Merge and Deduplicate
+                const merged = [...resultsByCode, ...resultsByName];
+                const unique = Array.from(new Map(merged.map(item => [item.code, item])).values());
+
+                // Filter out SELF (cannot be own parent)
+                setParentCandidates(unique.filter(i => i.code !== resource.code));
+
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setIsSearchingParent(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(handle);
+    }, [parentSearch, isOpen, resource.code]);
 
     const handleValueChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setError(null);
         const { name, value } = e.target;
-
-        // parentCode: treat empty as null
-        if (name === "parentCode") {
-            setFormData(prev => ({ ...prev, parentCode: value === "" ? null : value }));
-            return;
-        }
-
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -68,9 +120,7 @@ function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) 
         setError(null);
 
         if (!formData.name || formData.name.trim() === "") {
-            const msg = t("incidentType.errors.nameRequired");
-            setError(new Error(msg));
-            toast.error(msg);
+            toast.error(t("incidentType.errors.nameRequired"));
             return;
         }
 
@@ -80,7 +130,7 @@ function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) 
                 name: formData.name.trim(),
                 description: (formData.description ?? "").trim(),
                 severity: formData.severity,
-                parentCode: formData.parentCode ?? null
+                parentCode: formData.parentCode // null or string
             });
             toast.success(t("incidentType.success.updated"));
             onUpdated();
@@ -95,20 +145,20 @@ function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) 
 
     if (!isOpen) return null;
 
-    // avoid setting itself as parent
-    const availableParents = roots.filter(r => r.code !== resource.code);
-
     return (
         <div className="it-modal-overlay">
             <div className="it-modal-content">
                 <h2>{t("incidentType.editModal.title")} - {resource.code}</h2>
 
                 <form onSubmit={handleSubmit} className="it-form">
+
+                    {/* Read Only Code */}
                     <div className="it-form-group">
                         <label>{t("incidentType.form.code")} ({t("incidentType.read-only")})</label>
                         <input type="text" value={resource.code} disabled className="info-card-input" />
                     </div>
 
+                    {/* Name */}
                     <div className="it-form-group">
                         <label>{t("incidentType.form.name")}</label>
                         <input
@@ -120,6 +170,7 @@ function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) 
                         />
                     </div>
 
+                    {/* Description */}
                     <div className="it-form-group">
                         <label>{t("incidentType.form.description")}</label>
                         <input
@@ -130,6 +181,7 @@ function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) 
                         />
                     </div>
 
+                    {/* Severity */}
                     <div className="it-form-group">
                         <label>{t("incidentType.form.severity")}</label>
                         <select
@@ -143,21 +195,50 @@ function IncidentTypeEditModal({ isOpen, onClose, onUpdated, resource }: Props) 
                         </select>
                     </div>
 
+                    {/* --- NEW: PARENT SELECTOR WITH SEARCH --- */}
                     <div className="it-form-group">
                         <label>{t("incidentType.form.parent")}</label>
+
+                        {/* 1. Search Box to find the parent */}
+                        <input
+                            type="text"
+                            placeholder={t("incidentType.parent.searchPlaceholder")}
+                            value={parentSearch}
+                            onChange={(e) => setParentSearch(e.target.value)}
+                            className="it-search-input-small"
+                            style={{ marginBottom: '0.5rem' }}
+                        />
+
+                        {/* 2. Select Box populated by search results */}
                         <select
                             name="parentCode"
                             value={formData.parentCode ?? ""}
-                            onChange={handleValueChange}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData(prev => ({ ...prev, parentCode: val === "" ? null : val }));
+                            }}
+                            disabled={isSearchingParent}
                         >
                             <option value="">{t("incidentType.parent.none")}</option>
-                            {availableParents.map(p => (
+
+                            {/* Always show the CURRENT parent if it's not in the candidates list (to avoid UI bug where it looks empty) */}
+                            {resource.parentCode && !parentCandidates.find(c => c.code === resource.parentCode) && (
+                                <option value={resource.parentCode}>
+                                    {resource.parentCode} (Current)
+                                </option>
+                            )}
+
+                            {parentCandidates.map(p => (
                                 <option key={p.id} value={p.code}>
                                     {p.code} – {p.name}
                                 </option>
                             ))}
                         </select>
+                        <small style={{ color: '#666', fontSize: '0.8rem' }}>
+                            {t("incidentType.parent.searchPlaceholder")}
+                        </small>
                     </div>
+                    {/* ---------------------------------------- */}
 
                     {error && <p className="it-error-message">{error.message}</p>}
 

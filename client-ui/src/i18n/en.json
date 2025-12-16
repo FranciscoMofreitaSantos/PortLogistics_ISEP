@@ -68,7 +68,8 @@
     "planningScheduling": "Planning",
     "pp": "Privacy Policies",
     "dataRigths": "Data Rights",
-    "dataRigthsAdmin" : "Manage DDs Requests"
+    "dataRigthsAdmin" : "Manage DDs Requests",
+    "incidentType" : "Incident Types"
   },
   "layout": {
     "light": "Light mode",
