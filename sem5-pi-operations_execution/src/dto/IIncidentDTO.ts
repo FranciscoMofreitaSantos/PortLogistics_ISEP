@@ -5,6 +5,7 @@ export interface IIncidentDTO {
     id? : string,
     code : string,
     incidentTypeCode : string,
+    vveList: string[];
     startTime : Date,
     endTime : Date | null,
     duration : number | null,

@@ -22,6 +22,12 @@ const IncidentSchema = new mongoose.Schema({
         index: true
     },
 
+    vveList: {
+        type: [String],
+        index: true,
+        default: []
+    },
+
 
     startTime     :{
         type: Date,

@@ -12,6 +12,7 @@ export default class IncidentMap extends Mapper<Incident, IIncidentDTO, IInciden
             id : i.id.toString(),
             code : i.code,
             incidentTypeCode : i.incidentTypeCode,
+            vveList : i.vveList,
             startTime : i.startTime,
             endTime : i.endTime,
             duration : i.duration,
@@ -29,6 +30,7 @@ export default class IncidentMap extends Mapper<Incident, IIncidentDTO, IInciden
             {
                 code : raw.code,
                 incidentTypeCode : raw.incidentTypeCode,
+                vveList: raw.vveList,
                 startTime : raw.startTime,
                 endTime : raw.endTime ?? null,
                 duration : raw.duration ?? null,
@@ -37,7 +39,7 @@ export default class IncidentMap extends Mapper<Incident, IIncidentDTO, IInciden
                 description: raw.description,
                 createdByUser : raw.createdByUser,
                 upcomingWindowStartTime : raw.upcomingWindowStartTime ?? null,
-                upcomingWindowEndTime : raw.upcomingWindowStartTime ?? null,
+                upcomingWindowEndTime : raw.upcomingWindowEndTime ?? null,
 
                 createdAt : raw.createdAt,
                 updatedAt : raw.updatedAt ?? null
@@ -51,7 +53,8 @@ export default class IncidentMap extends Mapper<Incident, IIncidentDTO, IInciden
             id : domain.id.toString(),
             code : domain.code,
             incidentTypeCode : domain.incidentTypeCode,
-            startTime : domain.createdAt,
+            vveList: domain.vveList,
+            startTime : domain.startTime,
             endTime : domain.endTime,
             duration : domain.duration,
             severity : domain.severity,

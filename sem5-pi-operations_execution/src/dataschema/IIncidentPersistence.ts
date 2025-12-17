@@ -5,6 +5,7 @@ export interface IIncidentPersistence {
     id? : string,
     code : string,
     incidentTypeCode : string,
+    vveList: string[];
     startTime : Date,
     endTime : Date | null,
     duration : number | null,
