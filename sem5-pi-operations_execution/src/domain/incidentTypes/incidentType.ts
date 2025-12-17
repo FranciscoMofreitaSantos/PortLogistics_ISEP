@@ -157,7 +157,7 @@ export class IncidentType
     }
 
 
-    private static isValidCodeFormat(code: string): boolean {
+    static isValidCodeFormat(code: string): boolean {
         return /^T-INC\d{3}$/.test(code);
     }
     private touch(): void {

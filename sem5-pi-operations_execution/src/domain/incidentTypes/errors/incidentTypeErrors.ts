@@ -1,8 +1,8 @@
 export enum IncidentTypeError {
-    AlreadyExists = "SEVERITY_ALREADY_EXISTS",
-    NotFound = "SEVERITY_NOT_FOUND",
-    InvalidSeverity = "SEVERITY_INVALID_CATEGORY",
-    PersistError = "SEVERITY_PERSIST_ERROR",
-    InvalidCodeFormat = "SEVERITY_INVALID_CODE_FORMAT",
-    InvalidInput = "SEVERITY_INVALID_INPUT",
+    AlreadyExists = "INCIDENT_TYPE_ALREADY_EXISTS",
+    NotFound = "INCIDENT_TYPE_NOT_FOUND",
+    InvalidSeverity = "INCIDENT_TYPE_INVALID_SEVERITY",
+    PersistError = "INCIDENT_TYPE_PERSIST_ERROR",
+    InvalidCodeFormat = "INCIDENT_TYPE_INVALID_CODE_FORMAT",
+    InvalidInput = "INCIDENT_TYPE_INVALID_INPUT",
 }
