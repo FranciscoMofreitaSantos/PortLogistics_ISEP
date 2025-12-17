@@ -1,17 +1,18 @@
 import { useTranslation } from "react-i18next";
 import type { ComplementaryTask } from "../domain/complementaryTask";
+import type { ComplementaryTaskCategory } from "../../complementaryTaskCategory/domain/complementaryTaskCategory"; // Importar o tipo
 import { FaExclamationTriangle } from "react-icons/fa";
 import "../style/complementaryTask.css";
 
 interface Props {
     tasks: ComplementaryTask[];
+    categories: ComplementaryTaskCategory[]; // Recebemos a lista completa para poder buscar o ID
     onEdit: (task: ComplementaryTask) => void;
-    onViewCategory: (categoryCode: string) => void;
+    onViewCategory: (categoryId: string) => void; // Explicitamos que espera um ID
     onFixCategory: (task: ComplementaryTask) => void;
-    categoryStatusMap: Record<string, boolean>;
 }
 
-function ComplementaryTaskTable({ tasks, onEdit, onViewCategory, onFixCategory, categoryStatusMap }: Props) {
+function ComplementaryTaskTable({ tasks, categories, onEdit, onViewCategory, onFixCategory }: Props) {
     const { t } = useTranslation();
 
     if (tasks.length === 0) {
@@ -46,17 +47,26 @@ function ComplementaryTaskTable({ tasks, onEdit, onViewCategory, onFixCategory, 
             </thead>
             <tbody>
             {tasks.map((task) => {
-                const isCategoryActive = categoryStatusMap[task.category] !== false;
+                // Procuramos a categoria correspondente ao código da tarefa
+                const matchedCategory = categories.find(c => c.code === task.category);
+
+                // Se não encontrar, assumimos inativo por segurança, mas tentamos obter o ID se existir
+                const isCategoryActive = matchedCategory ? matchedCategory.isActive : false;
+                const categoryId = matchedCategory ? matchedCategory.id : null;
+
+                const isCompleted = task.status === "Completed";
+                const showDetails = isCategoryActive || isCompleted;
 
                 return (
-                    <tr key={task.id} className={!isCategoryActive ? "row-warning" : ""}>
+                    <tr key={task.id} className={!showDetails ? "row-warning" : ""}>
                         <td>{task.code}</td>
                         <td>
-                            {isCategoryActive ? (
+                            {showDetails ? (
                                 <button
-                                    onClick={() => onViewCategory(task.category)}
+                                    onClick={() => categoryId && onViewCategory(categoryId)} // Envia o ID, não o código
                                     className="ct-details-button"
                                     title={t("actions.viewDetails")}
+                                    disabled={!categoryId} // Previne clique se não encontrou a categoria
                                 >
                                     {t("ct.details") || "Details"}
                                 </button>
@@ -81,8 +91,14 @@ function ComplementaryTaskTable({ tasks, onEdit, onViewCategory, onFixCategory, 
                         </td>
                         <td>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button onClick={() => onEdit(task)} className="pr-edit-button">
-                                    {t("actions.edit")}
+                                <button
+                                    onClick={() => onEdit(task)}
+                                    className="pr-edit-button"
+                                    disabled={isCompleted}
+                                    style={isCompleted ? { opacity: 0.5, cursor: 'not-allowed', pointerEvents: 'none' } : {}}
+                                    title={isCompleted ? t("ct.errors.cannotEditCompleted") || "Cannot edit completed task" : ""}
+                                >
+                                    {t("ct.actions.edit")}
                                 </button>
                             </div>
                         </td>

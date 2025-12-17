@@ -114,6 +114,7 @@
     "accessModules": "Access Modules",
     "port3d": "3D Visualization",
     "ctc" : "Complementary Task Categories",
+    "ct" : "Complementary Tasks",
     "announcement": {
       "title": "System notices",
       "body": "Scheduled maintenance today at 23:00 — some modules may be unavailable."
@@ -1309,6 +1310,7 @@
       "title": "Edit Category"
     },
 
+
     "stats": {
       "total": "Total",
       "active": "Active",
@@ -1353,7 +1355,8 @@
       "code": "Code",
       "name": "Name",
       "description": "Description",
-      "duration": "Default Duration (minutes)"
+      "duration": "Default Duration",
+      "category" : "Category"
     },
 
     "errors": {
@@ -1510,6 +1513,7 @@
       "inProgress": "In Progress",
       "completed": "Completed"
     },
+
     "table": {
       "code": "Code",
       "category": "Category",

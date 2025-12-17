@@ -117,7 +117,8 @@
     "sao": "Gerir Organizações Agente de Transporte",
     "port3d": "Visualização 3D",
     "planning": "Planeamento",
-    "ctc" : "Categorias de tarefas complementares",
+    "ctc" : "Categorias de Tarefas Complementares",
+    "ct" : "Tarefas Complementares",
     "announcement": {
       "title": "Avisos do sistema",
       "body": "Manutenção agendada hoje às 23:00 — alguns módulos poderão ficar indisponíveis."
@@ -1351,7 +1352,8 @@
       "code": "Código",
       "name": "Nome",
       "description": "Descrição",
-      "duration": "Duração Padrão (minutos)"
+      "duration": "Duração Padrão",
+      "category" : "Categoria"
     },
 
     "errors": {

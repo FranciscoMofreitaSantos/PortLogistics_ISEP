@@ -27,6 +27,7 @@ import ComplementaryTaskCreateModal from "../components/ComplementaryTaskCreateM
 import ComplementaryTaskEditModal from "../components/ComplementaryTaskEditModal";
 import ComplementaryTaskCategoryDetailsModal from "../../complementaryTaskCategory/components/ComplementaryTaskCategoryDetailsModal";
 import ComplementaryTaskFixCategoryModal from "../components/ComplementaryTaskFixCategoryModal";
+import {BookAIcon} from "lucide-react";
 
 type FilterType = "all" | "code" | "category" | "staff" | "vve";
 
@@ -35,7 +36,7 @@ function ComplementaryTaskPage() {
     const didMountRef = useRef(false);
 
     const [tasks, setTasks] = useState<ComplementaryTask[]>([]);
-    const [categoryStatusMap, setCategoryStatusMap] = useState<Record<string, boolean>>({});
+    const [categories, setCategories] = useState<ComplementaryTaskCategory[]>([]);
 
     const [selectedTask, setSelectedTask] = useState<ComplementaryTask | null>(null);
     const [viewCategory, setViewCategory] = useState<ComplementaryTaskCategory | null>(null);
@@ -66,14 +67,7 @@ function ComplementaryTaskPage() {
             ]);
 
             setTasks(tasksData);
-
-            const statusMap: Record<string, boolean> = {};
-            catsData.forEach(cat => {
-                statusMap[cat.id] = cat.isActive;
-                statusMap[cat.code] = cat.isActive;
-            });
-            setCategoryStatusMap(statusMap);
-
+            setCategories(catsData);
         } catch (err) {
             setError(err as Error);
             toast.error(t("ct.errors.loadAll") || "Error loading data");
@@ -164,7 +158,7 @@ function ComplementaryTaskPage() {
                     ‹
                 </Link>
                 <h1>
-                    <FaTasks className="ct-icon" /> {t("ct.title") || "Complementary Tasks"}
+                    <BookAIcon className="ct-icon" /> {t("ct.title") || "Complementary Tasks"}
                 </h1>
             </div>
 
@@ -208,10 +202,10 @@ function ComplementaryTaskPage() {
 
             <ComplementaryTaskTable
                 tasks={tasks}
+                categories={categories}
                 onEdit={handleEdit}
                 onViewCategory={handleViewCategory}
                 onFixCategory={handleFixCategory}
-                categoryStatusMap={categoryStatusMap}
             />
 
             <ComplementaryTaskCreateModal

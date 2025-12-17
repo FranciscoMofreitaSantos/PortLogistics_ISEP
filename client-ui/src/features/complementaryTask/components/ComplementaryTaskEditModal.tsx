@@ -191,9 +191,9 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource }: Pr
                             value={formData.status}
                             onChange={handleValueChange}
                         >
-                            <option value="Scheduled">Scheduled</option>
-                            <option value="InProgress">In Progress</option>
-                            <option value="Completed">Completed</option>
+                            <option value="Scheduled">{t("ct.status.Scheduled")}</option>
+                            <option value="InProgress">{t("ct.status.InProgress")}</option>
+                            <option value="Completed">{t("ct.status.Completed")}</option>
                         </select>
                     </div>
 
