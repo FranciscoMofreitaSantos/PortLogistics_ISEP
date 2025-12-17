@@ -28,10 +28,7 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
     }
 
 
-    public static create(
-        props: ComplementaryTaskProps,
-        id?: UniqueEntityID
-    ): ComplementaryTask {
+    public static create(props: ComplementaryTaskProps, id?: UniqueEntityID): ComplementaryTask {
 
         const guardResult = Guard.againstNullOrUndefinedBulk([
             { argument: props.code, argumentName: "code" },
@@ -69,6 +66,11 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
             id
         );
     }
+
+    public static rehydrate(props: ComplementaryTaskProps, id: UniqueEntityID): ComplementaryTask {
+        return new ComplementaryTask(props, id);
+    }
+
 
 
     get id(): UniqueEntityID {

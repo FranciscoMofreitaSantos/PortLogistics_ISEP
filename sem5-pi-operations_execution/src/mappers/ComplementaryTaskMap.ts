@@ -15,17 +15,17 @@ export default class ComplementaryTaskMap extends Mapper<ComplementaryTask, ICom
         return {
             id: domain.id.toString(),
             code : domain.code.value,
-            category: domain.category.toString(),
+            category: domain.category.id.toString(),
             staff: domain.staff,
             timeStart : domain.timeStart,
             timeEnd : domain.timeEnd,
             status : domain.status,
-            vve : domain.vve.toString()
+            vve : domain.vve.id.toString(),
         };
     }
 
     toDomain(raw: IComplementaryTaskPersistence): ComplementaryTask | null {
-        return ComplementaryTask.create(
+        return ComplementaryTask.rehydrate(
             {
                 code: ComplementaryTaskCode.createFromString(raw.code),
                 category: ComplementaryTaskCategoryId.create(raw.category),
@@ -44,13 +44,13 @@ export default class ComplementaryTaskMap extends Mapper<ComplementaryTask, ICom
     toPersistence(domain: ComplementaryTask): IComplementaryTaskPersistence {
         return {
             domainId : domain.id.toString(),
-            code : domain.code.toString(),
-            category : domain.category.toString(),
+            code : domain.code.value,
+            category : domain.category.id.toString(),
             staff : domain.staff,
             timeStart : domain.timeStart,
             timeEnd : domain.timeEnd,
             status : domain.status,
-            vve : domain.vve.toString(),
+            vve : domain.vve.id.toString(),
             createdAt : domain.createdAt,
             updatedAt : domain.updatedAt
         };

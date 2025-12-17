@@ -87,14 +87,12 @@ export default class ComplementaryTaskRepo implements IComplementaryTaskRepo {
             .filter(Boolean) as ComplementaryTask[];
     }
 
-    public async findByVve(vve: VesselVisitExecutionId): Promise<ComplementaryTask[]> {
-        const records = await this.complementaryTaskSchema.find({
+    public async findByVve(vve: VesselVisitExecutionId): Promise<ComplementaryTask | null> {
+        const record = await this.complementaryTaskSchema.findOne({
             vve: vve.id.toString()
         });
 
-        return records
-            .map(r => this.complementaryTaskMap.toDomain(r))
-            .filter(Boolean) as ComplementaryTask[];
+        return record ? this.complementaryTaskMap.toDomain(record) : null;
     }
 
     public async findCompleted(): Promise<ComplementaryTask[]> {
@@ -118,8 +116,8 @@ export default class ComplementaryTaskRepo implements IComplementaryTaskRepo {
 
     public async findInRange(start: Date, end: Date): Promise<ComplementaryTask[]> {
         const records = await this.complementaryTaskSchema.find({
-            timeStart: { $gte: start },
-            timeEnd: { $lte: end }
+            timeStart: { $lt: end },
+            timeEnd: { $gt: start }
         });
 
         return records

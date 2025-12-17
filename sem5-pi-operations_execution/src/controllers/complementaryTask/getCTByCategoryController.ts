@@ -19,11 +19,15 @@ export default class GetCTByCategoryController extends BaseController {
     protected async executeImpl(): Promise<any> {
         this.logger.info("HTTP GET /api/complementary-tasks/category");
 
-        const cat = this.req.params.category;
+        const cat = this.req.query.category as string;
 
         try {
             this.logger.debug("Calling ctService.getByCategoryAsync().");
-            const result = await this.ctService.getByCategoryAsync(ComplementaryTaskCategoryId.caller(cat));
+            if (!cat) {
+                return this.clientError("Category is required");
+            }
+
+            const result = await this.ctService.getByCategoryAsync(ComplementaryTaskCategoryId.create(cat));
 
             if (result.isFailure) {
                 this.logger.warn("CT fetch failed at Service level.", {

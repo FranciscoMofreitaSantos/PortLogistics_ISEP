@@ -19,8 +19,8 @@ export default interface IComplementaryTaskService {
     getByCategoryAsync(category: ComplementaryTaskCategoryId): Promise<Result<IComplementaryTaskDTO[]>>;
 
     getInRangeAsync(timeStart: Date, timeEnd: Date): Promise<Result<IComplementaryTaskDTO[]>>;
-    //TODO NÃO ESQUECER DE IMPLEMENTAR ISTO QND VVE --> READY
-    getByVveAsync(vve: VesselVisitExecutionId): Promise<Result<IComplementaryTaskDTO[]>>;
+
+    getByVveAsync(vve: VesselVisitExecutionId): Promise<Result<IComplementaryTaskDTO>>;
 
     getScheduledAsync(): Promise<Result<IComplementaryTaskDTO[]>>;
 

@@ -5,7 +5,6 @@ export enum CTError {
     NotInProgress = "CT_NOT_IN_PROGRESS",
     AlreadyCompleted = "CT_ALREADY_COMPLETED",
     InvalidTimeWindow = "CT_INVALID_TIME_WINDOW",
-    AlreadyExists = "CT_ALREADY_EXISTS",
     PersistError = "CT_PERSIST_ERROR",
     NotFound = "CT_NOT_FOUND",
     InvalidTimeRange = "CT_INVALID_TIME_RANGE"

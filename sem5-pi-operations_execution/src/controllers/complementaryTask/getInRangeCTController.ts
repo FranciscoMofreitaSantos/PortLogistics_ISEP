@@ -18,17 +18,17 @@ export default class GetInRangeCTController extends BaseController {
     protected async executeImpl(): Promise<any> {
         this.logger.info("HTTP GET /api/complementary-tasks/in-range");
 
-        const { timeStart, timeEnd } = this.req.params;
+        const { timeStart, timeEnd } = this.req.query;
 
         if (!timeStart || !timeEnd) {
             return this.clientError("timeStart and timeEnd are required");
         }
 
-        const startDate = new Date(timeStart);
-        const endDate = new Date(timeEnd);
+        const startDate = new Date(Number(timeStart));
+        const endDate = new Date(Number(timeEnd));
 
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-            return this.clientError("Invalid date format. Use ISO 8601.");
+            return this.clientError("Invalid date range.");
         }
 
         try {

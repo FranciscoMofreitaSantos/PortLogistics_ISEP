@@ -18,12 +18,16 @@ export default class GetCTByVveController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         this.logger.info("HTTP GET /api/complementary-tasks/vve");
+        const vve = this.req.query.vve as string;
 
-        const vve = this.req.params.vve;
 
         try {
             this.logger.debug("Calling ctService.getByVveAsync().");
-            const result = await this.ctService.getByVveAsync(VesselVisitExecutionId.caller(vve));
+            if (!vve) {
+                return this.clientError("VVE is required");
+            }
+
+            const result = await this.ctService.getByVveAsync(VesselVisitExecutionId.create(vve));
 
             if (result.isFailure) {
                 this.logger.warn("CT fetch failed at Service level.", {

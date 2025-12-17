@@ -153,7 +153,7 @@ export default {
             },
             getInProgress: {
                 name : "GetInProgressCtController",
-                path : "../controllers/complementaryTask/getInProgressCtController",
+                path : "../controllers/complementaryTask/getInProgressCTController",
             },
             getInRange: {
                 name : "GetInRangeCTController",

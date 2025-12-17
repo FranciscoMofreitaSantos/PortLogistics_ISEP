@@ -22,11 +22,11 @@ export default class UpdateCTController extends BaseController {
         const dto = this.req.body as IComplementaryTaskDTO;
 
         try {
-            if (!dto.code) {
+            if (!code) {
                 return this.clientError("Code is required");
             }
 
-            const result = await this.ctService.updateAsync(ComplementaryTaskCode.createFromString(dto.code), dto);
+            const result = await this.ctService.updateAsync(ComplementaryTaskCode.createFromString(code), dto);
 
             return this.ok(this.res, result.getValue());
 

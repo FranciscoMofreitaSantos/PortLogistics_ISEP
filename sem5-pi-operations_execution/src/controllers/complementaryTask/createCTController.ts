@@ -1,9 +1,9 @@
-import {BaseController} from "../../core/infra/BaseController";
-import {Inject, Service} from "typedi";
-import {Logger} from "winston";
+import { BaseController } from "../../core/infra/BaseController";
+import { Inject, Service } from "typedi";
+import { Logger } from "winston";
 import IComplementaryTaskService from "../../services/IServices/IComplementaryTaskService";
-import {BusinessRuleValidationError} from "../../core/logic/BusinessRuleValidationError";
-import {IComplementaryTaskDTO} from "../../dto/IComplementaryTaskDTO";
+import { BusinessRuleValidationError } from "../../core/logic/BusinessRuleValidationError";
+import { IComplementaryTaskDTO } from "../../dto/IComplementaryTaskDTO";
 
 @Service()
 export default class CreateCTController extends BaseController {
@@ -17,9 +17,32 @@ export default class CreateCTController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
-        const dto = this.req.body as IComplementaryTaskDTO;
-
         try {
+            const {
+                category,
+                staff,
+                timeStart,
+                timeEnd,
+                status,
+                vve
+            } = this.req.body;
+
+            const startDate = new Date(timeStart);
+            const endDate = new Date(timeEnd);
+
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                return this.clientError("Invalid date format. Use ISO 8601.");
+            }
+
+            const dto: IComplementaryTaskDTO = {
+                category,
+                staff,
+                timeStart: startDate,
+                timeEnd: endDate,
+                status,
+                vve
+            };
+
             const result = await this.ctService.createAsync(dto);
             return this.ok(this.res, result.getValue());
 
@@ -30,20 +53,11 @@ export default class CreateCTController extends BaseController {
                     message: e.message,
                     details: e.details
                 });
-
                 return this.clientError(e.message);
             }
 
-            this.logger.error(
-                "Unexpected error creating ComplementaryTask",
-                {e}
-            );
-
+            this.logger.error("Unexpected error creating ComplementaryTask", { e });
             return this.fail("Internal server error");
         }
     }
-
-
 }
-
-

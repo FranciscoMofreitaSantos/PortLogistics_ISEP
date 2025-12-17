@@ -1,0 +1,51 @@
+POST http://localhost:3000/api/complementary-tasks
+Content-Type: application/json
+
+{
+  "category": "1a14e352-1b76-41fb-b899-72664e019065",
+  "staff": "Staff A",
+  "timeStart": "2025-12-17T09:00:00.000Z",
+  "timeEnd": "2025-12-17T11:00:00.000Z",
+  "status": "Scheduled",
+  "vve": "1a14e352-1b76-41fb-b899-72664e119065"
+}
+
+###
+PUT http://localhost:3000/api/complementary-tasks/CTC001[1]
+Content-Type: application/json
+
+{
+  "category": "1a14e352-1b76-41fb-b899-72664e019065",
+  "staff": "Staff B",
+  "timeStart": "2025-12-17T10:00:00.000Z",
+  "timeEnd": "2025-12-17T12:00:00.000Z",
+  "status": "Scheduled",
+  "vve": "1a14e352-1b76-41fb-b899-72664e119065"
+}
+
+###
+GET http://localhost:3000/api/complementary-tasks
+
+###
+GET http://localhost:3000/api/complementary-tasks/search/code/CTC003%5B1%5D
+
+###
+GET http://localhost:3000/api/complementary-tasks/search/completed?status=Completed
+
+###
+GET http://localhost:3000/api/complementary-tasks/search/in-progress?status=InProgress
+
+###
+GET http://localhost:3000/api/complementary-tasks/search/scheduled?status=Scheduled
+
+###
+GET http://localhost:3000/api/complementary-tasks/search/category?category=1a14e352-1b76-41fb-b899-72664e019065
+
+###
+GET http://localhost:3000/api/complementary-tasks/search/staff?staff=Staff%20A
+
+###
+GET http://localhost:3000/api/complementary-tasks/search/vve?vve=1a14e352-1b76-41fb-b899-72664e119065
+
+###
+GET http://localhost:3000/api/complementary-tasks/search/in-range?timeStart=1765962000000&timeEnd=1765969200000

@@ -5,6 +5,7 @@ import {ComplementaryTaskCategory} from "../domain/complementaryTaskCategory/com
 import {IComplementaryTaskCategoryPersistence} from "../dataschema/IComplementaryTaskCategoryPersistence";
 import {Category} from "../domain/complementaryTaskCategory/category";
 import ComplementaryTaskCategoryMap from "../mappers/ComplementaryTaskCategoryMap";
+import {ComplementaryTaskCategoryId} from "../domain/complementaryTaskCategory/complementaryTaskCategoryId";
 
 @Service()
 export default class ComplementaryTaskCategoryRepo implements IComplementaryTaskCategoryRepo {
@@ -99,6 +100,38 @@ export default class ComplementaryTaskCategoryRepo implements IComplementaryTask
             return null;
         }
     }
+
+    public async findById(id: ComplementaryTaskCategoryId): Promise<ComplementaryTaskCategory | null> {
+
+        this.logger.debug("Finding ComplementaryTaskCategory by id", {
+            id: id.id.toString()
+        });
+
+        try {
+            const record = await this.complementaryTaskCategorySchema.findOne({
+                domainId: id.id.toString()
+            });
+
+            if (!record) {
+                this.logger.warn(
+                    "ComplementaryTaskCategory not found by id",
+                    { id: id.id.toString() }
+                );
+                return null;
+            }
+
+            return this.categoryMap.toDomain(record);
+
+        } catch (e) {
+            this.logger.error(
+                "Error finding ComplementaryTaskCategory by id",
+                { id: id.id.toString(), error: e }
+            );
+            return null;
+        }
+    }
+
+
 
     public async findByName(name: string): Promise<ComplementaryTaskCategory[]> {
 

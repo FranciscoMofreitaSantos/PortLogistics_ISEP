@@ -14,6 +14,7 @@ import {BusinessRuleValidationError} from "../core/logic/BusinessRuleValidationE
 import {CTError} from "../domain/complementaryTask/errors/ctErrors";
 import {ComplementaryTask} from "../domain/complementaryTask/complementaryTask";
 import {CTCError} from "../domain/complementaryTaskCategory/errors/ctcErrors";
+import IComplementaryTaskCategoryRepo from "./IRepos/IComplementaryTaskCategoryRepo";
 
 @Service()
 export default class ComplementaryTaskService implements IComplementaryTaskService {
@@ -21,6 +22,9 @@ export default class ComplementaryTaskService implements IComplementaryTaskServi
     constructor(
         @Inject("ComplementaryTaskRepo")
         private repo: IComplementaryTaskRepo,
+
+        @Inject("ComplementaryTaskCategoryRepo")
+        private ctcRepo: IComplementaryTaskCategoryRepo,
 
         @Inject("ComplementaryTaskMap")
         private complementaryTaskMap: ComplementaryTaskMap,
@@ -31,21 +35,33 @@ export default class ComplementaryTaskService implements IComplementaryTaskServi
     }
 
     public async createAsync(dto: IComplementaryTaskDTO): Promise<Result<IComplementaryTaskDTO>> {
-        this.logger.info("Creating ComplementaryTask", {code: dto.code});
+        this.logger.info("Creating ComplementaryTask");
 
         const number = await this.repo.getNextSequenceNumber();
 
+        const ctc = await this.ctcRepo.findById(ComplementaryTaskCategoryId.create(dto.category));
+        if (!ctc) {
+            throw new BusinessRuleValidationError(
+                CTError.InvalidInput,
+                "Complementary Task Category not found",
+                `No CTC found with id ${dto.category}`
+            );
+        }
+
+
+
         const task = ComplementaryTask.create({
-            code: ComplementaryTaskCode.create(dto.category, number),
-            category: ComplementaryTaskCategoryId.caller(dto.category),
+            code: ComplementaryTaskCode.create(ctc.code, number),
+            category: ComplementaryTaskCategoryId.create(dto.category),
             staff: dto.staff,
             timeStart: dto.timeStart,
             timeEnd: dto.timeEnd,
             status: dto.status,
-            vve: VesselVisitExecutionId.caller(dto.vve),
+            vve: VesselVisitExecutionId.create(dto.vve),
             createdAt : new Date(),
             updatedAt: null
         });
+
 
         const saved = await this.repo.save(task);
         if (!saved) {
@@ -102,6 +118,7 @@ export default class ComplementaryTaskService implements IComplementaryTaskServi
 
     public async getByCodeAsync(code: ComplementaryTaskCode): Promise<Result<IComplementaryTaskDTO>> {
         this.logger.debug(`Fetching complementary task with code: ${code}`);
+
         const task = await this.repo.findByCode(code);
         if (!task) {
             throw new BusinessRuleValidationError(
@@ -119,10 +136,17 @@ export default class ComplementaryTaskService implements IComplementaryTaskServi
         return Result.ok(tasks.map(t => this.complementaryTaskMap.toDTO(t)));
     }
 
-    public async getByVveAsync(vve: VesselVisitExecutionId): Promise<Result<IComplementaryTaskDTO[]>> {
-        this.logger.debug(`Fetching all complementary tasks from vve: ${vve}`);
-        const tasks = await this.repo.findByVve(vve);
-        return Result.ok(tasks.map(t => this.complementaryTaskMap.toDTO(t)));
+    public async getByVveAsync(vve: VesselVisitExecutionId): Promise<Result<IComplementaryTaskDTO>> {
+        this.logger.debug(`Fetching complementary task with vve: ${vve}`);
+        const task = await this.repo.findByVve(vve);
+        if (!task) {
+            throw new BusinessRuleValidationError(
+                CTCError.NotFound,
+                "Complementary task not found",
+                `No category found with vve ${vve}`
+            );
+        }
+        return Result.ok(this.complementaryTaskMap.toDTO(task));
     }
 
     public async getCompletedAsync(): Promise<Result<IComplementaryTaskDTO[]>> {
@@ -145,19 +169,10 @@ export default class ComplementaryTaskService implements IComplementaryTaskServi
     }
 
     public async getInRangeAsync(timeStart: Date, timeEnd: Date): Promise<Result<IComplementaryTaskDTO[]>> {
-        const now = new Date();
-
         if (timeStart >= timeEnd) {
             throw new BusinessRuleValidationError(
                 CTError.InvalidTimeRange,
                 "Start time must be before end time"
-            );
-        }
-
-        if (timeStart < now) {
-            throw new BusinessRuleValidationError(
-                CTError.InvalidTimeRange,
-                "Start time must be in the future"
             );
         }
 

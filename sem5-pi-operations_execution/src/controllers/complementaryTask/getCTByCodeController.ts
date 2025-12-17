@@ -17,11 +17,17 @@ export default class GetCTByCodeController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
+        this.logger.info("HTTP GET /api/complementary-tasks/code");
         const code = this.req.params.code;
+        console.log("RAW PARAM:", code);
 
         try {
-            const result = await this.ctService.getByCodeAsync(ComplementaryTaskCode.createFromString(code));
+            this.logger.debug("Calling ctService.getByCodeAsync().");
+            if (!code) {
+                return this.clientError("Code is required");
+            }
 
+            const result = await this.ctService.getByCodeAsync(ComplementaryTaskCode.createFromString(code));
             return this.ok(this.res, result.getValue());
 
         } catch (e) {

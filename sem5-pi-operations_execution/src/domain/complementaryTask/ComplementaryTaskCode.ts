@@ -26,7 +26,7 @@ export class ComplementaryTaskCode extends ValueObject<ComplementaryTaskCodeProp
             );
         }
 
-        if (!Number.isInteger(number) || number < 0) {
+        if (!Number.isInteger(number) || number <= 0) {
             throw new BusinessRuleValidationError(
                 CTError.InvalidCode,
                 "Code number must be a positive integer"
@@ -34,6 +34,15 @@ export class ComplementaryTaskCode extends ValueObject<ComplementaryTaskCodeProp
         }
 
         const normalizedPrefix = prefix.trim().toUpperCase();
+
+
+        if (!/^[A-Z0-9]+$/.test(normalizedPrefix)) {
+            throw new BusinessRuleValidationError(
+                CTError.InvalidCode,
+                "Code prefix must be alphanumeric (A-Z, 0-9)"
+            );
+        }
+
         const value = `${normalizedPrefix}[${number}]`;
 
         return new ComplementaryTaskCode({ value });
@@ -51,13 +60,14 @@ export class ComplementaryTaskCode extends ValueObject<ComplementaryTaskCodeProp
 
         const normalized = raw.trim().toUpperCase();
 
-        const match = /^([A-Z]+)\[(\d+)]$/.exec(normalized);
+
+        const match = /^([A-Z0-9]+)\[(\d+)]$/.exec(normalized);
 
         if (!match) {
             throw new BusinessRuleValidationError(
                 CTError.InvalidCode,
                 "Invalid complementary task code format",
-                "Expected format: PREFIX[NUMBER]"
+                "Expected format: PREFIX[NUMBER] (e.g. CTC001[1])"
             );
         }
 
@@ -67,7 +77,4 @@ export class ComplementaryTaskCode extends ValueObject<ComplementaryTaskCodeProp
         return ComplementaryTaskCode.create(prefix, number);
     }
 
-    public toString(): string {
-        return this.props.value;
-    }
 }

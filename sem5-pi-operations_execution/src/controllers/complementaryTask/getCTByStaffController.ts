@@ -19,10 +19,15 @@ export default class GetCTByStaffController extends BaseController {
     protected async executeImpl(): Promise<any> {
         this.logger.info("HTTP GET /api/complementary-tasks/staff");
 
-        const staff = this.req.params.staff;
+        const staff = this.req.query.staff as string;
 
         try {
             this.logger.debug("Calling ctService.getByStaffAsync().");
+
+            if (!staff) {
+                return this.clientError("Staff is required");
+            }
+
             const result = await this.ctService.getByStaffAsync(staff);
 
             if (result.isFailure) {

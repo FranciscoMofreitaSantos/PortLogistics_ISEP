@@ -12,7 +12,7 @@ export default interface IComplementaryTaskRepo extends Repo<ComplementaryTask> 
     findAll(): Promise<ComplementaryTask[]>;
     findByCategory(category: ComplementaryTaskCategoryId): Promise<ComplementaryTask[]>
     findByStaff(staff: string): Promise<ComplementaryTask[]>
-    findByVve(vve: VesselVisitExecutionId): Promise<ComplementaryTask[]>
+    findByVve(vve: VesselVisitExecutionId): Promise<ComplementaryTask | null>
     findCompleted(status : CTStatus): Promise<ComplementaryTask[]>
     findInProgress(status : CTStatus): Promise<ComplementaryTask[]>
     findScheduled(status : CTStatus): Promise<ComplementaryTask[]>
