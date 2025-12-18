@@ -225,7 +225,12 @@ export class Incident extends AggregateRoot<IncidentProps> {
         this.touch();
     }
 
-    public changeEndTime(endTime: Date | null): void {
+    public markAsResolved(): void {
+        this.changeEndTime(new Date(Date.now()));
+        this.touch();
+    }
+
+    private changeEndTime(endTime: Date | null): void {
         if (endTime === undefined) {
             throw new BusinessRuleValidationError(
                 IncidentError.InvalidInput,
