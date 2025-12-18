@@ -164,7 +164,19 @@ export default {
                 path : "../controllers/complementaryTask/getScheduledCTController",
             },
 
-        }
+        },
+
+        vesselVisitExecution: {
+            create: {
+                name: "createVVEController",
+                path: "../controllers/vve/createVVEController",
+            },
+
+            getAll: {
+                name: "getAllVVEController",
+                path: "../controllers/vve/getAllVVEController",
+            }
+        },
     },
 
     repos: {
@@ -180,6 +192,10 @@ export default {
         complementaryTask : {
             name: "ComplementaryTaskRepo",
             path : "../repos/complementaryTaskRepo"
+        },
+        VesselVisitExecution: {
+            name: "VesselVisitExecutionRepo",
+            path: "../repos/vesselVisitExecutionRepo"
         }
     },
 
@@ -196,6 +212,10 @@ export default {
         complementaryTask : {
             name: "ComplementaryTaskService",
             path : "../services/complementaryTaskService"
+        },
+        VesselVisitExecution: {
+            name: "VesselVisitExecutionService",
+            path: "../services/vesselVisitExecutionService"
         }
     }
 };
