@@ -1,0 +1,63 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+hide circle
+skinparam classAttributeIconSize 0
+
+class Incident {
+  - _id: UniqueEntityID
+  - props: IncidentProps
+  + create(props: IncidentProps, id?: UniqueEntityID): Incident
+  + addAffectedVve(vveId: string): void
+  + removeAffectedVve(vveId: string): void
+  + markAsResolved(): void
+  + changeImpactMode(mode: ImpactMode): void
+}
+
+interface IIncidentRepo {
+  + save(incident: Incident): Promise<Incident>
+  + findByCode(code: string): Promise<Incident | null>
+  + findByVVE(vveCode: string): Promise<Incident[]>
+  + getActiveIncidents(): Promise<Incident[]>
+}
+
+class IncidentRepo implements IIncidentRepo {
+  - incidentSchema: Model<IIncidentPersistence>
+  - incidentMap: IncidentMap
+}
+
+interface IIncidentService {
+  + createAsync(dto: IIncidentDTO): Promise<Result<IIncidentDTO>>
+  + updateAsync(code: string, dto: IIncidentDTO): Promise<Result<IIncidentDTO>>
+  + addVVEToIncidentAsync(code: string, vveCode: string): Promise<Result<IIncidentDTO>>
+}
+
+class IncidentService implements IIncidentService {
+  - repo: IIncidentRepo
+  - repoType: IIncidentTypeRepository
+  - map: IncidentMap
+}
+
+class CreateIncidentController {
+  - service: IIncidentService
+  + execute(req, res): Promise<void>
+}
+
+class UpdateIncidentController {
+  - service: IIncidentService
+  + execute(req, res): Promise<void>
+}
+
+class AddVVEToIncidentController {
+  - service: IIncidentService
+  + execute(req, res): Promise<void>
+}
+
+CreateIncidentController ..> IIncidentService
+UpdateIncidentController ..> IIncidentService
+AddVVEToIncidentController ..> IIncidentService
+IncidentService --> IIncidentRepo
+IncidentRepo --> Incident
+IncidentService ..> Incident
+
+@enduml

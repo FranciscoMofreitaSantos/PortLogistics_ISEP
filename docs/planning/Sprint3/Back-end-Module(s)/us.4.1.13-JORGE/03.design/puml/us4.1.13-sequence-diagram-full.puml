@@ -1,0 +1,319 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+title Sequence Diagram (Full) – US4.1.13 Record and Manage Incidents
+
+actor "Logistic Operator" as Operator
+boundary "SPA" as SPA
+boundary "Incident Routes" as Routes
+control "Incident Controllers" as Ctrl
+control "IncidentService" as Svc
+entity "IncidentRepo" as Repo
+entity "IncidentTypeRepo" as TypeRepo
+entity "IncidentMap" as Map
+database "MongoDB (Mongoose)" as DB
+
+== Create Incident ==
+Operator -> SPA : Fill form + Submit
+SPA -> Routes : POST /api/incidents\n(Create Incident DTO)
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : createAsync(dto)
+
+Svc -> Repo : findByCode(dto.code)
+Repo -> DB : findOne({code})
+DB --> Repo : record/null
+Repo --> Svc : Incident?/null
+
+alt code exists
+  Svc --> Ctrl : BusinessRuleValidationError(AlreadyExists)
+  Ctrl --> SPA : 400 Bad Request
+else code does not exist
+  Svc -> TypeRepo : findByCode(dto.incidentTypeCode)
+  TypeRepo -> DB : findOne({code: incidentTypeCode})
+  DB --> TypeRepo : record/null
+  TypeRepo --> Svc : IncidentType?/null
+  
+  alt incident type not found
+    Svc --> Ctrl : BusinessRuleValidationError(NotFound type)
+    Ctrl --> SPA : 400 Bad Request
+  end
+
+  Svc -> Svc : checkIfVVEsExist(dto.vveList)
+  note right : External validation (Service/Repo)
+
+  Svc -> Map : (conceptual) parsing enums\nSeverityFactory.fromString(...)\nImpactModeFactory.fromString(...)
+  Svc -> Svc : Incident.create(props)
+
+  Svc -> Repo : save(incident)
+  Repo -> Map : toPersistence(incident)
+  Repo -> DB : create(persistence)
+  DB --> Repo : createdDoc
+  Repo -> Map : toDomain(createdDoc)
+  Repo --> Svc : Incident
+
+  Svc -> Map : toDTO(Incident)
+  Svc --> Ctrl : Result.ok(dto)
+  Ctrl --> SPA : 201 Created\nIncidentDTO
+end
+
+== Update Incident ==
+Operator -> SPA : Edit + Submit
+SPA -> Routes : PUT /api/incidents/{code}\n(Update Incident DTO)
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : updateAsync(code, dto)
+
+Svc -> Repo : findByCode(code)
+Repo -> DB : findOne({code})
+DB --> Repo : record/null
+Repo -> Map : toDomain(record)
+Repo --> Svc : Incident?/null
+
+alt incident not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+else found
+  Svc -> TypeRepo : findByCode(dto.incidentTypeCode)
+  TypeRepo -> DB : findOne({code})
+  DB --> TypeRepo : record/null
+  TypeRepo --> Svc : IncidentType?/null
+
+  alt incident type not found
+    Svc --> Ctrl : BusinessRuleValidationError(NotFound type)
+    Ctrl --> SPA : 400 Bad Request
+  end
+
+  Svc -> Svc : checkIfVVEsExist(dto.vveList)
+
+  Svc -> Map : (conceptual) parsing enums
+  
+  opt impactMode == UPCOMING
+    alt switching from other mode without windows
+      Svc --> Ctrl : BusinessRuleValidationError(UpdateError)
+      Ctrl --> SPA : 400 Bad Request
+    else has windows
+      Svc -> Svc : incident.changeUpComingWindowTimes(...)
+    end
+  end
+
+  Svc -> Svc : incident.changeIncidentTypeCode(...)\nchangeVVEList(...)\nchangeStartTime(...)\nchangeSeverity(...)\nchangeImpactMode(...)\nchangeDescription(...)
+
+  Svc -> Repo : save(incident)
+  Repo -> Map : toPersistence(incident)
+  Repo -> DB : update/save(persistence)
+  DB --> Repo : updatedDoc
+  Repo -> Map : toDomain(updatedDoc)
+  Repo --> Svc : Incident
+
+  Svc -> Map : toDTO(Incident)
+  Svc --> Ctrl : Result.ok(dto)
+  Ctrl --> SPA : 200 OK\nIncidentDTO
+end
+
+== Add VVE to Incident ==
+Operator -> SPA : Add VVE to Incident
+SPA -> Routes : POST /api/incidents/{code}/vve/{vveCode}
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : addVVEToIncidentAsync(code, vveCode)
+
+Svc -> Repo : findByCode(code)
+Repo -> DB : findOne({code})
+DB --> Repo : record/null
+Repo -> Map : toDomain(record)
+Repo --> Svc : Incident?/null
+
+alt incident not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+else found
+  Svc -> Svc : checkIfVVEsExist(vveCode)
+  Svc -> Svc : incident.addAffectedVve(vveCode)
+
+  Svc -> Repo : save(incident)
+  Repo -> Map : toPersistence(incident)
+  Repo -> DB : update/save(persistence)
+  DB --> Repo : updatedDoc
+  Repo -> Map : toDomain(updatedDoc)
+  Repo --> Svc : Incident
+
+  Svc -> Map : toDTO(Incident)
+  Svc --> Ctrl : Result.ok(dto)
+  Ctrl --> SPA : 200 OK\nIncidentDTO
+end
+
+== Remove VVE from Incident ==
+Operator -> SPA : Remove VVE
+SPA -> Routes : DELETE /api/incidents/{code}/vve/{vveCode}
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : removeVVEAsync(code, vveCode)
+
+Svc -> Repo : findByCode(code)
+Repo -> DB : findOne({code})
+DB --> Repo : record/null
+Repo -> Map : toDomain(record)
+Repo --> Svc : Incident?/null
+
+alt incident not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+else found
+  Svc -> Svc : incident.removeAffectedVve(vveCode)
+
+  Svc -> Repo : save(incident)
+  Repo -> Map : toPersistence(incident)
+  Repo -> DB : update/save(persistence)
+  DB --> Repo : updatedDoc
+  Repo -> Map : toDomain(updatedDoc)
+  Repo --> Svc : Incident
+
+  Svc -> Map : toDTO(Incident)
+  Svc --> Ctrl : Result.ok(dto)
+  Ctrl --> SPA : 200 OK\nIncidentDTO
+end
+
+== Mark as Resolved ==
+Operator -> SPA : Mark Resolved
+SPA -> Routes : PATCH /api/incidents/{code}/resolve
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : markAsResolvedAsync(code)
+
+Svc -> Repo : findByCode(code)
+Repo -> DB : findOne({code})
+Repo -> Map : toDomain(record)
+Repo --> Svc : Incident?/null
+
+alt incident not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+else found
+  Svc -> Svc : incident.markAsResolved()
+  note right: Sets endTime to now()
+
+  Svc -> Repo : save(incident)
+  Repo -> DB : update/save(persistence)
+  Repo --> Svc : Incident
+
+  Svc -> Map : toDTO(Incident)
+  Svc --> Ctrl : Result.ok(dto)
+  Ctrl --> SPA : 200 OK\nIncidentDTO
+end
+
+== Get All Incidents ==
+Operator -> SPA : View All
+SPA -> Routes : GET /api/incidents
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : getAllIncidentAsync()
+Svc -> Repo : findAll()
+Repo -> DB : find({})
+DB --> Repo : docs[]
+Repo -> Map : toDomain(docs[])
+Repo --> Svc : Incident[]
+Svc -> Map : toDTO(list)
+Svc --> Ctrl : Result.ok(list)
+Ctrl --> SPA : 200 OK\nIncidentDTO[]
+
+== Get Active Incidents ==
+Operator -> SPA : View Active
+SPA -> Routes : GET /api/incidents/active
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : getActiveIncidentsAsync()
+Svc -> Repo : getActiveIncidents()
+Repo -> DB : find({endTime: null})
+DB --> Repo : docs[]
+Repo -> Map : toDomain(docs[])
+Repo --> Svc : Incident[]
+Svc -> Map : toDTO(list)
+Svc --> Ctrl : Result.ok(list)
+Ctrl --> SPA : 200 OK\nIncidentDTO[]
+
+== Get Resolved Incidents ==
+Operator -> SPA : View Resolved
+SPA -> Routes : GET /api/incidents/resolved
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : getResolvedIncidentsAsync()
+Svc -> Repo : getResolvedIncidents()
+Repo -> DB : find({endTime: { $ne: null }})
+DB --> Repo : docs[]
+Repo -> Map : toDomain(docs[])
+Repo --> Svc : Incident[]
+Svc -> Map : toDTO(list)
+Svc --> Ctrl : Result.ok(list)
+Ctrl --> SPA : 200 OK\nIncidentDTO[]
+
+== Search by Date Range ==
+Operator -> SPA : Filter by Date
+SPA -> Routes : GET /api/incidents/search/date?start=...&end=...
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : getByDataRangeAsync(start, end)
+
+alt start > end
+  Svc --> Ctrl : Result.fail("Invalid range")
+  Ctrl --> SPA : 400 Bad Request
+else valid range
+  Svc -> Repo : getByDataRange(start, end)
+  Repo -> DB : find({startTime: {$gte: start, $lte: end}})
+  DB --> Repo : docs[]
+  Repo -> Map : toDomain(docs[])
+  Repo --> Svc : Incident[]
+  Svc -> Map : toDTO(list)
+  Svc --> Ctrl : Result.ok(list)
+  Ctrl --> SPA : 200 OK\nIncidentDTO[]
+end
+
+== Search by Severity ==
+Operator -> SPA : Filter by Severity
+SPA -> Routes : GET /api/incidents/search/severity?severity=...
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : getBySeverityAsync(severity)
+Svc -> Repo : getBySeverity(severity)
+Repo -> DB : find({severity: severity})
+DB --> Repo : docs[]
+Repo -> Map : toDomain(docs[])
+Repo --> Svc : Incident[]
+Svc -> Map : toDTO(list)
+Svc --> Ctrl : Result.ok(list)
+Ctrl --> SPA : 200 OK\nIncidentDTO[]
+
+== Search by VVE ==
+Operator -> SPA : Filter by VVE
+SPA -> Routes : GET /api/incidents/vve/{vveCode}
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : getByVVEAsync(vveCode)
+Svc -> Svc : checkIfVVEsExist(vveCode)
+Svc -> Repo : findByVVE(vveCode)
+Repo -> DB : find({vveList: vveCode})
+DB --> Repo : docs[]
+Repo -> Map : toDomain(docs[])
+Repo --> Svc : Incident[]
+Svc -> Map : toDTO(list)
+Svc --> Ctrl : Result.ok(list)
+Ctrl --> SPA : 200 OK\nIncidentDTO[]
+
+== Delete Incident ==
+Operator -> SPA : Delete Incident
+SPA -> Routes : DELETE /api/incidents/{code}
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : deleteAsync(code)
+
+Svc -> Repo : findByCode(code)
+Repo -> DB : findOne({code})
+DB --> Repo : record/null
+Repo --> Svc : Incident?/null
+
+alt not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+else found
+  Svc -> Repo : deleteIncident(code)
+  Repo -> DB : deleteOne({code})
+  DB --> Repo : deletedCount
+  
+  alt deletedCount == 0
+     Svc --> Ctrl : Result.fail(Error)
+     Ctrl --> SPA : 500 Internal Error
+  else deleted ok
+     Svc --> Ctrl : Result.ok()
+     Ctrl --> SPA : 200 OK / 204 No Content
+  end
+end
+
+@enduml
