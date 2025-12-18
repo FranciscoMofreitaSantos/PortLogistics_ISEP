@@ -17,7 +17,7 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             {name: "complementaryTaskCategorySchema", path: "../persistence/schemas/complementaryTaskCategorySchema"},
             {name: "incidentTypeSchema", path: "../persistence/schemas/incidentTypeSchema"},
             {name: "complementaryTaskSchema", path: "../persistence/schemas/complementaryTaskSchema"},
-            {name: "IncidentSchema", path: "../persistence/schemas/incidentSchema"}
+            {name: "incidentSchema", path: "../persistence/schemas/incidentSchema"}
         ],
 
         mappers: [

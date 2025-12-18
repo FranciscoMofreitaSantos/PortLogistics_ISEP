@@ -252,7 +252,7 @@ export default {
             path : "../repos/complementaryTaskRepo"
         },
         incident: {
-            name: "IncidentRepo",
+            name: "incidentRepo",
             path: "../repos/incidentRepo",
         }
     },
