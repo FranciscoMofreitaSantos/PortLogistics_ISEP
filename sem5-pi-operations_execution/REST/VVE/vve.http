@@ -1,0 +1,14 @@
+@api_url = http://localhost:3000/api/vve
+
+### Criar um novo Vessel Visit Execution (VVE)
+POST http://localhost:3000/api/vve
+Content-Type: application/json
+
+{
+  "vvnId": "a3e352fa-415f-4ac7-b9fe-8619fa4dc6c3",
+  "actualArrivalTime": "2025-05-20T10:30:00Z",
+  "creatorEmail": "emanuel@isep.ipp.pt"
+}
+
+### Listar todos os registos de VVE
+GET {{api_url}}
