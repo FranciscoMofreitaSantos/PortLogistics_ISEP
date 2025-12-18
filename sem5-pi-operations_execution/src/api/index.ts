@@ -3,6 +3,7 @@ import userRoute from "./routes/userRoute";
 import complementaryTaskCategoryRoute from "./routes/complementaryTaskCategoryRoute";
 import incidentTypeRoute from "./routes/incidentTypeRoute"
 import complementaryTaskRoute from "./routes/complementaryTaskRoute";
+import vveRoute from "./routes/vveRoute";
 export default () => {
     const app = Router();
 
@@ -15,5 +16,6 @@ export default () => {
     complementaryTaskCategoryRoute(app);
     complementaryTaskRoute(app);
     incidentTypeRoute(app);
+    vveRoute(app);
     return app;
 }
