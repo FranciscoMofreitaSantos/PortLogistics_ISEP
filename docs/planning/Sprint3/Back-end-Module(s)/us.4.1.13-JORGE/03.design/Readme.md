@@ -1,54 +1,51 @@
-# USx -???
+# US 4.1.13 - Record and manage incidents
 
-## 3. Design - User Story Realization 
+## 3. Design - User Story Realization
 
 ### 3.1. Rationale
 
-_**Note that SSD - Alternative One is adopted.**_
+**Note:** This realization follows a **Single Action Controller** pattern (one controller per operation) within a layered architecture (Controller -> Service -> Repository).
 
-| Interaction ID                      | Question: Which class is responsible for...           | Answer | Justification (with patterns)                                                                                 |
-|:------------------------------------|:------------------------------------------------------|:-------|:--------------------------------------------------------------------------------------------------------------|
-| Step 1 :   	                        | 	... interacting with the actor?                      | x      | Pure Fabrication: there is no reason to assign this responsibility to any existing class in the Domain Model. |
-| 			  		                             | 	... coordinating the US?                             | y      | Controller                                                                                                    |
-| Step 2 : request data (skillName)		 | 	... displaying the form for the actor to input data? | z      | Pure Fabrication                                                                                              |
+| Interaction ID | Question: Which class is responsible for... | Answer | Justification (with patterns) |
+| --- | --- | --- | --- |
+| **Create Incident** | ... interacting with the actor (API client)? | `CreateIncidentController` | **Pure Fabrication**: Handles HTTP request/response handling separately from business logic. |
+|  | ... coordinating the creation logic? | `IncidentService` | **Controller / Service Layer**: Orchestrates validation, entity creation, and persistence commands. |
+|  | ... generating the unique ID? | `Incident` (Aggregate) | **Information Expert**: The domain entity (or its factory) knows the format and rules for its identity. |
+|  | ... persisting the new incident? | `IncidentRepo` | **Repository**: Abstraction for data access layer (Mongoose). |
+|  | ... validating the `IncidentType` exists? | `IncidentTypeRepo` | **Repository**: Accesses `IncidentType` aggregate data to ensure referential integrity. |
+| **Update Incident** | ... interacting with the actor? | `UpdateIncidentController` | **Pure Fabrication**: Specialized controller for updates. |
+|  | ... retrieving the existing incident? | `IncidentRepo` | **Repository**: Finds the aggregate root by its ID/code. |
+|  | ... applying changes (severity, impact)? | `Incident` (Aggregate) | **Information Expert / Mutator**: Domain logic for state transitions and invariants (e.g., date checks) resides here. |
+| **Add VVE** | ... interacting with the actor? | `AddVVEToIncidentController` | **Pure Fabrication**: Specialized controller for adding VVEs. |
+|  | ... validating the VVE exists? | `VVEService` (mock/stub) | **Service**: External service or repository call (depending on bounded context integration). |
+|  | ... linking VVE to Incident? | `Incident` (Aggregate) | **Information Expert**: The `Incident` aggregate maintains the `vveList` and ensures uniqueness/invariants. |
 
-### Systematization ##
+### Systematization
 
-According to the taken rationale, the conceptual classes promoted to software classes are: 
+According to the taken rationale, the conceptual classes promoted to software classes are:
 
-*none
+* **Incident** (Aggregate Root)
+* **IncidentType** (Aggregate Root - for validation)
 
-Other software classes (i.e. Pure Fabrication) identified: 
+Other software classes (i.e., Pure Fabrication) identified:
 
-* none
+* **CreateIncidentController** / **UpdateIncidentController** / **AddVVEToIncidentController** (API Layer)
+* **IncidentService** (Application Layer)
+* **IncidentRepo** / **IncidentTypeRepo** (Infrastructure/Persistence Layer)
+* **IncidentMap** (Data Mapper)
+* **IncidentDTO** (Data Transfer Object)
 
+---
 
 ## 3.2. Sequence Diagram (SD)
 
+### Full Diagram (Create Incident Scenario)
 
-### Full Diagram
+![](./puml/us4.1.13-sequence-diagram-full.svg)
 
-This diagram shows the full sequence of interactions between the classes involved in the realization of this user story.
-
-![Sequence Diagram - Full](svg/usx-sequence-diagram-full.svg)
-
-### Split Diagrams
-
-The following diagram shows the same sequence of interactions between the classes involved in the realization of this user story, but it is split in partial diagrams to better illustrate the interactions between the classes.
-
-It uses Interaction Occurrence (a.k.a. Interaction Use).
-
-![Sequence Diagram - split](svg/usx-sequence-diagram-split.svg)
-
-
-**Get Skill Repository**
-
-![Sequence Diagram - Partial - Get Skill Repository](svg/usx-sequence-diagram-partial-get-skill-repository.svg)
-
-**Register Skill**
-
-![Sequence Diagram - Partial - Register Skill](svg/usx-sequence-diagram-partial-register-skill.svg)
 
 ## 3.3. Class Diagram (CD)
 
-![Class Diagram](svg/usx-class-diagram.svg)
+This diagram details the static structure of the classes implemented for this User Story.
+
+![](./puml/us4.1.13-class-diagram.svg)

@@ -60,6 +60,19 @@ export default class IncidentService implements IIncidentService {
             const severity = SeverityFactory.fromString(String(dto.severity));
             const impactMode = ImpactModeFactory.fromString(String(dto.impactMode));
 
+            if(impactMode == ImpactMode.Specific && dto.vveList.length != 1) {
+                throw new BusinessRuleValidationError(
+                    IncidentTypeError.InvalidInput,
+                    "Invalid number of VVE",
+                    `VVE list must have only 1 VVE when impactMode is 'Specific'.`
+                )
+            }else if(impactMode == ImpactMode.AllOnGoing ) {
+                // ir busvar todos a data-base
+            }else if(impactMode == ImpactMode.Upcoming ) {
+                // ir buscar a base de dados todos os atuais, e sempre que for chamdo e novos VVEs sejham criados tbm vao ser afetados por este (DENTRO DOS SEU TEMPOS CLARO)
+            }
+
+
             const incident = Incident.create({
                 code :  dto.code,
                 incidentTypeCode: dto.incidentTypeCode,
