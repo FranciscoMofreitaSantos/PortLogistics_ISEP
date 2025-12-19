@@ -7,27 +7,23 @@ export interface IComplementaryTaskDTO {
     staff: string;
     status: CTStatus;
     timeStart: Date;
-    timeEnd: Date;
+    timeEnd: Date | null;
     vve: string;
 }
 
 export interface ICreateComplementaryTaskDTO {
     category: string;
     staff: string;
-    status: CTStatus;
     timeStart: Date;
-    timeEnd: Date;
     vve: string;
 }
 
-export interface IUpdateComplementaryTaskDetailsDTO {
+export interface IUpdateComplementaryTaskDTO {
     category: string;
     staff: string;
+    status: CTStatus;
     timeStart: Date;
-    timeEnd: Date;
     vve: string;
 }
 
-export interface IUpdateComplementaryTaskStatusDTO {
-    status: CTStatus;
-}
+
