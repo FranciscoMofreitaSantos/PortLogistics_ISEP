@@ -6,10 +6,11 @@ import { IVesselVisitExecutionDTO } from "../dto/IVesselVisitExecutionDTO";
 import { Result } from "../core/logic/Result";
 import { VesselVisitExecution } from "../domain/vesselVisitExecution/vesselVisitExecution";
 import { VesselVisitExecutionCode } from "../domain/vesselVisitExecution/vesselVisitExecutionCode";
-
 import { BusinessRuleValidationError } from "../core/logic/BusinessRuleValidationError";
 import VvnService from "./ExternalData/vvnService";
 import VesselVisitExecutionMap from "../mappers/VesselVisitExecutionMap";
+import {VesselVisitExecutionId} from "../domain/vesselVisitExecution/vesselVisitExecutionId";
+import {VVEError} from "../domain/vesselVisitExecution/errors/vveErrors";
 
 @Service()
 export default class VesselVisitExecutionService implements IVesselVisitExecutionService {
@@ -69,6 +70,20 @@ export default class VesselVisitExecutionService implements IVesselVisitExecutio
             // @ts-ignore
             return Result.fail<IVesselVisitExecutionDTO[]>(e.message);
         }
+    }
+
+    public async getByIdAsync(id: VesselVisitExecutionId): Promise<Result<IVesselVisitExecutionDTO>> {
+
+        const vve = await this.repo.findById(id);
+        if (!vve) {
+            throw new BusinessRuleValidationError(
+                VVEError.NotFound,
+                "VVE not found",
+                `No VVE found with id ${id}`
+            );
+        }
+
+        return Result.ok(this.vesselVisitExecutionMap.toDTO(vve));
     }
 
     //METODOS AUXILIARES

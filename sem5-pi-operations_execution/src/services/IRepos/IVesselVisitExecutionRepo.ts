@@ -1,6 +1,7 @@
 import { Repo } from "../../core/infra/Repo";
 import { VesselVisitExecution } from "../../domain/vesselVisitExecution/vesselVisitExecution";
 import {VesselVisitExecutionCode} from "../../domain/vesselVisitExecution/vesselVisitExecutionCode";
+import {VesselVisitExecutionId} from "../../domain/vesselVisitExecution/vesselVisitExecutionId";
 
 export default interface IVesselVisitExecutionRepo extends Repo<VesselVisitExecution> {
     save(vve: VesselVisitExecution): Promise<VesselVisitExecution>;
@@ -8,5 +9,6 @@ export default interface IVesselVisitExecutionRepo extends Repo<VesselVisitExecu
     getNextSequenceNumber(): Promise<number>;
     findAll(): Promise<VesselVisitExecution[]>;
     findByCode(code: VesselVisitExecutionCode) : Promise<VesselVisitExecution | null>;
+    findById(id: VesselVisitExecutionId) : Promise<VesselVisitExecution | null>;
     getAllInDateRange(startDate: Date, endDate: Date): Promise<VesselVisitExecution[]>;
 }
