@@ -14,7 +14,7 @@ interface ComplementaryTaskProps {
     category: ComplementaryTaskCategoryId;
     staff: string;
     timeStart: Date;
-    timeEnd: Date;
+    timeEnd: Date | null;
     status: CTStatus;
     vve: VesselVisitExecutionId;
     createdAt: Date;
@@ -32,7 +32,6 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
             {argument: props.category, argumentName: "categoryId"},
             {argument: props.staff, argumentName: "staff"},
             {argument: props.timeStart, argumentName: "timeStart"},
-            {argument: props.timeEnd, argumentName: "timeEnd"},
             {argument: props.status, argumentName: "status"},
             {argument: props.vve, argumentName: "vveId"},
             {argument: props.createdAt, argumentName: "createdAt"},
@@ -46,7 +45,14 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
             );
         }
 
-        this.validateTimeWindow(props.timeStart, props.timeEnd);
+        if (props.status === CTStatus.Completed || props.status === CTStatus.InProgress) {
+            throw new BusinessRuleValidationError(
+                CTError.InScheduleCreation,
+                "It's not possible to create a complementary task with a status different from Scheduled",
+                guardResult.message ?? "Not Scheduled task at creation"
+            );
+        }
+
 
         if (!props.staff.trim()) {
             throw new BusinessRuleValidationError(CTError.InvalidInput, "Staff is required");
@@ -56,6 +62,7 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
             {
                 ...props,
                 updatedAt: props.updatedAt ?? null,
+                timeEnd: props.timeEnd ?? null,
             },
             id
         );
@@ -89,7 +96,7 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
         return this.props.timeStart;
     }
 
-    get timeEnd(): Date {
+    get timeEnd(): Date | null {
         return this.props.timeEnd;
     }
 
@@ -113,7 +120,6 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
         category: ComplementaryTaskCategoryId,
         staff: string,
         timeStart: Date,
-        timeEnd: Date,
         vve: VesselVisitExecutionId
     ): void {
         this.ensureNotCompleted();
@@ -122,12 +128,9 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
             throw new BusinessRuleValidationError(CTError.InvalidInput, "Staff is required");
         }
 
-        ComplementaryTask.validateTimeWindow(timeStart, timeEnd);
-
         this.props.category = category;
         this.props.staff = staff;
         this.props.timeStart = timeStart;
-        this.props.timeEnd = timeEnd;
         this.props.vve = vve;
 
         this.touch();
@@ -169,14 +172,13 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
         }
 
         const start = this.props.timeStart.getTime();
-        const end = this.props.timeEnd.getTime();
         const t = now.getTime();
 
-        if (t < start || t > end) {
+        if (t < start) {
             throw new BusinessRuleValidationError(
                 CTError.InvalidTimeWindow,
                 "Cannot start task outside its time window",
-                `Now=${now.toISOString()} start=${this.props.timeStart.toISOString()} end=${this.props.timeEnd.toISOString()}`
+                `Now=${now.toISOString()} start=${this.props.timeStart.toISOString()}}`
             );
         }
 
@@ -193,16 +195,18 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
             );
         }
 
-        const end = this.props.timeEnd.getTime();
-        if (now.getTime() < end) {
+        const start = this.props.timeStart.getTime();
+        const t = now.getTime();
+
+        if (t < start) {
             throw new BusinessRuleValidationError(
                 CTError.InvalidTimeWindow,
-                "Cannot complete task before timeEnd",
-                `Now=${now.toISOString()} end=${this.props.timeEnd.toISOString()}`
+                "Cannot complete task before it starts",
+                `Now=${now.toISOString()} start=${this.props.timeStart.toISOString()}}`
             );
         }
-
         this.props.status = CTStatus.Completed;
+        this.props.timeEnd = now;
         this.touch();
     }
 
@@ -216,23 +220,6 @@ export class ComplementaryTask extends AggregateRoot<ComplementaryTaskProps> {
             throw new BusinessRuleValidationError(
                 CTError.AlreadyCompleted,
                 "Cannot modify a completed complementary task"
-            );
-        }
-    }
-
-    private static validateTimeWindow(start: Date, end: Date): void {
-        if (start >= end) {
-            throw new BusinessRuleValidationError(
-                CTError.InvalidTimeWindow,
-                "Invalid time window",
-                "Start time must be before end time"
-            );
-        }
-
-        if (start.getTime() < Date.now()) {
-            throw new BusinessRuleValidationError(
-                CTError.InvalidTimeWindow,
-                "Start time cannot be in the past"
             );
         }
     }
