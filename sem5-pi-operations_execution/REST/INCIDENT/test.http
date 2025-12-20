@@ -1,5 +1,4 @@
 ### 1. Criar Incidente Ativo (Impacto Específico)
-# Cria um incidente sem endTime (Ativo) afetando uma VVE específica.
 POST http://localhost:3000/api/incidents
 Content-Type: application/json
 
@@ -17,27 +16,26 @@ Content-Type: application/json
   "upcomingWindowEndTime": null
 }
 
-### 2. Criar Incidente Passado/Resolvido (Impacto Global)
-# Cria um incidente que já tem endTime definido.
+### 2. Criar Incidente Resolvido (AllOnGoing)
 POST http://localhost:3000/api/incidents
 Content-Type: application/json
 
 {
   "code": "INC-2024-00002",
   "incidentTypeCode": "T-INC001",
-  "vveList": ["ALL"],
+  "vveList": [],
   "startTime": "2024-12-10T10:00:00Z",
   "endTime": "2024-12-10T14:00:00Z",
   "severity": "Major",
-  "impactMode": "Global",
+  "impactMode": "AllOnGoing",
   "description": "Tempestade forte afetando todas as operações do porto.",
   "createdByUser": "admin@example.com",
   "upcomingWindowStartTime": null,
   "upcomingWindowEndTime": null
 }
 
-### 3. Criar Incidente Futuro (Upcoming)
-# Requer janelas de tempo upcoming preenchidas.
+### 3. Criar Incidente (Upcoming)
+# Requer janelas upcoming preenchidas.
 POST http://localhost:3000/api/incidents
 Content-Type: application/json
 
@@ -56,7 +54,6 @@ Content-Type: application/json
 }
 
 ### 4. Atualizar Incidente
-# Altera a severidade e descrição do Incidente 001.
 PUT http://localhost:3000/api/incidents/INC-2024-00001
 Content-Type: application/json
 
@@ -73,18 +70,15 @@ Content-Type: application/json
 }
 
 ### 5. Adicionar VVE a um Incidente
-# Adiciona uma nova VVE afetada ao incidente 001.
 POST http://localhost:3000/api/incidents/INC-2024-00001/vve/VVE-112233
 Content-Type: application/json
 
 {}
 
 ### 6. Remover VVE de um Incidente
-# Remove a VVE original do incidente 001.
 DELETE http://localhost:3000/api/incidents/INC-2024-00001/vve/VVE-998877
 
 ### 7. Marcar Incidente como Resolvido
-# Define o endTime para o momento atual.
 PATCH http://localhost:3000/api/incidents/INC-2024-00001/resolve
 
 ### 8. Obter Todos os Incidentes
@@ -94,24 +88,21 @@ GET http://localhost:3000/api/incidents
 GET http://localhost:3000/api/incidents/INC-2024-00002
 
 ### 10. Obter Incidentes Ativos
-# Deve retornar apenas os que têm endTime = null (ex: o INC-003 Upcoming).
+# endTime = null (ex: INC-00001 antes do passo 7, e INC-00003)
 GET http://localhost:3000/api/incidents/active
 
 ### 11. Obter Incidentes Resolvidos
-# Deve retornar INC-001 e INC-002.
+# endTime != null (ex: INC-00002, e INC-00001 após o passo 7)
 GET http://localhost:3000/api/incidents/resolved
 
 ### 12. Pesquisar por Intervalo de Datas
-# Procura incidentes que ocorreram em Dezembro.
 GET http://localhost:3000/api/incidents/search/date?start=2024-12-01T00:00:00Z&end=2024-12-31T23:59:59Z
 
 ### 13. Pesquisar por Severidade
 GET http://localhost:3000/api/incidents/search/severity?severity=Critical
 
 ### 14. Pesquisar Incidentes por VVE
-# Procura incidentes que afetam a VVE-112233 (adicionada no passo 5).
 GET http://localhost:3000/api/incidents/vve/VVE-112233
 
 ### 15. Apagar Incidente
-# Remove o incidente futuro (003).
 DELETE http://localhost:3000/api/incidents/INC-2024-00003

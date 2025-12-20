@@ -113,7 +113,7 @@ export default (app: Router) => {
                 startTime: Joi.date().iso().required(),
                 endTime: Joi.date().iso().allow(null).optional(),
                 severity: Joi.string().valid("Minor", "Major", "Critical").required(),
-                impactMode: Joi.string().valid("Specific", "Upcoming", "Global").required(), // Adjust enums as needed
+                impactMode: Joi.string().valid("Specific", "Upcoming", "AllOnGoing").required(),
                 description: Joi.string().required(),
                 createdByUser: Joi.string().required(),
                 upcomingWindowStartTime: Joi.date().iso().allow(null).optional(),
@@ -136,7 +136,7 @@ export default (app: Router) => {
                 startTime: Joi.date().iso().required(),
                 endTime: Joi.date().iso().allow(null).optional(),
                 severity: Joi.string().valid("Minor", "Major", "Critical").required(),
-                impactMode: Joi.string().valid("Specific", "Upcoming", "Global").required(),
+                impactMode: Joi.string().valid("Specific", "Upcoming", "AllOnGoing").required(),
                 description: Joi.string().required(),
                 upcomingWindowStartTime: Joi.date().iso().allow(null).optional(),
                 upcomingWindowEndTime: Joi.date().iso().allow(null).optional(),

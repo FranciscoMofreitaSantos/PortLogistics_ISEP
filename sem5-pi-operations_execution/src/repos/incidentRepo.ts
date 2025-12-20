@@ -42,7 +42,7 @@ export default class IncidentRepo implements IIncidentRepo {
         this.logger.debug("Finding Incident by VVE", {vveCode});
 
         try {
-            const list = await this.incidentSchema.find({vveCode});
+            const list = await this.incidentSchema.find({ vveList: vveCode });
 
             return list
                 .map(record => this.incidentMap.toDomain(record))
@@ -71,7 +71,7 @@ export default class IncidentRepo implements IIncidentRepo {
     }
 
     async exists(i: Incident): Promise<boolean> {
-        const record = await this.incidentSchema.findOne({domainId: i.id.toString()});
+        const record = await this.incidentSchema.findOne({ id: i.id.toString() });
         return !!record;
     }
 

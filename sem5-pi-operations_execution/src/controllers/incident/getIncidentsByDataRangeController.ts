@@ -1,6 +1,6 @@
-import {Inject, Service} from "typedi";
-import {BaseController} from "../../core/infra/BaseController";
-import {Logger} from "winston";
+import { Inject, Service } from "typedi";
+import { BaseController } from "../../core/infra/BaseController";
+import { Logger } from "winston";
 import IIncidentService from "../../services/IServices/IIncidentService";
 
 @Service()
@@ -13,12 +13,15 @@ export default class GetIncidentsByDataRangeController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
-        // Conversão explícita de string para Date
-        const startDataRange = new Date(this.req.query.startDataRange as string);
-        const endDataRange = new Date(this.req.query.endDataRange as string);
-
         try {
-            const result = await this.incidentService.getByDataRangeAsync(startDataRange, endDataRange);
+            const start = new Date(this.req.query.start as string);
+            const end = new Date(this.req.query.end as string);
+
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return this.clientError("Invalid date format. Use ISO 8601, e.g. 2025-12-20T10:00:00Z");
+            }
+
+            const result = await this.incidentService.getByDataRangeAsync(start, end);
 
             if (result.isFailure) {
                 return this.clientError(result.errorValue() as string);

@@ -13,9 +13,9 @@ export default class AddVVEToIncidentController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
-        // Tenta obter de Params primeiro (mais RESTful), senão Query
-        const incidentCode = this.req.params.incidentCode || this.req.query.incidentCode as string;
-        const vveCode = this.req.params.vveCode || this.req.query.vveCode as string;
+        const incidentCode = this.req.params.code || (this.req.query.incidentCode as string);
+        const vveCode = this.req.params.vveCode || (this.req.query.vveCode as string);
+
 
         try {
             const result = await this.incidentService.addVVEToIncidentAsync(incidentCode, vveCode);

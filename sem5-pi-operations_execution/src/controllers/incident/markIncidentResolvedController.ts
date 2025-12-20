@@ -13,7 +13,7 @@ export default class MarkIncidentResolvedController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
-        const incidentCode = this.req.params.incidentCode || this.req.query.incidentCode as string;
+        const incidentCode = this.req.params.code || (this.req.query.incidentCode as string);
 
         try {
             const result = await this.incidentService.markAsResolvedAsync(incidentCode);

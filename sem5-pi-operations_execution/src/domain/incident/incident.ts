@@ -193,9 +193,14 @@ export class Incident extends AggregateRoot<IncidentProps> {
         this.touch();
     }
 
-    public changeVVEList(vveList : string[]): void {
-        this.props.vveList = vveList;
+    public changeVVEList(vveList: string[]): void {
+        const normalized = Incident.normalizeVveList(vveList);
+        Incident.validateScopeRules(this.props.impactMode, normalized);
+
+        this.props.vveList = normalized;
+        this.touch();
     }
+
 
     public changeStartTime(startTime: Date): void {
         if (startTime === null || startTime === undefined) {
@@ -227,7 +232,6 @@ export class Incident extends AggregateRoot<IncidentProps> {
 
     public markAsResolved(): void {
         this.changeEndTime(new Date(Date.now()));
-        this.touch();
     }
 
     private changeEndTime(endTime: Date | null): void {
