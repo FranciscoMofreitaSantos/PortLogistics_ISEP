@@ -1,16 +1,18 @@
-import type {HandleComplementaryTaskDTO} from "../dtos/handleComplementaryTaskDTO.ts";
+
 import type {ComplementaryTask} from "../domain/complementaryTask.ts";
 import {operationsApi} from "../../../services/api.tsx";
 import {mapToCTDomain} from "../mappers/complementaryTaskMapper.ts";
+import type {CreateComplementaryTaskDTO} from "../dtos/createComplementaryTaskDTO.ts";
+import type {UpdateComplementaryTaskDTO} from "../dtos/updateComplementaryTaskDTO.ts";
 
 
-export async function createCT(dto: HandleComplementaryTaskDTO): Promise<ComplementaryTask> {
+export async function createCT(dto: CreateComplementaryTaskDTO): Promise<ComplementaryTask> {
     const res = await operationsApi.post("/api/complementary-tasks", dto);
     return mapToCTDomain(res.data);
 }
 
 
-export async function updateCT(code: string, dto: HandleComplementaryTaskDTO): Promise<ComplementaryTask> {
+export async function updateCT(code: string, dto: UpdateComplementaryTaskDTO): Promise<ComplementaryTask> {
     const res = await operationsApi.put(`/api/complementary-tasks/${code}`, dto);
     return mapToCTDomain(res.data);
 }

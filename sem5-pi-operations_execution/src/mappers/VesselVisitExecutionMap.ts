@@ -9,6 +9,7 @@ export default class VesselVisitExecutionMap extends Mapper<VesselVisitExecution
 
     toDTO(vve: VesselVisitExecution): IVesselVisitExecutionDTO {
         return {
+            id : vve.id.toString(),
             code: vve.code.value,
             vvnId: vve.vvnId,
             vesselImo: vve.vesselImo,

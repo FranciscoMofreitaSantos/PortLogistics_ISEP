@@ -1517,7 +1517,8 @@
       "start": "Início",
       "end": "Fim",
       "status": "Estado",
-      "actions": "Ações"
+      "actions": "Ações",
+      "endEstimatedActual" : "Término estimado"
     },
 
     "form": {
@@ -1536,7 +1537,8 @@
       "code": "Código",
       "category": "Categoria",
       "staff": "Staff",
-      "vve": "VVE"
+      "vve": "VVE",
+      "range" : "Por tempo"
     },
 
     "status": {
@@ -1563,7 +1565,8 @@
     "actions": {
       "create": "Criar",
       "edit" : "Editar",
-      "fix" : "Alterar"
+      "fix" : "Alterar",
+      "complete" : "Terminar"
     }
   }
 }

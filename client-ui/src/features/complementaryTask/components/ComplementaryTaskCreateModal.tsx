@@ -3,37 +3,33 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { createCT } from "../services/complementaryTaskService";
 import { getAllCTC } from "../../complementaryTaskCategory/services/complementaryTaskCategoryService";
-import type { HandleComplementaryTaskDTO } from "../dtos/handleComplementaryTaskDTO";
+import type { CreateComplementaryTaskDTO } from "../dtos/createComplementaryTaskDTO";
 import type { ComplementaryTaskCategory } from "../../complementaryTaskCategory/domain/complementaryTaskCategory";
+import type { VesselVisitExecutionDTO } from "../../vesselVisitExecution/dto/vesselVisitExecutionDTO";
 import "../style/complementaryTask.css";
-
-const MOCK_VVE_LIST = [
-    { id: "VVE-001", name: "VVE-2024-Arrival-01" },
-    { id: "VVE-002", name: "VVE-2024-Departure-02" },
-    { id: "VVE-003", name: "VVE-2024-Maintenance-03" }
-];
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     onCreated: () => void;
+    vveList: VesselVisitExecutionDTO[];
 }
 
-type FormState = Omit<HandleComplementaryTaskDTO, "timeStart" | "timeEnd"> & {
+type FormState = {
+    category: string;
+    staff: string;
+    vve: string;
     timeStart: string;
-    timeEnd: string;
 };
 
 const initialData: FormState = {
     category: "",
     staff: "",
     vve: "",
-    status: "Scheduled",
-    timeStart: "",
-    timeEnd: ""
+    timeStart: ""
 };
 
-function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated }: Props) {
+function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated, vveList }: Props) {
     const { t } = useTranslation();
     const [formData, setFormData] = useState<FormState>(initialData);
     const [categories, setCategories] = useState<ComplementaryTaskCategory[]>([]);
@@ -80,16 +76,28 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated }: Props) {
         }
 
         setIsLoading(true);
-        try {
-            const submitData: HandleComplementaryTaskDTO = {
-                ...formData,
-                timeStart: new Date(formData.timeStart),
-                timeEnd: new Date(formData.timeEnd)
-            };
 
+        // Prepara os dados para o DTO
+        const submitData: CreateComplementaryTaskDTO = {
+            category: formData.category, // ID da Categoria
+            staff: formData.staff,
+            vve: formData.vve,           // ID da VVE
+            timeStart: new Date(formData.timeStart)
+        };
+
+        // --- DEBUG: Vê os dados no console antes de enviar ---
+        console.log("📤 A enviar para API:", {
+            category_id: submitData.category,
+            vve_id: submitData.vve,
+            staff: submitData.staff,
+            timeStart: submitData.timeStart.toISOString()
+        });
+
+        try {
             await createCT(submitData);
             toast.success(t("ct.success.created") || "Task created successfully");
             onCreated();
+            onClose();
         } catch (err) {
             const apiError = err as Error;
             setError(apiError);
@@ -107,7 +115,6 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated }: Props) {
                 <h2>{t("ct.createTitle") || "Create Complementary Task"}</h2>
 
                 <form onSubmit={handleSubmit} className="ct-form">
-
                     <div className="form-row" style={{ display: 'flex', gap: '1rem' }}>
                         <div className="ct-form-group" style={{ flex: 1 }}>
                             <label>{t("ct.form.category")}</label>
@@ -119,7 +126,8 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated }: Props) {
                             >
                                 <option value="">{t("common.select")}</option>
                                 {categories.map(cat => (
-                                    <option key={cat.id} value={cat.code}>
+                                    /* Corrigido: value agora é cat.id */
+                                    <option key={cat.id} value={cat.id}>
                                         {cat.name}
                                     </option>
                                 ))}
@@ -134,60 +142,37 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated }: Props) {
                                 onChange={handleValueChange}
                             >
                                 <option value="">{t("common.select")}</option>
-                                {MOCK_VVE_LIST.map(vve => (
+                                {vveList.map(vve => (
+                                    /* Corrigido: value agora é vve.id (o code é só para o utilizador ler) */
                                     <option key={vve.id} value={vve.id}>
-                                        {vve.name}
+                                        {vve.code}
                                     </option>
                                 ))}
                             </select>
                         </div>
                     </div>
 
-                    <div className="form-row" style={{ display: 'flex', gap: '1rem' }}>
-                        <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.staff")}</label>
-                            <input
-                                name="staff"
-                                type="text"
-                                value={formData.staff}
-                                onChange={handleValueChange}
-                                placeholder="Staff ID or Name"
-                            />
-                        </div>
-                        <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.status")}</label>
-                            <select
-                                name="status"
-                                value={formData.status}
-                                onChange={handleValueChange}
-                            >
-                                <option value="Scheduled">{t("ct.status.Scheduled")}</option>
-                                <option value="InProgress">{t("ct.status.InProgress")}</option>
-                            </select>
-                        </div>
+                    <div className="ct-form-group">
+                        <label>{t("ct.form.staff")}</label>
+                        <input
+                            required
+                            name="staff"
+                            type="text"
+                            value={formData.staff}
+                            onChange={handleValueChange}
+                            placeholder="Staff ID or Name"
+                        />
                     </div>
 
-                    <div className="form-row" style={{ display: 'flex', gap: '1rem' }}>
-                        <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.startTime")}</label>
-                            <input
-                                required
-                                name="timeStart"
-                                type="datetime-local"
-                                value={formData.timeStart}
-                                onChange={handleValueChange}
-                            />
-                        </div>
-                        <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.endTime")}</label>
-                            <input
-                                required
-                                name="timeEnd"
-                                type="datetime-local"
-                                value={formData.timeEnd}
-                                onChange={handleValueChange}
-                            />
-                        </div>
+                    <div className="ct-form-group">
+                        <label>{t("ct.form.startTime")}</label>
+                        <input
+                            required
+                            name="timeStart"
+                            type="datetime-local"
+                            value={formData.timeStart}
+                            onChange={handleValueChange}
+                        />
                     </div>
 
                     {error && <p className="ct-error-message">{error.message}</p>}

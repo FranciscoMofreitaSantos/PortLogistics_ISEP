@@ -11,7 +11,7 @@ export interface ComplementaryTask {
     category: string;
     staff: string;
     timeStart: Date;
-    timeEnd: Date;
+    timeEnd?: Date;
     status: CTStatus;
     vve: string;
 }

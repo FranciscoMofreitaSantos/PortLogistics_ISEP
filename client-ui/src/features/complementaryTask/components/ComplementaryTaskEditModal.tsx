@@ -4,27 +4,18 @@ import toast from "react-hot-toast";
 import { updateCT } from "../services/complementaryTaskService";
 import { getAllCTC } from "../../complementaryTaskCategory/services/complementaryTaskCategoryService";
 import type { ComplementaryTask } from "../domain/complementaryTask";
-import type { HandleComplementaryTaskDTO } from "../dtos/handleComplementaryTaskDTO";
+import type { UpdateComplementaryTaskDTO } from "../dtos/updateComplementaryTaskDTO";
 import type { ComplementaryTaskCategory } from "../../complementaryTaskCategory/domain/complementaryTaskCategory";
+import type { VesselVisitExecutionDTO } from "../../vesselVisitExecution/dto/vesselVisitExecutionDTO";
 import "../style/complementaryTask.css";
-
-const MOCK_VVE_LIST = [
-    { id: "VVE-001", name: "VVE-2024-Arrival-01" },
-    { id: "VVE-002", name: "VVE-2024-Departure-02" },
-    { id: "VVE-003", name: "VVE-2024-Maintenance-03" }
-];
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     onUpdated: () => void;
     resource: ComplementaryTask;
+    vveList: VesselVisitExecutionDTO[];
 }
-
-type FormState = Omit<HandleComplementaryTaskDTO, "timeStart" | "timeEnd"> & {
-    timeStart: string;
-    timeEnd: string;
-};
 
 const toInputDateString = (dateInput: Date | string) => {
     if (!dateInput) return "";
@@ -34,17 +25,16 @@ const toInputDateString = (dateInput: Date | string) => {
     return localISOTime;
 };
 
-function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource }: Props) {
+function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource, vveList }: Props) {
     const { t } = useTranslation();
     const [categories, setCategories] = useState<ComplementaryTaskCategory[]>([]);
 
-    const [formData, setFormData] = useState<FormState>({
+    const [formData, setFormData] = useState({
         category: resource.category,
         staff: resource.staff,
         vve: resource.vve,
         status: resource.status,
-        timeStart: toInputDateString(resource.timeStart),
-        timeEnd: toInputDateString(resource.timeEnd)
+        timeStart: toInputDateString(resource.timeStart)
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -58,8 +48,7 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource }: Pr
                 staff: resource.staff,
                 vve: resource.vve,
                 status: resource.status,
-                timeStart: toInputDateString(resource.timeStart),
-                timeEnd: toInputDateString(resource.timeEnd)
+                timeStart: toInputDateString(resource.timeStart)
             });
             setError(null);
         }
@@ -89,10 +78,12 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource }: Pr
 
         setIsLoading(true);
         try {
-            const submitData: HandleComplementaryTaskDTO = {
-                ...formData,
-                timeStart: new Date(formData.timeStart),
-                timeEnd: new Date(formData.timeEnd)
+            const submitData: UpdateComplementaryTaskDTO = {
+                category: formData.category,
+                staff: formData.staff,
+                vve: formData.vve,
+                status: formData.status as any,
+                timeStart: new Date(formData.timeStart)
             };
 
             await updateCT(resource.code, submitData);
@@ -142,9 +133,9 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource }: Pr
                                 value={formData.vve}
                                 onChange={handleValueChange}
                             >
-                                {MOCK_VVE_LIST.map(vve => (
+                                {vveList.map(vve => (
                                     <option key={vve.id} value={vve.id}>
-                                        {vve.name}
+                                        {vve.code}
                                     </option>
                                 ))}
                             </select>
@@ -154,6 +145,7 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource }: Pr
                     <div className="ct-form-group">
                         <label>{t("ct.form.staff")}</label>
                         <input
+                            required
                             name="staff"
                             type="text"
                             value={formData.staff}
@@ -173,28 +165,17 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource }: Pr
                             />
                         </div>
                         <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.endTime")}</label>
-                            <input
-                                required
-                                name="timeEnd"
-                                type="datetime-local"
-                                value={formData.timeEnd}
+                            <label>{t("ct.form.status")}</label>
+                            <select
+                                name="status"
+                                value={formData.status}
                                 onChange={handleValueChange}
-                            />
+                            >
+                                <option value="Scheduled">{t("ct.status.Scheduled")}</option>
+                                <option value="InProgress">{t("ct.status.InProgress")}</option>
+                                <option value="Completed">{t("ct.status.Completed")}</option>
+                            </select>
                         </div>
-                    </div>
-
-                    <div className="ct-form-group">
-                        <label>{t("ct.form.status")}</label>
-                        <select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleValueChange}
-                        >
-                            <option value="Scheduled">{t("ct.status.Scheduled")}</option>
-                            <option value="InProgress">{t("ct.status.InProgress")}</option>
-                            <option value="Completed">{t("ct.status.Completed")}</option>
-                        </select>
                     </div>
 
                     {error && <p className="ct-error-message">{error.message}</p>}

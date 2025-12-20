@@ -25,7 +25,7 @@ Content-Type: application/json
 GET http://localhost:3000/api/complementary-tasks
 
 ###
-GET http://localhost:3000/api/complementary-tasks/search/code/CTC003%5B1%5D
+GET http://localhost:3000/api/complementary-tasks/search/code/CTC006%5B1%5D
 
 ###
 GET http://localhost:3000/api/complementary-tasks/search/completed?status=Completed

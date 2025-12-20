@@ -1522,7 +1522,8 @@
       "start": "Start Time",
       "end": "End Time",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "endEstimatedActual" : "Expected end"
     },
     "form": {
       "code": "Task Code",
@@ -1539,7 +1540,8 @@
       "code": "Code",
       "category": "Category",
       "staff": "Staff",
-      "vve": "VVE"
+      "vve": "VVE",
+      "range" : "Between range"
     },
     "status": {
       "Scheduled": "Scheduled",
@@ -1562,7 +1564,8 @@
     "actions": {
       "create": "Create",
       "edit" : "Edit",
-      "fix" : "Fix"
+      "fix" : "Fix",
+      "complete" : "Complete"
     }
   }
 }
