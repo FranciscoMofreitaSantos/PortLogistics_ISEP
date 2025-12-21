@@ -86,6 +86,20 @@ export default class VesselVisitExecutionService implements IVesselVisitExecutio
         return Result.ok(this.vesselVisitExecutionMap.toDTO(vve));
     }
 
+    public async getByCodeAsync(code: VesselVisitExecutionCode): Promise<Result<IVesselVisitExecutionDTO>> {
+
+        const vve = await this.repo.findByCode(code);
+        if (!vve) {
+            throw new BusinessRuleValidationError(
+                VVEError.NotFound,
+                "VVE not found",
+                `No VVE found with code ${code}`
+            );
+        }
+
+        return Result.ok(this.vesselVisitExecutionMap.toDTO(vve));
+    }
+
     //METODOS AUXILIARES
 
     private async generateCodeAsync(): Promise<VesselVisitExecutionCode> {

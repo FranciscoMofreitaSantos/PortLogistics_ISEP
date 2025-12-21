@@ -6,6 +6,7 @@ import middlewares from "../middlewares";
 import CreateVVEController from "../../controllers/vve/createVVEController";
 import GetAllVVEController from "../../controllers/vve/getAllVVEController";
 import GetVVEByIdController from "../../controllers/vve/getVVEByIdController";
+import GetVVEByCodeController from "../../controllers/vve/getVVEByCodeController";
 
 const route = Router();
 
@@ -14,7 +15,8 @@ export default (app: Router) => {
 
     const createCtrl = Container.get(config.controllers.vesselVisitExecution.create.name) as CreateVVEController;
     const getAllCtrl = Container.get(config.controllers.vesselVisitExecution.getAll.name) as GetAllVVEController;
-    const getByIdCtrl = Container.get(config.controllers.vesselVisitExecution.getAll.name) as GetVVEByIdController;
+    const getByIdCtrl = Container.get(config.controllers.vesselVisitExecution.getById.name) as GetVVEByIdController;
+    const getByCodeCtrl = Container.get(config.controllers.vesselVisitExecution.getByCode.name) as GetVVEByCodeController;
     
     route.post(
         "/",
@@ -30,4 +32,5 @@ export default (app: Router) => {
 
     route.get("/", (req, res) => getAllCtrl.execute(req, res));
     route.get("/:id", (req, res) => getByIdCtrl.execute(req, res));
+    route.get("/code/:code", (req, res) => getByCodeCtrl.execute(req, res));
 };
