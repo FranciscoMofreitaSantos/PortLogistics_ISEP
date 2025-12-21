@@ -5,6 +5,7 @@ import {
 import {ComplementaryTaskCode} from "../../domain/complementaryTask/ComplementaryTaskCode";
 import {ComplementaryTaskCategoryId} from "../../domain/complementaryTaskCategory/complementaryTaskCategoryId";
 import {VesselVisitExecutionId} from "../../domain/vesselVisitExecution/vesselVisitExecutionId";
+import {VesselVisitExecutionCode} from "../../domain/vesselVisitExecution/vesselVisitExecutionCode";
 
 export default interface IComplementaryTaskService {
 
@@ -25,6 +26,8 @@ export default interface IComplementaryTaskService {
     getInRangeAsync(timeStart: Date, timeEnd: Date): Promise<Result<IComplementaryTaskDTO[]>>;
 
     getByVveAsync(vve: VesselVisitExecutionId): Promise<Result<IComplementaryTaskDTO>>;
+
+    getByVveCodeAsync(vveCode: VesselVisitExecutionCode): Promise<Result<IComplementaryTaskDTO>>;
 
     getScheduledAsync(): Promise<Result<IComplementaryTaskDTO[]>>;
 

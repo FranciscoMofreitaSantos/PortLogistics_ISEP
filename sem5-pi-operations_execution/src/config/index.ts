@@ -163,6 +163,10 @@ export default {
                 name : "GetCTByVveController",
                 path : "../controllers/complementaryTask/getCTByVveController",
             },
+            getByVveCode: {
+                name : "GetCTByVveCodeController",
+                path : "../controllers/complementaryTask/getCTByVveCodeController",
+            },
             getInProgress: {
                 name : "GetInProgressCtController",
                 path : "../controllers/complementaryTask/getInProgressCTController",

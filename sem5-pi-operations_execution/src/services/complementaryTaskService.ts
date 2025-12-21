@@ -25,6 +25,8 @@ import {CTStatus} from "../domain/complementaryTask/ctstatus";
 
 import {CTError} from "../domain/complementaryTask/errors/ctErrors";
 import {CTCError} from "../domain/complementaryTaskCategory/errors/ctcErrors";
+import {VesselVisitExecutionCode} from "../domain/vesselVisitExecution/vesselVisitExecutionCode";
+import {VVEError} from "../domain/vesselVisitExecution/errors/vveErrors";
 
 @Service()
 export default class ComplementaryTaskService implements IComplementaryTaskService {
@@ -151,9 +153,9 @@ export default class ComplementaryTaskService implements IComplementaryTaskServi
         const ctc = await this.ctcRepo.findByCode(categoryCode);
         if(!ctc) {
             throw new BusinessRuleValidationError(
-                CTCError.NotFound,
-                "Complementary task not found",
-                `No task found with ctc code ${categoryCode}`
+                CTError.NotFound,
+                "Complementary task category not found",
+                `No ctc found with code ${categoryCode}`
             );
         }
         const tasks = await this.repo.findByCategory(ctc.categoryId);
@@ -169,6 +171,28 @@ export default class ComplementaryTaskService implements IComplementaryTaskServi
     public async getByVveAsync(vve: VesselVisitExecutionId): Promise<Result<IComplementaryTaskDTO>> {
 
         const task = await this.repo.findByVve(vve);
+        if (!task) {
+            throw new BusinessRuleValidationError(
+                CTCError.NotFound,
+                "Complementary task not found",
+                `No task found with vve ${vve}`
+            );
+        }
+
+        return Result.ok(this.complementaryTaskMap.toDTO(task));
+    }
+
+    public async getByVveCodeAsync(vveCode: VesselVisitExecutionCode): Promise<Result<IComplementaryTaskDTO>> {
+
+        const vve = await this.vveRepo.findByCode(vveCode);
+        if(!vve) {
+            throw new BusinessRuleValidationError(
+                VVEError.NotFound,
+                "VVE not found",
+                `No vve found with code ${vve}`
+            );
+        }
+        const task = await this.repo.findByVve(vve.vesselVisitExecutionId);
         if (!task) {
             throw new BusinessRuleValidationError(
                 CTCError.NotFound,

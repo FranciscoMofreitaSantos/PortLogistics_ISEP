@@ -16,6 +16,7 @@ import GetInProgressCTController from "../../controllers/complementaryTask/getIn
 import GetInRangeCTController from "../../controllers/complementaryTask/getInRangeCTController";
 import GetScheduledCTController from "../../controllers/complementaryTask/getScheduledCTController";
 import GetCTByCategoryCodeController from "../../controllers/complementaryTask/getCTByCategoryCodeController";
+import GetCTByVveCodeController from "../../controllers/complementaryTask/getCTByVveCodeController";
 
 const route = Router();
 
@@ -31,6 +32,7 @@ export default (app: Router) => {
     const getByCodeCtrl = Container.get(config.controllers.complementaryTask.getByCode.name) as GetCTByCodeController;
     const getByStaffCtrl = Container.get(config.controllers.complementaryTask.getByStaff.name) as GetCTByStaffController;
     const getByVveCtrl = Container.get(config.controllers.complementaryTask.getByVve.name) as GetCTByVveController;
+    const getByVveCodeCtrl = Container.get(config.controllers.complementaryTask.getByVveCode.name) as GetCTByVveCodeController;
     const getInProgressCtrl = Container.get(config.controllers.complementaryTask.getInProgress.name) as GetInProgressCTController;
     const getInRangeCtrl = Container.get(config.controllers.complementaryTask.getInRange.name) as GetInRangeCTController;
     const getScheduledCtrl = Container.get(config.controllers.complementaryTask.getScheduled.name) as GetScheduledCTController;
@@ -90,6 +92,12 @@ export default (app: Router) => {
         "/search/vve",
         celebrate({ query: Joi.object({ vve: Joi.string().required() }) }),
         (req, res) => getByVveCtrl.execute(req, res)
+    );
+
+    route.get(
+        "/search/vveCode",
+        celebrate({ query: Joi.object({ vve: Joi.string().required() }) }),
+        (req, res) => getByVveCodeCtrl.execute(req, res)
     );
 
     route.get(
