@@ -1,4 +1,3 @@
-// src/features/viewer3d/scene/PortScene.ts
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { SceneData, ContainerDto } from "../types";
@@ -37,7 +36,6 @@ import { portSceneConfig } from "../config/sceneConfigLoader";
 import { PMREMGenerator, EquirectangularReflectionMapping } from "three";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
-// ⭐ Sky shader + GUI (do exemplo three.js)
 import { Sky } from "three/addons/objects/Sky.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 
@@ -54,9 +52,6 @@ export type LayerVis = Partial<{
     decoratives?: boolean;
 }>;
 
-/* ===========================================================
-   Simulação local de estado operacional (VVN + Tasks)
-   =========================================================== */
 
 type SimStatus =
     | "Waiting"
@@ -182,6 +177,8 @@ function getStatusTooltip(status?: SimStatus): string {
     }
 }
 
+
+
 export class PortScene {
     container: HTMLDivElement;
     renderer: THREE.WebGLRenderer;
@@ -269,7 +266,6 @@ export class PortScene {
     private selectionPulseDuration = 0.6;
     private selectionBaseScale = new THREE.Vector3(1, 1, 1);
 
-    // 🎵 Áudio
     private audioListener: THREE.AudioListener;
     private bgMusic: THREE.Audio | null = null;
     private clickSound: THREE.Audio | null = null;
@@ -277,7 +273,6 @@ export class PortScene {
     private clickLoaded = false;
     private bgStartedOnce = false;
 
-    // 🐦 Aves
     private birdsGroup = new THREE.Group();
     private birds: {
         mesh: THREE.Group;
@@ -289,7 +284,6 @@ export class PortScene {
         wingSpeed: number;
     }[] = [];
 
-    // 🌤 Sky shader
     private sky!: Sky;
     private sun = new THREE.Vector3();
     private skyGui?: GUI;
@@ -302,6 +296,156 @@ export class PortScene {
         azimuth: 180,
         exposure: 0.5,
     };
+
+    private vesselStatusAlbedoMix = 0.10;
+    private vesselStatusEmissiveIntensity = 0.22;
+    private vesselStatusDesaturate = 0.25;
+
+
+    // Outline do objeto selecionado (silhouette)
+    private selectionOutline: THREE.Group | null = null;
+
+    // Config do highlight
+    private highlightOutlineColor = 0xffd54a; // amarelo suave/ambar
+    private highlightOutlineOpacity = 0.25;
+    private highlightOutlineScale = 1.03; // espessura do contorno (1.02 - 1.06)
+    private highlightEmissiveIntensity = 0.25;
+
+// ====== SETA ACIMA DA SELEÇÃO ======
+    private selectionArrow: THREE.Sprite | null = null;
+    private selectionArrowTex: THREE.Texture | null = null;
+    private arrowBaseY = 0;
+    private arrowTime = 0;
+
+// tuning
+    private arrowPixelSize = 96;
+    private arrowWorldScale = 14;
+    private arrowYOffset = 8;     // distância acima do topo do bbox
+
+
+    private makeArrowTexture(): THREE.Texture {
+        const size = this.arrowPixelSize;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext("2d")!;
+        ctx.clearRect(0, 0, size, size);
+
+        ctx.translate(size / 2, size / 2);
+
+        // sombra suave
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.ellipse(0, 18, 18, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // seta/pin
+        ctx.beginPath();
+        ctx.moveTo(0, -30);
+        ctx.lineTo(18, 8);
+        ctx.lineTo(6, 8);
+        ctx.lineTo(6, 28);
+        ctx.lineTo(-6, 28);
+        ctx.lineTo(-6, 8);
+        ctx.lineTo(-18, 8);
+        ctx.closePath();
+
+        ctx.fillStyle = "rgba(255, 213, 74, 0.95)"; // amarelo suave
+        ctx.fill();
+
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "rgba(15, 23, 42, 0.95)"; // contorno escuro
+        ctx.stroke();
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+        return tex;
+    }
+
+    private ensureSelectionArrow() {
+        if (this.selectionArrow) return;
+
+        if (!this.selectionArrowTex) {
+            this.selectionArrowTex = this.makeArrowTexture();
+        }
+
+        const mat = new THREE.SpriteMaterial({
+            map: this.selectionArrowTex,
+            transparent: true,
+            depthTest: false,  // sempre visível (estilo UI). Se quiseres realista, põe true.
+            depthWrite: false,
+        });
+
+        const sprite = new THREE.Sprite(mat);
+
+        (sprite.material as THREE.SpriteMaterial).rotation = Math.PI;
+        sprite.renderOrder = 2000;
+        sprite.scale.set(this.arrowWorldScale, this.arrowWorldScale, 1);
+        sprite.visible = false;
+
+        this.scene.add(sprite);
+        this.selectionArrow = sprite;
+    }
+
+    private clearSelectionArrow() {
+        if (!this.selectionArrow) return;
+        this.selectionArrow.visible = false;
+    }
+
+    private updateSelectionArrowPosition() {
+        if (!this.selectionArrow || !this.selectedObj) return;
+
+        const box = new THREE.Box3().setFromObject(this.selectedObj);
+        if (box.isEmpty()) {
+            this.selectionArrow.visible = false;
+            return;
+        }
+
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+
+        const topY = box.max.y;
+        this.arrowBaseY = topY + this.arrowYOffset;
+
+        this.selectionArrow.position.set(center.x, this.arrowBaseY, center.z);
+        this.selectionArrow.visible = true;
+    }
+
+    private updateSelectionArrow(dt: number) {
+        if (!this.selectionArrow || !this.selectionArrow.visible) return;
+
+        this.arrowTime += dt;
+
+        // hover suave
+        const hover = Math.sin(this.arrowTime * 3.2) * 1.2;
+        this.selectionArrow.position.y = this.arrowBaseY + hover;
+
+        // pulse ligeiro
+        const s = 1 + 0.06 * (0.5 + 0.5 * Math.sin(this.arrowTime * 3.2));
+        this.selectionArrow.scale.set(this.arrowWorldScale * s, this.arrowWorldScale * s, 1);
+    }
+
+
+    private clearSelectionOutline() {
+        if (!this.selectionOutline) return;
+
+        // remover do parent
+        if (this.selectionOutline.parent) {
+            this.selectionOutline.parent.remove(this.selectionOutline);
+        }
+
+        // libertar materiais do outline (não dispor geometria porque é partilhada)
+        this.selectionOutline.traverse((o: any) => {
+            if (!o.isMesh) return;
+            const mat = o.material as THREE.Material | THREE.Material[] | undefined;
+            if (Array.isArray(mat)) mat.forEach((m) => m?.dispose?.());
+            else mat?.dispose?.();
+        });
+
+        this.selectionOutline = null;
+    }
 
     constructor(container: HTMLDivElement) {
         this.container = container;
@@ -434,13 +578,14 @@ export class PortScene {
         this.scene.add(this.selectionSpotlightTarget);
 
         this.selectionSpotlight = new THREE.SpotLight(
-            0xff0000,
-            400,
+            0xffffff,
+            140,
             0,
-            Math.PI / 6,
-            0.5,
+            Math.PI / 7,
+            0.6,
             1,
         );
+
         this.selectionSpotlight.castShadow = false;
         this.selectionSpotlight.visible = false;
         this.selectionSpotlight.target = this.selectionSpotlightTarget;
@@ -825,20 +970,23 @@ export class PortScene {
 
     /** Remove o highlight da seleção anterior, se existir. */
     private clearHighlight() {
-        if (!this.selectedObj) return;
+        // remover outline
+        this.clearSelectionOutline();
 
-        this.selectedObj.traverse((o: any) => {
-            if (!o.isMesh || !o.userData.__origMat) return;
+        if (this.selectedObj) {
+            this.selectedObj.traverse((o: any) => {
+                if (!o.isMesh || !o.userData.__origMat) return;
 
-            const current = o.material;
-            if (Array.isArray(current)) current.forEach((m: any) => m?.dispose?.());
-            else current?.dispose?.();
+                const current = o.material;
+                if (Array.isArray(current)) current.forEach((m: any) => m?.dispose?.());
+                else current?.dispose?.();
 
-            o.material = o.userData.__origMat;
-            delete o.userData.__origMat;
+                o.material = o.userData.__origMat;
+                delete o.userData.__origMat;
 
-            o.scale.set(1, 1, 1);
-        });
+                o.scale.set(1, 1, 1);
+            });
+        }
 
         this.selectedObj = null;
         this.hasSpotTarget = false;
@@ -846,57 +994,91 @@ export class PortScene {
         if (this.selectionSpotlight) {
             this.selectionSpotlight.visible = false;
         }
+        this.clearSelectionArrow();
     }
 
+
     private applyHighlight(obj: THREE.Object3D) {
+        // 1) Criar outline group e anexar ao objeto selecionado
+        const outlineGroup = new THREE.Group();
+        outlineGroup.name = "__selectionOutline__";
+
+        const outlineMat = new THREE.MeshBasicMaterial({
+            color: this.highlightOutlineColor,
+            side: THREE.BackSide,
+            transparent: true,
+            opacity: this.highlightOutlineOpacity,
+            depthWrite: false,     // evita artefactos no depth
+            depthTest: true,       // mantém oclusão correta
+        });
+
         obj.traverse((o: any) => {
-            if (!o.isMesh) return;
+            if (!o.isMesh || !o.geometry) return;
 
-            if (!o.userData.__origMat) {
-                if (Array.isArray(o.material)) {
-                    o.userData.__origMat = o.material;
-                    o.material = o.material.map((m: THREE.Material) => m.clone());
-                } else if (o.material) {
-                    o.userData.__origMat = o.material;
-                    o.material = (o.material as THREE.Material).clone();
-                }
-            }
+            // mesh "casca" para silhouette
+            const outlineMesh = new THREE.Mesh(o.geometry, outlineMat.clone());
 
+            // copiar transform local do mesh original
+            outlineMesh.position.copy(o.position);
+            outlineMesh.quaternion.copy(o.quaternion);
+            outlineMesh.scale.copy(o.scale).multiplyScalar(this.highlightOutlineScale);
+
+            outlineMesh.renderOrder = 999; // desenhar “por cima” dentro do mesmo objeto
+            outlineMesh.frustumCulled = false;
+
+            // importante: não receber/castar sombras
+            outlineMesh.castShadow = false;
+            outlineMesh.receiveShadow = false;
+
+            outlineGroup.add(outlineMesh);
+
+            // 2) Opcional: emissive MUITO subtil (sem alterar color)
+            //    Isto mantém a textura e dá só um “lift” de destaque.
             const mats = Array.isArray(o.material) ? o.material : [o.material];
             mats.forEach((m: any) => {
                 if (!m) return;
+                if (!("emissive" in m)) return;
 
-                const highlightColor = new THREE.Color(0xffff00);
-
-                if ("color" in m && m.color) {
-                    m.color.lerp(highlightColor, 0.7);
-                }
-
-                if ("emissive" in m) {
-                    if (!m.emissive) {
-                        m.emissive = new THREE.Color(0x000000);
-                    }
-                    m.emissive.lerp(highlightColor, 0.8);
-                    if ("emissiveIntensity" in m) {
-                        m.emissiveIntensity = 1.5;
+                // guardar original uma vez (para reverter no clearHighlight, se quiseres)
+                if (!o.userData.__origMat) {
+                    if (Array.isArray(o.material)) {
+                        o.userData.__origMat = o.material;
+                        o.material = o.material.map((mm: THREE.Material) => mm.clone());
+                    } else {
+                        o.userData.__origMat = o.material;
+                        o.material = (o.material as THREE.Material).clone();
                     }
                 }
+
+                // reapontar m para o clone efetivo (porque acabámos de clonar acima)
+                const clonedMats = Array.isArray(o.material) ? o.material : [o.material];
+                clonedMats.forEach((cm: any) => {
+                    if (!cm || !("emissive" in cm)) return;
+
+                    if (!cm.emissive) cm.emissive = new THREE.Color(0x000000);
+                    cm.emissive.setHex(this.highlightOutlineColor);
+                    if ("emissiveIntensity" in cm) cm.emissiveIntensity = this.highlightEmissiveIntensity;
+                });
             });
         });
 
+        obj.add(outlineGroup);
+        this.selectionOutline = outlineGroup;
+
+        // manter tracking atual
         this.selectedObj = obj;
 
+        // pulse mantém-se (se quiseres reduzir o “inchaço”, baixa 0.18 no updateSelectionPulse)
         this.selectionBaseScale.copy(obj.scale);
         this.selectionPulseElapsed = 0;
 
+        // spotlight (como já tinhas)
         if (this.selectionSpotlight && this.selectionSpotlightTarget) {
             const box = new THREE.Box3().setFromObject(obj);
             const newCenter = new THREE.Vector3();
             box.getCenter(newCenter);
 
-            if (!this.hasSpotTarget) {
-                this.selectionCenter.copy(newCenter);
-            }
+            if (!this.hasSpotTarget) this.selectionCenter.copy(newCenter);
 
             this.spotFromCenter.copy(this.selectionCenter);
             this.spotToCenter.copy(newCenter);
@@ -905,29 +1087,86 @@ export class PortScene {
 
             this.selectionSpotlight.visible = true;
         }
+
+        this.ensureSelectionArrow();
+        this.arrowTime = 0;
+        this.updateSelectionArrowPosition();
+
     }
 
     private applyVesselStatusVisual(node: THREE.Object3D, status?: SimStatus) {
         if (!status) return;
 
+        // evita trabalho/cumulativo a cada frame: só reaplica quando muda
+        const last = (node.userData as any).__lastVesselStatus;
+        if (last === status) return;
+        (node.userData as any).__lastVesselStatus = status;
+
+        // cor do status (suavizada/pastel)
         const col = new THREE.Color(vesselStatusColorHex(status));
+        col.lerp(new THREE.Color(0xffffff), this.vesselStatusDesaturate);
 
         node.traverse((o: any) => {
             if (!o.isMesh) return;
+
             const mats = Array.isArray(o.material) ? o.material : [o.material];
 
-            mats.forEach((m: any) => {
-                if (!m) return;
+            // se materiais mudaram (ex: highlight de seleção clonou), refaz cache base
+            const uuids = mats.map((m: any) => m?.uuid).join("|");
+            const cachedUuids = o.userData.__vesselBaseUuids as string | undefined;
 
+            if (!o.userData.__vesselBase || cachedUuids !== uuids) {
+                // IMPORTANT: garantir materiais únicos por mesh (para não afetar outras vessels)
+                // Se já são únicos, isto é barato; se forem partilhados, evita side effects.
+                if (Array.isArray(o.material)) {
+                    o.material = o.material.map((m: THREE.Material) => m.clone());
+                } else if (o.material) {
+                    o.material = (o.material as THREE.Material).clone();
+                }
+
+                const clonedMats = Array.isArray(o.material) ? o.material : [o.material];
+
+                o.userData.__vesselBase = clonedMats.map((m: any) => ({
+                    hasColor: !!m?.color,
+                    baseColor: m?.color?.clone?.(),
+                    hasEmissive: "emissive" in m,
+                    baseEmissive: m?.emissive?.clone?.() ?? new THREE.Color(0x000000),
+                    baseEmissiveIntensity:
+                        typeof m?.emissiveIntensity === "number" ? m.emissiveIntensity : 1,
+                }));
+
+                o.userData.__vesselBaseUuids = (Array.isArray(o.material) ? o.material : [o.material])
+                    .map((m: any) => m?.uuid)
+                    .join("|");
+            }
+
+            const baseArr = o.userData.__vesselBase as any[];
+            const activeMats = Array.isArray(o.material) ? o.material : [o.material];
+
+            activeMats.forEach((m: any, i: number) => {
+                if (!m) return;
+                const base = baseArr?.[i];
+                if (!base) return;
+
+                // 1) manter textura visível: albedo mix baixo a partir do base
+                if (base.hasColor && m.color && base.baseColor) {
+                    m.color.copy(base.baseColor).lerp(col, this.vesselStatusAlbedoMix);
+                }
+
+                // 2) emissive suave (não “neon”)
                 if ("emissive" in m) {
                     if (!m.emissive) m.emissive = new THREE.Color(0x000000);
-                    m.emissive.lerp(col, 0.8);
-                } else if ("color" in m) {
-                    m.color.lerp(col, 0.4);
+                    m.emissive.copy(col);
+
+                    if ("emissiveIntensity" in m) {
+                        // fixo e baixo (não acumula)
+                        m.emissiveIntensity = this.vesselStatusEmissiveIntensity;
+                    }
                 }
             });
         });
     }
+
 
     /** Inicia animação de foco suave da câmara para o objeto selecionado. */
     private focusCameraOnObject(obj: THREE.Object3D) {
@@ -1373,8 +1612,9 @@ export class PortScene {
         const now = performance.now();
         const dt = Math.min(0.05, (now - this.lastT) / 1000);
         this.lastT = now;
+        this.updateSelectionArrow(dt);
 
-        // 🌊 atualizar animação da água (PortBase expõe em userData)
+        // atualizar animação da água (PortBase expõe em userData)
         const updateWater = (this.gBase.userData as any)?.updateWater;
         if (typeof updateWater === "function") {
             updateWater(dt, now / 1000);
@@ -1425,5 +1665,16 @@ export class PortScene {
         if (this.skyGui) {
             this.skyGui.destroy();
         }
+
+        if (this.selectionArrow) {
+            this.scene.remove(this.selectionArrow);
+            (this.selectionArrow.material as THREE.Material)?.dispose?.();
+            this.selectionArrow = null;
+        }
+        if (this.selectionArrowTex) {
+            this.selectionArrowTex.dispose();
+            this.selectionArrowTex = null;
+        }
+
     }
 }
