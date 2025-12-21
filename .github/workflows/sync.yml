@@ -9,16 +9,21 @@ jobs:
   git-mirror:
     runs-on: ubuntu-latest
     steps:
+      
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Mirror para o meu perfil
         env:
-        
           MINHA_CHAVE: ${{ secrets.MINHA_CHAVE_PESSOAL }}
         run: |
-          # Agora usamos a variável de ambiente $MINHA_CHAVE
+          
+          git config --global user.email "francisco@exemplo.com"
+          git config --global user.name "Francisco Santos"
+          
+          
           REMOTE_URL="https://x-access-token:${MINHA_CHAVE}@github.com/FranciscoMofreitaSantos/PortLogistics.git"
           
           git push --force --prune $REMOTE_URL "refs/remotes/origin/*:refs/heads/*"
