@@ -3,7 +3,7 @@ name: Sincronizar para Perfil Pessoal
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
   git-mirror:
@@ -14,7 +14,11 @@ jobs:
           fetch-depth: 0
 
       - name: Mirror para o meu perfil
-        run: |    
-          REMOTE_URL="https://x-access-token:${{ secrets.MINHA_CHAVE_PESSOAL }}@github.com/FranciscoMofreitaSantos/PortLogistics.git"
+        env:
+        
+          MINHA_CHAVE: ${{ secrets.MINHA_CHAVE_PESSOAL }}
+        run: |
+          # Agora usamos a variável de ambiente $MINHA_CHAVE
+          REMOTE_URL="https://x-access-token:${MINHA_CHAVE}@github.com/FranciscoMofreitaSantos/PortLogistics.git"
           
           git push --force --prune $REMOTE_URL "refs/remotes/origin/*:refs/heads/*"
