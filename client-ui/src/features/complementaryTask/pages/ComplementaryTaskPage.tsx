@@ -9,12 +9,11 @@ import {
     getAllCT,
     getCTByCode,
     getCTByStaff,
-    getCTByVve,
     getScheduledCT,
     getCompletedCT,
     getInProgressCT,
     getCTInRange,
-    updateCT, getCTByCategoryCode
+    updateCT, getCTByCategoryCode, getCTByVveCode
 } from "../services/complementaryTaskService";
 
 import {
@@ -109,7 +108,7 @@ function ComplementaryTaskPage() {
                     break;
                 case "category": data = await getCTByCategoryCode(value as string); break;
                 case "staff": data = await getCTByStaff(value as string); break;
-                case "vve": data = await getCTByVve(value as string); break;
+                case "vve": data = await getCTByVveCode(value as string); break;
                 case "scheduled": data = await getScheduledCT(); break;
                 case "completed": data = await getCompletedCT(); break;
                 case "inProgress": data = await getInProgressCT(); break;
@@ -123,6 +122,7 @@ function ComplementaryTaskPage() {
                     await loadData();
                     return;
             }
+            console.log(data);
             setTasks(data);
         } catch {
             setTasks([]);

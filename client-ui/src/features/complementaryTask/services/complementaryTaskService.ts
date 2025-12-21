@@ -79,6 +79,22 @@ export async function getCTByVve(vve: string): Promise<ComplementaryTask[]> {
     return res.data.map(mapToCTDomain);
 }
 
+export async function getCTByVveCode(vve: string): Promise<ComplementaryTask[]> {
+    const res = await operationsApi.get(
+        "/api/complementary-tasks/search/vveCode",
+        { params: { vve: vve.trim() } }
+    );
+
+    const data = res.data;
+    if (!data) return [];
+
+    if (Array.isArray(data)) {
+        return data.map(mapToCTDomain);
+    }
+
+    return [mapToCTDomain(data)];
+}
+
 
 export async function getCTInRange(timeStart: number, timeEnd: number): Promise<ComplementaryTask[]> {
     const res = await operationsApi.get("/api/complementary-tasks/search/in-range",
