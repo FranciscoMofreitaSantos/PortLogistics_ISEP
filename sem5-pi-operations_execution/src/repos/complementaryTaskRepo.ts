@@ -118,8 +118,23 @@ export default class ComplementaryTaskRepo implements IComplementaryTaskRepo {
 
     public async findInRange(start: Date, end: Date): Promise<ComplementaryTask[]> {
         const records = await this.complementaryTaskSchema.find({
-            timeStart: { $lt: end },
-            timeEnd: { $gt: start }
+            $or: [
+                {
+                    timeEnd: null,
+                    timeStart: {
+                        $gte: start,
+                        $lte: end
+                    }
+                },
+
+                {
+                    $and: [
+                        { timeEnd: { $ne: null } },
+                        { timeStart: { $lt: end } },
+                        { timeEnd: { $gt: start } }
+                    ]
+                }
+            ]
         });
 
         return records

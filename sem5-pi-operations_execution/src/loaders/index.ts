@@ -51,6 +51,7 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.controllers.complementaryTask.getAll,
             config.controllers.complementaryTask.getCompleted,
             config.controllers.complementaryTask.getByCategory,
+            config.controllers.complementaryTask.getByCategoryCode,
             config.controllers.complementaryTask.getByCode,
             config.controllers.complementaryTask.getByStaff,
             config.controllers.complementaryTask.getByVve,

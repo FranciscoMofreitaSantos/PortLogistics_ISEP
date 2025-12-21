@@ -1,6 +1,6 @@
 import {Result} from "../../core/logic/Result";
 import {
-    IComplementaryTaskDTO, IHandleComplementaryTaskDTO
+    IComplementaryTaskDTO, ICreateComplementaryTaskDTO, IUpdateComplementaryTaskDTO
 } from "../../dto/IComplementaryTaskDTO";
 import {ComplementaryTaskCode} from "../../domain/complementaryTask/ComplementaryTaskCode";
 import {ComplementaryTaskCategoryId} from "../../domain/complementaryTaskCategory/complementaryTaskCategoryId";
@@ -8,9 +8,9 @@ import {VesselVisitExecutionId} from "../../domain/vesselVisitExecution/vesselVi
 
 export default interface IComplementaryTaskService {
 
-    createAsync(dto: IHandleComplementaryTaskDTO): Promise<Result<IComplementaryTaskDTO>>;
+    createAsync(dto: ICreateComplementaryTaskDTO): Promise<Result<IComplementaryTaskDTO>>;
 
-    updateAsync(code: ComplementaryTaskCode, dto: IHandleComplementaryTaskDTO): Promise<Result<IComplementaryTaskDTO>>;
+    updateAsync(code: ComplementaryTaskCode, dto: IUpdateComplementaryTaskDTO): Promise<Result<IComplementaryTaskDTO>>;
 
     getAllAsync(): Promise<Result<IComplementaryTaskDTO[]>>;
 
@@ -19,6 +19,8 @@ export default interface IComplementaryTaskService {
     getByStaffAsync(staff: string): Promise<Result<IComplementaryTaskDTO[]>>;
 
     getByCategoryAsync(category: ComplementaryTaskCategoryId): Promise<Result<IComplementaryTaskDTO[]>>;
+
+    getByCategoryCodeAsync(categoryCode: string): Promise<Result<IComplementaryTaskDTO[]>>;
 
     getInRangeAsync(timeStart: Date, timeEnd: Date): Promise<Result<IComplementaryTaskDTO[]>>;
 

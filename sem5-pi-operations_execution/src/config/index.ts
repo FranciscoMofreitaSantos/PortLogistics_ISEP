@@ -147,6 +147,10 @@ export default {
                 name : "GetCTByCategoryController",
                 path : "../controllers/complementaryTask/getCTByCategoryController",
             },
+            getByCategoryCode: {
+                name : "GetCTByCategoryCodeController",
+                path : "../controllers/complementaryTask/getCTByCategoryCodeController",
+            },
             getByCode: {
                 name : "GetCTByCodeController",
                 path : "../controllers/complementaryTask/getCTByCodeController",
