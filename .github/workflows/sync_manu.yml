@@ -1,0 +1,30 @@
+name: Sincronizar para Perfil Pessoal Manu
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  git-mirror:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Mirror para o meu perfil
+        env:
+          MINHA_CHAVE: ${{ secrets.F4NKS_CHAVE_PESSOAL }}
+        
+        run: |
+          
+          git config --global user.email "emanuel@exemplo.com"
+          git config --global user.name "Emanuel Almeuda"
+          
+          
+          REMOTE_URL="https://x-access-token:${MINHA_CHAVE}@github.com/SAEmanuel/Sustainable_Port_Logistics_ISEP"
+          
+          git push --force --prune $REMOTE_URL "refs/remotes/origin/*:refs/heads/*"
