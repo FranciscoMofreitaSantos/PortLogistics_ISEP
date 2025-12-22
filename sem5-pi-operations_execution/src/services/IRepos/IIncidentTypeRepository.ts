@@ -7,6 +7,7 @@ export default interface IIncidentTypeRepository extends Repo<IncidentType> {
     getDirectChilds(parentCode: string): Promise<IncidentType[]>;
     getSubTreeFromParentNode(parentCode: string): Promise<IncidentType[]>;
     getRootTypes(): Promise<IncidentType[]>;
+    removeType(incidentTypeCode: string): Promise<number>;
 
 }
 

@@ -53,6 +53,10 @@ export default {
                 name: "CreatedITController",
                 path: "../controllers/incidentType/createdITController"
             },
+            remove:{
+                name: "RemoveIncidentTypeController",
+                path: "../controllers/incidentType/removeIncidentTypeController"
+            },
             update:{
                 name: "UpdateITController",
                 path: "../controllers/incidentType/updateITController"

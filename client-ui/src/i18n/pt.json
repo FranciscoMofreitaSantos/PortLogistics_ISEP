@@ -1456,7 +1456,8 @@
     },
     "success": {
       "created": "Incident type created successfully!",
-      "updated": "Incident type updated successfully!"
+      "updated": "Incident type updated successfully!",
+      "deleted": "Incident Type deleted successfully!"
     }
   },
   "ct": {
@@ -1535,6 +1536,8 @@
     "createButton": "Criar Tipo de Incidente",
     "noData": "Não existem tipos de incidente.",
     "read-only": "Apenas de leitura",
+    "confirmDelete": "Are you sure about deleting this Incident Type?",
+
     "hierarchy": {
       "title": "Hierarquia",
       "empty": "Selecione um tipo de incidente na tabela para visualizar a sua sub-árvore.",
@@ -1563,7 +1566,8 @@
       "actions": "Ações"
     },
     "actions": {
-      "edit": "Editar"
+      "edit": "Editar",
+      "delete": "Eliminar"
     },
     "search": {
       "roots": "Raiz",

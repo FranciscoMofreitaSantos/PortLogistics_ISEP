@@ -13,6 +13,7 @@ import {
     getIncidentTypesByName,
     getIncidentTypeChildren,
     getIncidentTypeSubtree,
+    deleteIncidentType,
 } from "../services/incidentTypeService";
 
 import IncidentTypeTable from "../components/IncidentTypeTable";
@@ -37,7 +38,7 @@ function IncidentTypePage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    // dedicated "editing" item (avoid fighting with hierarchy selection)
+    // dedicated "editing" item
     const [editing, setEditing] = useState<IncidentType | null>(null);
 
     // main list loading/errors
@@ -127,7 +128,6 @@ function IncidentTypePage() {
 
             setItems(data);
 
-            // optional UX: if search returned a single item, auto-select + load its subtree
             if (data.length === 1) {
                 await handleSelect(data[0]);
             }
@@ -166,8 +166,42 @@ function IncidentTypePage() {
         setEditing(null);
         loadRoots();
 
-        // optional: refresh subtree if the edited item is the selected one
         if (selectedCode) loadSubtree(selectedCode);
+    };
+
+    const handleDelete = async (it: IncidentType) => {
+        const confirmed = window.confirm(
+            t("incidentType.confirmDelete", { code: it.code, name: it.name })
+        );
+        if (!confirmed) return;
+
+        try {
+            await deleteIncidentType(it.code);
+
+            toast.success(t("incidentType.success.deleted"));
+
+            // remove from current lists immediately (UX)
+            setItems((prev) => prev.filter((x) => x.code !== it.code));
+            setSubtree((prev) => prev.filter((x) => x.code !== it.code));
+
+            // if it was selected, clear selection
+            if (selectedCode === it.code) {
+                setSelected(null);
+                setSelectedCode(null);
+                setSubtree([]);
+            }
+
+            // refresh roots to keep tree consistent
+            await loadRoots();
+
+            // refresh subtree if still selected and not the deleted one
+            if (selectedCode && selectedCode !== it.code) {
+                await loadSubtree(selectedCode);
+            }
+        } catch (err) {
+            const msg = (err as Error)?.message ?? t("incidentType.errors.delete");
+            toast.error(msg);
+        }
     };
 
     return (
@@ -219,6 +253,7 @@ function IncidentTypePage() {
                     <IncidentTypeTable
                         items={items}
                         onEdit={handleEdit}
+                        onDelete={handleDelete}
                         onSelect={handleSelect}
                         selectedCode={selectedCode}
                     />

@@ -24,6 +24,35 @@ export default class IncidentTypeService implements IIncidentTypeService {
         private logger: Logger,
     ) {}
 
+    async removeAsync(incidentTypeCode: string): Promise<Result<void>> {
+        this.logger.info("Deleting Incident Type", { incidentTypeCode });
+
+        if (!IncidentType.isValidCodeFormat(incidentTypeCode)) {
+            throw new BusinessRuleValidationError(
+                IncidentTypeError.InvalidCodeFormat,
+                "Invalid code format",
+                "Code must follow the format T-INC###"
+            );
+        }
+
+        const directChildren = await this.repo.getDirectChilds(incidentTypeCode);
+        if (directChildren.length > 0) {
+            return Result.fail<void>("Cannot delete an Incident Type that has children");
+        }
+
+        const deleted = await this.repo.removeType(incidentTypeCode);
+        if (deleted === 0) {
+            throw new BusinessRuleValidationError(
+                IncidentTypeError.NotFound,
+                "Incident Type not found",
+                `No Incident Type with code ${incidentTypeCode} was found`
+            );
+        }
+
+        return Result.ok<void>();
+    }
+
+
     public async createAsync(dto: IIncidentTypeDTO): Promise<Result<IIncidentTypeDTO>> {
         this.logger.info("Creating Incident Type", { code: dto.code });
 

@@ -69,6 +69,7 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.controllers.incidentType.getByCode,
             config.controllers.incidentType.getByName,
             config.controllers.incidentType.getDirectChilds,
+            config.controllers.incidentType.remove,
 
             // VesselVisitExecution controllers
             config.controllers.vesselVisitExecution.create,

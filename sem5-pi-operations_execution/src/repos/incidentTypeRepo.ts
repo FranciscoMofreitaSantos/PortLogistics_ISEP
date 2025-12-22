@@ -19,6 +19,14 @@ export default class IncidentTypeRepo implements IIncidentTypeRepository {
     ) {
     }
 
+    async removeType(incidentTypeCode: string): Promise<number> {
+        this.logger.debug("Deleting Incident Type", { incidentTypeCode });
+
+        const result = await this.incidentTypeSchema.deleteOne({ code: incidentTypeCode });
+        return result.deletedCount ?? 0;
+    }
+
+
     public async exists(it: IncidentType): Promise<boolean> {
         const record = await this.incidentTypeSchema.findOne({domainId: it.id.toString()});
         return !!record;

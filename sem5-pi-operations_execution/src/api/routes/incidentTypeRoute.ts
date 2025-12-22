@@ -10,6 +10,7 @@ import GetITByNameController from "../../controllers/incidentType/getITByNameCon
 import GetITRootController from "../../controllers/incidentType/getITRootController";
 import GetITDirectChildController from "../../controllers/incidentType/getITDirectChildController";
 import GetITSubTreeController from "../../controllers/incidentType/getITSubTreeController";
+import RemoveIncidentTypeController from "../../controllers/incidentType/removeIncidentTypeController"
 
 const route = Router();
 
@@ -19,6 +20,10 @@ export default (app: Router) => {
     const createCtrl = Container.get(
         config.controllers.incidentType.create.name
     ) as CreatedITController;
+
+    const removeCtrl = Container.get(
+        config.controllers.incidentType.remove.name
+    ) as RemoveIncidentTypeController;
 
     const updateCtrl = Container.get(
         config.controllers.incidentType.update.name
@@ -148,4 +153,16 @@ export default (app: Router) => {
         }),
         (req, res) => updateCtrl.execute(req, res)
     );
+
+    // DELETE /incidentTypes/:code (Delete Incident)
+    route.delete(
+        "/:code",
+        celebrate({
+            params: Joi.object({
+                code: Joi.string().pattern(/^T-INC\d{3}$/).required(),
+            }),
+        }),
+        (req, res) => removeCtrl.execute(req, res)
+    );
+
 };

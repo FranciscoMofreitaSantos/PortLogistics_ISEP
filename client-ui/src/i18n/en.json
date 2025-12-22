@@ -1400,7 +1400,7 @@
     "createButton": "Criar Tipo de Incidente",
     "noData": "Não existem tipos de incidente.",
     "read-only": "Apenas de leitura",
-
+    "confirmDelete": "Are you sure about deleting this Incident Type?",
     "hierarchy": {
       "title": "Hierarchy",
       "empty": "Select an incident type in the table to display its subtree.",
@@ -1412,30 +1412,31 @@
 
 
     "createModal": {
-      "title": "Criar Tipo de Incidente",
+      "title": "Create Incident Type",
       "subtitle": "Selecione o pai e defina os detalhes do tipo de incidente."
     },
 
     "editModal": {
-      "title": "Editar Tipo de Incidente"
+      "title": "Edit Incident Type"
     },
 
     "stats": {
       "total": "Total",
-      "roots": "Raiz",
-      "children": "Filhos"
+      "roots": "Root",
+      "children": "Children"
     },
 
     "table": {
-      "code": "Código",
-      "name": "Nome",
-      "severity": "Gravidade",
-      "parent": "Pai",
-      "actions": "Ações"
+      "code": "Code",
+      "name": "Name",
+      "severity": "Severity",
+      "parent": "Father",
+      "actions": "Actions"
     },
 
     "actions": {
-      "edit": "Editar"
+      "edit": "Edit",
+      "delete": "Delete"
     },
 
     "search": {
@@ -1502,7 +1503,8 @@
 
     "success": {
       "created": "Tipo de incidente criado com sucesso!",
-      "updated": "Tipo de incidente atualizado com sucesso!"
+      "updated": "Tipo de incidente atualizado com sucesso!",
+      "deleted": "Incident Type deleted successfully!"
     }
   },
   "ct": {
