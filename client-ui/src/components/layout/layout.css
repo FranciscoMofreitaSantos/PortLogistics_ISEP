@@ -469,7 +469,7 @@ html, body {
 
 /* Se tiveres um H3 dentro da marca no footer, remove o inline style e usa esta classe */
 .footer-brand-title {
-    color: #111827 !important;
+    color: #ffffff !important;
     font-size: 1.2rem;
     margin: 0;
 }

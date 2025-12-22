@@ -196,6 +196,11 @@ export default {
                 path : "../controllers/incident/createIncidentController",
             },
 
+            updateVEEList: {
+                name : "UpdateListsVVEsController",
+                path : "../controllers/incident/updateListsVVEsController",
+            },
+
             update: {
                 name : "UpdateIncidentController",
                 path : "../controllers/incident/updateIncidentController",

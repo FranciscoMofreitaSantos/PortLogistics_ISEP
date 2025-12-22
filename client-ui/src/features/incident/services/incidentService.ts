@@ -85,3 +85,8 @@ export async function getAllVVEs(): Promise<string[]> {
 
     return fullVVEs.map((vve: VesselVisitExecution) => vve.code.toString());
 }
+
+export async function updateListsVVEs(code : string): Promise<Incident> {
+    const res = await operationsApi.patch(`/api/incidents/${code}/updateList`);
+    return mapToIncidentDomain(res.data);
+}

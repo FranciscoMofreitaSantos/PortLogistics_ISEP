@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
@@ -9,6 +9,7 @@ import type { UpdateIncidentDTO } from "../dtos/updateIncidentDTO";
 import { createIncident, updateIncident, getAllVVEs } from "../services/incidentService";
 import { getAllIncidentTypes } from "../../incidentTypes/services/incidentTypeService"
 import type {IncidentType} from "../../incidentTypes/domain/incidentType.ts";
+import { useAppStore } from "../../../app/store";
 
 const severities: Severity[] = ["Minor", "Major", "Critical"];
 const impactModes: ImpactMode[] = ["Specific", "AllOnGoing", "Upcoming"];
@@ -26,6 +27,10 @@ const emptyCreate: CreateIncidentDTO = {
     upcomingWindowStartTime: null,
     upcomingWindowEndTime: null,
 };
+export function getCurrentSarId(): string | null {
+    const user = useAppStore.getState().user;
+    return user?.email?.toString() ?? null;
+}
 
 export default function IncidentUpsertModal({
                                                 isOpen,
@@ -58,7 +63,8 @@ export default function IncidentUpsertModal({
     useEffect(() => {
         if (!isOpen) return;
 
-        // 1. Carregar lista de VVEs do backend
+        const userEmail = getCurrentSarId();
+
         setLoadingVves(true);
         getAllVVEs()
             .then((list) => setAllVves(list))
@@ -71,8 +77,7 @@ export default function IncidentUpsertModal({
             .catch(() => toast.error("Falha ao carregar lista de Incidents Types"))
             .finally(() => setLoadingIncidentTypes(false));
 
-
-        // 2. Preencher formulário
+        // 3) Preencher formulário
         if (mode === "edit" && resource) {
             setData({
                 code: resource.code,
@@ -83,16 +88,21 @@ export default function IncidentUpsertModal({
                 severity: resource.severity,
                 impactMode: resource.impactMode,
                 description: resource.description ?? "",
-                createdByUser: resource.createdByUser ?? "",
+                createdByUser: (userEmail ?? ""),
                 upcomingWindowStartTime: resource.upcomingWindowStartTime ?? null,
                 upcomingWindowEndTime: resource.upcomingWindowEndTime ?? null,
             });
         } else {
-            setData(emptyCreate);
+            setData({
+                ...emptyCreate,
+                createdByUser: userEmail ?? "",
+            });
         }
-        setVveSearch(""); // Limpa pesquisa ao reabrir
+
+        setVveSearch("");
         setIncidentTypeSearch("");
     }, [isOpen, mode, resource]);
+
 
     const isUpcoming = data.impactMode === "Upcoming";
     const isAllOngoing = data.impactMode === "AllOnGoing";
@@ -216,7 +226,7 @@ export default function IncidentUpsertModal({
                                     className="in-input"
                                     value={data.code}
                                     onChange={(e) => onField("code", e.target.value)}
-                                    placeholder="Ex: INC-2025-001"
+                                    placeholder="Ex: INC-2025-00001"
                                 />
                             </div>
                         ) : (
@@ -277,6 +287,7 @@ export default function IncidentUpsertModal({
                                     value={data.createdByUser}
                                     onChange={(e) => onField("createdByUser", e.target.value)}
                                     placeholder="user@example.com"
+                                    readOnly
                                 />
                             </div>
                         )}

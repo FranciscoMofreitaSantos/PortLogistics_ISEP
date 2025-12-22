@@ -34,6 +34,43 @@ export default class IncidentService implements IIncidentService {
         private logger: Logger
     ) {}
 
+    async updatedListsOfVVEsAsync(incidentCode: string): Promise<Result<IIncidentDTO>> {
+        this.logger.info("Updating Incident Types (ALLONGOING/UPCOMING) lists", { code: incidentCode });
+
+        try{
+            const exist = await this.repo.findByCode(incidentCode);
+            if (!exist) {
+                throw new BusinessRuleValidationError(
+                    IncidentError.AlreadyExists,
+                    "Incident with code ${incidentCode} does not exists",
+                    `Incident with code ${incidentCode} does not exists`
+                );
+            }
+
+            if (exist.impactMode == ImpactMode.AllOnGoing) {
+                const listAllVVEs = await this.repoVVE.findAll();
+                exist.changeVVEList(listAllVVEs.map(vve => vve.code.value));
+            }else if(exist.impactMode == ImpactMode.Upcoming && exist.upcomingWindowStartTime && exist.upcomingWindowEndTime) {
+                const listVVEWindow = await this.repoVVE.getAllInDateRange(exist.upcomingWindowStartTime,exist.upcomingWindowEndTime);
+                exist.changeVVEList(listVVEWindow.map(vve => vve.code.value));
+            }
+
+            const saved = await this.repo.save(exist);
+            if (!saved) {
+                throw new BusinessRuleValidationError(
+                    IncidentTypeError.PersistError,
+                    "Error saving Incident"
+                );
+            }
+
+            return Result.ok(this.incidentMap.toDTO(saved));
+
+        }catch(e){
+            const msg = e instanceof Error ? e.message : "Unknown error";
+            return Result.fail<IIncidentDTO>(msg);
+        }
+    }
+
     public async createAsync(dto: IIncidentDTO): Promise<Result<IIncidentDTO>> {
         this.logger.info("Creating Incident", { code: dto.code });
 

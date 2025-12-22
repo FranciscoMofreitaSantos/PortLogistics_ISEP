@@ -123,7 +123,7 @@ export class Incident extends AggregateRoot<IncidentProps> {
         if (!this.isValidCodeFormat(props.code)) {
             throw new BusinessRuleValidationError(
                 IncidentError.InvalidCodeFormat,
-                "Invalid incident format for code",
+                "Invalid incident format for code: Code must follow the format INC-YYYY-#####",
                 "Code must follow the format INC-YYYY-#####"
             );
         }
@@ -231,6 +231,15 @@ export class Incident extends AggregateRoot<IncidentProps> {
     }
 
     public markAsResolved(): void {
+
+        if (this.props.startTime.getTime() > Date.now()) {
+            throw new BusinessRuleValidationError(
+                IncidentError.InvalidInput,
+                "Cannot resolve an incident before its startTime.",
+                "Cannot resolve an incident before its startTime."
+            );
+        }
+
         this.changeEndTime(new Date(Date.now()));
     }
 
@@ -327,6 +336,14 @@ export class Incident extends AggregateRoot<IncidentProps> {
 
     // Optional helpers for attach/detach in SPECIFIC mode
     public addAffectedVve(vveId: string): void {
+        if (!Incident.isSpecificMode(this.props.impactMode)) {
+            throw new BusinessRuleValidationError(
+                IncidentError.InvalidInput,
+                "Cannot manually add VVEs unless impact mode is 'Specific'.",
+                "Cannot manually add VVEs unless impact mode is 'Specific'."
+            );
+        }
+
         const v = Incident.normalizeVveId(vveId);
         if (!v) {
             throw new BusinessRuleValidationError(
@@ -366,7 +383,7 @@ export class Incident extends AggregateRoot<IncidentProps> {
         if (end != null && end.getTime() < start.getTime()) {
             throw new BusinessRuleValidationError(
                 IncidentError.InvalidTimeWindow,
-                "Invalid time window",
+                "Invalid time window : End time must be after or equal to start time.",
                 "End time must be after or equal to start time"
             );
         }
@@ -400,42 +417,63 @@ export class Incident extends AggregateRoot<IncidentProps> {
         windowStart: Date | null,
         windowEnd: Date | null
     ): void {
-        if (!Incident.isUpcomingMode(impactMode)) return;
+        const isUpcoming = Incident.isUpcomingMode(impactMode);
 
+        // Se NÃO for Upcoming, a janela tem de ser null (invariante)
+        if (!isUpcoming) {
+            if (windowStart != null || windowEnd != null) {
+                throw new BusinessRuleValidationError(
+                    IncidentError.InvalidInput,
+                    "Upcoming window times are only allowed when impact mode is 'Upcoming'.",
+                    "Upcoming window times must be null unless impact mode is 'Upcoming'."
+                );
+            }
+            return;
+        }
+
+        // Upcoming: janela obrigatória
         if (windowStart == null || windowEnd == null) {
             throw new BusinessRuleValidationError(
                 IncidentError.InvalidInput,
-                "Invalid details for impact mode type upcoming incident",
+                "When impact mode is 'Upcoming', window start/end time cannot be null.",
                 "When impact mode is 'Upcoming', window start/end time cannot be null."
-            );
-        }
-
-        if (windowStart.getTime() < startTime.getTime()) {
-            throw new BusinessRuleValidationError(
-                IncidentError.InvalidInput,
-                "Invalid details for impact mode type upcoming incident",
-                "Upcoming window start time must be greater than or equal to incident start time."
             );
         }
 
         if (windowStart.getTime() > windowEnd.getTime()) {
             throw new BusinessRuleValidationError(
                 IncidentError.InvalidInput,
-                "Invalid details for impact mode type upcoming incident",
+                "Upcoming window start time cannot be greater than window end time.",
                 "Upcoming window start time cannot be greater than window end time."
             );
         }
 
+        // O incidente só tem efeito a partir de startTime → janela não pode começar antes
+        if (windowStart.getTime() < startTime.getTime()) {
+            throw new BusinessRuleValidationError(
+                IncidentError.InvalidInput,
+                `Upcoming window must start at or after incident startTime.
+- startTime:   ${startTime.toISOString()}
+- windowStart: ${windowStart.toISOString()}
+- windowEnd:   ${windowEnd.toISOString()}`,
+                "Upcoming window must start at or after incident startTime."
+            );
+        }
+
+        // Se houver endTime (incidente resolvido), a janela deve caber no intervalo ativo
         if (endTime != null) {
-            if (windowStart.getTime() > endTime.getTime() || windowEnd.getTime() > endTime.getTime()) {
+            if (windowEnd.getTime() > endTime.getTime()) {
                 throw new BusinessRuleValidationError(
                     IncidentError.InvalidInput,
-                    "Invalid details for impact mode type upcoming incident",
-                    "Upcoming window must be within the incident time interval when endTime is set."
+                    `Upcoming window must end at or before incident endTime.
+- endTime:     ${endTime.toISOString()}
+- windowEnd:   ${windowEnd.toISOString()}`,
+                    "Upcoming window must end at or before incident endTime."
                 );
             }
         }
     }
+
 
     private static normalizeVveId(vveId: string): string {
         return (vveId ?? "").trim();

@@ -96,6 +96,7 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.controllers.incident.addVVE,
             config.controllers.incident.removeVVE,
             config.controllers.incident.markResolved,
+            config.controllers.incident.updateVEEList,
         ],
         repos: [
             config.repos.user,

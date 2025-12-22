@@ -771,6 +771,7 @@
     "emailPlaceholder": "Enter Email"
   },
   "actions": {
+    "atualizar": "Update List of VVEs",
     "search": "Search",
     "clear": "Clear",
     "changeRole": "Change Role",
@@ -787,7 +788,8 @@
     "saved": "Saved!",
     "back": "Back",
     "next": "Next",
-    "create": "Create"
+    "create": "Create",
+    "edit": "Edit"
   },
   "table": {
     "name": "Name",

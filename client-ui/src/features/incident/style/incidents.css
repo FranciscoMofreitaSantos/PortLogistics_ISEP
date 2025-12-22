@@ -287,3 +287,10 @@ body {
 .in-selected-area {
     display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;
 }
+/* Actions row inside Details modal */
+.in-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;          /* espaçamento entre botões */
+    flex-wrap: wrap;       /* em ecrãs pequenos quebra para a linha de baixo */
+}

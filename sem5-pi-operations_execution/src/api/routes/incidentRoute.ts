@@ -16,6 +16,7 @@ import GetResolvedIncidentsController from "../../controllers/incident/getResolv
 import MarkIncidentResolvedController from "../../controllers/incident/markIncidentResolvedController";
 import RemoveVVEFromIncidentController from "../../controllers/incident/removeVVEFromIncidentController";
 import UpdateIncidentController from "../../controllers/incident/updateIncidentController";
+import UpdateListsVVEsController from "../../controllers/incident/updateListsVVEsController"
 
 const route = Router();
 
@@ -43,6 +44,7 @@ export default (app: Router) => {
     const removeVVECtrl = Container.get(config.controllers.incident.removeVVE.name) as RemoveVVEFromIncidentController;
     const markResolvedCtrl = Container.get(config.controllers.incident.markResolved.name) as MarkIncidentResolvedController;
 
+    const updateList = Container.get(config.controllers.incident.updateVEEList.name) as UpdateListsVVEsController;
     // --------------------------------------
     // Routes Definitions
     // IMPORTANT: Static routes before /:code
@@ -154,6 +156,17 @@ export default (app: Router) => {
             }),
         }),
         (req, res) => markResolvedCtrl.execute(req, res)
+    );
+
+    // PATCH /incidents/:code/updateList
+    route.patch(
+        "/:code/updateList",
+        celebrate({
+            params: Joi.object({
+                code: Joi.string().required(),
+            }),
+        }),
+        (req, res) => updateList.execute(req, res)
     );
 
     // POST /incidents/:code/vve/:vveCode (Add VVE)

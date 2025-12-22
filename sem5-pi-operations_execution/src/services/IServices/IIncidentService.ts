@@ -19,4 +19,5 @@ export default interface IIncidentService {
     markAsResolvedAsync(incidentCode: string): Promise<Result<IIncidentDTO>>;
     addVVEToIncidentAsync(incidentCode: string, vveCode: string): Promise<Result<IIncidentDTO>>;
     removeVVEAsync(incidentCode: string, vveCode: string): Promise<Result<IIncidentDTO>>;
+    updatedListsOfVVEsAsync(incidentCode: string) : Promise<Result<IIncidentDTO>>;
 }

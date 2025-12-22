@@ -68,9 +68,11 @@ export default function IncidentTable({
                         <td>{it.endTime ? new Date(it.endTime).toLocaleString() : "-"}</td>
 
                         <td onClick={(e) => e.stopPropagation()}>
-                            <button className="in-btn in-btn-ghost" onClick={() => onEdit(it)}>
-                                {t("actions.edit")}
-                            </button>
+                            {status === "active"  && (
+                                <button className="in-btn in-btn-ghost" onClick={() => onEdit(it)}>
+                                    {t("actions.edit")}
+                                </button>
+                            )}
                         </td>
                     </tr>
                 );

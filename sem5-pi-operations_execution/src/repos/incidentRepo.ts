@@ -139,15 +139,18 @@ export default class IncidentRepo implements IIncidentRepo {
     }
 
     async getResolvedIncidents(): Promise<Incident[]> {
-        this.logger.debug("Finding Resolved Incidents (endTime is NOT null)");
+        this.logger.debug("Finding Resolved Incidents (endTime != null AND endTime <= now)");
 
         try {
-            // Resolved = endTime is NOT null ($ne)
-            const list = await this.incidentSchema.find({ endTime: { $ne: null } });
+            const now = new Date();
+
+            const list = await this.incidentSchema.find({
+                endTime: { $ne: null, $lte: now },
+            });
 
             return list
                 .map(record => this.incidentMap.toDomain(record))
-                .filter(i => i != null) as Incident[];
+                .filter((i): i is Incident => i != null);
 
         } catch (e) {
             this.logger.error("Error finding Resolved Incidents", { error: e });

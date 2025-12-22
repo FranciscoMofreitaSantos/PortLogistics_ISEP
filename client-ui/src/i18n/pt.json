@@ -555,6 +555,7 @@
       "errorEmpty": "O campo de pesquisa não pode estar vazio"
     },
     "actions": {
+      "atualizar": "Update",
       "search": "Pesquisar",
       "clear": "Limpar",
       "details": "Detalhes",
@@ -785,7 +786,9 @@
     "saved": "Salvo!",
     "back": "Voltar",
     "next": "Seguinte",
-    "create": "Criar"
+    "create": "Criar",
+    "edit": "Editar",
+    "atualizar": "Atualizar Lista VVE"
   },
   "table": {
     "name": "Nome",

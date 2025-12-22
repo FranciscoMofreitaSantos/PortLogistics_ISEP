@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import type { Incident } from "../domain/incident";
 import "../style/incidents.css";
-import { addVVEToIncident, removeVVEFromIncident, resolveIncident, deleteIncident } from "../services/incidentService";
+import { resolveIncident, deleteIncident,updateListsVVEs } from "../services/incidentService";
 
 export default function IncidentDetailsPanel({
                                                  selected,
@@ -17,11 +17,13 @@ export default function IncidentDetailsPanel({
     onClose: () => void;
 }) {
     const { t } = useTranslation();
-    const [vveInput, setVveInput] = useState("");
     const [busy, setBusy] = useState(false);
 
     const isResolved = useMemo(() => !!selected?.endTime, [selected]);
-
+    const isNotSpecific = useMemo(
+        () => !!selected?.impactMode && selected.impactMode !== "Specific",
+        [selected?.impactMode]
+    );
     const handleResolve = async () => {
         if (!selected) return;
         setBusy(true);
@@ -35,6 +37,21 @@ export default function IncidentDetailsPanel({
             setBusy(false);
         }
     };
+
+    const handleUpdateLists = async () => {
+        if (!selected) return;
+        setBusy(true);
+        try {
+            const updated = await updateListsVVEs(selected.code);
+            toast.success(t("incident.success.updatedList"));
+            onChanged(updated);
+        } catch (e) {
+            toast.error((e as Error).message || t("incident.errors.updatedFailed"));
+        } finally {
+            setBusy(false);
+        }
+    };
+
 
     const handleDelete = async () => {
         if (!selected) return;
@@ -53,39 +70,10 @@ export default function IncidentDetailsPanel({
         }
     };
 
-    const handleAddVVE = async () => {
-        if (!selected) return;
-        const vve = vveInput.trim();
-        if (!vve) return;
-
-        setBusy(true);
-        try {
-            const updated = await addVVEToIncident(selected.code, vve);
-            toast.success(t("incident.success.vveAdded"));
-            setVveInput("");
-            onChanged(updated);
-        } catch (e) {
-            toast.error((e as Error).message || t("incident.errors.vveAddFailed"));
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    const handleRemoveVVE = async (vve: string) => {
-        if (!selected) return;
-        setBusy(true);
-        try {
-            const updated = await removeVVEFromIncident(selected.code, vve);
-            toast.success(t("incident.success.vveRemoved"));
-            onChanged(updated);
-        } catch (e) {
-            toast.error((e as Error).message || t("incident.errors.vveRemoveFailed"));
-        } finally {
-            setBusy(false);
-        }
-    };
 
     if (!selected) return null;
+
+    const vves = selected.vveList ?? [];
 
     return (
         <>
@@ -102,7 +90,6 @@ export default function IncidentDetailsPanel({
                     </div>
                 </div>
 
-                {/* Botão Fechar (X) */}
                 <button className="in-close-btn" onClick={onClose} title={t("actions.close")}>
                     ✕
                 </button>
@@ -110,7 +97,6 @@ export default function IncidentDetailsPanel({
 
             {/* Corpo com Scroll */}
             <div className="in-details-body">
-
                 {/* Barra de Ações */}
                 <div className="in-actions" style={{ marginBottom: "1.5rem" }}>
                     {!isResolved && (
@@ -121,6 +107,11 @@ export default function IncidentDetailsPanel({
                     <button className="in-btn in-btn-danger" disabled={busy} onClick={handleDelete}>
                         {t("actions.delete")}
                     </button>
+                    {isNotSpecific && !isResolved && (
+                    <button className="in-btn in-btn-primary" disabled={busy} onClick={handleUpdateLists}>
+                        {t("actions.atualizar")}
+                    </button>
+                    )}
                 </div>
 
                 {/* Grid de Informações Principais */}
@@ -137,7 +128,9 @@ export default function IncidentDetailsPanel({
                     <div className="in-kv">
                         <div className="in-k">{t("incident.fields.impactMode")}</div>
                         <div className="in-v">
-                            <span className="in-pill in-pill-neutral">{t(`incident.impact.${selected.impactMode}`)}</span>
+              <span className="in-pill in-pill-neutral">
+                {t(`incident.impact.${selected.impactMode}`)}
+              </span>
                         </div>
                     </div>
 
@@ -148,7 +141,9 @@ export default function IncidentDetailsPanel({
 
                     <div className="in-kv">
                         <div className="in-k">{t("incident.fields.endTime")}</div>
-                        <div className="in-v">{selected.endTime ? new Date(selected.endTime).toLocaleString() : "-"}</div>
+                        <div className="in-v">
+                            {selected.endTime ? new Date(selected.endTime).toLocaleString() : "-"}
+                        </div>
                     </div>
                 </div>
 
@@ -158,41 +153,19 @@ export default function IncidentDetailsPanel({
                     <div className="in-desc">{selected.description || <span className="in-muted">-</span>}</div>
                 </div>
 
-                {/* Gestão de VVEs */}
+                {/* VVEs (READ-ONLY) */}
                 <div className="in-block">
                     <div className="in-block-title">{t("incident.fields.vves")}</div>
 
-                    <div className="in-vve-bar">
-                        <input
-                            className="in-input"
-                            value={vveInput}
-                            onChange={(e) => setVveInput(e.target.value)}
-                            placeholder={t("incident.vve.placeholder")}
-                            style={{ flex: 1 }}
-                        />
-                        <button className="in-btn in-btn-ghost" onClick={handleAddVVE} disabled={busy || vveInput.trim() === ""}>
-                            {t("incident.actions.addVve")}
-                        </button>
-                    </div>
-
-                    {selected.vveList.length === 0 ? (
+                    {vves.length === 0 ? (
                         <div className="in-muted" style={{ fontStyle: "italic", fontSize: "0.85rem" }}>
                             {t("incident.vve.empty")}
                         </div>
                     ) : (
                         <div className="in-chip-wrap">
-                            {selected.vveList.map((vve) => (
+                            {vves.map((vve) => (
                                 <div key={vve} className="in-chip">
                                     <span className="in-mono">{vve}</span>
-                                    <button
-                                        type="button"
-                                        className="in-chip-x"
-                                        onClick={() => handleRemoveVVE(vve)}
-                                        disabled={busy}
-                                        title={t("incident.actions.removeVve")}
-                                    >
-                                        ✕
-                                    </button>
                                 </div>
                             ))}
                         </div>
