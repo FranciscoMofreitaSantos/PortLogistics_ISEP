@@ -4,7 +4,7 @@
     "target": "ES2020",
     "lib": ["ES2020"],
 
-    /* Module system */
+/* Module system */
     "module": "commonjs",
     "moduleResolution": "node",
 

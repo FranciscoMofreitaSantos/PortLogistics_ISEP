@@ -1,47 +1,46 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Incident } from '../../domain/incident/incident'; // Adjust path
+import { Incident } from '../../domain/incident/incident';
 import { BusinessRuleValidationError } from '../../core/logic/BusinessRuleValidationError';
 import { IncidentError } from '../../domain/incident/errors/incidentErrors';
-import { Severity } from '../../domain/incidentTypes/severity'; // Adjust path or mock
-import { ImpactMode } from '../../domain/incident/impactMode'; // Adjust path
+import { Severity } from '../../domain/incidentTypes/severity';
+import { ImpactMode } from '../../domain/incident/impactMode';
 
 describe('Incident Domain Entity', () => {
-
     // Helper: Valid default properties for a clean "Global" incident
     const validGlobalProps = {
         code: 'INC-2024-00001',
         incidentTypeCode: 'T-INC001',
         vveList: [] as string[],
         startTime: new Date('2024-01-01T10:00:00Z'),
-        endTime: null,
-        duration: null,
-        severity: Severity.Major, // Assuming Enum or String literal
-        impactMode: ImpactMode.AllOnGoing, // Assuming 'AllOnGoing' / 'Global'
+        endTime: null as Date | null,
+        duration: null as number | null,
+        severity: Severity.Major,
+        impactMode: ImpactMode.AllOnGoing,
         description: 'Standard Incident',
         createdByUser: 'user@example.com',
-        upcomingWindowStartTime: null,
-        upcomingWindowEndTime: null,
+        upcomingWindowStartTime: null as Date | null,
+        upcomingWindowEndTime: null as Date | null,
         createdAt: new Date(),
-        updatedAt: null
+        updatedAt: null as Date | null,
     };
 
     describe('create', () => {
-
         it('should create a valid Global Incident successfully', () => {
             const incident = Incident.create(validGlobalProps);
 
             expect(incident).toBeDefined();
             expect(incident.code).toBe(validGlobalProps.code);
             expect(incident.impactMode).toBe(ImpactMode.AllOnGoing);
-            expect(incident.duration).toBeNull(); // Active incident
+            expect(incident.duration).toBeNull();
         });
 
         it('should fail if Code format is invalid', () => {
             const invalidCodes = ['INC-2024-1', 'INC-24-00001', 'BAD-CODE', 'inc-2024-00001'];
 
-            invalidCodes.forEach(code => {
+            invalidCodes.forEach((code) => {
                 const props = { ...validGlobalProps, code };
                 expect(() => Incident.create(props)).toThrow(BusinessRuleValidationError);
+
                 try {
                     Incident.create(props);
                 } catch (e: any) {
@@ -60,38 +59,28 @@ describe('Incident Domain Entity', () => {
             expect(() => Incident.create(propsMissingDesc)).toThrow(BusinessRuleValidationError);
         });
 
-        // Time Validations
         it('should fail if EndTime is before StartTime', () => {
             const props = {
                 ...validGlobalProps,
                 startTime: new Date('2024-01-02T10:00:00Z'),
-                endTime: new Date('2024-01-01T10:00:00Z') // Before Start
+                endTime: new Date('2024-01-01T10:00:00Z'),
             };
             expect(() => Incident.create(props)).toThrow(BusinessRuleValidationError);
         });
 
         it('should calculate duration automatically if EndTime is provided', () => {
             const start = new Date('2024-01-01T10:00:00Z');
-            const end = new Date('2024-01-01T11:00:00Z'); // 1 hour later
+            const end = new Date('2024-01-01T11:00:00Z');
 
-            const props = {
-                ...validGlobalProps,
-                startTime: start,
-                endTime: end
-            };
-
+            const props = { ...validGlobalProps, startTime: start, endTime: end };
             const incident = Incident.create(props);
+
             expect(incident.endTime).toEqual(end);
-            expect(incident.duration).toBe(60); // 60 minutes
+            expect(incident.duration).toBe(60);
         });
 
-        // Impact Mode: Specific
         it('should fail creating SPECIFIC mode incident with empty VVE list', () => {
-            const props = {
-                ...validGlobalProps,
-                impactMode: ImpactMode.Specific,
-                vveList: []
-            };
+            const props = { ...validGlobalProps, impactMode: ImpactMode.Specific, vveList: [] };
             expect(() => Incident.create(props)).toThrow(BusinessRuleValidationError);
         });
 
@@ -99,20 +88,20 @@ describe('Incident Domain Entity', () => {
             const props = {
                 ...validGlobalProps,
                 impactMode: ImpactMode.Specific,
-                vveList: ['VVE-123', 'VVE-456']
+                vveList: ['VVE-123', 'VVE-456'],
             };
             const incident = Incident.create(props);
+
             expect(incident.vveList).toHaveLength(2);
             expect(incident.impactMode).toBe(ImpactMode.Specific);
         });
 
-        // Impact Mode: Upcoming
         it('should fail creating UPCOMING mode incident without Window Times', () => {
             const props = {
                 ...validGlobalProps,
                 impactMode: ImpactMode.Upcoming,
                 upcomingWindowStartTime: null,
-                upcomingWindowEndTime: null
+                upcomingWindowEndTime: null,
             };
             expect(() => Incident.create(props)).toThrow(BusinessRuleValidationError);
         });
@@ -122,21 +111,21 @@ describe('Incident Domain Entity', () => {
                 ...validGlobalProps,
                 impactMode: ImpactMode.Upcoming,
                 upcomingWindowStartTime: new Date('2024-02-02'),
-                upcomingWindowEndTime: new Date('2024-02-01') // End before Start
+                upcomingWindowEndTime: new Date('2024-02-01'),
             };
             expect(() => Incident.create(props)).toThrow(BusinessRuleValidationError);
         });
 
         it('should fail if Upcoming Window is before Incident Start Time', () => {
             const incidentStart = new Date('2024-05-01');
-            const windowStart = new Date('2024-04-01'); // Before incident start
+            const windowStart = new Date('2024-04-01');
 
             const props = {
                 ...validGlobalProps,
                 startTime: incidentStart,
                 impactMode: ImpactMode.Upcoming,
                 upcomingWindowStartTime: windowStart,
-                upcomingWindowEndTime: new Date('2024-06-01')
+                upcomingWindowEndTime: new Date('2024-06-01'),
             };
             expect(() => Incident.create(props)).toThrow(BusinessRuleValidationError);
         });
@@ -151,7 +140,7 @@ describe('Incident Domain Entity', () => {
                 startTime: start,
                 impactMode: ImpactMode.Upcoming,
                 upcomingWindowStartTime: wStart,
-                upcomingWindowEndTime: wEnd
+                upcomingWindowEndTime: wEnd,
             };
 
             const incident = Incident.create(props);
@@ -164,12 +153,10 @@ describe('Incident Domain Entity', () => {
         let incident: Incident;
 
         beforeEach(() => {
-            // Start with a standard active incident
             incident = Incident.create(validGlobalProps);
         });
 
         it('markAsResolved: should set endTime to now and compute duration', () => {
-            // Mock Date.now to control time
             const now = new Date('2024-01-01T12:00:00Z');
             const originalDateNow = Date.now;
             Date.now = () => now.getTime();
@@ -177,10 +164,9 @@ describe('Incident Domain Entity', () => {
             incident.markAsResolved();
 
             expect(incident.endTime).toEqual(now);
-            expect(incident.duration).toBe(120); // 10:00 to 12:00 = 2 hours = 120m
+            expect(incident.duration).toBe(120);
             expect(incident.updatedAt).not.toBeNull();
 
-            // Restore Date.now
             Date.now = originalDateNow;
         });
 
@@ -191,26 +177,18 @@ describe('Incident Domain Entity', () => {
         });
 
         it('changeStartTime: should fail if new start time is after existing end time', () => {
-            // First resolve it
-            const end = new Date('2024-01-01T11:00:00Z');
-            // We can cheat via private/protected props via 'any' or create a resolved incident directly
-            // Or define a method `changeEndTime` exposed publicly if your code allows (it is private in your class)
-            // Assuming we use markAsResolved for this test scenario:
-
-            // Let's create a resolved one directly for clarity
             const resolvedProps = {
                 ...validGlobalProps,
-                endTime: new Date('2024-01-01T12:00:00Z')
+                endTime: new Date('2024-01-01T12:00:00Z'),
             };
             const resolvedIncident = Incident.create(resolvedProps);
 
-            // Try to set Start Time AFTER the existing End Time
             const badStart = new Date('2024-01-01T13:00:00Z');
             expect(() => resolvedIncident.changeStartTime(badStart)).toThrow(BusinessRuleValidationError);
         });
 
         it('changeDescription: should update description', () => {
-            const newDesc = "Updated Description";
+            const newDesc = 'Updated Description';
             incident.changeDescription(newDesc);
             expect(incident.description).toBe(newDesc);
         });
@@ -221,72 +199,79 @@ describe('Incident Domain Entity', () => {
         });
 
         describe('Impact Mode & VVE List Changes', () => {
-
             it('changeImpactMode: switching to SPECIFIC without VVEs should fail (if VVE list is currently empty)', () => {
-                // incident has empty vveList by default in setup
                 expect(() => incident.changeImpactMode(ImpactMode.Specific)).toThrow(BusinessRuleValidationError);
             });
 
             it('changeImpactMode: switching to SPECIFIC with VVEs already present should succeed', () => {
-                incident.addAffectedVve("VVE-111"); // Prepare list first
+                // Não pode usar addAffectedVve aqui porque ainda não é Specific
+                incident.changeVVEList(['VVE-111']);
                 incident.changeImpactMode(ImpactMode.Specific);
+
                 expect(incident.impactMode).toBe(ImpactMode.Specific);
+                expect(incident.vveList).toContain('VVE-111');
             });
 
             it('changeImpactMode: switching to UPCOMING fails without setting windows first?', () => {
-                // Your implementation validates windows inside changeImpactMode/create logic
-                // If switch to UPCOMING, it calls validateUpcomingWindowRules
-                // Since current instance has null windows, it should fail.
                 expect(() => incident.changeImpactMode(ImpactMode.Upcoming)).toThrow(BusinessRuleValidationError);
             });
 
             it('addAffectedVve: should add unique VVEs', () => {
-                incident.addAffectedVve("VVE-001");
-                incident.addAffectedVve("VVE-002");
-                incident.addAffectedVve("VVE-001"); // Duplicate
+                // Preparar estado válido: Specific exige lista não vazia
+                incident.changeVVEList(['VVE-BASE']);
+                incident.changeImpactMode(ImpactMode.Specific);
 
-                expect(incident.vveList).toHaveLength(2); // Should dedup
-                expect(incident.vveList).toContain("VVE-001");
-                expect(incident.vveList).toContain("VVE-002");
+                incident.addAffectedVve('VVE-001');
+                incident.addAffectedVve('VVE-002');
+                incident.addAffectedVve('VVE-001'); // Duplicate
+
+                expect(incident.vveList).toHaveLength(3); // BASE + 001 + 002
+                expect(incident.vveList).toContain('VVE-BASE');
+                expect(incident.vveList).toContain('VVE-001');
+                expect(incident.vveList).toContain('VVE-002');
             });
 
             it('addAffectedVve: should normalize strings', () => {
-                incident.addAffectedVve("  VVE-SPACES  ");
-                expect(incident.vveList).toContain("VVE-SPACES");
+                incident.changeVVEList(['VVE-BASE']);
+                incident.changeImpactMode(ImpactMode.Specific);
+
+                incident.addAffectedVve('  VVE-SPACES  ');
+                expect(incident.vveList).toContain('VVE-SPACES');
             });
 
             it('removeAffectedVve: should remove VVE', () => {
-                incident.addAffectedVve("VVE-001");
-                incident.addAffectedVve("VVE-002");
+                incident.changeVVEList(['VVE-BASE']);
+                incident.changeImpactMode(ImpactMode.Specific);
 
-                incident.removeAffectedVve("VVE-001");
-                expect(incident.vveList).toHaveLength(1);
-                expect(incident.vveList[0]).toBe("VVE-002");
+                incident.addAffectedVve('VVE-001');
+                incident.addAffectedVve('VVE-002');
+
+                incident.removeAffectedVve('VVE-001');
+
+                expect(incident.vveList).toContain('VVE-BASE');
+                expect(incident.vveList).not.toContain('VVE-001');
+                expect(incident.vveList).toContain('VVE-002');
             });
 
             it('removeAffectedVve: should fail/throw if removing results in empty list for SPECIFIC mode', () => {
-                // Setup specific mode
-                incident.addAffectedVve("VVE-ONLY-ONE");
-                incident.changeImpactMode(ImpactMode.Specific); // Allowed now
+                incident.changeVVEList(['VVE-ONLY-ONE']);
+                incident.changeImpactMode(ImpactMode.Specific);
 
-                // Try to remove the last one
-                expect(() => incident.removeAffectedVve("VVE-ONLY-ONE")).toThrow(BusinessRuleValidationError);
+                expect(() => incident.removeAffectedVve('VVE-ONLY-ONE')).toThrow(BusinessRuleValidationError);
             });
         });
 
         describe('Upcoming Windows', () => {
             it('changeUpComingWindowTimes: should fail if not in UPCOMING mode', () => {
-                // Current mode is Global
                 expect(() => incident.changeUpComingWindowTimes(new Date(), new Date())).toThrow(BusinessRuleValidationError);
             });
 
             it('changeUpComingWindowTimes: should update windows if in UPCOMING mode', () => {
-                // Setup
                 const props = {
                     ...validGlobalProps,
                     impactMode: ImpactMode.Upcoming,
                     upcomingWindowStartTime: new Date('2024-01-02'),
-                    upcomingWindowEndTime: new Date('2024-01-03')
+                    upcomingWindowEndTime: new Date('2024-01-03'),
                 };
                 const upIncident = Incident.create(props);
 
