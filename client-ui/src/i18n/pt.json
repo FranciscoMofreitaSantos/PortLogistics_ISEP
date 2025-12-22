@@ -119,6 +119,7 @@
     "planning": "Planeamento",
     "ctc": "Categorias de Tarefas Complementares",
     "ct": "Tarefas Complementares",
+    "incident" : "Incidentes",
     "announcement": {
       "title": "Avisos do sistema",
       "body": "Manutenção agendada hoje às 23:00 — alguns módulos poderão ficar indisponíveis."

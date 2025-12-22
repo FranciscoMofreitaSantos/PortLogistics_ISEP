@@ -115,6 +115,7 @@
     "port3d": "3D Visualization",
     "ctc" : "Complementary Task Categories",
     "ct" : "Complementary Tasks",
+    "incident" : "Incidents",
     "announcement": {
       "title": "System notices",
       "body": "Scheduled maintenance today at 23:00 — some modules may be unavailable."
