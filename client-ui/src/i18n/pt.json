@@ -1076,7 +1076,22 @@
     "prologSequenceTitle": "Sequencia de operações",
     "startTime": "Entrada",
     "endTime": "Saída",
-    "duration": "Duração"
+    "duration": "Duração",
+    "genetic": "Genético",
+    "comparisonMethod": "Método de Comparação",
+    "choose": "Escolha...",
+    "advancedSettingsOptional": "Configurações Avançadas (Opcional)",
+    "population": "População",
+    "defaultPopulation": "Ex: 50",
+    "generations": "Gerações",
+    "defaultGenerations": "Ex: 100",
+    "mutationRate": "Taxa de Mutação (%)",
+    "exMutation": "Ex: 0.1",
+    "crossoverRate": "Taxa de Cruzamento (%)",
+    "exCrossover": "Ex: 0.8",
+    "runMultiCrane": "Rodar Multi-Crane ({{algo}})",
+    "standardView": "Visão Padrão",
+    "comparison": "Comparação"
   },
   "footer": {
     "desc": "Plataforma integrada para gestão portuária inteligente, otimização logística e controlo de operações marítimas.",

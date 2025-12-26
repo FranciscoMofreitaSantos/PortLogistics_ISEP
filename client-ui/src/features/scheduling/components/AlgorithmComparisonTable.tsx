@@ -20,14 +20,16 @@ type ScheduleResponseWithTime = ScheduleResponse & { executionTime?: number };
 
 interface AlgorithmComparisonTableProps {
     allResults: Partial<Record<AlgorithmType, ScheduleResponseWithTime>>;
-    t: (key: string, options?: any) => string;
+    // Correção ESLint: Alterado 'any' para 'Record<string, unknown>'
+    t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 const ComparisonRow: React.FC<{
     algo: AlgorithmType;
     result?: ScheduleResponseWithTime;
     minDelay: number | null;
-    t: (key: string, options?: any) => string;
+    // Correção ESLint: Alterado 'any' para 'Record<string, unknown>'
+    t: (key: string, options?: Record<string, unknown>) => string;
 }> = ({ algo, result, minDelay, t }) => {
 
     const hasData = !!result;
@@ -39,15 +41,17 @@ const ComparisonRow: React.FC<{
         )
         : 0;
 
-    const delay = hasData ? result.prolog.total_delay ?? 0 : '-';
+    // Correção TS2365: Criamos variáveis separadas para lógica numérica e exibição textual
+    const delayValue = hasData ? (result.prolog.total_delay ?? 0) : 0;
+    const delayDisplay = hasData ? (result.prolog.total_delay ?? 0).toString() : '-';
+
     const operations = hasData ? result.schedule.operations.length : '-';
 
-    // --- MUDANÇA: Ler o tempo de execução ---
     const execTime = hasData && result.executionTime !== undefined
         ? `${result.executionTime.toFixed(0)} ms`
         : '-';
 
-    const isBest = hasData && minDelay !== null && delay === minDelay && minDelay >= 0;
+    const isBest = hasData && minDelay !== null && delayValue === minDelay && minDelay >= 0;
     const isNotComputed = !hasData;
 
     return (
@@ -67,14 +71,14 @@ const ComparisonRow: React.FC<{
                 {isNotComputed ? (
                     <Badge color="gray" size="lg">{t('planningScheduling.notComputed')}</Badge>
                 ) : (
-                    <Badge size="lg" color={delay > 0 ? "red" : "green"}>
-                        {delay} {t('planningScheduling.hours')}
+                    // Correção TS2365: Agora comparamos número com número (delayValue > 0)
+                    <Badge size="lg" color={delayValue > 0 ? "red" : "green"}>
+                        {delayDisplay} {t('planningScheduling.hours')}
                     </Badge>
                 )}
             </Table.Td>
             <Table.Td style={{textAlign: 'right'}}>{totalCraneHours !== 0 ? totalCraneHours : '-'}</Table.Td>
             <Table.Td style={{textAlign: 'right'}}>{operations}</Table.Td>
-            {/* --- MUDANÇA: Exibir o tempo --- */}
             <Table.Td style={{textAlign: 'right'}}>
                 <Text fw={500} size="sm">{execTime}</Text>
             </Table.Td>
@@ -85,11 +89,11 @@ const ComparisonRow: React.FC<{
 
 const AlgorithmComparisonTable: React.FC<AlgorithmComparisonTableProps> = ({ allResults, t }) => {
 
-    const algorithmTypes: AlgorithmType[] = ['optimal', 'greedy', 'local_search'];
+    const algorithmTypes: AlgorithmType[] = ['optimal', 'greedy', 'local_search', 'genetic'];
 
     const computedDelays = Object.values(allResults)
         .map(r => r?.prolog?.total_delay)
-        .filter(delay => typeof delay === 'number' && delay >= 0);
+        .filter((delay): delay is number => typeof delay === 'number' && delay >= 0);
 
     const minDelay = computedDelays.length > 0 ? Math.min(...computedDelays) : null;
 

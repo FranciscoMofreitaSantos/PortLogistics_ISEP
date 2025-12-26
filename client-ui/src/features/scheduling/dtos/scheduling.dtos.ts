@@ -69,3 +69,27 @@ export interface PrologFullResultDto {
     best_sequence: PrologOperationResultDto[];
     status: string;
 }
+
+export interface GeneticScheduleResultDto {
+    algorithm: 'genetic';
+    schedule: DailyScheduleResultDto;
+    prolog: PrologFullResultDto;
+
+    populationSize: number;
+    generations: number;
+    mutationRate: number;
+    crossoverRate: number;
+}
+
+export interface SmartScheduleResultDto {
+    selectedAlgorithm: 'optimal' | 'greedy' | 'local_search' | 'genetic';
+
+    schedule: DailyScheduleResultDto;
+    prolog: PrologFullResultDto;
+
+    problemSize: number;
+    vesselCount: number;
+    craneCount: number;
+
+    selectionReason: string;
+}

@@ -20,7 +20,9 @@ import {
     Container,
     Center,
     Select,
-    Table
+    Table,
+    NumberInput,
+    Collapse
 } from '@mantine/core';
 
 import {
@@ -33,7 +35,9 @@ import {
     IconShip,
     IconCpu,
     IconSettings,
-    IconListDetails
+    IconListDetails,
+    IconDna,
+    IconAdjustmentsHorizontal
 } from '@tabler/icons-react';
 
 import {notifyLoading, notifySuccess, notifyError} from "../../../utils/notify";
@@ -41,6 +45,7 @@ import {
     SchedulingService,
     type AlgorithmType,
     type ScheduleResponse,
+    type GeneticParams
 } from '../services/SchedulingService';
 
 import type {
@@ -54,6 +59,9 @@ import { MultiCraneAnalysis } from '../components/MultiCraneAnalysis';
 
 
 export type ScheduleResponseWithTime = ScheduleResponse & { executionTime?: number };
+
+// Definição de tipo para a função de tradução para evitar 'any'
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 function HtmlDateInput({
                            value,
@@ -88,7 +96,8 @@ function HtmlDateInput({
     );
 }
 
-const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, locale: string }) => {
+// Correção ESLint: Alterado 't: any' para 't: TFunc'
+const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: TFunc, locale: string }) => {
     const isDelayed = op.departureDelay > 0;
 
     const formatTimeOnly = (isoString: string): string => {
@@ -104,22 +113,10 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
     };
 
     const formatTimeInterval = (startIso: string, endIso: string): string => {
-        const startDate = new Date(startIso);
-        const endDate = new Date(endIso);
-
         const startTime = formatTimeOnly(startIso);
         const endTime = formatTimeOnly(endIso);
-
-
-        const isSameDay = startDate.toISOString().split('T')[0] === endDate.toISOString().split('T')[0];
-
-        if (isSameDay) {
-            return `${startTime} - ${endTime}`;
-        } else {
-            return `${startTime} - ${endTime}`;
-        }
+        return `${startTime} - ${endTime}`;
     }
-
 
     return (
         <Card withBorder radius="md" p="md" shadow="sm" mb="lg">
@@ -128,7 +125,6 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
                     <IconShip size={20} color='var(--mantine-color-indigo-6)'/>
                     <Title order={4}>{op.vessel}</Title>
                 </Flex>
-
                 <Badge variant="light" color="indigo" size="lg">
                     {t('planningScheduling.dock')}: {op.dock}
                 </Badge>
@@ -139,12 +135,10 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
                     <Text size="xs" c="dimmed">{t('planningScheduling.window')}</Text>
                     <Text fw={600}>{op.startTime} - {op.endTime}</Text>
                 </Grid.Col>
-
                 <Grid.Col span={{base: 6, md: 3}}>
                     <Text size="xs" c="dimmed">{t('planningScheduling.optimizedDuration')}</Text>
                     <Text fw={700} c="indigo">{op.optimizedOperationDuration}h</Text>
                 </Grid.Col>
-
                 <Grid.Col span={{base: 6, md: 3}}>
                     <Text size="xs" c="dimmed">{t('planningScheduling.craneUsed')}</Text>
                     <Group gap={4}>
@@ -154,7 +148,6 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
                         )}
                     </Group>
                 </Grid.Col>
-
                 <Grid.Col span={{base: 6, md: 3}}>
                     <Text size="xs" c="dimmed">{t('planningScheduling.work')}</Text>
                     <Text>{op.loadingDuration}h / {op.unloadingDuration}h</Text>
@@ -171,7 +164,6 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
                             {t('planningScheduling.realDeparture')}: {op.realDepartureTime}
                         </Text>
                     </Flex>
-
                     <Badge color={isDelayed ? 'red' : 'green'} size="lg">
                         {t('planningScheduling.delay')}: {op.departureDelay}h
                     </Badge>
@@ -196,10 +188,8 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: any, loc
     );
 };
 
-
 const PrologSequenceTable: React.FC<{ sequence: PrologOperationResultDto[] }> = ({ sequence }) => {
     const { t } = useTranslation();
-
     const rows = sequence.map((item, index) => (
         <Table.Tr key={item.vessel}>
             <Table.Td>{index + 1}</Table.Td>
@@ -209,7 +199,6 @@ const PrologSequenceTable: React.FC<{ sequence: PrologOperationResultDto[] }> = 
             <Table.Td c="orange.7">{item.end - item.start}</Table.Td>
         </Table.Tr>
     ));
-
     return (
         <Box my="xl">
             <Title order={4} mb="md">
@@ -236,26 +225,25 @@ const PrologSequenceTable: React.FC<{ sequence: PrologOperationResultDto[] }> = 
     );
 };
 
-
 export default function SchedulePage() {
     const {t, i18n} = useTranslation();
 
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<AlgorithmType>('greedy');
-
     const [multiCraneAlgorithm, setMultiCraneAlgorithm] = useState<string>('greedy');
 
+    const [geneticParams, setGeneticParams] = useState<GeneticParams>({
+        populationSize: undefined,
+        generations: undefined,
+        mutationRate: undefined,
+        crossoverRate: undefined
+    });
+
     const [showComparisonAnalysis, setShowComparisonAnalysis] = useState(false);
-
     const [isLoading, setIsLoading] = useState(false);
-
     const [error, setError] = useState<string | null>(null);
-
-    const [allResults, setAllResults] =
-        useState<Partial<Record<AlgorithmType, ScheduleResponseWithTime>>>({});
-
-    const [lastComputedAlgorithm, setLastComputedAlgorithm] =
-        useState<AlgorithmType | null>(null);
+    const [allResults, setAllResults] = useState<Partial<Record<AlgorithmType, ScheduleResponseWithTime>>>({});
+    const [lastComputedAlgorithm, setLastComputedAlgorithm] = useState<AlgorithmType | null>(null);
 
     const locale = i18n.language;
 
@@ -263,13 +251,14 @@ export default function SchedulePage() {
         {value: 'optimal', label: t('planningScheduling.optimal'), icon: IconStar},
         {value: 'greedy', label: t('planningScheduling.greedy'), icon: IconBolt},
         {value: 'local_search', label: t('planningScheduling.localSearch'), icon: IconSearch},
+        {value: 'genetic', label: t('planningScheduling.genetic'), icon: IconDna},
         {value: 'multi_crane', label: 'Multi Crane', icon: IconCpu},
     ];
 
     const getAlgoName = useCallback(
         (algo: AlgorithmType | null) =>
             algorithms.find(a => a.value === algo)?.label ?? "",
-        [t, algorithms]
+        [algorithms]
     );
 
     const scheduleToDisplay = allResults[lastComputedAlgorithm as AlgorithmType];
@@ -285,20 +274,18 @@ export default function SchedulePage() {
         setIsLoading(true);
         setError(null);
 
-
         const startTime = performance.now();
 
         try {
             const response = await SchedulingService.getDailySchedule(
                 selectedDate,
                 currentAlgo,
-                multiCraneAlgorithm
+                multiCraneAlgorithm,
+                geneticParams
             );
-
 
             const endTime = performance.now();
             const durationMs = endTime - startTime;
-
 
             const newResults = {
                 ...allResults,
@@ -307,23 +294,14 @@ export default function SchedulePage() {
 
             setAllResults(newResults);
             setLastComputedAlgorithm(currentAlgo);
-
-            if (currentAlgo === 'multi_crane') {
-                setShowComparisonAnalysis(true);
-            } else {
-                setShowComparisonAnalysis(false);
-            }
+            setShowComparisonAnalysis(currentAlgo === 'multi_crane');
 
             toast.dismiss(loadingId);
             notifySuccess(t('planningScheduling.scheduleSuccess'));
         } catch (e) {
             console.error(e);
             toast.dismiss(loadingId);
-            setError(
-                e instanceof Error && e.message.includes("404")
-                    ? t('planningScheduling.noOperations')
-                    : t('planningScheduling.error')
-            );
+            setError(e instanceof Error ? e.message : t('planningScheduling.error'));
             notifyError(t('planningScheduling.scheduleFail'));
         } finally {
             setIsLoading(false);
@@ -332,7 +310,6 @@ export default function SchedulePage() {
 
     return (
         <Container size="xl" py="xl" className="bg-gray-50 min-h-screen">
-            {/* HEADER */}
             <Group justify="space-between" mb="xl" pb="md" style={{borderBottom: "1px solid #ddd"}}>
                 <Group gap="sm">
                     <Link to="/dashboard" className="pr-back-button">‹</Link>
@@ -350,7 +327,6 @@ export default function SchedulePage() {
                 </Group>
             </Group>
 
-            {/* FILTERS */}
             <Card shadow="lg" radius="xl" p="xl" withBorder mb="xl">
                 <Grid gutter="xl">
                     <Grid.Col span={{base: 12, md: 4}}>
@@ -388,10 +364,10 @@ export default function SchedulePage() {
                                 />
                             </Box>
                             {selectedAlgorithm === 'multi_crane' && (
-                                <Box w={200} className="animate-fade-in">
+                                <Box w={200}>
                                     <Select
-                                        label="Método de Comparação"
-                                        placeholder="Escolha..."
+                                        label={t('planningScheduling.comparisonMethod')}
+                                        placeholder={t('planningScheduling.choose')}
                                         radius="md"
                                         leftSection={<IconSettings size={16}/>}
                                         data={[
@@ -408,6 +384,55 @@ export default function SchedulePage() {
                     </Grid.Col>
                 </Grid>
 
+                <Collapse in={selectedAlgorithm === 'genetic'}>
+                    <Box mt="xl" p="md" style={{ backgroundColor: 'var(--mantine-color-gray-0)', borderRadius: '12px', border: '1px dashed #ccc' }}>
+                        <Group mb="xs">
+                            <IconAdjustmentsHorizontal size={18} color="gray"/>
+                            <Text fw={700} size="sm">{t('planningScheduling.advancedSettingsOptional')}</Text>
+                        </Group>
+                        <Grid>
+                            <Grid.Col span={{base: 6, md: 3}}>
+                                <NumberInput
+                                    label={t('planningScheduling.population')}
+                                    placeholder={t('planningScheduling.defaultPopulation')}
+                                    min={2}
+                                    value={geneticParams.populationSize}
+                                    onChange={(val) => setGeneticParams({...geneticParams, populationSize: val as number})}
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={{base: 6, md: 3}}>
+                                <NumberInput
+                                    label={t('planningScheduling.generations')}
+                                    placeholder={t('planningScheduling.defaultGenerations')}
+                                    min={1}
+                                    value={geneticParams.generations}
+                                    onChange={(val) => setGeneticParams({...geneticParams, generations: val as number})}
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={{base: 6, md: 3}}>
+                                <NumberInput
+                                    label={t('planningScheduling.mutationRate')}
+                                    placeholder={t('planningScheduling.exMutation')}
+                                    decimalScale={2}
+                                    min={0} max={1} step={0.01}
+                                    value={geneticParams.mutationRate}
+                                    onChange={(val) => setGeneticParams({...geneticParams, mutationRate: val as number})}
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={{base: 6, md: 3}}>
+                                <NumberInput
+                                    label={t('planningScheduling.crossoverRate')}
+                                    placeholder={t('planningScheduling.exCrossover')}
+                                    decimalScale={2}
+                                    min={0} max={1} step={0.01}
+                                    value={geneticParams.crossoverRate}
+                                    onChange={(val) => setGeneticParams({...geneticParams, crossoverRate: val as number})}
+                                />
+                            </Grid.Col>
+                        </Grid>
+                    </Box>
+                </Collapse>
+
                 <Button
                     onClick={fetchSchedule}
                     size="lg"
@@ -421,33 +446,30 @@ export default function SchedulePage() {
                     color={selectedAlgorithm !== 'multi_crane' ? "indigo" : undefined}
                 >
                     {selectedAlgorithm === 'multi_crane'
-                        ? `Rodar Multi-Crane (${algorithms.find(a=>a.value === multiCraneAlgorithm)?.label || multiCraneAlgorithm})`
+                        ? t('planningScheduling.runMultiCrane', {algo: algorithms.find(a=>a.value === multiCraneAlgorithm)?.label || multiCraneAlgorithm})
                         : t('planningScheduling.computeScheduleFor', {algo: getAlgoName(selectedAlgorithm)})
                     }
                 </Button>
             </Card>
 
-            {/* ERROR */}
             {error && (
                 <Notification icon={<IconAlertTriangle size={20}/>} color="red" radius="md" mb="xl">
                     {error}
                 </Notification>
             )}
 
-            {/* RESULTS */}
             {Object.keys(allResults).length > 0 && !isLoading && (
                 <Box mt="xl">
-
                     {allResults['multi_crane']?.comparisonData && (
                         <Group justify="center" mb="lg">
                             <SegmentedControl
                                 value={showComparisonAnalysis ? 'analysis' : 'standard'}
                                 onChange={(v) => setShowComparisonAnalysis(v === 'analysis')}
                                 data={[
-                                    { value: 'standard', label: 'Visão Padrão' },
+                                    { value: 'standard', label: t('planningScheduling.standardView') },
                                     { value: 'analysis', label: (
                                             <Group gap={6}>
-                                                <Text fw={700} c="blue">Comparação</Text>
+                                                <Text fw={700} c="blue">{t('planningScheduling.comparison')}</Text>
                                             </Group>
                                         )}
                                 ]}
@@ -456,11 +478,9 @@ export default function SchedulePage() {
                     )}
 
                     {showComparisonAnalysis && allResults['multi_crane']?.comparisonData ? (
-                        <MultiCraneAnalysis
-                            data={allResults['multi_crane'].comparisonData!}
-                        />
+                        <MultiCraneAnalysis data={allResults['multi_crane'].comparisonData!} />
                     ) : (
-                        <AlgorithmComparisonTable allResults={allResults} t={t} />
+                        <AlgorithmComparisonTable allResults={allResults} t={t as TFunc} />
                     )}
 
                     {!showComparisonAnalysis && scheduleToDisplay && scheduleToDisplay.schedule && (
@@ -486,14 +506,12 @@ export default function SchedulePage() {
                             </Card>
 
                             {scheduleToDisplay.prolog?.best_sequence && (
-                                <PrologSequenceTable
-                                    sequence={scheduleToDisplay.prolog.best_sequence}
-                                />
+                                <PrologSequenceTable sequence={scheduleToDisplay.prolog.best_sequence} />
                             )}
 
                             <Stack gap="md">
                                 {scheduleToDisplay.schedule.operations?.map((op) => (
-                                    <OperationRow key={op.vvnId} op={op} t={t} locale={locale}/>
+                                    <OperationRow key={op.vvnId} op={op} t={t as TFunc} locale={locale}/>
                                 ))}
                             </Stack>
 

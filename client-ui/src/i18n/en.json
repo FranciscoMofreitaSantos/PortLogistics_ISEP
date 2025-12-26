@@ -1077,7 +1077,22 @@
     "prologSequenceTitle": "Operations sequence",
     "startTime": "Entrace",
     "endTime": "Departure",
-    "duration": "Duration"
+    "duration": "Duration",
+    "genetic": "Genetic",
+    "comparisonMethod": "Comparison Method",
+    "choose": "Choose...",
+    "advancedSettingsOptional": "Advanced Settings (Optional)",
+    "population": "Population",
+    "defaultPopulation": "Ex: 50",
+    "generations": "Generations",
+    "defaultGenerations": "Ex: 100",
+    "mutationRate": "Mutation Rate (%)",
+    "exMutation": "Ex: 0.1",
+    "crossoverRate": "Crossover Rate (%)",
+    "exCrossover": "Ex: 0.8",
+    "runMultiCrane": "Run Multi-Crane ({{algo}})",
+    "standardView": "Standard View",
+    "comparison": "Comparison"
   },
   "footer": {
     "desc": "Integrated platform for smart port management, logistics optimization, and maritime operations control.",

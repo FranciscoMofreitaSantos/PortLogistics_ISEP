@@ -4,16 +4,36 @@ import type {
     PrologFullResultDto,
 } from '../dtos/scheduling.dtos';
 
-
-
 export type ScheduleResponse = {
-    algorithm: 'optimal' | 'greedy' | 'local_search' | 'multi_crane' | 'genetic';
+    algorithm:
+        | 'optimal'
+        | 'greedy'
+        | 'local_search'
+        | 'multi_crane'
+        | 'genetic'
+        | 'smart';
+
     schedule: DailyScheduleResultDto;
     prolog: PrologFullResultDto;
+
     comparisonData?: MultiCraneComparisonResultDto;
 };
 
-export type AlgorithmType = 'optimal' | 'greedy' | 'local_search' | 'multi_crane' | 'genetic';
+export type AlgorithmType =
+    | 'optimal'
+    | 'greedy'
+    | 'local_search'
+    | 'multi_crane'
+    | 'genetic'
+    | 'smart';
+
+
+export interface GeneticParams {
+    populationSize?: number;
+    generations?: number;
+    mutationRate?: number;
+    crossoverRate?: number;
+}
 
 const BASE_URL = import.meta.env.VITE_PLANNING_URL;
 
@@ -21,20 +41,30 @@ export const SchedulingService = {
     async getDailySchedule(
         day: string,
         algorithm: AlgorithmType,
-        comparisonAlgorithm: string = 'greedy'
+        comparisonAlgorithm: string = 'greedy',
+        geneticParams?: GeneticParams
     ): Promise<ScheduleResponse> {
 
-        // A chave de URL para o backend deve ser 'local_search'
-        const baseEndpoint = `api/schedule/daily/${algorithm}`;
-        let endpointUrl = baseEndpoint.replace('-', '_'); // Fixa local-search -> local_search
+        let endpointUrl = `api/schedule/daily/${algorithm}`;
         let queryParams = `?day=${day}`;
 
+        endpointUrl = endpointUrl.replace('-', '_');
+
         if (algorithm === 'multi_crane') {
-            const multiCraneEndpoint = `api/schedule/daily/multi-crane-comparison`;
-            // Correção para o parâmetro do algoritmo
-            const algorithmParam = comparisonAlgorithm.replace('-', '_');
-            queryParams += `&algorithm=${algorithmParam}`;
-            endpointUrl = multiCraneEndpoint; // O endpoint é o de comparação
+            endpointUrl = `api/schedule/daily/multi-crane-comparison`;
+            queryParams += `&algorithm=${comparisonAlgorithm.replace('-', '_')}`;
+        }
+
+        if (algorithm === 'smart') {
+            endpointUrl = `api/schedule/daily/smart`;
+        }
+
+        if (algorithm === 'genetic') {
+            endpointUrl = `api/schedule/daily/genetic`;
+            if (geneticParams?.populationSize) queryParams += `&populationSizeOverride=${geneticParams.populationSize}`;
+            if (geneticParams?.generations) queryParams += `&generationsOverride=${geneticParams.generations}`;
+            if (geneticParams?.mutationRate) queryParams += `&mutationRateOverride=${geneticParams.mutationRate}`;
+            if (geneticParams?.crossoverRate) queryParams += `&crossoverRateOverride=${geneticParams.crossoverRate}`;
         }
 
         const url = `${BASE_URL}/${endpointUrl}${queryParams}`;
@@ -49,40 +79,54 @@ export const SchedulingService = {
 
             const rawResult = await response.json();
 
-            // Bloco de tratamento para a comparação multi_crane
             if (algorithm === 'multi_crane' && rawResult.multiCraneSchedule) {
                 const comparisonDto = rawResult as MultiCraneComparisonResultDto;
-
                 return {
                     algorithm: 'multi_crane',
                     schedule: comparisonDto.multiCraneSchedule,
-                    // Conversão explícita para o tipo PrologFullResultDto
                     prolog: comparisonDto.multiCraneProlog as PrologFullResultDto,
                     comparisonData: comparisonDto
                 };
             }
 
-            // Bloco de tratamento para algoritmos individuais (Optimal, Greedy, Local Search)
-            if (rawResult.schedule) {
+            if (algorithm === 'genetic' && rawResult.schedule) {
+                return {
+                    algorithm: 'genetic',
+                    schedule: rawResult.schedule,
+                    prolog: rawResult.prolog as PrologFullResultDto
+                };
+            }
 
-                // Mapeia o resultado geral do backend para o tipo ScheduleResponse
+            if (algorithm === 'smart' && rawResult.schedule) {
+                return {
+                    algorithm: rawResult.selectedAlgorithm,
+                    schedule: rawResult.schedule,
+                    prolog: rawResult.prolog as PrologFullResultDto
+                };
+            }
+
+            if (rawResult.schedule) {
                 return {
                     ...rawResult,
-                    // Garante que o campo prolog tem o tipo correto
                     prolog: rawResult.prolog as PrologFullResultDto
                 } as ScheduleResponse;
             }
 
-            // Fallback para respostas não estruturadas
             if (rawResult.operations) {
                 return {
-                    algorithm: algorithm as any,
+                    algorithm,
                     schedule: rawResult as DailyScheduleResultDto,
-                    prolog: { total_delay: 0, best_sequence: [], status: 'partial' } as PrologFullResultDto
+                    // CORREÇÃO: Adicionada a propriedade 'algorithm' para cumprir a interface PrologFullResultDto
+                    prolog: {
+                        algorithm,
+                        total_delay: 0,
+                        best_sequence: [],
+                        status: 'partial'
+                    } as PrologFullResultDto
                 };
             }
 
-            throw new Error("Formato de resposta desconhecido do servidor.");
+            throw new Error("Unknown schedule response format from server");
 
         } catch (error) {
             console.error(`Error fetching schedule for ${algorithm}:`, error);
