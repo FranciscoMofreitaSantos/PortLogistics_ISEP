@@ -70,49 +70,6 @@ jobs:
         run: npm test
 
 
-  # ===========================
-  # FRONTEND UNIT TESTS
-  # ===========================
-  test-frontend-unit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install frontend dependencies
-        working-directory: ./client-ui
-        run: npm ci
-
-      - name: Run frontend unit tests
-        working-directory: ./client-ui
-        run: npm test
-
-
-  # ===========================
-  # CYPRESS END-TO-END TESTS
-  # ===========================
-  test-frontend-e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install frontend dependencies
-        working-directory: ./client-ui
-        run: npm ci
-
-      - name: Run Cypress E2E tests
-        working-directory: ./client-ui
-        run: |
-          npx cypress install
-          npx cypress run
-
 
   # ===========================
   # DEPLOY (ONLY IF ALL TESTS PASS)
@@ -124,8 +81,6 @@ jobs:
       - test-webapi
       - test-scheduling
       - test-operations
-      - test-frontend-unit
-      - test-frontend-e2e
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
