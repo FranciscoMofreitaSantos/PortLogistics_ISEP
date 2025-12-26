@@ -22,6 +22,8 @@ import PhysicalResourceTable from "../components/PhysicalResourceTable";
 import PhysicalResourceSearch from "../components/PhysicalResourceSearch";
 import PhysicalResourceDetails from "../components/PhysicalResourceDetails";
 import PhysicalResourceCreateModal from "../components/PhysicalResourceCreateModal";
+import PhysicalResourceBusyModal from "../components/PhysicalResourceBusyModal";
+import { BsNutFill } from "react-icons/bs";
 
 type FilterType = "all" | "code" | "description" | "type" | "status";
 
@@ -30,6 +32,7 @@ function PhysicalResourcePage() {
     const [physicalResources, setPhysicalResources] = useState<PhysicalResource[]>([]);
     const [selectedPhysicalResource, setSelectedPhysicalResource] = useState<PhysicalResource | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isAllocationOpen, setIsAllocationOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -103,6 +106,17 @@ function PhysicalResourcePage() {
     const handleShowDetails = (resource: PhysicalResource) => {
         setSelectedPhysicalResource(resource);
         setIsDetailsOpen(true);
+    };
+
+    const handleShowAllocation = (resource: PhysicalResource) => {
+        setSelectedPhysicalResource(resource);
+        setIsAllocationOpen(true);
+    };
+
+    const handleCloseAllocation = () => {
+        setIsAllocationOpen(false);
+        setSelectedPhysicalResource(null);
+        loadPhysicalResources();
     };
 
     const handleCloseDetails = () => {
@@ -180,6 +194,7 @@ function PhysicalResourcePage() {
             <PhysicalResourceTable
                 resources={physicalResources}
                 onDetails={handleShowDetails}
+                onAllocation={handleShowAllocation}
             />
 
             {selectedPhysicalResource && (
@@ -187,6 +202,15 @@ function PhysicalResourcePage() {
                     resource={selectedPhysicalResource}
                     isOpen={isDetailsOpen}
                     onClose={handleCloseDetails}
+                />
+            )}
+
+            {selectedPhysicalResource && (
+                <PhysicalResourceBusyModal
+                    resource={selectedPhysicalResource}
+                    isOpen={isAllocationOpen}
+                    onClose={handleCloseAllocation}
+                    operations={[]}
                 />
             )}
 

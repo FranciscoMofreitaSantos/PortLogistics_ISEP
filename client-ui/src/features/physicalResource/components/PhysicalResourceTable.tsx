@@ -6,6 +6,7 @@ import "../style/physicalResource.css";
 interface PhysicalResourceTableProps {
     resources: PhysicalResource[];
     onDetails: (resource: PhysicalResource) => void;
+    onAllocation: (resource: PhysicalResource) => void;
 }
 
 const getStatusClass = (status: PhysicalResourceStatus | string) => {
@@ -21,7 +22,7 @@ const getStatusClass = (status: PhysicalResourceStatus | string) => {
     }
 };
 
-function PhysicalResourceTable({ resources, onDetails }: PhysicalResourceTableProps) {
+function PhysicalResourceTable({ resources, onDetails,onAllocation }: PhysicalResourceTableProps) {
     const { t } = useTranslation();
 
     if (resources.length === 0) {
@@ -55,12 +56,21 @@ function PhysicalResourceTable({ resources, onDetails }: PhysicalResourceTablePr
                     {}
 
                     <td>
-                        <button
-                            onClick={() => onDetails(resource)}
-                            className="pr-details-button"
-                        >
-                            {t("physicalResource.actions.details")}
-                        </button>
+                        <div className="pr-table-actions">
+                            <button
+                                onClick={() => onDetails(resource)}
+                                className="pr-details-button"
+                            >
+                                {t("physicalResource.actions.details")}
+                            </button>
+
+                            <button
+                                onClick={() => onAllocation(resource)}
+                                className="pr-details-button"
+                            >
+                                {t("physicalResource.actions.allocation")}
+                            </button>
+                        </div>
                     </td>
                 </tr>
             ))}
