@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using SEM5_PI_DecisionEngineAPI.DTOs;
 using SEM5_PI_DecisionEngineAPI.Exceptions;
 using SEM5_PI_DecisionEngineAPI.Services;
+using SEM5_PI_PlanningScheduling.DTOs;
+using SEM5_PI_PlanningScheduling.Services;
 
 namespace SEM5_PI_DecisionEngineAPI.Controllers;
 
@@ -12,10 +14,12 @@ namespace SEM5_PI_DecisionEngineAPI.Controllers;
 public class ScheduleController : ControllerBase
 {
     private readonly SchedulingService _schedulingService;
+    private readonly OperationExecutionServiceClient _oemClient;
 
-    public ScheduleController(SchedulingService schedulingService)
+    public ScheduleController(SchedulingService schedulingService, OperationExecutionServiceClient oemClient)
     {
         _schedulingService = schedulingService;
+        _oemClient = oemClient;
     }
 
     [HttpGet("daily/basic")]
@@ -120,4 +124,24 @@ public class ScheduleController : ControllerBase
             return BadRequest(new { error = e.Message });
         }
     }
-}
+
+    [HttpPost("save")]
+    public async Task<IActionResult> SaveSchedule([FromBody] SaveScheduleDto dto)
+    {
+        // Validação básica
+        if (dto == null) return BadRequest("Dados inválidos.");
+        if (dto.Operations == null || dto.Operations.Count == 0) return BadRequest("O plano não tem operações.");
+
+        try
+        {
+            // O dto já tem a estrutura correta (Algorithm, Status, Operations em camelCase)
+            await _oemClient.SaveOperationPlanAsync(dto);
+        
+            return Ok(new { Message = "Plano guardado com sucesso." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Error = ex.Message });
+        }
+    }
+   }
