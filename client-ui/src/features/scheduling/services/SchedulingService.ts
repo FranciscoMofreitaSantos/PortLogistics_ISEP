@@ -1,7 +1,7 @@
 import type {
     DailyScheduleResultDto,
     MultiCraneComparisonResultDto,
-    PrologFullResultDto,
+    PrologFullResultDto, SaveScheduleDto,
     SmartScheduleResultDto,
 } from '../dtos/scheduling.dtos';
 
@@ -36,6 +36,31 @@ export interface SmartParams {
 const BASE_URL = import.meta.env.VITE_PLANNING_URL;
 
 export const SchedulingService = {
+
+    async saveSchedule(data: SaveScheduleDto): Promise<void> {
+        const url = `${BASE_URL}/api/schedule/save`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || errorData.message || "Failed to save schedule");
+            }
+
+        } catch (error) {
+            console.error("Error saving schedule:", error);
+            throw error;
+        }
+    },
+
+
     async getDailySchedule(
         day: string,
         algorithm: AlgorithmType,
@@ -46,6 +71,8 @@ export const SchedulingService = {
 
         let endpointUrl = `api/schedule/daily/${algorithm}`;
         let queryParams = `?day=${day}`;
+
+
 
         endpointUrl = endpointUrl.replace('-', '_');
 

@@ -175,7 +175,7 @@ public class SchedulingService
     // =================================================================================
     // GENERIC ALGORITHM SCHEDULING (Recuperado para o Controller)
     // =================================================================================
-    public async Task<(DailyScheduleResultDto Schedule, PrologFullResultDto Prolog)> ComputeScheduleWithAlgorithmAsync(
+    public async Task<(DailyScheduleResultDto Schedule, PrologFullResultDto Prolog)>  ComputeScheduleWithAlgorithmAsync(
         DateOnly day,
         string algorithmType)
     {
