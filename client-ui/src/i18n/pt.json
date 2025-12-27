@@ -1098,7 +1098,16 @@
     "smartDefaultSeconds": "Padrão: Auto",
     "smartReasonTitle": "Decisão da Inteligência Artificial",
     "smartSelectionPerformed": "Algoritmo selecionado",
-    "smartReason": "Motivo da Seleção"
+    "smartReason": "Motivo da Seleção",
+    "savePlan": "Guardar Plano de Operações",
+    "savingPlan": "A guardar plano...",
+    "saveSuccess": "Plano de Operações guardado com sucesso!",
+    "saveError": "Erro ao guardar o Plano de Operações.",
+    "status": "ESTADO",
+    "readyToSave": "PRONTO A GUARDAR",
+    "saved": "PLANO GUARDADO",
+    "savedSuccessfully": "Plano Guardado!"
+    
   },
   "footer": {
     "desc": "Plataforma integrada para gestão portuária inteligente, otimização logística e controlo de operações marítimas.",
