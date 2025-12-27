@@ -1099,7 +1099,15 @@
     "smartDefaultSeconds": "Default: Auto",
     "smartReasonTitle": "Artificial Intelligence Decision",
     "smartSelectionPerformed": "Selected algorithm",
-    "smartReason": "Selection Reason"
+    "smartReason": "Selection Reason",
+    "savePlan": "Save Operation Plan",
+    "savingPlan": "Saving plan...",
+    "saveSuccess": "Operation Plan saved successfully!",
+    "saveError": "Error saving the Operation Plan.",
+    "status": "STATUS",
+    "readyToSave": "READY TO SAVE",
+    "saved": "PLAN SAVED",
+    "savedSuccessfully": "Plan Saved!"
   },
   "footer": {
     "desc": "Integrated platform for smart port management, logistics optimization, and maritime operations control.",
