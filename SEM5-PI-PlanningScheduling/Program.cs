@@ -1,4 +1,5 @@
 using SEM5_PI_DecisionEngineAPI.Services;
+using SEM5_PI_PlanningScheduling.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,17 @@ builder.Services.AddHttpClient<PhysicalResourceServiceClient>();
 builder.Services.AddHttpClient<StaffMemberServiceClient>();
 builder.Services.AddHttpClient<VesselServiceClient>();
 builder.Services.AddHttpClient<VesselVisitNotificationServiceClient>();
+builder.Services.AddHttpClient<OperationExecutionServiceClient>(client =>
+{
+    var baseUrl = builder.Configuration["OperationExecutionModule:BaseUrl"];
+
+    if (string.IsNullOrEmpty(baseUrl))
+    {
+        throw new InvalidOperationException("OperationExecutionModule:BaseUrl is not configured.");
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
+});
 
 
 builder.Services.AddScoped<SchedulingService>();
