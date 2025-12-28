@@ -1,0 +1,18 @@
+[
+  {
+    "code": "CTC001",
+    "name": "Carga Geral",
+    "description": "Categoria complementar de carga geral",
+    "category": "GENERAL",
+    "defaultDuration": 60,
+    "isActive": true
+  },
+  {
+    "code": "CTC002",
+    "name": "Operações Técnicas",
+    "description": "Apoio técnico complementar",
+    "category": "TECH",
+    "defaultDuration": 45,
+    "isActive": false
+  }
+]
