@@ -77,21 +77,12 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated, vveList }: P
 
         setIsLoading(true);
 
-        // Prepara os dados para o DTO
         const submitData: CreateComplementaryTaskDTO = {
-            category: formData.category, // ID da Categoria
+            category: formData.category,
             staff: formData.staff,
-            vve: formData.vve,           // ID da VVE
+            vve: formData.vve,
             timeStart: new Date(formData.timeStart)
         };
-
-        // --- DEBUG: Vê os dados no console antes de enviar ---
-        console.log("📤 A enviar para API:", {
-            category_id: submitData.category,
-            vve_id: submitData.vve,
-            staff: submitData.staff,
-            timeStart: submitData.timeStart.toISOString()
-        });
 
         try {
             await createCT(submitData);
@@ -117,8 +108,9 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated, vveList }: P
                 <form onSubmit={handleSubmit} className="ct-form">
                     <div className="form-row" style={{ display: 'flex', gap: '1rem' }}>
                         <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.category")}</label>
+                            <label htmlFor="ct-category">{t("ct.form.category")}</label>
                             <select
+                                id="ct-category"
                                 required
                                 name="category"
                                 value={formData.category}
@@ -126,7 +118,6 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated, vveList }: P
                             >
                                 <option value="">{t("common.select")}</option>
                                 {categories.map(cat => (
-                                    /* Corrigido: value agora é cat.id */
                                     <option key={cat.id} value={cat.id}>
                                         {cat.name}
                                     </option>
@@ -134,8 +125,9 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated, vveList }: P
                             </select>
                         </div>
                         <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.vve")}</label>
+                            <label htmlFor="ct-vve">{t("ct.form.vve")}</label>
                             <select
+                                id="ct-vve"
                                 required
                                 name="vve"
                                 value={formData.vve}
@@ -143,7 +135,6 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated, vveList }: P
                             >
                                 <option value="">{t("common.select")}</option>
                                 {vveList.map(vve => (
-                                    /* Corrigido: value agora é vve.id (o code é só para o utilizador ler) */
                                     <option key={vve.id} value={vve.id}>
                                         {vve.code}
                                     </option>
@@ -153,8 +144,9 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated, vveList }: P
                     </div>
 
                     <div className="ct-form-group">
-                        <label>{t("ct.form.staff")}</label>
+                        <label htmlFor="ct-staff">{t("ct.form.staff")}</label>
                         <input
+                            id="ct-staff"
                             required
                             name="staff"
                             type="text"
@@ -165,8 +157,9 @@ function ComplementaryTaskCreateModal({ isOpen, onClose, onCreated, vveList }: P
                     </div>
 
                     <div className="ct-form-group">
-                        <label>{t("ct.form.startTime")}</label>
+                        <label htmlFor="ct-timeStart">{t("ct.form.startTime")}</label>
                         <input
+                            id="ct-timeStart"
                             required
                             name="timeStart"
                             type="datetime-local"

@@ -30,7 +30,7 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource, vveL
     const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
-        category: resource.category, // Aqui deve ser guardado o ID
+        category: resource.category,
         staff: resource.staff,
         vve: resource.vve,
         status: resource.status,
@@ -70,7 +70,6 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource, vveL
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        console.log(formData.vve);
         try {
             const submitData: UpdateComplementaryTaskDTO = {
                 category: formData.category,
@@ -100,14 +99,15 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource, vveL
                 <form onSubmit={handleSubmit} className="ct-form">
 
                     <div className="ct-form-group">
-                        <label>{t("ct.form.code")} ({t("ct.read-only")})</label>
-                        <input type="text" value={resource.code} disabled className="info-card-input" />
+                        <label htmlFor="ct-edit-code">{t("ct.form.code")} ({t("ct.read-only")})</label>
+                        <input id="ct-edit-code" type="text" value={resource.code} disabled className="info-card-input" />
                     </div>
 
                     <div className="form-row" style={{ display: 'flex', gap: '1rem' }}>
                         <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.category")}</label>
+                            <label htmlFor="ct-edit-category">{t("ct.form.category")}</label>
                             <select
+                                id="ct-edit-category"
                                 name="category"
                                 value={formData.category}
                                 onChange={handleValueChange}
@@ -122,8 +122,9 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource, vveL
                             </select>
                         </div>
                         <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.vve")}</label>
+                            <label htmlFor="ct-edit-vve">{t("ct.form.vve")}</label>
                             <select
+                                id="ct-edit-vve"
                                 name="vve"
                                 value={formData.vve}
                                 onChange={handleValueChange}
@@ -139,8 +140,9 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource, vveL
                     </div>
 
                     <div className="ct-form-group">
-                        <label>{t("ct.form.staff")}</label>
+                        <label htmlFor="ct-edit-staff">{t("ct.form.staff")}</label>
                         <input
+                            id="ct-edit-staff"
                             required
                             name="staff"
                             type="text"
@@ -151,8 +153,9 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource, vveL
 
                     <div className="form-row" style={{ display: 'flex', gap: '1rem' }}>
                         <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.startTime")}</label>
+                            <label htmlFor="ct-edit-startTime">{t("ct.form.startTime")}</label>
                             <input
+                                id="ct-edit-startTime"
                                 required
                                 name="timeStart"
                                 type="datetime-local"
@@ -161,8 +164,9 @@ function ComplementaryTaskEditModal({ isOpen, onClose, onUpdated, resource, vveL
                             />
                         </div>
                         <div className="ct-form-group" style={{ flex: 1 }}>
-                            <label>{t("ct.form.status")}</label>
+                            <label htmlFor="ct-edit-status">{t("ct.form.status")}</label>
                             <select
+                                id="ct-edit-status"
                                 name="status"
                                 value={formData.status}
                                 onChange={handleValueChange}
