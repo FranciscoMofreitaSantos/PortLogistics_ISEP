@@ -41,7 +41,7 @@
     "react-i18next": "^16.2.3",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.5",
-    "three": "^0.181.0",
+    "three": "^0.182.0",
     "user-event": "^3.0.3",
     "zod": "^4.1.12",
     "zustand": "^5.0.8"

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
+import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 
 export type FPRigOpts = {
     speed?: number;          // m/s

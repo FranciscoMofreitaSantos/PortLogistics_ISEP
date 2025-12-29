@@ -1,11 +1,10 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import type { SceneData, ContainerDto } from "../types";
 
 import { makePortBase } from "./objects/PortBase";
 import type { PortLayout } from "./objects/PortBase";
 import { ASSETS_TEXTURES } from "./utils/assets";
-// @ts-ignore – util interno com tipos compatíveis
 import { computePortGrids /* , drawPortGridsDebug */ } from "./objects/portGrids";
 
 import { addRoadPoles } from "./objects/roadLights";
