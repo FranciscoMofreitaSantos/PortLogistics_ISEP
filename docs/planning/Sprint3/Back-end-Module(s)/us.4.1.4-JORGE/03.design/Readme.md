@@ -1,52 +1,51 @@
-## 3. Design - User Story Realization 
+## 3. Design – User Story Realization (US4.1.4)
 
 ### 3.1. Rationale
 
-_**Note that SSD - Alternative One is adopted.**_
+***Note that SSD – Alternative One is adopted.***
 
-| Interaction ID                      | Question: Which class is responsible for...           | Answer | Justification (with patterns)                                                                                 |
-|:------------------------------------|:------------------------------------------------------|:-------|:--------------------------------------------------------------------------------------------------------------|
-| Step 1 :   	                        | 	... interacting with the actor?                      | x      | Pure Fabrication: there is no reason to assign this responsibility to any existing class in the Domain Model. |
-| 			  		                             | 	... coordinating the US?                             | y      | Controller                                                                                                    |
-| Step 2 : request data (skillName)		 | 	... displaying the form for the actor to input data? | z      | Pure Fabrication                                                                                              |
+| Interaction ID | Question: Which class is responsible for...                      | Answer                                                                                      | Justification (with patterns)                                                                                                                                        |
+| -------------: | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|         Step 1 | … interacting with the actor (HTTP request/response)?            | `OperationPlanController`                                                                   | **Controller** (GRASP) to handle REST interaction, keep application logic out of the transport layer.                                                                |
+|                | … coordinating the use case?                                     | `OperationPlanService`                                                                      | **Application Service** (DDD) / **Controller** (GRASP) coordination role; ensures orchestration, transactions, and sequencing.                                       |
+|         Step 2 | … validating request payload (DTO constraints)?                  | `OperationPlanController` (syntactic) + `OperationPlan` / `OperationPlanService` (semantic) | Split validation: **Pure Fabrication** for input schema checks in controller; **Information Expert** for invariants in domain/service (e.g., `startTime < endTime`). |
+|         Step 3 | … loading the current plan for the VVN?                          | `OperationPlanRepo`                                                                         | **Repository** abstracts persistence and query logic; **Low Coupling** between service and DB technology (Mongo/Mongoose).                                           |
+|         Step 4 | … applying the manual changes to the plan?                       | `OperationPlan` (and `Operation` entity)                                                    | **Aggregate Root** ensures internal consistency; **Information Expert** over plan state and invariants.                                                              |
+|         Step 5 | … detecting conflicts with other VVNs and resource availability? | `OperationPlanConsistencyChecker`                                                           | **Domain Service** for cross-aggregate rules; **Protected Variations** isolates conflict logic from application flow.                                                |
+|         Step 6 | … persisting the updated plan?                                   | `OperationPlanRepo`                                                                         | **Repository** persists the aggregate; supports optimistic concurrency (e.g., version/ETag).                                                                         |
+|         Step 7 | … logging date/author/reason and change details?                 | `OperationPlanAuditRepo` (or `AuditLogRepo`)                                                | **Pure Fabrication** for audit trail storage; keeps audit concerns decoupled from core aggregate while meeting traceability requirements.                            |
+|         Step 8 | … mapping domain objects to response DTO?                        | `OperationPlanMap`                                                                          | **Mapper / Data Mapper** pattern to avoid leaking persistence/domain structures into API contracts.                                                                  |
 
-### Systematization ##
+#### Systematization
 
-According to the taken rationale, the conceptual classes promoted to software classes are: 
+According to the taken rationale, the conceptual classes promoted to software classes are:
 
-*none
+* `OperationPlan` (Aggregate Root)
+* `Operation` (Entity inside the aggregate)
+* `OperationPlanChangeLog` (Entity/Record for audit trail) **or** external audit model
+* (Referenced context) `VVN`, `Dock`, `Crane`, `StaffMember` (as needed for conflict checks)
 
-Other software classes (i.e. Pure Fabrication) identified: 
+Other software classes (i.e., Pure Fabrication) identified:
 
-* none
+* `OperationPlanController`
+* `OperationPlanService`
+* `OperationPlanRepo`
+* `OperationPlanConsistencyChecker`
+* `OperationPlanAuditRepo` (or `AuditLogRepo`)
+* `OperationPlanMap` (mapper)
 
+---
 
-## 3.2. Sequence Diagram (SD)
-
-
-### Full Diagram
-
-This diagram shows the full sequence of interactions between the classes involved in the realization of this user story.
-
-![Sequence Diagram - Full](svg/usx-sequence-diagram-full.svg)
-
-### Split Diagrams
-
-The following diagram shows the same sequence of interactions between the classes involved in the realization of this user story, but it is split in partial diagrams to better illustrate the interactions between the classes.
-
-It uses Interaction Occurrence (a.k.a. Interaction Use).
-
-![Sequence Diagram - split](svg/usx-sequence-diagram-split.svg)
+### 3.2. Sequence Diagram (SD)
 
 
-**Get Skill Repository**
+#### Full Diagram (PlantUML)
 
-![Sequence Diagram - Partial - Get Skill Repository](svg/usx-sequence-diagram-partial-get-skill-repository.svg)
+![](./puml/us.4.1.4-class-diagram-Sequence_Diagram___Update_Operation_Plan__US4_1_4____Full.png)
 
-**Register Skill**
+---
 
-![Sequence Diagram - Partial - Register Skill](svg/usx-sequence-diagram-partial-register-skill.svg)
+### 3.3. Class Diagram (CD)
 
-## 3.3. Class Diagram (CD)
+![](./puml/usx-sequence-diagram-full-Class_Diagram___US4_1_4_Update_Operation_Plan.png)
 
-![Class Diagram](svg/usx-class-diagram.svg)

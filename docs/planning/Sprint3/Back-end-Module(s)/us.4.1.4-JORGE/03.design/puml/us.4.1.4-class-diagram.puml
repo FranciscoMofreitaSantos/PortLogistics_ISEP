@@ -1,0 +1,94 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+title Sequence Diagram – Update Operation Plan (US4.1.4) – Full
+
+actor "Logistics Operator" as Operator
+boundary "SPA" as SPA
+control "OperationPlanController" as Ctrl
+control "OperationPlanService" as App
+entity "OperationPlanRepo" as Repo
+control "OperationPlanConsistencyChecker" as Checker
+entity "OperationPlanAuditRepo" as AuditRepo
+control "OperationPlanMap" as Map
+
+== Load current plan (optional UI step) ==
+Operator -> SPA : Open VVN plan screen
+SPA -> Ctrl : GET /api/vvns/{vvnId}/operation-plan?planDate={date}
+Ctrl -> App : getPlan(vvnId, date)
+App -> Repo : findByVvnAndDate(vvnId, date)
+alt Plan found
+  Repo --> App : OperationPlan
+  App -> Map : toDTO(plan)
+  Map --> App : OperationPlanDto
+  App --> Ctrl : Result.ok(dto)
+  Ctrl --> SPA : 200 OK\nBody: OperationPlanDto
+else Not found
+  Repo --> App : null
+  App --> Ctrl : Result.fail(NotFound)
+  Ctrl --> SPA : 404 Not Found\nProblemDetails
+end
+
+== Submit manual update ==
+Operator -> SPA : Edit times/crane/staff + reason
+SPA -> Ctrl : PATCH /api/vvns/{vvnId}/operation-plan\nBody: UpdateOperationPlanDto + reasonForChange\nHeader: If-Match (optional)
+
+Ctrl -> Ctrl : validate DTO (required reason, types, missing fields)
+
+alt Invalid request (syntactic)
+  Ctrl --> SPA : 400 Bad Request\nProblemDetails (validation)
+else Valid request
+  Ctrl -> App : updatePlan(vvnId, dto, authorFromAuth, ifMatch?)
+
+  App -> Repo : findByVvnAndDate(vvnId, dto.planDate)
+  alt Plan not found
+    Repo --> App : null
+    App --> Ctrl : Result.fail(NotFound)
+    Ctrl --> SPA : 404 Not Found\nProblemDetails
+  else Plan found
+    Repo --> App : plan
+
+    alt Concurrency conflict (ETag/version)
+      App --> Ctrl : Result.fail(PreconditionFailed)
+      Ctrl --> SPA : 412 Precondition Failed\nProblemDetails
+    else OK to proceed
+      App -> plan : applyPatch(dto.operations, dto.status)\n(enforce invariants)
+      alt Domain validation fails
+        App --> Ctrl : Result.fail(ValidationError)
+        Ctrl --> SPA : 400 Bad Request\nProblemDetails
+      else Domain validation ok
+        App -> Checker : check(plan)
+        alt Blocking conflicts
+          Checker --> App : conflicts[]
+          App --> Ctrl : Result.fail(Conflict, conflicts)
+          Ctrl --> SPA : 409 Conflict\nProblemDetails + conflicts[]
+        else No blocking conflicts
+          Checker --> App : warnings[]
+          App -> Repo : save(plan)
+          App -> AuditRepo : append(planId, author, reason, diff, changedAt)
+          App -> Map : toDTO(plan, warnings)
+          Map --> App : OperationPlanDto (+ warnings)
+          App --> Ctrl : Result.ok(dto)
+          Ctrl --> SPA : 200 OK\nBody: OperationPlanDto (+ warnings)
+        end
+      end
+    end
+  end
+end
+
+== View audit trail ==
+Operator -> SPA : Open "Change Log"
+SPA -> Ctrl : GET /api/vvns/{vvnId}/operation-plan/audit
+Ctrl -> App : getAudit(vvnId, planDate)
+App -> AuditRepo : findByVvnAndDate(vvnId, planDate)
+alt Audit found
+  AuditRepo --> App : AuditEntry[]
+  App --> Ctrl : Result.ok(AuditEntry[])
+  Ctrl --> SPA : 200 OK\nBody: AuditEntry[]
+else Not found
+  AuditRepo --> App : []
+  App --> Ctrl : Result.fail(NotFound)
+  Ctrl --> SPA : 404 Not Found\nProblemDetails
+end
+
+@enduml
