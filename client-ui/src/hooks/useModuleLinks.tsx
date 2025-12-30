@@ -5,10 +5,11 @@ import {
     FaUsers, FaCogs, FaCertificate, FaUniversity, FaShip, FaProjectDiagram, FaCalendarAlt
 } from "react-icons/fa";
 import {
-    FiShuffle, FiTablet, FiAnchor, FiBox, FiFileText, FiMapPin, FiGrid, FiClipboard
+    FiShuffle, FiTablet, FiAnchor, FiBox, FiFileText, FiMapPin, FiGrid
 } from "react-icons/fi";
 import { BsBookmarksFill } from "react-icons/bs";
 import { BookAIcon } from "lucide-react";
+import { RiHistoryFill} from "react-icons/ri";
 
 
 export const roleColor: Record<Role, string> = {
@@ -44,7 +45,7 @@ const routeConfig: Record<string, JSX.Element> = {
     "/incidentType": <FiFileText />,
     "/incident": <FiFileText />,
     "/3dSecene": <FiBox />,
-    "/operationLog" : <FiClipboard />
+    "/operationLog" : <RiHistoryFill />
 };
 
 export type ModuleLink = {
