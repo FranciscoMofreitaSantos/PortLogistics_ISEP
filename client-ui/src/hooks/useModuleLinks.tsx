@@ -5,7 +5,7 @@ import {
     FaUsers, FaCogs, FaCertificate, FaUniversity, FaShip, FaProjectDiagram, FaCalendarAlt
 } from "react-icons/fa";
 import {
-    FiShuffle, FiTablet, FiAnchor, FiBox, FiFileText, FiMapPin, FiGrid
+    FiShuffle, FiTablet, FiAnchor, FiBox, FiFileText, FiMapPin, FiGrid, FiClipboard
 } from "react-icons/fi";
 import { BsBookmarksFill } from "react-icons/bs";
 import { BookAIcon } from "lucide-react";
@@ -43,7 +43,8 @@ const routeConfig: Record<string, JSX.Element> = {
     "/sar": <FiFileText />,
     "/incidentType": <FiFileText />,
     "/incident": <FiFileText />,
-    "/3dSecene": <FiBox />
+    "/3dSecene": <FiBox />,
+    "/operationLog" : <FiClipboard />
 };
 
 export type ModuleLink = {
@@ -81,6 +82,7 @@ export function useModuleLinks(t: (k: string) => string, role?: Role | string | 
                 add("dashboard.physicalResources", "/physical-resources");
                 add("dashboard.staffMembers", "/staff-members");
                 add("dashboard.planning", "/planning-scheduling");
+                add("dashboard.operationLog", "/operationLog");
                 add("dashboard.ct", "/ct");
                 add("dashboard.port3d", "/3dSecene");
                 add("dashboard.dd", "/datarights");
