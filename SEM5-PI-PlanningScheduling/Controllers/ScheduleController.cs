@@ -47,7 +47,7 @@ public class ScheduleController : ControllerBase
                 return BadRequest(new
                     { error = $"Invalid algorithm. Supported: {string.Join(", ", validAlgorithms)}" });
             }
-            
+
             var result = await _schedulingService.ComputeScheduleWithAlgorithmAsync(day, algorithm);
 
             return Ok(new
@@ -79,7 +79,7 @@ public class ScheduleController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
-    
+
     [HttpGet("daily/genetic")]
     public async Task<ActionResult<GeneticScheduleResultDto>> GetDailyGeneticSchedule(
         [FromQuery] DateOnly day,
@@ -106,7 +106,7 @@ public class ScheduleController : ControllerBase
             return BadRequest(new { error = e.Message });
         }
     }
-    
+
     [HttpGet("daily/smart")]
     public async Task<ActionResult<SmartScheduleResultDto>> GetSmartSchedule(
         [FromQuery] DateOnly day,
@@ -128,15 +128,15 @@ public class ScheduleController : ControllerBase
     [HttpPost("save")]
     public async Task<IActionResult> SaveSchedule([FromBody] SaveScheduleDto dto)
     {
-        // Validação básica
+       
         if (dto == null) return BadRequest("Dados inválidos.");
         if (dto.Operations == null || dto.Operations.Count == 0) return BadRequest("O plano não tem operações.");
 
         try
         {
-            // O dto já tem a estrutura correta (Algorithm, Status, Operations em camelCase)
+            
             await _oemClient.SaveOperationPlanAsync(dto);
-        
+
             return Ok(new { Message = "Plano guardado com sucesso." });
         }
         catch (Exception ex)
@@ -144,4 +144,25 @@ public class ScheduleController : ControllerBase
             return StatusCode(500, new { Error = ex.Message });
         }
     }
-   }
+
+    [HttpGet("rebalance/docks")]
+    public async Task<ActionResult<DockRebalanceProposalDto>> GetDockRebalanceProposal(
+        [FromQuery] DateOnly day)
+    {
+        try
+        {
+            var result = await _schedulingService
+                .ComputeDockRebalanceProposalAsync(day);
+
+            return Ok(result);
+        }
+        catch (PlanningSchedulingException e)
+        {
+            return BadRequest(new { error = e.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+}

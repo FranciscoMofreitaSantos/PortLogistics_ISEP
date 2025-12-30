@@ -175,7 +175,7 @@ public class SchedulingService
     // =================================================================================
     // GENERIC ALGORITHM SCHEDULING (Recuperado para o Controller)
     // =================================================================================
-    public async Task<(DailyScheduleResultDto Schedule, PrologFullResultDto Prolog)>  ComputeScheduleWithAlgorithmAsync(
+    public async Task<(DailyScheduleResultDto Schedule, PrologFullResultDto Prolog)> ComputeScheduleWithAlgorithmAsync(
         DateOnly day,
         string algorithmType)
     {
@@ -913,6 +913,175 @@ public class SchedulingService
             SelectionReason = reason
         };
     }
-    
-    
+
+    public async Task<DockRebalanceProposalDto> ComputeDockRebalanceProposalAsync(DateOnly day)
+    {
+        ClearCaches();
+
+        var vvns = await _vvnClient.GetVisitNotifications();
+        var vvnsForDay = vvns
+            .Where(v => DateOnly.FromDateTime(v.EstimatedTimeArrival.Date) == day)
+            .ToList();
+
+        if (vvnsForDay.Count == 0)
+            throw new PlanningSchedulingException($"No approved visits for {day}");
+
+        var proposal = new DockRebalanceProposalDto { Day = day };
+
+        var allDocks = await _dockClient.GetAllDocksAsync();
+
+        var vvnsByDock = allDocks.ToDictionary(
+            d => d.Code.Value,
+            d => vvnsForDay.Where(v => v.Dock == d.Code.Value).ToList()
+        );
+
+        var vessels = new Dictionary<string, VesselDto?>();
+        foreach (var vvn in vvnsForDay)
+            vessels[vvn.Id] = await GetCachedVesselAsync(vvn.VesselImo);
+
+        var dockMeta = new Dictionary<string, List<PhysicalResourceDto>>();
+        foreach (var dock in vvnsByDock.Keys)
+            dockMeta[dock] = await GetCachedDockCranesAsync(dock);
+
+        var dockLoad = vvnsByDock.ToDictionary(
+            kv => kv.Key,
+            kv => kv.Value.Sum(v =>
+                (v.EstimatedTimeDeparture - v.EstimatedTimeArrival).TotalHours)
+        );
+
+        foreach (var dockGroup in vvnsByDock)
+        {
+            var dockCode = dockGroup.Key;
+            var vvnList = dockGroup.Value
+                .OrderBy(v => v.EstimatedTimeArrival)
+                .ToList();
+
+            if (!dockMeta[dockCode].Any())
+            {
+                foreach (var vvn in vvnList)
+                {
+                    proposal.Reassignments.Add(new DockReassignmentEntryDto
+                    {
+                        VvnId = vvn.Id,
+                        VesselName = vessels[vvn.Id]?.Name ?? "Unknown",
+                        OriginalDock = dockCode,
+                        ProposedDock = dockCode,
+                        Rejected = true,
+                        RejectionReason = "Dock has no cranes",
+                        EvaluationNotes = "Immediate reassignment recommended",
+                        DecisionType = "invalid-dock"
+                    });
+                }
+
+                continue;
+            }
+
+            foreach (var vvn in vvnList)
+            {
+                var duration = (vvn.EstimatedTimeDeparture - vvn.EstimatedTimeArrival).TotalHours;
+
+                var move = await TryFindImprovedDockAsync(
+                    vvn,
+                    vessels[vvn.Id],
+                    vvnsByDock,
+                    dockMeta,
+                    dockLoad
+                );
+
+                if (move is not null &&
+                    move.IsProposedMove &&
+                    !move.Rejected &&
+                    move.BalanceImprovementScore > 0)
+                {
+                    dockLoad[vvn.Dock] -= duration;
+                    dockLoad[move.ProposedDock] += duration;
+
+                    proposal.Reassignments.Add(move);
+                    continue;
+                }
+
+                proposal.Reassignments.Add(new DockReassignmentEntryDto
+                {
+                    VvnId = vvn.Id,
+                    VesselName = vessels[vvn.Id]?.Name ?? "Unknown",
+                    OriginalDock = dockCode,
+                    ProposedDock = dockCode,
+                    DecisionType = "no-change",
+                    EvaluationNotes = "Move discarded — no net balance improvement"
+                });
+            }
+        }
+
+        proposal.OptimizationSummary =
+            $"Evaluated {vvnsForDay.Count} vessels across {vvnsByDock.Count} docks. " +
+            $"{proposal.TotalMoves} reassignment(s) suggested.";
+
+        return proposal;
+    }
+
+    private async Task<DockReassignmentEntryDto?> TryFindImprovedDockAsync(
+        VesselVisitNotificationPSDto vvn,
+        VesselDto? vessel,
+        Dictionary<string, List<VesselVisitNotificationPSDto>> vvnsByDock,
+        Dictionary<string, List<PhysicalResourceDto>> dockMeta,
+        Dictionary<string, double> dockLoad)
+    {
+        var duration = (vvn.EstimatedTimeDeparture - vvn.EstimatedTimeArrival).TotalHours;
+
+        var candidateDocks = vvnsByDock
+            .OrderBy(kv => kv.Value.Count == 0 ? 0 : 1)
+            .ThenBy(kv => dockLoad[kv.Key])
+            .ToList();
+
+        foreach (var kv in candidateDocks)
+        {
+            var dock = kv.Key;
+            var dockVessels = kv.Value;
+
+            if (dock == vvn.Dock)
+                continue;
+
+            if (!dockMeta[dock].Any())
+                continue;
+
+            bool dockIsEmpty = dockVessels.Count == 0;
+
+            bool conflict = dockVessels.Any(v =>
+                v.EstimatedTimeArrival < vvn.EstimatedTimeDeparture &&
+                vvn.EstimatedTimeArrival < v.EstimatedTimeDeparture);
+
+            if (conflict && !dockIsEmpty)
+                continue;
+
+            var loadOriginBefore = dockLoad[vvn.Dock];
+            var loadTargetBefore = dockLoad[dock];
+
+            var loadOriginAfter = loadOriginBefore - duration;
+            var loadTargetAfter = loadTargetBefore + duration;
+
+            var improvementScore =
+                (loadOriginBefore - loadTargetBefore) -
+                (loadOriginAfter - loadTargetAfter);
+
+            if (improvementScore <= 0 && !dockIsEmpty)
+                continue;
+
+            return new DockReassignmentEntryDto
+            {
+                VvnId = vvn.Id,
+                VesselName = vessel?.Name ?? "Unknown",
+                OriginalDock = vvn.Dock,
+                ProposedDock = dock,
+                DecisionType = "proposed-move",
+                DockLoadBefore = loadTargetBefore,
+                DockLoadAfter = loadTargetAfter,
+                BalanceImprovementScore = improvementScore,
+                EvaluationNotes = dockIsEmpty
+                    ? "Selected empty dock to reduce congestion"
+                    : "Move reduces workload imbalance between docks"
+            };
+        }
+
+        return null;
+    }
 }

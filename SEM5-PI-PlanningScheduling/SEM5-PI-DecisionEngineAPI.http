@@ -39,3 +39,8 @@ Accept: application/json
 ###
 GET {{DecisionAddress}}/api/schedule/daily/smart?day=2025-12-01
 Accept: application/json
+
+###
+# Dock Rebalancing Proposal
+GET {{DecisionAddress}}/api/schedule/rebalance/docks?day=2025-12-01
+Accept: application/json
