@@ -101,3 +101,9 @@ export interface SaveScheduleDto {
     status: string;
     operations: SchedulingOperationDto[];
 }
+
+export interface OperationPlanFilterDTO {
+    startDate?: string;
+    endDate?: string;
+    vessel?: string;
+}

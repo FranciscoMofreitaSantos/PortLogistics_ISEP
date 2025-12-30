@@ -1,6 +1,6 @@
 import type {
     DailyScheduleResultDto,
-    MultiCraneComparisonResultDto,
+    MultiCraneComparisonResultDto, OperationPlanFilterDTO,
     PrologFullResultDto, SaveScheduleDto,
     SmartScheduleResultDto,
 } from '../dtos/scheduling.dtos';
@@ -34,6 +34,7 @@ export interface SmartParams {
 }
 
 const BASE_URL = import.meta.env.VITE_PLANNING_URL;
+const BASE_OPERATIONS_URL = import.meta.env.VITE_OPERATIONS_URL;
 
 export const SchedulingService = {
 
@@ -58,6 +59,23 @@ export const SchedulingService = {
             console.error("Error saving schedule:", error);
             throw error;
         }
+    },
+
+    async getHistoryPlans(filters: OperationPlanFilterDTO): Promise<SaveScheduleDto[]> {
+        const params = new URLSearchParams();
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
+        if (filters.vessel) params.append('vessel', filters.vessel);
+
+        const url = `${BASE_OPERATIONS_URL}/api/operation-plans?${params.toString()}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error("Erro ao carregar histórico");
+        return response.json();
     },
 
 
