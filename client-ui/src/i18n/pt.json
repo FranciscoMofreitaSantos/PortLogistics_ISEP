@@ -121,6 +121,7 @@
     "ctc": "Categorias de Tarefas Complementares",
     "ct": "Tarefas Complementares",
     "incident": "Incidentes",
+    "dockRebalance" : "Atribuição de Doca",
     "announcement": {
       "title": "Avisos do sistema",
       "body": "Manutenção agendada hoje às 23:00 — alguns módulos poderão ficar indisponíveis."
@@ -1713,6 +1714,32 @@
       "vveRequiredSpecific": "No modo Específico, tem de indicar pelo menos 1 VVE.",
       "upcomingWindowRequired": "No modo Próximo, tem de indicar o início/fim do próximo.",
       "rangeRequired": "Indique o início e o fim do intervalo."
+    }
+  },
+  "dockRebalance": {
+    "title": "Motor de Otimização",
+    "subtitle": "Otimização estatística de carga entre docas",
+    "dateLabel": "Data de Referência",
+    "computeButton": "Calcular Otimização",
+    "improvement": "Melhoria do Equilíbrio",
+    "stdDevBefore": "Desvio Padrão (Antes)",
+    "stdDevAfter": "Desvio Padrão (Depois)",
+    "loadComparison": "Resumo Global de Carga",
+    "assignments": "Atribuições de Navios",
+    "vessel": "Navio",
+    "status": "Estado",
+    "timeWindow": "Janela de Operação",
+    "dockPath": "Caminho (Original → Proposto)",
+    "dock": "Doca",
+    "loadBefore": "Carga Inicial",
+    "loadAfter": "Carga Final",
+    "difference": "Diferença",
+    "moved": "Reatribuído",
+    "emptyState": "Selecione uma data para analisar o equilíbrio do porto.",
+    "successNotify": "Otimização concluída.",
+    "errorNotify": "Erro ao calcular rebalanceamento.",
+    "decisions": {
+      "no-change" : "Sem alteração"
     }
   }
 }

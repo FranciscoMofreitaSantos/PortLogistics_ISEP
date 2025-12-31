@@ -117,6 +117,7 @@
     "ctc": "Complementary Task Categories",
     "ct": "Complementary Tasks",
     "incident": "Incidents",
+    "dockRebalance" : "Dock Attribution",
     "announcement": {
       "title": "System notices",
       "body": "Scheduled maintenance today at 23:00 — some modules may be unavailable."
@@ -1715,6 +1716,33 @@
       "vveRequiredSpecific": "In Specific mode, you must indicate at least 1 VVE.",
       "upcomingWindowRequired": "In Upcoming mode, you must indicate upcoming start/end.",
       "rangeRequired": "Indicate start and end for the range."
+    }
+  },
+
+  "dockRebalance": {
+    "title": "Rebalancing Engine",
+    "subtitle": "Statistical load optimization between docks",
+    "dateLabel": "Reference Date",
+    "computeButton": "Run Analysis",
+    "improvement": "Balance Improvement",
+    "stdDevBefore": "Std Deviation (Before)",
+    "stdDevAfter": "Std Deviation (After)",
+    "loadComparison": "Global Load Summary",
+    "assignments": "Vessel Assignments",
+    "vessel": "Vessel",
+    "status": "Status",
+    "timeWindow": "Operation Window",
+    "dockPath": "Path (Original → Proposed)",
+    "dock": "Dock",
+    "loadBefore": "Initial Load",
+    "loadAfter": "Final Load",
+    "difference": "Difference",
+    "moved": "Reassigned",
+    "emptyState": "Select a date to analyze port balance.",
+    "successNotify": "Optimization completed.",
+    "errorNotify": "Error computing rebalance.",
+    "decisions": {
+      "no-change" : "No changes"
     }
   }
 }
