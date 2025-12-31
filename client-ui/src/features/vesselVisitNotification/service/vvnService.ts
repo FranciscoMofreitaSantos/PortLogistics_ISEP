@@ -154,6 +154,7 @@ const vvnService = {
     updateVvn,
     createVvn,
     rejectByCode,
+    getVvnById,
 };
 
 export default vvnService;
