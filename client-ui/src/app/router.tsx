@@ -36,6 +36,7 @@ import ComplementaryTaskCategoryPage
 import ComplementaryTaskPage from "../features/complementaryTask/pages/ComplementaryTaskPage.tsx";
 import OperationPlanHistoryPage from "../features/scheduling/pages/OperationPlanHistoryPage.tsx";
 import VVE from "../features/vesselVisitExecution/components/CreateVVE.tsx";
+import {DockRebalancePage} from "../features/dockRebalance/pages/DockRebalancePage.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -64,6 +65,12 @@ export const router = createBrowserRouter([
                                 path: "planning-scheduling",
                                 element: <RequireRole roles={[Roles.ProjectManager, Roles.LogisticsOperator]} />,
                                 children: [{ index: true, element: <SchedulePage /> }],
+                            },
+
+                            {
+                                path: "dockRebalance",
+                                element: <RequireRole roles={[Roles.PortAuthorityOfficer]} />,
+                                children: [{ index: true, element: <DockRebalancePage /> }],
                             },
                             {
                                 path: "operationLog",

@@ -2,14 +2,17 @@
 import {type JSX, useMemo} from "react";
 import { Roles, type Role } from "../app/types";
 import {
-    FaUsers, FaCogs, FaCertificate, FaUniversity, FaShip, FaProjectDiagram, FaCalendarAlt
+    FaUsers, FaCogs, FaCertificate, FaUniversity, FaShip, FaProjectDiagram, FaCalendarAlt, FaLifeRing
 } from "react-icons/fa";
 import {
-    FiShuffle, FiTablet, FiAnchor, FiBox, FiFileText, FiMapPin, FiGrid
+    FiShuffle, FiTablet, FiAnchor, FiBox, FiGrid, FiAlertTriangle, FiList, FiCheckSquare,
+    FiFileText
 } from "react-icons/fi";
 import { BsBookmarksFill } from "react-icons/bs";
-import {BookAIcon, ClipboardCheck, Lamp} from "lucide-react";
-import { RiHistoryFill} from "react-icons/ri";
+import {BookAIcon, ClipboardCheck} from "lucide-react";
+import { RiHistoryFill, RiScales3Line, RiShieldCheckLine, RiMapPin2Fill } from "react-icons/ri";
+import { HiOutlineDocumentReport } from "react-icons/hi";
+
 
 
 export const roleColor: Record<Role, string> = {
@@ -21,7 +24,6 @@ export const roleColor: Record<Role, string> = {
     [Roles.PortOperationsSupervisor]: "#ded418",
 };
 
-
 const routeConfig: Record<string, JSX.Element> = {
     "/dashboard": <FiGrid />,
     "/vvn": <FaUniversity />,
@@ -31,20 +33,22 @@ const routeConfig: Record<string, JSX.Element> = {
     "/vessels": <FaShip />,
     "/projects": <FaProjectDiagram />,
     "/storage-areas": <FiBox />,
-    "/docks": <FiMapPin />,
+    "/docks": <RiMapPin2Fill />,
     "/vessel-types": <FiAnchor />,
-    "/responsevvn": <FiFileText />,
-    "/sao": <FiFileText />,
+    "/responsevvn": <FiCheckSquare />,
+    "/sao": <HiOutlineDocumentReport />,
     "/datarights": <FiTablet />,
     "/datarightsAdmin": <FiShuffle />,
-    "/ctc": <BsBookmarksFill />,
+    "/ctc": <FiList />,
     "/ct": <BookAIcon />,
     "/users": <FaCogs />,
     "/planning-scheduling": <FaCalendarAlt />,
-    "/sar": <FiFileText />,
-    "/incidentType": <FiFileText />,
-    "/incident": <FiFileText />,
+    "/sar": <FaLifeRing />,
+    "/incidentType": <BsBookmarksFill />,
+    "/incident": <FiAlertTriangle />,
     "/3dSecene": <FiBox />,
+    "/dockRebalance" : <RiScales3Line />,
+    "/pp": <RiShieldCheckLine />,
     "/operationLog" : <RiHistoryFill />,
     "/vve" : <ClipboardCheck />
 };
@@ -111,6 +115,7 @@ export function useModuleLinks(t: (k: string) => string, role?: Role | string | 
                 add("dashboard.sao", "/sao");
                 add("menu.sar", "/sar");
                 add("menu.incidentType", "/incidentType");
+                add("dashboard.dockRebalance", "/dockRebalance");
                 add("dashboard.port3d", "/3dSecene");
                 add("dashboard.dd", "/datarights");
                 break;

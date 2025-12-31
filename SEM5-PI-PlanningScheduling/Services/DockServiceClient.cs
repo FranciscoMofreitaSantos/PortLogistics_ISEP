@@ -111,5 +111,17 @@ public class DockServiceClient
         
         return cranes;
     }
+    
+    public async Task<List<DockDto>> GetAllDocksAsync()
+    {
+        var response = await _httpClient.GetAsync("/api/Dock");
+
+        if (!response.IsSuccessStatusCode)
+            return new List<DockDto>();
+
+        var docks = await response.Content.ReadFromJsonAsync<List<DockDto>>();
+
+        return docks ?? new List<DockDto>();
+    }
 
 }

@@ -2,8 +2,10 @@ import type {
     DailyScheduleResultDto,
     MultiCraneComparisonResultDto, OperationPlanFilterDTO,
     PrologFullResultDto, SaveScheduleDto,
-    SmartScheduleResultDto,
+    SchedulingOperationDto,
+    SmartScheduleResultDto, UpdateOperationPlanBatchResultDto, UpdateOperationPlanForVvnsBatchDto,
 } from '../dtos/scheduling.dtos';
+import type { UpdateOperationPlanForVvnDto, UpdateOperationPlanResultDto } from "../dtos/scheduling.dtos";
 
 export type ScheduleResponse = {
     algorithm: AlgorithmType;
@@ -36,7 +38,83 @@ export interface SmartParams {
 const BASE_URL = import.meta.env.VITE_PLANNING_URL;
 const BASE_OPERATIONS_URL = import.meta.env.VITE_OPERATIONS_URL;
 
+export type UpdateOperationPlanBatchDto = {
+    planDomainId: string;
+    reasonForChange: string;
+    author: string;
+    updates: Array<{ vvnId: string; operations: any[] }>;
+};
+
+
+
 export const SchedulingService = {
+
+    async updateOperationPlanBatch(payload: UpdateOperationPlanBatchDto, token?: string) {
+        const url = `${BASE_OPERATIONS_URL}/api/operation-plans/batch`;
+
+        const response = await fetch(url, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.message || body.error || "Erro ao atualizar Operation Plan (batch).");
+        return body as UpdateOperationPlanResultDto;
+    },
+
+    async updateOperationPlanForVvn(
+        payload: UpdateOperationPlanForVvnDto,
+        token?: string
+    ): Promise<UpdateOperationPlanResultDto> {
+        const url = `${BASE_OPERATIONS_URL}/api/operation-plans/vvn`;
+
+        const response = await fetch(url, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const body = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            // backend: { message: "..." }
+            throw new Error(body.message || body.error || "Erro ao atualizar Operation Plan.");
+        }
+
+        return body as UpdateOperationPlanResultDto;
+    },
+
+    async updateOperationPlanForVvnsBatch(
+        payload: UpdateOperationPlanForVvnsBatchDto,
+        token?: string
+    ): Promise<UpdateOperationPlanBatchResultDto> {
+        const url = `${BASE_OPERATIONS_URL}/api/operation-plans/vvns`;
+
+        const response = await fetch(url, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const body = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(body.message || body.error || "Erro ao atualizar Operation Plan (batch).");
+        }
+
+        return body as UpdateOperationPlanBatchResultDto;
+    },
+
 
     async saveSchedule(data: SaveScheduleDto): Promise<void> {
         const url = `${BASE_URL}/api/schedule/save`;
@@ -183,5 +261,36 @@ export const SchedulingService = {
 
     calculateTotalDelay(schedule: DailyScheduleResultDto): number {
         return schedule.operations.reduce((sum, op) => sum + (op.departureDelay || 0), 0);
+    },
+
+    async getPlansByCrane(
+        crane: string,
+        startDate: string,
+        endDate: string
+    ): Promise<SaveScheduleDto[]> {
+        if (!crane || !startDate || !endDate) {
+            throw new Error("Missing required parameters: crane, startDate, endDate");
+        }
+
+        const params = new URLSearchParams({ crane, startDate, endDate });
+        const url = `${BASE_OPERATIONS_URL}/api/operation-plans/by-resource?${params.toString()}`;
+
+        const response = await fetch(url, { headers: { "Content-Type": "application/json" } });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || errorData.message || "Failed to fetch plans by crane");
+        }
+
+        const backendPlans: SaveScheduleDto[] = await response.json();
+
+        // Normalize backend DTO to frontend types
+        return backendPlans.map(plan => ({
+            ...plan,
+            planDate: new Date(plan.planDate).toISOString(),
+            operations: plan.operations.map(op => ({
+                ...op,
+                staffAssignments: op.staffAssignments ?? [],
+            })) as SchedulingOperationDto[],
+        }));
     }
 };

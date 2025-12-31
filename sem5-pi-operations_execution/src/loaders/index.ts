@@ -19,7 +19,8 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             {name: "incidentSchema", path: "../persistence/schemas/incidentSchema"},
             {name: "complementaryTaskSchema", path: "../persistence/schemas/complementaryTaskSchema"},
             {name: "vesselVisitExecutionSchema", path: "../persistence/schemas/vesselVisitExecutionSchema"},
-            { name: "operationPlanSchema", path: "../persistence/schemas/operationPlanSchema" }
+            { name: "operationPlanSchema", path: "../persistence/schemas/operationPlanSchema" },
+            { name: "operationPlanChangeLogSchema", path: "../persistence/schemas/operationPlanChangeLogSchema" }
         ],
 
         mappers: [
@@ -80,7 +81,7 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.controllers.vesselVisitExecution.getByCode,
             config.controllers.vesselVisitExecution.getByImo,
             config.controllers.vesselVisitExecution.getInRange,
-            //config.controllers.vesselVisitExecution.updateBerthDock,
+            config.controllers.vesselVisitExecution.updateBerthDock,
 
 
             // Incident controllers
@@ -102,7 +103,9 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             //OperationPlan
             config.controllers.operationPlan.create,
             config.controllers.incident.updateVEEList,
-            config.controllers.operationPlan.list
+            config.controllers.operationPlan.list,
+            config.controllers.operationPlan.update
+
         ],
         repos: [
             config.repos.user,
@@ -112,7 +115,8 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.repos.incident,
             config.repos.complementaryTask,
             config.repos.VesselVisitExecution,
-            config.repos.operationPlan
+            config.repos.operationPlan,
+            config.repos.operationPlanChangeLog
         ],
         services: [
             config.services.user,
