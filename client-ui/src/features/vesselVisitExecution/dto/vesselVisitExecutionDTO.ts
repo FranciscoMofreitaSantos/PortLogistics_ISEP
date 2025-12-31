@@ -7,3 +7,9 @@ export interface VesselVisitExecutionDTO {
     status: string;
     creatorEmail: string;
 }
+
+export interface CreateVesselVisitExecutionDto {
+    vesselVisitNotificationId: string;
+    actualArrivalTime: string;
+    creatorEmail: string;
+}
