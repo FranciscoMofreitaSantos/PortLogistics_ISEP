@@ -41,6 +41,22 @@ export default (app: Router) => {
         (req, res) => createCtrl.execute(req, res)
     );
 
+    /**
+     * @swagger
+     * /api/vve:
+     *   get:
+     *     summary: Get all vessel visit executions
+     *     responses:
+     *       200:
+     *         description: List of VVE
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 type: object
+     */
+
     route.get("/", (req, res) => getAllCtrl.execute(req, res));
 
     route.get(
