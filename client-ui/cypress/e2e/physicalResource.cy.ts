@@ -159,8 +159,33 @@ describe("Physical Resources – E2E", () => {
                 "startTime": 0,
                 "endTime": 17,
                 "loadingDuration": 4,
-                "unloadingDuration": 7,
+                "unloadingDuration": 5,
                 "crane": "TRUCK-001",
+                "craneCountUsed": 1,
+                "totalCranesOnDock": 1,
+                "optimizedOperationDuration": 11,
+                "realDepartureTime": 11,
+                "realArrivalTime": 1,
+                "departureDelay": 0,
+                "staffAssignments": [
+                    {
+                        "staffMemberName": "Emanuelly Lingjiyang",
+                        "intervalStart": "2025-12-01T01:00:00",
+                        "intervalEnd": "2025-12-01T08:00:00"
+                    }
+                ],
+                "theoreticalRequiredCranes": null,
+                "resourceSuggestion": null
+            },
+            {
+                "vvnId": "a3e352fa-415f-4ac7-b9fe-8619fa4dc6c3",
+                "vessel": "Global Titan",
+                "dock": "DK-0001",
+                "startTime": 0,
+                "endTime": 17,
+                "loadingDuration": 4,
+                "unloadingDuration": 5,
+                "crane": "TRUCK-002",
                 "craneCountUsed": 1,
                 "totalCranesOnDock": 1,
                 "optimizedOperationDuration": 11,
@@ -198,10 +223,11 @@ describe("Physical Resources – E2E", () => {
 
         cy.get(".pr-table tbody").contains("Genético").should("exist"); 
 
-        const expectedOccupancy = 4 + 7;
+        const expectedOccupancy = 9;
         cy.get(".pr-table tbody tr").eq(3).should("contain.text", `${expectedOccupancy} h`);
 
-        
+        const expectedTotalTime = 18;
+        cy.get(".pr-table tbody tr").eq(4).should("contain.text", `${expectedTotalTime} h`);
     });
 
 });

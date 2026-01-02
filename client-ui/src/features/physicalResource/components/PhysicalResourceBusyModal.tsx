@@ -65,9 +65,10 @@ function PhysicalResourceBusyModal({ isOpen, onClose, resource }: PhysicalResour
                         );
 
                         const totalPlanTime = plan.operations.reduce(
-                            (sum, op) => sum + ((op.loadingDuration || 0) + (op.unloadingDuration || 0)),
+                            (sum, op) => sum + (op.loadingDuration + op.unloadingDuration),
                             0
                         );
+
 
                         return {
                             ...plan,
@@ -170,7 +171,14 @@ function PhysicalResourceBusyModal({ isOpen, onClose, resource }: PhysicalResour
                         <tbody>
                             {filteredPlans.length > 0 ? (
                                 filteredPlans.map(plan => {
-                                    const formattedDate = new Date(plan.planDate).toLocaleDateString('pt-PT'); // DD/MM/YYYY
+                                    const formattedDate = new Date(plan.planDate).toLocaleString('pt-PT', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                });
                                     return (
                                         <tr key={`${plan.planDate}-${plan.algorithm}`}>
                                             <td>{formattedDate}</td>

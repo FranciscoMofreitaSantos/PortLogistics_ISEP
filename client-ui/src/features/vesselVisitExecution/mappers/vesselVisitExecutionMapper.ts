@@ -15,5 +15,8 @@ export function mapToVVEDomain(dto: VesselVisitExecutionDTO): VesselVisitExecuti
         actualDockId: dto.actualDockId,
 
         dockDiscrepancyNote: dto.dockDiscrepancyNote ?? dto.note,
+        
+        actualUnBerthTime: dto.actualUnBerthTime,
+        actualLeavePortTime: dto.actualLeavePortTime,
     };
 }

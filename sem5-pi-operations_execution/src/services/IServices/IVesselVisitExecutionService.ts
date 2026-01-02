@@ -35,4 +35,12 @@ export default interface IVesselVisitExecutionService {
         }>,
         operatorId: string
     ): Promise<Result<IVesselVisitExecutionDTO>>;
+
+
+    setCompletedAsync(
+        id: VesselVisitExecutionId,
+        actualUnBerthTime: Date,
+        actualLeavePortTime: Date,
+        updaterEmail: string
+    ): Promise<Result<IVesselVisitExecutionDTO>>;
 }

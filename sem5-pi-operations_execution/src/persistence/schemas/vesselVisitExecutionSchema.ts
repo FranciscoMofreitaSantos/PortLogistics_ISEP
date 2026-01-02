@@ -14,6 +14,9 @@ const VesselVisitExecutionSchema = new mongoose.Schema(
         actualDockId: { type: String, required: false },
         dockDiscrepancyNote: { type: String, required: false },
 
+        actualUnBerthTime: { type: Date, required: false },
+        actualLeavePortTime: { type: Date, required: false },
+
         updatedAt: { type: Date, required: false },
         auditLog: {
             type: [

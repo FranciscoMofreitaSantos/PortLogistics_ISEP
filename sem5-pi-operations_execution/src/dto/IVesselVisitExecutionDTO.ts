@@ -9,6 +9,9 @@ export interface IVesselVisitExecutionDTO {
     actualDockId?: string;
     dockDiscrepancyNote?: string;
 
+    actualUnBerthTime?: Date;
+    actualLeavePortTime?: Date;
+
     updatedAt?: Date;
     auditLog?: Array<{
         at: Date;

@@ -16,8 +16,11 @@ interface VesselVisitExecutionProps {
 
     actualBerthTime?: Date;
     actualDockId?: string;
-    dockDiscrepancyNote?: string;
+    dockDiscrepancyNote?: string; 	
 
+    actualUnBerthTime?: Date;
+    actualLeavePortTime?: Date;
+	
     updatedAt?: Date;
     auditLog?: Array<{
         at: Date;
@@ -54,6 +57,13 @@ export class VesselVisitExecution extends AggregateRoot<VesselVisitExecutionProp
 
     get actualArrivalTime(): Date {
         return this.props.actualArrivalTime;
+    }
+
+     get actualUnBerthTime(): Date | undefined {
+        return this.props.actualUnBerthTime;
+    }
+    get actualLeavePortTime(): Date | undefined {
+        return this.props.actualLeavePortTime;
     }
 
     get status(): string {
@@ -238,6 +248,71 @@ export class VesselVisitExecution extends AggregateRoot<VesselVisitExecutionProp
             action: "UPDATE_EXECUTED_OPERATIONS",
             changes: { from: previous, to: this.props.executedOperations }
         });
+    }
+
+
+    public setCompleted(
+        actualUnBerthTime: Date,
+        actualLeavePortTime: Date,
+        updatedBy: string,
+    ): void {
+
+        if (this.props.status !== "In Progress") {
+            throw new BusinessRuleValidationError(
+                "Invalid status",
+                "Only 'In Progress' VVEs can be completed."
+            );
+        }
+
+        if (!this.areAllExecutedOperationsCompleted()) {
+        throw new BusinessRuleValidationError(
+            "Cargo Operations Incomplete",
+            "Cannot complete VVE until all cargo operations are completed."
+        );
+    }
+
+        if (actualLeavePortTime.getTime() < actualUnBerthTime.getTime()) {
+            throw new BusinessRuleValidationError(
+                "Invalid port departure time",
+                "Actual port departure time cannot be before actual unberth time."
+            );
+        }
+
+        const now = new Date();
+
+        const previous = {
+            actualUnBerthTime: this.props.actualUnBerthTime,
+            actualLeavePortTime: this.props.actualLeavePortTime,
+            status: this.props.status
+        };
+
+         this.props.actualUnBerthTime = actualUnBerthTime;
+        this.props.actualLeavePortTime = actualLeavePortTime;
+        this.props.status = "Completed";
+
+        this.props.updatedAt = now;
+
+        this.props.auditLog = this.props.auditLog ?? [];
+        this.props.auditLog.push({
+            at: now,
+            by: updatedBy,
+            action: "SET_COMPLETED",
+            changes: {
+                from: previous,
+                to: {
+                    actualUnBerthTime,
+                    actualLeavePortTime,
+                    status: "Completed"
+                }
+            }
+        });
+    }
+
+    public areAllExecutedOperationsCompleted(): boolean {
+        const ops = this.props.executedOperations ?? [];
+        if (ops.length === 0) return false;
+
+        return ops.every(op => op.status === "completed");
     }
 
 }

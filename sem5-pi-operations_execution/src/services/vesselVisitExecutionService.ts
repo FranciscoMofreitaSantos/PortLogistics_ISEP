@@ -272,4 +272,42 @@ export default class VesselVisitExecutionService implements IVesselVisitExecutio
         return Result.ok(this.vesselVisitExecutionMap.toDTO(vve));
     }
 
+    
+    public async setCompletedAsync(
+    id: VesselVisitExecutionId,
+    actualUnBerthTime: Date,
+    actualLeavePortTime: Date,
+    updaterEmail: string
+    ): Promise<Result<IVesselVisitExecutionDTO>> {
+
+        const vve = await this.repo.findById(id);
+        if (!vve) {
+            throw new BusinessRuleValidationError(
+                "VVE Not Found",
+                `No VVE found with id ${id.toString()}`
+            );
+        }
+
+        try {
+
+            //validation is made in the domain class
+            vve.setCompleted(actualUnBerthTime, actualLeavePortTime, updaterEmail);
+            await this.repo.save(vve);
+
+            this.logger.info("VVE marked as completed", {
+                vveId: id.toString(),
+                actualUnBerthTime: actualUnBerthTime.toISOString(),
+                actualLeavePortTime: actualLeavePortTime.toISOString(),
+                updaterEmail
+            });
+
+            return Result.ok(this.vesselVisitExecutionMap.toDTO(vve));
+        } catch (err: any) {
+            this.logger.error("Failed to complete VVE", { error: err });
+            return Result.fail<IVesselVisitExecutionDTO>(err.message);
+        }
+    }
+
+
+
 }

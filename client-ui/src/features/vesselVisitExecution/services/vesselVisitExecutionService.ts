@@ -1,6 +1,6 @@
 import { operationsApi } from "../../../services/api.tsx";
 import type { VesselVisitExecution } from "../domain/vesselVisitExecution.ts";
-import type { CreateVesselVisitExecutionDto } from "../dto/vesselVisitExecutionDTO.ts"; // Importamos o DTO
+import type { CompleteVVEDto, CreateVesselVisitExecutionDto } from "../dto/vesselVisitExecutionDTO.ts"; // Importamos o DTO
 import { mapToVVEDomain } from "../mappers/vesselVisitExecutionMapper.ts";
 
 export async function getAllVVE(): Promise<VesselVisitExecution[]> {
@@ -19,8 +19,15 @@ export async function createVVE(dto: CreateVesselVisitExecutionDto): Promise<Ves
     const res = await operationsApi.post("/api/vve", dto);
     return mapToVVEDomain(res.data);
 }
+
+export async function completeVVE(dto: CompleteVVEDto): Promise<VesselVisitExecution> {
+    const res = await operationsApi.put(`/api/vve/${dto.id}/complete`, dto);
+    return mapToVVEDomain(res.data);
+}
+
 export const VesselVisitExecutionService = {
     getAll: getAllVVE,
     getById: getVVEById,
-    create: createVVE
+    create: createVVE,
+    complete: completeVVE
 };
