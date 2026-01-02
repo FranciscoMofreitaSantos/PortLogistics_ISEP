@@ -29,7 +29,11 @@ import { updateBerthDockVVE } from "../services/vveBerthDockService";
 
 import { useAppStore } from "../../../app/store";
 
+// ✅ IMPORT DO EDITOR (ajusta se o caminho for diferente)
+import { ExecutedOperationsEditor } from "../components/ExecutedOperationsEditor";
+
 const GLOBAL_VESSEL_CACHE: Record<string, string> = {};
+
 const formatDateOnly = (date: any) => {
     if (!date) return "Selecione uma data";
     const dObj = date instanceof Date ? date : new Date(date);
@@ -132,6 +136,9 @@ export default function VesselVisitExecutionPage() {
     const [loadingDockOptions, setLoadingDockOptions] = useState(false);
 
     const [auditOpen, setAuditOpen] = useState(false);
+
+    // ✅ NOVO: modal para Operações executadas
+    const [executedOpsOpen, { open: openExecutedOps, close: closeExecutedOps }] = useDisclosure(false);
 
     useEffect(() => {
         isMounted.current = true;
@@ -510,6 +517,7 @@ export default function VesselVisitExecutionPage() {
                 )}
             </Stack>
 
+            {/* ===================== MODAL DETALHES ===================== */}
             <Modal
                 opened={detailsModalOpen}
                 onClose={closeDetails}
@@ -612,6 +620,26 @@ export default function VesselVisitExecutionPage() {
                             </Card>
                         </Stack>
 
+                        {/* ✅ NOVA SECÇÃO + BOTÃO */}
+                        <Stack gap={6}>
+                            <Group justify="space-between" align="center">
+                                <Text size="sm" c="dimmed" tt="uppercase" fw={700}>Operações executadas</Text>
+                                <Button
+                                    size="xs"
+                                    variant="light"
+                                    onClick={openExecutedOps}
+                                    disabled={!selectedHistoryItem?.id || !selectedHistoryItem?.vvnId || !user?.email}
+                                >
+                                    Atualizar
+                                </Button>
+                            </Group>
+                            <Card withBorder radius="md" padding="sm">
+                                <Text size="sm" c="dimmed">
+                                    Regista tempos reais, estado, recursos e notas para as operações planeadas.
+                                </Text>
+                            </Card>
+                        </Stack>
+
                         <Stack gap={6}>
                             <Group justify="space-between" align="center">
                                 <Text size="sm" c="dimmed" tt="uppercase" fw={700}>Auditoria</Text>
@@ -678,6 +706,28 @@ export default function VesselVisitExecutionPage() {
                 )}
             </Modal>
 
+            {/* ✅ MODAL NOVO: EXECUTED OPS */}
+            <Modal
+                opened={executedOpsOpen}
+                onClose={closeExecutedOps}
+                title="Operações executadas"
+                centered
+                size="xl"
+                radius="lg"
+                overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
+            >
+                {!selectedHistoryItem?.id || !selectedHistoryItem?.vvnId ? (
+                    <Text c="dimmed">Sem VVE/VVN selecionado.</Text>
+                ) : (
+                    <ExecutedOperationsEditor
+                        vveId={selectedHistoryItem.id}
+                        vvnId={selectedHistoryItem.vvnId}
+                        operatorId={user?.email ?? "unknown"}
+                    />
+                )}
+            </Modal>
+
+            {/* ===================== MODAL EDIT BERTH/DOCK ===================== */}
             <Modal
                 opened={editBerthOpen}
                 onClose={closeEditBerth}
@@ -739,6 +789,7 @@ export default function VesselVisitExecutionPage() {
                 </Stack>
             </Modal>
 
+            {/* ===================== MODAL WIZARD ===================== */}
             <Modal opened={wizardOpen} onClose={closeWizard} size="xl" padding={0} radius="lg" withCloseButton={false} overlayProps={{ backgroundOpacity: 0.55, blur: 5 }}>
                 <Box p="md" style={{ borderBottom: '1px solid #eee' }}>
                     <Group justify="space-between">

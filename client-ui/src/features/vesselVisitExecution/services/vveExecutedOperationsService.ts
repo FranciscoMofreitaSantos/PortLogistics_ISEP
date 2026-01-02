@@ -16,11 +16,12 @@ export type ExecutedOperationDto = {
 };
 
 export type UpdateExecutedOperationsDto = {
-    executedOperations: ExecutedOperationDto[];
-    updaterEmail: string;
+    operatorId: string;
+    operations: ExecutedOperationDto[];
 };
 
 export async function updateExecutedOperationsVVE(id: string, dto: UpdateExecutedOperationsDto) {
-    const res = await operationsApi.put(`/api/vve/${id}/operations`, dto);
+    const res = await operationsApi.put(`/api/vve/${id}/executed-operations`, dto);
     return res.data;
 }
+
