@@ -42,7 +42,7 @@ export default (app: Router) => {
     );
 
     /**
-     * @swagger
+     * @openapi
      * /api/vve:
      *   get:
      *     summary: Get all vessel visit executions
@@ -56,7 +56,7 @@ export default (app: Router) => {
      *               items:
      *                 type: object
      */
-
+    
     route.get("/", (req, res) => getAllCtrl.execute(req, res));
 
     route.get(
