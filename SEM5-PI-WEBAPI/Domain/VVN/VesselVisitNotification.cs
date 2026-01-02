@@ -158,8 +158,11 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
         private void SetDock(DockCode dock)
         {
-            if (!_isConstructing && !IsEditableWhenAccepting)
-                throw new BusinessRuleValidationException("Cannot update dock when VVN is not editable.");
+            bool isAllowedStatus = Status.StatusValue == VvnStatus.Submitted || 
+                                   Status.StatusValue == VvnStatus.Accepted;
+
+            if (!_isConstructing && !isAllowedStatus)
+                throw new BusinessRuleValidationException("A doca só pode ser definida para VVNs submetidas ou já aceites.");
 
             Dock = dock;
         }
@@ -192,7 +195,7 @@ namespace SEM5_PI_WEBAPI.Domain.VVN
 
         private void SetVesselImo(ImoNumber vesselImo)
         {
-            if (!_isConstructing && !IsEditable)
+            if (!_isConstructing)
                 throw new BusinessRuleValidationException("Cannot update Vessel IMO when VVN is not editable.");
 
             VesselImo = vesselImo;

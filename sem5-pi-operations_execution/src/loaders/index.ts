@@ -19,6 +19,8 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             {name: "incidentSchema", path: "../persistence/schemas/incidentSchema"},
             {name: "complementaryTaskSchema", path: "../persistence/schemas/complementaryTaskSchema"},
             {name: "vesselVisitExecutionSchema", path: "../persistence/schemas/vesselVisitExecutionSchema"},
+            {name: "operationPlanSchema", path: "../persistence/schemas/operationPlanSchema"},
+            {name: "dockReassignmentLogSchema", path: "../persistence/schemas/dockReassignmentLogSchema"},
             { name: "operationPlanSchema", path: "../persistence/schemas/operationPlanSchema" },
             { name: "operationPlanChangeLogSchema", path: "../persistence/schemas/operationPlanChangeLogSchema" }
         ],
@@ -31,6 +33,7 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             {name: "VesselVisitExecutionMap", path: "../mappers/VesselVisitExecutionMap"},
             {name: "IncidentMap", path: "../mappers/IncidentMap"},
             {name: "OperationPlanMap", path: "../mappers/OperationPlanMap"},
+            {name: "DockReassignmentLogMap", path: "../mappers/DockReassignmentLogMap"}
         ],
 
         controllers: [
@@ -82,7 +85,7 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.controllers.vesselVisitExecution.getByImo,
             config.controllers.vesselVisitExecution.getInRange,
             config.controllers.vesselVisitExecution.updateBerthDock,
-            config.controllers.vesselVisitExecution.updateExecutedOperations,
+
 
             // Incident controllers
             config.controllers.incident.create,
@@ -104,7 +107,12 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.controllers.operationPlan.create,
             config.controllers.incident.updateVEEList,
             config.controllers.operationPlan.list,
-            config.controllers.operationPlan.update
+            config.controllers.operationPlan.update,
+
+            //DockReassignmentLog
+            config.controllers.dockReassignmentLog.create,
+            config.controllers.dockReassignmentLog.getAll,
+            
 
         ],
         repos: [
@@ -116,7 +124,9 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.repos.complementaryTask,
             config.repos.VesselVisitExecution,
             config.repos.operationPlan,
-            config.repos.operationPlanChangeLog
+            config.repos.operationPlanChangeLog,
+            config.repos.operationPlan,
+            config.repos.dockReassignmentLog
         ],
         services: [
             config.services.user,
@@ -126,7 +136,8 @@ export default async ({expressApp}: { expressApp: express.Application }) => {
             config.services.VesselVisitExecution,
             config.services.complementaryTask,
             config.services.incident,
-            config.services.operationPlan
+            config.services.operationPlan,
+            config.services.dockReassignmentLog
         ]
     });
 

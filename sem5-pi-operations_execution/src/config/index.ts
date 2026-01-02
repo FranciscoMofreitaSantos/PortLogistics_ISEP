@@ -1,12 +1,13 @@
 import dotenv from "dotenv";
 import path from "path";
 import GetAllITController from "../controllers/incidentType/getAllITController";
+import GetAllDockReassignmentLog from "../controllers/dockReassignmentLog/getAllDockReassignmentLog";
 
 const env = process.env.NODE_ENV || "development";
 
 const envPath = path.resolve(process.cwd(), `.env.${env}`);
 
-const result = dotenv.config({ path: envPath });
+const result = dotenv.config({path: envPath});
 
 if (result.error) {
     console.warn(`⚠️  Could not load ${envPath}. Falling back to .env`);
@@ -197,8 +198,8 @@ export default {
             },
 
             updateVEEList: {
-                name : "UpdateListsVVEsController",
-                path : "../controllers/incident/updateListsVVEsController",
+                name: "UpdateListsVVEsController",
+                path: "../controllers/incident/updateListsVVEsController",
             },
 
             update: {
@@ -317,10 +318,21 @@ export default {
             },
         },
 
+        dockReassignmentLog: {
+            create: {
+                name: "CreateDockReassignmentLogController",
+                path: "../controllers/dockReassignmentLog/createDockReassignmentLogController",
+            },
+            getAll: {
+                name: "GetAllDockReassignmentLog",
+                path: "../controllers/dockReassignmentLog/getAllDockReassignmentLog",
+            },
+        },
+
     },
 
     repos: {
-        user: { name: "UserRepo", path: "../repos/userRepo" },
+        user: {name: "UserRepo", path: "../repos/userRepo"},
         complementaryTaskCategory: {
             name: "ComplementaryTaskCategoryRepo",
             path: "../repos/complementaryTaskCategoryRepo"
@@ -329,9 +341,9 @@ export default {
             name: "IncidentTypeRepo",
             path: "../repos/incidentTypeRepo"
         },
-        complementaryTask : {
+        complementaryTask: {
             name: "ComplementaryTaskRepo",
-            path : "../repos/complementaryTaskRepo"
+            path: "../repos/complementaryTaskRepo"
         },
         VesselVisitExecution: {
             name: "VesselVisitExecutionRepo",
@@ -347,10 +359,18 @@ export default {
             name: "OperationPlanChangeLogRepo",
             path: "../repos/operationPlanChangeLogRepo"
         }
+        operationPlan: {
+            name: "OperationPlanRepo",
+            path: "../repos/operationPlanRepo"
+        },
+        dockReassignmentLog: {
+            name: "DockReassignmentLogRepo",
+            path: "../repos/dockReassignmentLogRepo"
+        },
     },
 
     services: {
-        user: { name: "UserService", path: "../services/userService" },
+        user: {name: "UserService", path: "../services/userService"},
         complementaryTaskCategory: {
             name: "ComplementaryTaskCategoryService",
             path: "../services/complementaryTaskCategoryService"
@@ -359,9 +379,9 @@ export default {
             name: "IncidentTypeService",
             path: "../services/incidentTypeService"
         },
-        complementaryTask : {
+        complementaryTask: {
             name: "ComplementaryTaskService",
-            path : "../services/complementaryTaskService"
+            path: "../services/complementaryTaskService"
         },
         VesselVisitExecution: {
             name: "VesselVisitExecutionService",
@@ -373,6 +393,11 @@ export default {
         },
         operationPlan: {
             name: "OperationPlanService",
-            path: "../services/operationPlanService" }
+            path: "../services/operationPlanService"
+        },
+        dockReassignmentLog: {
+            name: "DockReassignmentLogService",
+            path: "../services/dockReassignmentLogService"
+        }
     }
 };

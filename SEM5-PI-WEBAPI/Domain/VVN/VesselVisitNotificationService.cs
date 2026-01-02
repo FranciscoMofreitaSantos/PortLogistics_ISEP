@@ -290,9 +290,9 @@ public class VesselVisitNotificationService : IVesselVisitNotificationService
         if (vvnInDb == null)
             throw new BusinessRuleValidationException($"No Vessel Visit Notification found with ID = {id.Value}");
 
-        if (!vvnInDb.IsEditable)
-            throw new BusinessRuleValidationException(
-                "Only VVNs with status 'InProgress' or 'PendingInformation' can be edited.");
+        // if (!vvnInDb.IsEditable)
+        //     throw new BusinessRuleValidationException(
+        //         "Only VVNs with status 'InProgress' or 'PendingInformation' can be edited.");
 
         if (!string.IsNullOrWhiteSpace(dto.EstimatedTimeArrival))
             vvnInDb.UpdateEstimatedTimeArrival(new ClockTime(DateTime.Parse(dto.EstimatedTimeArrival)));

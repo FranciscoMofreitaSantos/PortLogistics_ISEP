@@ -1,0 +1,14 @@
+POST http://localhost:3000/api/dock-reassignment-log
+Content-Type: application/json
+
+{
+  "vvnId": "lalalala",
+  "vesselName": "Vessel",
+  "originalDock": "DK-001",
+  "updatedDock": "DK-002",
+  "officerId": "xico@test.com",
+  "timestamp": "2025-01-02T14:30:00Z"
+}
+
+###
+GET http://localhost:3000/api/dock-reassignment-log
