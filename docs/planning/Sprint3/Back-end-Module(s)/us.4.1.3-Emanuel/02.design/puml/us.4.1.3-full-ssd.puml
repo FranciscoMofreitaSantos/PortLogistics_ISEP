@@ -1,0 +1,72 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+title Sequence Diagram (Design) – US 4.1.3: Search Operation Plans
+
+actor "Logistics Operator" as Operator
+boundary "SPA" as SPA
+boundary "OperationPlan Routes" as Routes
+control "GetOperationPlansController" as Ctrl
+control "OperationPlanService" as Svc
+entity "OperationPlanRepo" as Repo
+participant "OperationPlanMap" as Map
+database "MongoDB" as DB
+
+== Search Plans ==
+
+Operator -> SPA : Apply filters (Date/Vessel)
+SPA -> Routes : GET /api/operation-plans?startDate=X&endDate=Y&vessel=Z
+
+Routes -> Routes : Middleware: Auth Check
+
+alt Authorized
+    Routes -> Ctrl : execute(req, res)
+    activate Ctrl
+
+    ' 1. Extração de Query Params (conforme o teu código)
+    Ctrl -> Ctrl : extract(startDate, endDate, vessel)
+
+    Ctrl -> Svc : getPlansAsync(startDate, endDate, vessel)
+    activate Svc
+
+    ' 2. Busca no Repositório
+    Svc -> Repo : findByCriteria(start, end, vessel)
+    activate Repo
+    
+ 
+
+    Repo -> DB : find(query).sort({ planDate: -1 })
+    activate DB
+    DB --> Repo : rawDocs[]
+    deactivate DB
+
+    ' 3. Hidratação para Domínio
+    loop for each doc
+        Repo -> Map : toDomain(rawDoc)
+        activate Map
+        Map --> Repo : planEntity
+        deactivate Map
+    end
+
+    Repo --> Svc : planEntities[]
+    deactivate Repo
+
+    ' 4. Conversão para DTO (O Controller espera DTOs no result.getValue())
+    loop for each entity
+        Svc -> Map : toDTO(planEntity)
+        activate Map
+        Map --> Svc : planDTO
+        deactivate Map
+    end
+
+    Svc --> Ctrl : Result.ok(planDTOs[])
+    deactivate Svc
+
+    Ctrl --> SPA : 200 OK (JSON List)
+    deactivate Ctrl
+
+else Unauthorized
+    Routes --> SPA : 401 Unauthorized
+end
+
+@enduml
