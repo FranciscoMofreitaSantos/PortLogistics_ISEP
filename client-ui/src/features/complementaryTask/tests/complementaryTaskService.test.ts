@@ -1,7 +1,28 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import * as mapper from "../mappers/complementaryTaskMapper";
 
-// Mocks para a API
+//
+// 🔹 Mock user store para gerar o header automaticamente
+//
+vi.mock("../../../app/store", () => ({
+    useAppStore: {
+        getState: () => ({
+            user: {
+                email: "unit.test@mock.com"
+            }
+        })
+    }
+}));
+
+const expectedHeaders = {
+    headers: {
+        "x-user-email": "unit.test@mock.com"
+    }
+};
+
+//
+// 🔹 Mocks da API
+//
 const mockGet = vi.fn();
 const mockPost = vi.fn();
 const mockPut = vi.fn();
@@ -14,73 +35,122 @@ vi.mock("../../../services/api", () => ({
     }
 }));
 
-let service: typeof import('../services/complementaryTaskService');
-const mapToDomainSpy = vi.spyOn(mapper, 'mapToCTDomain');
+let service: typeof import("../services/complementaryTaskService");
 
-describe('ComplementaryTask Service', () => {
+const mapToDomainSpy = vi.spyOn(mapper, "mapToCTDomain");
+
+describe("ComplementaryTask Service", () => {
 
     beforeAll(async () => {
-        service = await import('../services/complementaryTaskService');
+        service = await import("../services/complementaryTaskService");
     });
 
     beforeEach(() => {
         vi.clearAllMocks();
-        // Implementação básica do spy para retornar o dado como está
-        mapToDomainSpy.mockImplementation((data) => data as any);
+
+        // retorna o DTO como está (evitar dependência no mapper)
+        mapToDomainSpy.mockImplementation(data => data as any);
     });
 
-    it('getAllCT deve chamar GET e mapear a lista de resultados', async () => {
-        const mockData = [{ id: "1", code: "C1" }, { id: "2", code: "C2" }];
+    it("getAllCT deve chamar GET com header e mapear resultados", async () => {
+
+        const mockData = [
+            { id: "1", code: "C1" },
+            { id: "2", code: "C2" }
+        ];
+
         mockGet.mockResolvedValue({ data: mockData });
 
         const result = await service.getAllCT();
 
-        expect(mockGet).toHaveBeenCalledWith("/api/complementary-tasks");
+        expect(mockGet).toHaveBeenCalledWith(
+            "/api/complementary-tasks",
+            expectedHeaders
+        );
+
         expect(mapToDomainSpy).toHaveBeenCalledTimes(2);
         expect(result).toHaveLength(2);
     });
 
-    it('createCT deve chamar POST com o DTO correto', async () => {
+    it("createCT deve chamar POST com DTO e header", async () => {
+
         const dto = { code: "NEW", category: "CAT1" } as any;
-        mockPost.mockResolvedValue({ data: { id: "10", ...dto } });
+
+        mockPost.mockResolvedValue({
+            data: { id: "10", ...dto }
+        });
 
         await service.createCT(dto);
 
-        expect(mockPost).toHaveBeenCalledWith("/api/complementary-tasks", dto);
+        expect(mockPost).toHaveBeenCalledWith(
+            "/api/complementary-tasks",
+            dto,
+            expectedHeaders
+        );
+
         expect(mapToDomainSpy).toHaveBeenCalled();
     });
 
-    it('updateCT deve chamar PUT com o código e DTO', async () => {
+    it("updateCT deve chamar PUT com código, DTO e header", async () => {
+
         const code = "CT01";
         const dto = { status: "InProgress" } as any;
-        mockPut.mockResolvedValue({ data: { code, ...dto } });
+
+        mockPut.mockResolvedValue({
+            data: { code, ...dto }
+        });
 
         await service.updateCT(code, dto);
 
-        expect(mockPut).toHaveBeenCalledWith(`/api/complementary-tasks/${code}`, dto);
+        expect(mockPut).toHaveBeenCalledWith(
+            `/api/complementary-tasks/${code}`,
+            dto,
+            expectedHeaders
+        );
     });
 
-    it('getCTByCode deve chamar a rota de pesquisa por código', async () => {
+    it("getCTByCode deve chamar rota correta com header", async () => {
+
         mockGet.mockResolvedValue({ data: { code: "ABC" } });
 
         await service.getCTByCode("ABC");
 
-        expect(mockGet).toHaveBeenCalledWith("/api/complementary-tasks/search/code/ABC");
+        expect(mockGet).toHaveBeenCalledWith(
+            "/api/complementary-tasks/search/code/ABC",
+            expectedHeaders
+        );
     });
 
-    describe('getCTByVveCode', () => {
-        it('deve lidar com resposta que é um objeto único', async () => {
+    //
+    // -------- getCTByVveCode ----------
+    //
+
+    describe("getCTByVveCode", () => {
+
+        it("deve lidar com resposta como objeto único", async () => {
+
             const mockData = { id: "1", vve: "VVE1" };
+
             mockGet.mockResolvedValue({ data: mockData });
 
             const result = await service.getCTByVveCode("VVE1");
+
+            expect(mockGet).toHaveBeenCalledWith(
+                "/api/complementary-tasks/search/vveCode",
+                {
+                    ...expectedHeaders,
+                    params: { vve: "VVE1" }
+                }
+            );
 
             expect(result).toHaveLength(1);
             expect(result[0].id).toBe("1");
         });
 
-        it('deve lidar com resposta que é um array', async () => {
+        it("deve lidar com resposta como array", async () => {
+
             const mockData = [{ id: "1" }, { id: "2" }];
+
             mockGet.mockResolvedValue({ data: mockData });
 
             const result = await service.getCTByVveCode("VVE1");
@@ -88,7 +158,8 @@ describe('ComplementaryTask Service', () => {
             expect(result).toHaveLength(2);
         });
 
-        it('deve retornar array vazio se não houver dados', async () => {
+        it("deve retornar array vazio se API devolver null", async () => {
+
             mockGet.mockResolvedValue({ data: null });
 
             const result = await service.getCTByVveCode("VVE1");
@@ -97,15 +168,21 @@ describe('ComplementaryTask Service', () => {
         });
     });
 
-    it('getCTInRange deve passar os parâmetros de tempo corretamente', async () => {
+    it("getCTInRange deve enviar parâmetros e header corretamente", async () => {
+
         mockGet.mockResolvedValue({ data: [] });
+
         const start = 1000;
         const end = 2000;
 
         await service.getCTInRange(start, end);
 
-        expect(mockGet).toHaveBeenCalledWith("/api/complementary-tasks/search/in-range", {
-            params: { timeStart: start, timeEnd: end }
-        });
+        expect(mockGet).toHaveBeenCalledWith(
+            "/api/complementary-tasks/search/in-range",
+            {
+                ...expectedHeaders,
+                params: { timeStart: start, timeEnd: end }
+            }
+        );
     });
 });
