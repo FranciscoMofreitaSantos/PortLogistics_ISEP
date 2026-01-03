@@ -492,7 +492,6 @@ export default function VesselVisitExecutionPage() {
                                     >
                                         <Group justify="space-between" mb="xs">
                                             <Badge variant="light" color="teal" size="lg" radius="sm">{t('vesselVisitExecution.inPort')}</Badge>
-                                            <Text size="xs" c="dimmed" fw={700}>ID: {vve.id.substring(0, 6)}</Text>
                                         </Group>
                                         <Group wrap="nowrap" mb="md">
                                             <Avatar size="lg" radius="md" variant="light" color="teal"><IconShip size={24} /></Avatar>
