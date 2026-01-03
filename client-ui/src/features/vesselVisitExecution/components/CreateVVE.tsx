@@ -29,7 +29,6 @@ import { updateBerthDockVVE } from "../services/vveBerthDockService";
 
 import { useAppStore } from "../../../app/store";
 
-// ✅ IMPORT DO EDITOR (ajusta se o caminho for diferente)
 import { ExecutedOperationsEditor } from "../components/ExecutedOperationsEditor";
 
 const GLOBAL_VESSEL_CACHE: Record<string, string> = {};
@@ -137,7 +136,6 @@ export default function VesselVisitExecutionPage() {
 
     const [auditOpen, setAuditOpen] = useState(false);
 
-    // ✅ NOVO: modal para Operações executadas
     const [executedOpsOpen, { open: openExecutedOps, close: closeExecutedOps }] = useDisclosure(false);
 
     useEffect(() => {
@@ -513,7 +511,6 @@ export default function VesselVisitExecutionPage() {
                 )}
             </Stack>
 
-            {/* ===================== MODAL DETALHES ===================== */}
             <Modal
                 opened={detailsModalOpen}
                 onClose={closeDetails}
@@ -616,7 +613,6 @@ export default function VesselVisitExecutionPage() {
                             </Card>
                         </Stack>
 
-                        {/* ✅ NOVA SECÇÃO + BOTÃO */}
                         <Stack gap={6}>
                             <Group justify="space-between" align="center">
                                 <Text size="sm" c="dimmed" tt="uppercase" fw={700}>Operações executadas</Text>
@@ -702,7 +698,6 @@ export default function VesselVisitExecutionPage() {
                 )}
             </Modal>
 
-            {/* ✅ MODAL NOVO: EXECUTED OPS */}
             <Modal
                 opened={executedOpsOpen}
                 onClose={closeExecutedOps}
@@ -723,7 +718,6 @@ export default function VesselVisitExecutionPage() {
                 )}
             </Modal>
 
-            {/* ===================== MODAL EDIT BERTH/DOCK ===================== */}
             <Modal
                 opened={editBerthOpen}
                 onClose={closeEditBerth}
@@ -785,7 +779,6 @@ export default function VesselVisitExecutionPage() {
                 </Stack>
             </Modal>
 
-            {/* ===================== MODAL WIZARD ===================== */}
             <Modal opened={wizardOpen} onClose={closeWizard} size="xl" padding={0} radius="lg" withCloseButton={false} overlayProps={{ backgroundOpacity: 0.55, blur: 5 }}>
                 <Box p="md" style={{ borderBottom: '1px solid #eee' }}>
                     <Group justify="space-between">
