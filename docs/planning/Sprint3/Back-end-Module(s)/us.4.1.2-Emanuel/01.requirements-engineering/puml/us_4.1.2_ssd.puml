@@ -1,0 +1,47 @@
+@startuml
+skinparam actorStyle awesome
+autonumber
+
+actor "Logistics Operator" as User
+participant "System (SPA + OEM)" as System
+participant "Planning Module" as Planning
+
+title SSD - US 4.1.2: Generate & Store Operation Plans
+
+' --- PASSO 1: GERAR E VISUALIZAR ---
+group Step 1: Generate & Preview
+    User -> System : initiatePlanGeneration(date, algorithm)
+    activate System
+    
+    ' O Sistema pede ao módulo de planeamento os cálculos
+    System -> Planning : getBestSchedule(date, algorithm)
+    activate Planning
+    Planning --> System : operationSchedule (resources, times, sequence)
+    deactivate Planning
+
+    ' O Sistema mostra ao utilizador para revisão (sem gravar ainda)
+    System --> User : displayProposedPlan(operationSchedule)
+    deactivate System
+end
+
+' --- PASSO 2: GUARDAR (O Controller que testámos) ---
+group Step 2: Store Plan (CreateOperationPlanController)
+    User -> System : confirmAndSavePlan(planData)
+    activate System
+
+   
+
+    alt Success (200 OK)
+        System --> User : 200 OK (Plan Stored Successfully)
+    
+    else Validation Error (400)
+        ' Ex: Plano já existe para este VVN, ou dados inválidos
+        System --> User : 400 Bad Request (Error Message)
+
+    else System Error (500)
+        System --> User : 500 Internal Server Error
+    end
+    deactivate System
+end
+
+@enduml
