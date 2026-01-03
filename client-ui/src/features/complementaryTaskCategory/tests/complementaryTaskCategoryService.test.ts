@@ -5,6 +5,19 @@ import type { CreateComplementaryTaskCategoryDTO } from "../dtos/createComplemen
 import type { UpdateComplementaryTaskCategoryDTO } from "../dtos/updateComplementaryTaskCategoryDTO";
 import type { ComplementaryTaskCategory } from "../domain/complementaryTaskCategory";
 
+//
+// 🔹 Mock user store to provide email header
+//
+vi.mock("../../../app/store", () => ({
+    useAppStore: {
+        getState: () => ({
+            user: {
+                email: "unit.test@mock.com"
+            }
+        })
+    }
+}));
+
 const mockGet = vi.fn();
 const mockPost = vi.fn();
 const mockPut = vi.fn();
@@ -17,37 +30,58 @@ vi.mock("../../../services/api", () => ({
     }
 }));
 
-let service: typeof import('../services/complementaryTaskCategoryService');
-const mapToDomainSpy = vi.spyOn(mapper, 'mapToCTCDomain');
+let service: typeof import("../services/complementaryTaskCategoryService");
+
+const mapToDomainSpy = vi.spyOn(mapper, "mapToCTCDomain");
+
+const expectedHeaders = {
+    headers: {
+        "x-user-email": "unit.test@mock.com"
+    }
+};
 
 describe("ComplementaryTaskCategory Service", () => {
+
     beforeAll(async () => {
-        service = await import('../services/complementaryTaskCategoryService');
+        service = await import("../services/complementaryTaskCategoryService");
     });
 
     beforeEach(() => {
         vi.clearAllMocks();
-        mapToDomainSpy.mockImplementation((data: ComplementaryTaskCategoryDTO) => data as unknown as ComplementaryTaskCategory);
+
+        mapToDomainSpy.mockImplementation(
+            (data: ComplementaryTaskCategoryDTO) =>
+                data as unknown as ComplementaryTaskCategory
+        );
     });
 
-    it("getAllCTC should call GET and map results", async () => {
-        const mockData: ComplementaryTaskCategoryDTO[] = [{
-            id: "1",
-            code: "C1",
-            name: "N1",
-            description: "Desc 1",
-            category: "Maintenance",
-            isActive: true
-        }];
+    it("getAllCTC should call GET with auth header and map results", async () => {
+
+        const mockData: ComplementaryTaskCategoryDTO[] = [
+            {
+                id: "1",
+                code: "C1",
+                name: "N1",
+                description: "Desc 1",
+                category: "Maintenance",
+                isActive: true
+            }
+        ];
+
         mockGet.mockResolvedValue({ data: mockData });
 
         await service.getAllCTC();
 
-        expect(mockGet).toHaveBeenCalledWith("/api/complementary-task-categories");
+        expect(mockGet).toHaveBeenCalledWith(
+            "/api/complementary-task-categories",
+            expectedHeaders
+        );
+
         expect(mapToDomainSpy).toHaveBeenCalled();
     });
 
-    it("createCTC should call POST with DTO", async () => {
+    it("createCTC should call POST with DTO and auth header", async () => {
+
         const dto: CreateComplementaryTaskCategoryDTO = {
             code: "NEW",
             name: "New Cat",
@@ -55,14 +89,21 @@ describe("ComplementaryTaskCategory Service", () => {
             category: "Safety and Security"
         };
 
-        mockPost.mockResolvedValue({ data: { id: "10", ...dto, isActive: true } });
+        mockPost.mockResolvedValue({
+            data: { id: "10", ...dto, isActive: true }
+        });
 
         await service.createCTC(dto);
 
-        expect(mockPost).toHaveBeenCalledWith("/api/complementary-task-categories", dto);
+        expect(mockPost).toHaveBeenCalledWith(
+            "/api/complementary-task-categories",
+            dto,
+            expectedHeaders
+        );
     });
 
-    it("getCTCByCode should call specific endpoint with code", async () => {
+    it("getCTCByCode should call endpoint with code and auth header", async () => {
+
         const mockData: ComplementaryTaskCategoryDTO = {
             id: "1",
             code: "TEST",
@@ -71,26 +112,37 @@ describe("ComplementaryTaskCategory Service", () => {
             category: "Cleaning and Housekeeping",
             isActive: true
         };
+
         mockGet.mockResolvedValue({ data: mockData });
 
         await service.getCTCByCode("TEST");
 
-        // Ajustado para coincidir com o serviço: /api/complementary-task-categories/${code}
-        expect(mockGet).toHaveBeenCalledWith("/api/complementary-task-categories/TEST");
+        expect(mockGet).toHaveBeenCalledWith(
+            "/api/complementary-task-categories/TEST",
+            expectedHeaders
+        );
     });
 
-    it("updateCTC should call PUT with code and DTO", async () => {
+    it("updateCTC should call PUT with DTO and auth header", async () => {
+
         const code = "CAT01";
+
         const dto: UpdateComplementaryTaskCategoryDTO = {
             name: "Updated Name",
             description: "Updated description",
             category: "Maintenance"
         };
 
-        mockPut.mockResolvedValue({ data: { id: "1", code, ...dto, isActive: true } });
+        mockPut.mockResolvedValue({
+            data: { id: "1", code, ...dto, isActive: true }
+        });
 
         await service.updateCTC(code, dto);
 
-        expect(mockPut).toHaveBeenCalledWith(`/api/complementary-task-categories/${code}`, dto);
+        expect(mockPut).toHaveBeenCalledWith(
+            `/api/complementary-task-categories/${code}`,
+            dto,
+            expectedHeaders
+        );
     });
 });
