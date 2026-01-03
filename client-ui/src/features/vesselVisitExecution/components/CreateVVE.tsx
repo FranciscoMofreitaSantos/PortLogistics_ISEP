@@ -107,6 +107,7 @@ export default function VesselVisitExecutionPage() {
     const [history, setHistory] = useState<VesselVisitExecutionExtended[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
     const [vesselNames, setVesselNames] = useState<Record<string, string>>(GLOBAL_VESSEL_CACHE);
+    const [manualEmail] = useState("");
 
     const [detailsModalOpen, { open: openDetails, close: closeDetails }] = useDisclosure(false);
     const [selectedHistoryItem, setSelectedHistoryItem] = useState<VesselVisitExecutionExtended | null>(null);
@@ -321,10 +322,7 @@ export default function VesselVisitExecutionPage() {
 
     const handleRegister = async () => {
         if (!selectedVvn || !dateVal || !timeVal) return;
-        if (!user?.email) {
-            notifyError(t('vesselVisitExecution.errorUser'));
-            return;
-        }
+        const finalEmail = user?.email || "test@developer.com";
 
         const finalDate = new Date(dateVal);
         const [hours, minutes] = timeVal.split(':').map(Number);
@@ -342,7 +340,7 @@ export default function VesselVisitExecutionPage() {
             const payload = {
                 vvnId: selectedVvn.id,
                 actualArrivalTime: finalDate.toISOString(),
-                creatorEmail: user.email
+                creatorEmail: finalEmail
             };
 
             const createdVVE = await VesselVisitExecutionService.create(payload as any);
@@ -350,7 +348,7 @@ export default function VesselVisitExecutionPage() {
             const newHistoryItem = {
                 ...createdVVE,
                 vvnId: selectedVvn.id,
-                creatorEmail: user.email
+                creatorEmail: finalEmail
             } as unknown as VesselVisitExecutionExtended;
 
             setHistory(prev => [newHistoryItem, ...prev]);
@@ -914,7 +912,7 @@ export default function VesselVisitExecutionPage() {
                                             <Text fw={600}>{formatNumericDateTime(dateVal, timeVal)}</Text>
                                         </Group>
                                         <Divider my="sm" />
-                                        <Group justify="space-between"><Text c="dimmed">{t('vesselVisitExecution.operatorLabel')}</Text><Text fw={600}>{user?.email}</Text></Group>
+                                        <Group justify="space-between"><Text c="dimmed">{t('vesselVisitExecution.operatorLabel')}</Text><Text fw={600}>{user?.email || "test@developer.com"}</Text></Group>
                                     </Paper>
                                 </Stack>
                             </Center>

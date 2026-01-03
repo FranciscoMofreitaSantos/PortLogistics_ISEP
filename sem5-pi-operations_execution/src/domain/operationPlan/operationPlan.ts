@@ -33,19 +33,29 @@ export class OperationPlan extends AggregateRoot<OperationPlanProps> {
 
     public static create(props: OperationPlanProps, id?: UniqueEntityID): Result<OperationPlan> {
 
-        if (!props.algorithm || props.algorithm.length === 0) {
-            return Result.fail<OperationPlan>("O algoritmo deve ser especificado.");
+        if (!props.algorithm || props.algorithm.trim().length === 0) {
+            return Result.fail<OperationPlan>("Algorithm is required");
         }
 
-        if (!props.operations) {
-            return Result.fail<OperationPlan>("O plano deve conter uma lista de operações (mesmo que vazia).");
+        if (props.totalDelay < 0) {
+            return Result.fail<OperationPlan>("Total delay cannot be negative");
         }
 
-        return Result.ok<OperationPlan>(new OperationPlan(props, id));
+        if (!props.author || props.author.trim().length === 0) {
+            return Result.fail<OperationPlan>("Author is required");
+        }
+
+        if (!props.operations || props.operations.length === 0) {
+            return Result.fail<OperationPlan>("Plan must have at least one operation");
+        }
+
+        if (isNaN(props.planDate.getTime())) {
+            return Result.fail<OperationPlan>("Invalid plan date");
+        }
+
+        const operationPlan = new OperationPlan(props, id);
+        return Result.ok<OperationPlan>(operationPlan);
     }
-    
-
-
 
     public updateForVvn(vvnId: string, newOpsForVvn: IOperationDTO[]): Result<void> {
         if (!vvnId || vvnId.trim().length === 0) {
