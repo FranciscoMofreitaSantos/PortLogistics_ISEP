@@ -4,18 +4,15 @@ import {
     ActionIcon,
     Badge,
     Button,
-    Divider,
     Group,
-    NumberInput,
     Paper,
     Select,
     Stack,
     Text,
-    TextInput,
     Title,
 } from "@mantine/core";
 import { DatePicker, TimeInput } from "@mantine/dates";
-import { IconCheck, IconClockHour4, IconPlus, IconTrash, IconRefresh } from "@tabler/icons-react";
+import { IconCheck, IconClockHour4, IconRefresh } from "@tabler/icons-react";
 import { notifyError, notifySuccess } from "../../../utils/notify";
 import type { IOperationDTO, IOperationPlanDTO } from "../services/operationPlanService";
 import { getLatestPlanWithVvnOps } from "../services/operationPlanService";
@@ -26,19 +23,11 @@ import { operationsApi } from "../../../services/api.tsx";
    Tipos
 =========================== */
 
-type ResourceUsedDto = {
-    resourceId: string;
-    hours?: number;
-    quantity?: number;
-};
-
 type ExecutedOperationDraft = {
     plannedOperationId: string;
     actualStart?: string; // ISO
     actualEnd?: string; // ISO
     status?: "started" | "completed" | "delayed";
-    note?: string;
-    resourcesUsed: ResourceUsedDto[];
 };
 
 type ExecutedOperationFromBackend = {
@@ -46,10 +35,6 @@ type ExecutedOperationFromBackend = {
     actualStart?: string;
     actualEnd?: string;
     status?: "started" | "completed" | "delayed";
-    note?: string;
-    resourcesUsed?: ResourceUsedDto[];
-    updatedAt?: string;
-    updatedBy?: string;
 };
 
 type VVEBackend = {
@@ -95,7 +80,6 @@ function plannedDateFromPlan(planDateISO: string | undefined, hourNumber: number
 }
 
 // Mantine pode passar Date ou string dependendo da versão/typing.
-// Aceitamos unknown e normalizamos.
 function toDateValue(v: unknown): Date | null {
     if (!v) return null;
     if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
@@ -107,11 +91,7 @@ function toDateValue(v: unknown): Date | null {
 }
 
 function isSameDay(a: Date, b: Date) {
-    return (
-        a.getFullYear() === b.getFullYear() &&
-        a.getMonth() === b.getMonth() &&
-        a.getDate() === b.getDate()
-    );
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
 // pinta o dia selecionado
@@ -157,10 +137,8 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
     const [drafts, setDrafts] = useState<Record<string, ExecutedOperationDraft>>({});
     const [saving, setSaving] = useState(false);
 
-    // chave visual (accordion) – estável
     const opKey = (op: IOperationDTO, idx: number) => `${vvnId}-${idx}`;
 
-    // ID que vai para o backend (tem de bater com o plannedOperationId que o backend guarda!)
     const plannedOperationIdOf = (op: IOperationDTO, idx: number) => {
         const anyOp = op as any;
         return String(anyOp.plannedOperationId ?? anyOp.id ?? anyOp._id ?? `${vvnId}-${idx}`);
@@ -173,7 +151,6 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
     const loadEverything = async () => {
         setLoading(true);
         try {
-            // 1) carregar plan
             const p = await getLatestPlanWithVvnOps(vvnId, 120);
 
             const ops: IOperationDTO[] = (p?.operations ?? [])
@@ -183,19 +160,16 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
             setPlan(p ?? null);
             setPlannedOps(ops);
 
-            // 2) inicializar drafts por operação planeada
             const baseDrafts: Record<string, ExecutedOperationDraft> = {};
             ops.forEach((op, idx) => {
                 const key = opKey(op, idx);
                 baseDrafts[key] = {
                     plannedOperationId: plannedOperationIdOf(op, idx),
-                    resourcesUsed: [],
                 };
             });
 
             setDrafts(baseDrafts);
 
-            // 3) carregar executedOperations já guardadas e fazer merge
             setLoadingExisting(true);
             try {
                 const vve = await getVVEByIdRaw(vveId);
@@ -218,8 +192,6 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
                             actualStart: hit.actualStart ?? next[k].actualStart,
                             actualEnd: hit.actualEnd ?? next[k].actualEnd,
                             status: hit.status ?? next[k].status,
-                            note: hit.note ?? next[k].note,
-                            resourcesUsed: hit.resourcesUsed ?? next[k].resourcesUsed ?? [],
                         };
                     });
                     return next;
@@ -256,29 +228,6 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
             [key]: { ...prev[key], ...patch },
         }));
 
-    const addResource = (key: string) =>
-        setDrafts((prev) => ({
-            ...prev,
-            [key]: {
-                ...prev[key],
-                resourcesUsed: [...(prev[key].resourcesUsed ?? []), { resourceId: "" }],
-            },
-        }));
-
-    const setResource = (key: string, idx: number, patch: Partial<ResourceUsedDto>) =>
-        setDrafts((prev) => {
-            const list = [...(prev[key].resourcesUsed ?? [])];
-            list[idx] = { ...list[idx], ...patch };
-            return { ...prev, [key]: { ...prev[key], resourcesUsed: list } };
-        });
-
-    const removeResource = (key: string, idx: number) =>
-        setDrafts((prev) => {
-            const list = [...(prev[key].resourcesUsed ?? [])];
-            list.splice(idx, 1);
-            return { ...prev, [key]: { ...prev[key], resourcesUsed: list } };
-        });
-
     const copyPlannedTimes = (key: string, op: IOperationDTO) => {
         const ps = plannedDateFromPlan(plan?.planDate, (op as any).startTime ?? 0);
         const pe = plannedDateFromPlan(plan?.planDate, (op as any).endTime ?? 0);
@@ -300,17 +249,8 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
                 actualStart: d.actualStart,
                 actualEnd: d.actualEnd,
                 status: d.status,
-                note: d.note,
-                resourcesUsed: (d.resourcesUsed ?? []).filter((r) => r.resourceId?.trim()?.length > 0),
             }))
-            .filter(
-                (d) =>
-                    d.actualStart ||
-                    d.actualEnd ||
-                    d.status ||
-                    (d.resourcesUsed?.length ?? 0) > 0 ||
-                    (d.note?.trim()?.length ?? 0) > 0
-            );
+            .filter((d) => d.actualStart || d.actualEnd || d.status);
 
         if (operations.length === 0) {
             notifyError("Nada para guardar.");
@@ -321,10 +261,9 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
         try {
             await updateExecutedOperationsVVE(vveId, { operatorId, operations });
 
-            // refresh para confirmar e preencher o UI com o que ficou mesmo na BD
             await loadEverything();
 
-            notifySuccess("Execução atualizada (confirmado por refresh).");
+            notifySuccess("Execução atualizada.");
         } catch (e: any) {
             notifyError(e?.response?.data?.message || e?.message || "Erro ao guardar.");
         } finally {
@@ -335,15 +274,6 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
     /* ===========================
        UI helpers
     =========================== */
-
-    const plannedLabel = (op: IOperationDTO) => {
-        const ps = plannedDateFromPlan(plan?.planDate, (op as any).startTime ?? 0);
-        const pe = plannedDateFromPlan(plan?.planDate, (op as any).endTime ?? 0);
-        return `${ps.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })}–${pe.toLocaleTimeString(
-            "pt-PT",
-            { hour: "2-digit", minute: "2-digit" }
-        )}`;
-    };
 
     const statusBadge = (status?: ExecutedOperationDraft["status"]) => {
         if (!status) return <Badge variant="light" color="gray">SEM ESTADO</Badge>;
@@ -390,7 +320,7 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
                         const key = opKey(op, idx);
                         const d =
                             drafts[key] ??
-                            ({ plannedOperationId: plannedOperationIdOf(op, idx), resourcesUsed: [] } as ExecutedOperationDraft);
+                            ({ plannedOperationId: plannedOperationIdOf(op, idx) } as ExecutedOperationDraft);
 
                         const plannedStart = plannedDateFromPlan(plan?.planDate, (op as any).startTime ?? 0);
                         const plannedEnd = plannedDateFromPlan(plan?.planDate, (op as any).endTime ?? 0);
@@ -405,9 +335,7 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
                                 <Accordion.Control>
                                     <Group justify="space-between" w="100%">
                                         <Text fw={700}>Operação #{idx + 1}</Text>
-                                        <Group gap="xs">
-                                            {statusBadge(d.status)}
-                                        </Group>
+                                        <Group gap="xs">{statusBadge(d.status)}</Group>
                                     </Group>
                                 </Accordion.Control>
 
@@ -449,10 +377,7 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
                                                     getDayProps={selectedDayStyle(actualStartDate)}
                                                     onChange={(v) => {
                                                         const picked = toDateValue(v);
-                                                        const dt = combineLocal(
-                                                            picked,
-                                                            actualStartTime || hhmm(plannedStart)
-                                                        );
+                                                        const dt = combineLocal(picked, actualStartTime || hhmm(plannedStart));
                                                         setDraft(key, { actualStart: dt ? dt.toISOString() : undefined });
                                                     }}
                                                 />
@@ -478,10 +403,7 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
                                                     getDayProps={selectedDayStyle(actualEndDate)}
                                                     onChange={(v) => {
                                                         const picked = toDateValue(v);
-                                                        const dt = combineLocal(
-                                                            picked,
-                                                            actualEndTime || hhmm(plannedEnd)
-                                                        );
+                                                        const dt = combineLocal(picked, actualEndTime || hhmm(plannedEnd));
                                                         setDraft(key, { actualEnd: dt ? dt.toISOString() : undefined });
                                                     }}
                                                 />
@@ -509,73 +431,6 @@ export function ExecutedOperationsEditor(props: { vveId: string; vvnId: string; 
                                                 { value: "delayed", label: "delayed" },
                                             ]}
                                         />
-
-                                        <TextInput
-                                            label="Nota"
-                                            placeholder="Opcional…"
-                                            value={d.note ?? ""}
-                                            onChange={(e) => setDraft(key, { note: e.currentTarget.value })}
-                                        />
-
-                                        <Divider label="Recursos usados" labelPosition="center" />
-
-                                        <Stack gap="xs">
-                                            {(d.resourcesUsed ?? []).map((r, rIdx) => (
-                                                <Paper key={rIdx} withBorder p="sm" radius="md">
-                                                    <Group align="end">
-                                                        <TextInput
-                                                            label="Resource ID"
-                                                            placeholder="ex: crane-01"
-                                                            value={r.resourceId}
-                                                            onChange={(e) =>
-                                                                setResource(key, rIdx, {
-                                                                    resourceId: e.currentTarget.value,
-                                                                })
-                                                            }
-                                                            style={{ flex: 2 }}
-                                                        />
-                                                        <NumberInput
-                                                            label="Horas"
-                                                            min={0}
-                                                            value={r.hours ?? undefined}
-                                                            onChange={(v) =>
-                                                                setResource(key, rIdx, {
-                                                                    hours: typeof v === "number" ? v : undefined,
-                                                                })
-                                                            }
-                                                            style={{ flex: 1 }}
-                                                        />
-                                                        <NumberInput
-                                                            label="Quantidade"
-                                                            min={0}
-                                                            value={r.quantity ?? undefined}
-                                                            onChange={(v) =>
-                                                                setResource(key, rIdx, {
-                                                                    quantity: typeof v === "number" ? v : undefined,
-                                                                })
-                                                            }
-                                                            style={{ flex: 1 }}
-                                                        />
-                                                        <ActionIcon
-                                                            color="red"
-                                                            variant="light"
-                                                            onClick={() => removeResource(key, rIdx)}
-                                                        >
-                                                            <IconTrash size={16} />
-                                                        </ActionIcon>
-                                                    </Group>
-                                                </Paper>
-                                            ))}
-
-                                            <Button
-                                                size="xs"
-                                                variant="light"
-                                                leftSection={<IconPlus size={16} />}
-                                                onClick={() => addResource(key)}
-                                            >
-                                                Adicionar recurso
-                                            </Button>
-                                        </Stack>
 
                                         {loadingExisting ? (
                                             <Text size="xs" c="dimmed">
