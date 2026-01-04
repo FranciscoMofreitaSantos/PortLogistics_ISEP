@@ -1,0 +1,89 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+title Sequence Diagram (Full) – Update VVE Berth Time and Dock (US 4.1.8)
+
+actor "Logistics Operator" as Operator
+boundary "SPA" as SPA
+boundary "VVE Routes" as Routes
+control "VVE Controller" as Ctrl
+control "VVE Service" as Svc
+entity "VVE Repo" as Repo
+entity "VVE Mapper" as Map
+database "MongoDB (Mongoose)" as DB
+
+== Get VVE (optional for UI prefill) ==
+Operator -> SPA : Open VVE details screen
+SPA -> Routes : GET /vve/{vveId}
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : getByIdAsync(vveId)
+
+Svc -> Repo : findById(vveId)
+Repo -> DB : findOne({_id:vveId})
+DB --> Repo : doc/null
+Repo --> Svc : VVE?/null
+
+alt VVE not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+else found
+  Svc -> Map : toDTO(VVE)
+  Svc --> Ctrl : Result.ok(dto)
+  Ctrl --> SPA : 200 OK\nVVEDTO
+end
+
+== Update Berth Time and Dock ==
+Operator -> SPA : Fill berthTime + dockId + Submit
+SPA -> Routes : PUT /vve/{vveId}/berthing\n(Update Berthing DTO)
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : updateBerthingAsync(vveId, dto)
+
+'--- Load VVE ---
+Svc -> Repo : findById(vveId)
+Repo -> DB : findOne({_id:vveId})
+DB --> Repo : doc/null
+Repo --> Svc : VVE?/null
+
+alt VVE not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+
+else found
+  '--- Validate state + input ---
+  Svc -> Svc : validate(dto.berthTime, dto.dockId)
+
+  alt VVE status != "In Progress"
+    Svc --> Ctrl : BusinessRuleValidationError(InvalidState)
+    Ctrl --> SPA : 400 Bad Request
+  else status is "In Progress"
+    '--- Compare planned dock vs actual dock ---
+    Svc -> Svc : plannedDockId = vve.plannedDockId (from linked Operation Plan / VVN)
+    Svc -> Svc : actualDockId = dto.dockId
+
+    alt actualDockId != plannedDockId
+      Svc -> Svc : vve.addAutoNote("Actual dock differs from planned dock")
+    else matches planned dock
+      Svc -> Svc : (no note added)
+    end
+
+    '--- Apply update + audit metadata ---
+    Svc -> Svc : vve.setBerthTime(dto.berthTime)
+    Svc -> Svc : vve.setActualDock(dto.dockId)
+    Svc -> Svc : vve.appendAudit(operatorId, timestamp, "UPDATE_BERTHING")
+
+    '--- Persist ---
+    Svc -> Repo : save(vve)
+    Repo -> Map : toPersistence(vve)
+    Repo -> DB : updateOne({_id:vveId}, persistence)
+    DB --> Repo : updatedDoc
+    Repo -> Map : toDomain(updatedDoc)
+    Repo --> Svc : VVE
+
+    '--- Return DTO ---
+    Svc -> Map : toDTO(VVE)
+    Svc --> Ctrl : Result.ok(dto)
+    Ctrl --> SPA : 200 OK\nVVEDTO
+  end
+end
+
+@enduml

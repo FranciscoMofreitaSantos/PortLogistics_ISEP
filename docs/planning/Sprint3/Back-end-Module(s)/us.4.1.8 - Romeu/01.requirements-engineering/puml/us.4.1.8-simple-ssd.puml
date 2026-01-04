@@ -1,0 +1,38 @@
+@startuml
+skinparam actorStyle awesome
+autonumber
+
+actor "LogisticsOperator" as User
+participant "System" as System
+
+title SSD: Update VVE Berth Time and Dock (with Authorization)
+
+== Get Current VVE ==
+
+User -> System : GET /vve/{vveId}
+alt Authorized
+    System --> User : 200 OK (VVE details) / 404 Not Found
+else Unauthorized
+    System --> User : 401 Unauthorized / 403 Forbidden
+end
+
+== Update Berth Time and Dock ==
+
+User -> System : PUT /vve/{vveId}/berthing (berthTime, dockId)
+alt Authorized
+    alt Valid Request (VVE In Progress + Valid Data)
+        System --> User : 200 OK (VVE Updated)
+    else Planned Dock Differs from Actual Dock
+        System --> User : 200 OK (VVE Updated + Note/Warning)
+    else Invalid Data (missing/invalid berthTime or dockId)
+        System --> User : 400 Bad Request
+    else VVE Not In Progress
+        System --> User : 400 Bad Request
+    else VVE Not Found
+        System --> User : 404 Not Found
+    end
+else Unauthorized
+    System --> User : 401 Unauthorized / 403 Forbidden
+end
+
+@enduml
