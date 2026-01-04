@@ -1133,8 +1133,14 @@
     "status": "ESTADO",
     "readyToSave": "PRONTO A GUARDAR",
     "saved": "PLANO GUARDADO",
-    "savedSuccessfully": "Plano Guardado!"
-    
+    "savedSuccessfully": "Plano Guardado!",
+    "missingPlansTitle": "Planos em Falta",
+    "missingPlansDescription": "Foram encontradas as seguintes datas sem um plano de escalonamento guardado. Selecione uma data para começar o planeamento:",
+    "missingPlansButton": "Verificar Planos em Falta",
+    "noMissingPlans": "Não foram encontrados planos em falta para os próximos dias.",
+    "missingPlansError": "Ocorreu um erro ao verificar as datas em falta.",
+    "statusLabel": "Estado do Plano",
+    "planSaved": "Guardado no Sistema"
   },
 
   "vesselVisitExecution": {

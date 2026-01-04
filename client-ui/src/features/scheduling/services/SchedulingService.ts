@@ -1,11 +1,16 @@
 import type {
     DailyScheduleResultDto,
-    MultiCraneComparisonResultDto, OperationPlanFilterDTO,
-    PrologFullResultDto, SaveScheduleDto,
+    MultiCraneComparisonResultDto,
+    OperationPlanFilterDTO,
+    PrologFullResultDto,
+    SaveScheduleDto,
     SchedulingOperationDto,
-    SmartScheduleResultDto, UpdateOperationPlanBatchResultDto, UpdateOperationPlanForVvnsBatchDto,
+    SmartScheduleResultDto,
+    UpdateOperationPlanBatchResultDto,
+    UpdateOperationPlanForVvnsBatchDto,
 } from '../dtos/scheduling.dtos';
 import type { UpdateOperationPlanForVvnDto, UpdateOperationPlanResultDto } from "../dtos/scheduling.dtos";
+import vvnService from "../../vesselVisitNotification/service/vvnService";
 
 export type ScheduleResponse = {
     algorithm: AlgorithmType;
@@ -30,7 +35,6 @@ export interface GeneticParams {
     crossoverRate?: number;
 }
 
-
 export interface SmartParams {
     maxComputationSeconds?: number;
 }
@@ -42,14 +46,12 @@ export type UpdateOperationPlanBatchDto = {
     planDomainId: string;
     reasonForChange: string;
     author: string;
-    updates: Array<{ vvnId: string; operations: any[] }>;
+    updates: Array<{ vvnId: string; operations: SchedulingOperationDto[] }>;
 };
-
-
 
 export const SchedulingService = {
 
-    async updateOperationPlanBatch(payload: UpdateOperationPlanBatchDto, token?: string) {
+    async updateOperationPlanBatch(payload: UpdateOperationPlanBatchDto, token?: string): Promise<UpdateOperationPlanResultDto> {
         const url = `${BASE_OPERATIONS_URL}/api/operation-plans/batch`;
 
         const response = await fetch(url, {
@@ -84,7 +86,6 @@ export const SchedulingService = {
         const body = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-            // backend: { message: "..." }
             throw new Error(body.message || body.error || "Erro ao atualizar Operation Plan.");
         }
 
@@ -114,7 +115,6 @@ export const SchedulingService = {
 
         return body as UpdateOperationPlanBatchResultDto;
     },
-
 
     async saveSchedule(data: SaveScheduleDto): Promise<void> {
         const url = `${BASE_URL}/api/schedule/save`;
@@ -156,6 +156,31 @@ export const SchedulingService = {
         return response.json();
     },
 
+    async getMissingPlansDates(): Promise<string[]> {
+        const acceptedVvns = await vvnService.getAcceptedAll({});
+
+        const now = new Date();
+        const startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString();
+        const endDate = new Date(now.getFullYear(), now.getMonth() + 4, 1).toISOString();
+        const plans = await this.getHistoryPlans({ startDate, endDate });
+
+        const plannedVvnIds = new Set<string>();
+        plans.forEach(plan => {
+            plan.operations?.forEach(op => {
+                if (op.vvnId) plannedVvnIds.add(op.vvnId);
+            });
+        });
+
+        const missingDates = new Set<string>();
+        acceptedVvns.forEach(vvn => {
+            if (!plannedVvnIds.has(vvn.id)) {
+                const datePart = vvn.estimatedTimeArrival.split('T')[0];
+                missingDates.add(datePart);
+            }
+        });
+
+        return Array.from(missingDates).sort();
+    },
 
     async getDailySchedule(
         day: string,
@@ -167,8 +192,6 @@ export const SchedulingService = {
 
         let endpointUrl = `api/schedule/daily/${algorithm}`;
         let queryParams = `?day=${day}`;
-
-
 
         endpointUrl = endpointUrl.replace('-', '_');
 
@@ -283,7 +306,6 @@ export const SchedulingService = {
 
         const backendPlans: SaveScheduleDto[] = await response.json();
 
-        // Normalize backend DTO to frontend types
         return backendPlans.map(plan => ({
             ...plan,
             planDate: new Date(plan.planDate).toISOString(),

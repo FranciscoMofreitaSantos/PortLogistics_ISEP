@@ -1134,7 +1134,14 @@
     "status2": "Status",
     "readyToSave": "READY TO SAVE",
     "saved": "PLAN SAVED",
-    "savedSuccessfully": "Plan Saved!"
+    "savedSuccessfully": "Plan Saved!",
+    "missingPlansTitle": "Missing Plans",
+    "missingPlansDescription": "The following dates were found without a saved scheduling plan. Select a date to start planning:",
+    "missingPlansButton": "Check Missing Plans",
+    "noMissingPlans": "No missing plans found for the upcoming days.",
+    "missingPlansError": "An error occurred while checking for missing dates.",
+    "statusLabel": "Plan Status",
+    "planSaved": "Saved in System"
   },
 
   "vesselVisitExecution": {
