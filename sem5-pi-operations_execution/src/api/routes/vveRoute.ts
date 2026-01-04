@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Container } from "typedi";
 import { celebrate, Joi } from "celebrate";
 import config from "../../config";
+
 import CreateVVEController from "../../controllers/vve/createVVEController";
 import GetAllVVEController from "../../controllers/vve/getAllVVEController";
 import GetVVEByIdController from "../../controllers/vve/getVVEByIdController";
@@ -13,22 +14,222 @@ import UpdateVVEExecutedOperationsController from "../../controllers/vve/updateV
 
 const route = Router();
 
+/**
+ * @openapi
+ * tags:
+ *   - name: VesselVisitExecution
+ *     description: Real-time tracking of vessel visits (Arrivals, Berthing, Operations)
+ *
+ * components:
+ *   schemas:
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           example: Invalid input
+ *
+ *     ResourceUsed:
+ *       type: object
+ *       properties:
+ *         resourceId:
+ *           type: string
+ *           example: RES-001
+ *         quantity:
+ *           type: number
+ *           example: 2
+ *         hours:
+ *           type: number
+ *           example: 4.5
+ *
+ *     ExecutedOperation:
+ *       type: object
+ *       properties:
+ *         plannedOperationId:
+ *           type: string
+ *           example: OP-100
+ *         actualStart:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-01-01T10:00:00Z"
+ *         actualEnd:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-01-01T12:00:00Z"
+ *         status:
+ *           type: string
+ *           enum: [started, completed, delayed]
+ *           example: completed
+ *         note:
+ *           type: string
+ *           example: Operation delayed due to wind.
+ *         resourcesUsed:
+ *           type: array
+ *           items:
+ *             $ref: "#/components/schemas/ResourceUsed"
+ *
+ *     VesselVisitExecution:
+ *       type: object
+ *       description: Represents the actual execution of a vessel visit.
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: Unique internal identifier
+ *           example: 123e4567-e89b-12d3-a456-426614174000
+ *         code:
+ *           type: string
+ *           description: Business ID (VVE + Year + Seq)
+ *           example: VVE2025000001
+ *         vvnId:
+ *           type: string
+ *           description: Reference to the Notification
+ *           example: VVN-2025-001
+ *         vesselImo:
+ *           type: string
+ *           description: Vessel Identifier
+ *           example: IMO9999999
+ *         status:
+ *           type: string
+ *           description: Current state (In Progress, Completed, etc.)
+ *           example: In Progress
+ *         actualArrivalTime:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-01-01T08:00:00Z"
+ *         actualBerthTime:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         actualDockId:
+ *           type: string
+ *           nullable: true
+ *         executedOperations:
+ *           type: array
+ *           items:
+ *             $ref: "#/components/schemas/ExecutedOperation"
+ *
+ *     CreateVVERequest:
+ *       type: object
+ *       required: [vvnId, actualArrivalTime]
+ *       properties:
+ *         vvnId:
+ *           type: string
+ *           example: VVN-2025-001
+ *         actualArrivalTime:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-01-01T08:00:00Z"
+ *         creatorEmail:
+ *           type: string
+ *           format: email
+ *           example: operator@port.com
+ *
+ *     UpdateBerthRequest:
+ *       type: object
+ *       required: [actualBerthTime, actualDockId, updaterEmail]
+ *       properties:
+ *         actualBerthTime:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-01-01T09:30:00Z"
+ *         actualDockId:
+ *           type: string
+ *           example: DOCK-A1
+ *         updaterEmail:
+ *           type: string
+ *           format: email
+ *           example: dockmaster@port.com
+ *
+ *     UpdateOperationsRequest:
+ *       type: object
+ *       required: [operatorId, operations]
+ *       properties:
+ *         operatorId:
+ *           type: string
+ *           example: user-123
+ *         operations:
+ *           type: array
+ *           items:
+ *             $ref: "#/components/schemas/ExecutedOperation"
+ */
+
 export default (app: Router) => {
     app.use("/vve", route);
 
-    const createCtrl = Container.get(config.controllers.vesselVisitExecution.create.name) as CreateVVEController;
-    const getAllCtrl = Container.get(config.controllers.vesselVisitExecution.getAll.name) as GetAllVVEController;
-    const getByIdCtrl = Container.get(config.controllers.vesselVisitExecution.getById.name) as GetVVEByIdController;
-    const getByCodeCtrl = Container.get(config.controllers.vesselVisitExecution.getByCode.name) as GetVVEByCodeController;
-    const getByImoCtrl = Container.get(config.controllers.vesselVisitExecution.getByImo.name) as GetVVEByImoController;
-    const getInRangeCtrl = Container.get(config.controllers.vesselVisitExecution.getInRange.name) as GetVVEInRangeController;
+    const createCtrl = Container.get(
+        config.controllers.vesselVisitExecution.create.name
+    ) as CreateVVEController;
 
-    const updateBerthDockCtrl =
-        Container.get(config.controllers.vesselVisitExecution.updateBerthDock.name) as UpdateVVEActualBerthAndDockController;
+    const getAllCtrl = Container.get(
+        config.controllers.vesselVisitExecution.getAll.name
+    ) as GetAllVVEController;
 
-    const updateExecOpsCtrl =
-        Container.get(config.controllers.vesselVisitExecution.updateExecutedOperations.name) as UpdateVVEExecutedOperationsController;
+    const getByIdCtrl = Container.get(
+        config.controllers.vesselVisitExecution.getById.name
+    ) as GetVVEByIdController;
 
+    const getByCodeCtrl = Container.get(
+        config.controllers.vesselVisitExecution.getByCode.name
+    ) as GetVVEByCodeController;
+
+    const getByImoCtrl = Container.get(
+        config.controllers.vesselVisitExecution.getByImo.name
+    ) as GetVVEByImoController;
+
+    const getInRangeCtrl = Container.get(
+        config.controllers.vesselVisitExecution.getInRange.name
+    ) as GetVVEInRangeController;
+
+    const updateBerthDockCtrl = Container.get(
+        config.controllers.vesselVisitExecution.updateBerthDock.name
+    ) as UpdateVVEActualBerthAndDockController;
+
+    const updateExecOpsCtrl = Container.get(
+        config.controllers.vesselVisitExecution.updateExecutedOperations.name
+    ) as UpdateVVEExecutedOperationsController;
+
+    /**
+     * @openapi
+     * /api/vve:
+     *   post:
+     *     tags: [VesselVisitExecution]
+     *     summary: Register a vessel arrival (Create VVE)
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: "#/components/schemas/CreateVVERequest"
+     *     responses:
+     *       201:
+     *         description: VVE Created
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: "#/components/schemas/VesselVisitExecution"
+     *       400:
+     *         description: Validation error
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: "#/components/schemas/ErrorResponse"
+     *       500:
+     *         description: Internal server error
+     *   get:
+     *     tags: [VesselVisitExecution]
+     *     summary: Get all vessel visit executions
+     *     responses:
+     *       200:
+     *         description: List of VVE
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 $ref: "#/components/schemas/VesselVisitExecution"
+     *       500:
+     *         description: Internal server error
+     */
     route.post(
         "/",
         celebrate({
@@ -41,24 +242,41 @@ export default (app: Router) => {
         (req, res) => createCtrl.execute(req, res)
     );
 
+    route.get("/", (req, res) => getAllCtrl.execute(req, res));
+
     /**
      * @openapi
-     * /api/vve:
+     * /api/vve/range:
      *   get:
-     *     summary: Get all vessel visit executions
+     *     tags: [VesselVisitExecution]
+     *     summary: Get VVEs within a time range
+     *     parameters:
+     *       - in: query
+     *         name: timeStart
+     *         required: true
+     *         schema:
+     *           type: number
+     *         description: Start timestamp (milliseconds)
+     *         example: 1704067200000
+     *       - in: query
+     *         name: timeEnd
+     *         required: true
+     *         schema:
+     *           type: number
+     *         description: End timestamp (milliseconds)
+     *         example: 1704153600000
      *     responses:
      *       200:
-     *         description: List of VVE
+     *         description: Filtered list of VVE
      *         content:
      *           application/json:
      *             schema:
      *               type: array
      *               items:
-     *                 type: object
+     *                 $ref: "#/components/schemas/VesselVisitExecution"
+     *       400:
+     *         description: Validation error
      */
-    
-    route.get("/", (req, res) => getAllCtrl.execute(req, res));
-
     route.get(
         "/range",
         celebrate({
@@ -70,9 +288,109 @@ export default (app: Router) => {
         (req, res) => getInRangeCtrl.execute(req, res)
     );
 
+    /**
+     * @openapi
+     * /api/vve/code/{code}:
+     *   get:
+     *     tags: [VesselVisitExecution]
+     *     summary: Get VVE by Code
+     *     parameters:
+     *       - in: path
+     *         name: code
+     *         required: true
+     *         schema:
+     *           type: string
+     *         example: VVE2025000001
+     *     responses:
+     *       200:
+     *         description: VVE details
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: "#/components/schemas/VesselVisitExecution"
+     *       404:
+     *         description: Not Found
+     */
     route.get("/code/:code", (req, res) => getByCodeCtrl.execute(req, res));
+
+    /**
+     * @openapi
+     * /api/vve/imo/{imo}:
+     *   get:
+     *     tags: [VesselVisitExecution]
+     *     summary: Get VVEs by Vessel IMO
+     *     parameters:
+     *       - in: path
+     *         name: imo
+     *         required: true
+     *         schema:
+     *           type: string
+     *         example: IMO9999999
+     *     responses:
+     *       200:
+     *         description: List of VVEs for this vessel
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 $ref: "#/components/schemas/VesselVisitExecution"
+     */
     route.get("/imo/:imo", (req, res) => getByImoCtrl.execute(req, res));
 
+    /**
+     * @openapi
+     * /api/vve/{id}:
+     *   get:
+     *     tags: [VesselVisitExecution]
+     *     summary: Get VVE by ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: VVE details
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: "#/components/schemas/VesselVisitExecution"
+     *       404:
+     *         description: Not Found
+     */
+    route.get("/:id", (req, res) => getByIdCtrl.execute(req, res));
+
+    /**
+     * @openapi
+     * /api/vve/{id}/berth:
+     *   put:
+     *     tags: [VesselVisitExecution]
+     *     summary: Update Actual Berth Time and Dock
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: VVE Internal ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: "#/components/schemas/UpdateBerthRequest"
+     *     responses:
+     *       200:
+     *         description: Updated VVE
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: "#/components/schemas/VesselVisitExecution"
+     *       400:
+     *         description: Validation error
+     */
     route.put(
         "/:id/berth",
         celebrate({
@@ -85,6 +403,35 @@ export default (app: Router) => {
         (req, res, next) => updateBerthDockCtrl.execute(req, res, next)
     );
 
+    /**
+     * @openapi
+     * /api/vve/{id}/executed-operations:
+     *   put:
+     *     tags: [VesselVisitExecution]
+     *     summary: Update Executed Operations for a VVE
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: VVE Internal ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: "#/components/schemas/UpdateOperationsRequest"
+     *     responses:
+     *       200:
+     *         description: Updated VVE
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: "#/components/schemas/VesselVisitExecution"
+     *       400:
+     *         description: Validation error
+     */
     route.put(
         "/:id/executed-operations",
         celebrate({
@@ -115,6 +462,4 @@ export default (app: Router) => {
         }),
         (req, res, next) => updateExecOpsCtrl.execute(req, res, next)
     );
-
-    route.get("/:id", (req, res) => getByIdCtrl.execute(req, res));
 };
