@@ -1,0 +1,38 @@
+@startuml
+skinparam actorStyle awesome
+autonumber
+
+actor "LogisticsOperator" as User
+participant "System" as System
+
+title SSD: Update VVE with Executed Operations (with Authorization)
+
+== Get Current VVE and Planned Operations ==
+
+User -> System : GET /vve/{vveId}
+alt Authorized
+    System --> User : 200 OK (VVE details + planned operations) / 404 Not Found
+else Unauthorized
+    System --> User : 401 Unauthorized / 403 Forbidden
+end
+
+== Update Executed Operations ==
+
+User -> System : PUT /vve/{vveId}/executed-operations (operations[])
+alt Authorized
+    alt Valid Request (VVE In Progress + Valid Data)
+        System --> User : 200 OK (Execution Updated)
+    else Operation Not Found / Not Linked to Plan
+        System --> User : 404 Not Found
+    else Invalid Data (missing/invalid times/resources)
+        System --> User : 400 Bad Request
+    else VVE Not In Progress
+        System --> User : 400 Bad Request
+    else VVE Not Found
+        System --> User : 404 Not Found
+    end
+else Unauthorized
+    System --> User : 401 Unauthorized / 403 Forbidden
+end
+
+@enduml
