@@ -21,12 +21,12 @@ import {
     Space,
     Container,
     Center,
-    Select,
     Table,
     NumberInput,
     Collapse,
     Alert,
     ThemeIcon,
+    Modal,
 } from '@mantine/core';
 
 import {
@@ -37,7 +37,6 @@ import {
     IconAlertTriangle,
     IconClockHour3,
     IconShip,
-    IconSettings,
     IconListDetails,
     IconDna,
     IconAdjustmentsHorizontal,
@@ -45,8 +44,8 @@ import {
     IconInfoCircle,
     IconDeviceFloppy,
     IconClipboardCheck,
-    IconRocket,
-    IconCheck
+    IconCheck,
+    IconAlertCircle,
 } from '@tabler/icons-react';
 
 import {notifyLoading, notifySuccess, notifyError} from "../../../utils/notify";
@@ -148,7 +147,7 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: TFunc, l
                 </Grid.Col>
                 <Grid.Col span={{base: 6, md: 3}}>
                     <Text size="xs" c="dimmed" tt="uppercase" fw={700}>{t('planningScheduling.optimizedDuration')}</Text>
-                    <Text fw={700} c="indigo">{op.optimizedOperationDuration} min</Text>
+                    <Text fw={700} c="indigo">{op.optimizedOperationDuration}</Text>
                 </Grid.Col>
                 <Grid.Col span={{base: 6, md: 3}}>
                     <Text size="xs" c="dimmed" tt="uppercase" fw={700}>{t('planningScheduling.craneUsed')}</Text>
@@ -161,7 +160,7 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: TFunc, l
                 </Grid.Col>
                 <Grid.Col span={{base: 6, md: 3}}>
                     <Text size="xs" c="dimmed" tt="uppercase" fw={700}>{t('planningScheduling.work')}</Text>
-                    <Text>{op.loadingDuration}m / {op.unloadingDuration}m</Text>
+                    <Text>{op.loadingDuration}/{op.unloadingDuration}</Text>
                 </Grid.Col>
             </Grid>
 
@@ -176,7 +175,7 @@ const OperationRow = ({op, t, locale}: { op: SchedulingOperationDto, t: TFunc, l
                         </Text>
                     </Flex>
                     <Badge color={isDelayed ? 'red' : 'green'} size="lg" variant="filled">
-                        {t('planningScheduling.delay')}: {op.departureDelay} min
+                        {t('planningScheduling.delay')}: {op.departureDelay}
                     </Badge>
                 </Group>
             </Card>
@@ -243,7 +242,11 @@ export default function SchedulePage() {
 
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<AlgorithmType>('smart');
-    const [multiCraneAlgorithm, setMultiCraneAlgorithm] = useState<string>('greedy');
+    const [multiCraneAlgorithm] = useState<string>('greedy');
+
+    const [missingDates, setMissingDates] = useState<string[]>([]);
+    const [isCheckingMissing, setIsCheckingMissing] = useState(false);
+    const [openedMissingModal, setOpenedMissingModal] = useState(false);
 
     const [geneticParams, setGeneticParams] = useState<GeneticParams>({
         populationSize: undefined,
@@ -281,6 +284,23 @@ export default function SchedulePage() {
     );
 
     const scheduleToDisplay = allResults[lastComputedAlgorithm as AlgorithmType];
+
+    const handleCheckMissingPlans = async () => {
+        setIsCheckingMissing(true);
+        try {
+            const dates = await SchedulingService.getMissingPlansDates();
+            setMissingDates(dates);
+            if (dates.length > 0) {
+                setOpenedMissingModal(true);
+            } else {
+                notifySuccess(t('planningScheduling.noMissingPlans'));
+            }
+        } catch (e) {
+            notifyError(t('planningScheduling.missingPlansError'));
+        } finally {
+            setIsCheckingMissing(false);
+        }
+    };
 
     const fetchSchedule = async () => {
         if (!selectedDate) {
@@ -348,19 +368,19 @@ export default function SchedulePage() {
         };
 
         setIsSaving(true);
-        const loadingId = notifyLoading(t('planningScheduling.savingPlan') || "A guardar plano...");
+        const loadingId = notifyLoading(t('planningScheduling.savingPlan'));
 
         try {
             await SchedulingService.saveSchedule(dto);
             toast.dismiss(loadingId);
-            notifySuccess(t('planningScheduling.saveSuccess') || "Plano guardado com sucesso!");
+            notifySuccess(t('planningScheduling.saveSuccess'));
 
             setIsPlanSaved(true);
 
         } catch (e) {
             console.error(e);
             toast.dismiss(loadingId);
-            notifyError(t('planningScheduling.saveError') || "Erro ao guardar plano.");
+            notifyError(t('planningScheduling.saveError'));
         } finally {
             setIsSaving(false);
         }
@@ -368,7 +388,34 @@ export default function SchedulePage() {
 
     return (
         <Container size="xl" py="xl" className="bg-gray-50 min-h-screen">
-            {/* --- CABEÇALHO DA PÁGINA --- */}
+
+            <Modal
+                opened={openedMissingModal}
+                onClose={() => setOpenedMissingModal(false)}
+                title={t('planningScheduling.missingPlansTitle')}
+                centered
+                radius="md"
+            >
+                <Stack>
+                    <Text size="sm" c="dimmed">{t('planningScheduling.missingPlansDescription')}</Text>
+                    {missingDates.map(date => (
+                        <Button
+                            key={date}
+                            variant="light"
+                            color="orange"
+                            leftSection={<IconCalendar size={16}/>}
+                            onClick={() => {
+                                setSelectedDate(date);
+                                setOpenedMissingModal(false);
+                                setAllResults({});
+                            }}
+                        >
+                            {date}
+                        </Button>
+                    ))}
+                </Stack>
+            </Modal>
+
             <Group justify="space-between" mb="xl" pb="md" style={{borderBottom: "1px solid #e0e0e0"}}>
                 <Group gap="sm">
                     <Link to="/dashboard" className="pr-back-button" style={{ textDecoration: 'none', color: '#555', fontSize: '1.5rem', lineHeight: 1 }}>‹</Link>
@@ -384,9 +431,18 @@ export default function SchedulePage() {
                         </Text>
                     </Stack>
                 </Group>
+
+                <Button
+                    variant="outline"
+                    color="orange"
+                    leftSection={<IconAlertCircle size={20}/>}
+                    loading={isCheckingMissing}
+                    onClick={handleCheckMissingPlans}
+                >
+                    {t('planningScheduling.missingPlansButton')}
+                </Button>
             </Group>
 
-            {/* --- CARD DE INPUTS E CONFIGURAÇÃO --- */}
             <Card shadow="md" radius="lg" p="xl" withBorder mb="xl">
                 <Grid gutter="xl">
                     <Grid.Col span={{base: 12, md: 4}}>
@@ -428,28 +484,10 @@ export default function SchedulePage() {
                                     }))}
                                 />
                             </Box>
-                            {selectedAlgorithm === 'multi_crane' && (
-                                <Box w={200}>
-                                    <Select
-                                        label={t('planningScheduling.comparisonMethod')}
-                                        placeholder={t('planningScheduling.choose')}
-                                        radius="md"
-                                        leftSection={<IconSettings size={16}/>}
-                                        data={[
-                                            { value: 'greedy', label: 'Greedy' },
-                                            { value: 'local_search', label: 'Local Search' },
-                                            { value: 'optimal', label: 'Optimal' }
-                                        ]}
-                                        value={multiCraneAlgorithm}
-                                        onChange={(val) => setMultiCraneAlgorithm(val || 'greedy')}
-                                    />
-                                </Box>
-                            )}
                         </Group>
                     </Grid.Col>
                 </Grid>
 
-                {/* --- CONFIGURAÇÕES AVANÇADAS (Collapsibles) --- */}
                 <Collapse in={selectedAlgorithm === 'smart'}>
                     <Box mt="xl" p="md" style={{ backgroundColor: 'var(--mantine-color-indigo-0)', borderRadius: '12px', border: '1px dashed var(--mantine-color-indigo-2)' }}>
                         <Group mb="xs">
@@ -480,7 +518,6 @@ export default function SchedulePage() {
                             <Grid.Col span={{base: 6, md: 3}}>
                                 <NumberInput
                                     label={t('planningScheduling.population')}
-                                    placeholder={t('planningScheduling.defaultPopulation')}
                                     min={2}
                                     value={geneticParams.populationSize}
                                     onChange={(val) => setGeneticParams({...geneticParams, populationSize: val as number})}
@@ -489,7 +526,6 @@ export default function SchedulePage() {
                             <Grid.Col span={{base: 6, md: 3}}>
                                 <NumberInput
                                     label={t('planningScheduling.generations')}
-                                    placeholder={t('planningScheduling.defaultGenerations')}
                                     min={1}
                                     value={geneticParams.generations}
                                     onChange={(val) => setGeneticParams({...geneticParams, generations: val as number})}
@@ -498,9 +534,10 @@ export default function SchedulePage() {
                             <Grid.Col span={{base: 6, md: 3}}>
                                 <NumberInput
                                     label={t('planningScheduling.mutationRate')}
-                                    placeholder={t('planningScheduling.exMutation')}
+                                    min={0}
+                                    max={1}
+                                    step={0.01}
                                     decimalScale={2}
-                                    min={0} max={1} step={0.01}
                                     value={geneticParams.mutationRate}
                                     onChange={(val) => setGeneticParams({...geneticParams, mutationRate: val as number})}
                                 />
@@ -508,9 +545,10 @@ export default function SchedulePage() {
                             <Grid.Col span={{base: 6, md: 3}}>
                                 <NumberInput
                                     label={t('planningScheduling.crossoverRate')}
-                                    placeholder={t('planningScheduling.exCrossover')}
+                                    min={0}
+                                    max={1}
+                                    step={0.01}
                                     decimalScale={2}
-                                    min={0} max={1} step={0.01}
                                     value={geneticParams.crossoverRate}
                                     onChange={(val) => setGeneticParams({...geneticParams, crossoverRate: val as number})}
                                 />
@@ -519,7 +557,6 @@ export default function SchedulePage() {
                     </Box>
                 </Collapse>
 
-                {/* --- BOTÃO DE CALCULAR --- */}
                 <Button
                     onClick={fetchSchedule}
                     size="lg"
@@ -527,55 +564,29 @@ export default function SchedulePage() {
                     mt="xl"
                     loading={isLoading}
                     disabled={!selectedDate}
-                    leftSection={selectedAlgorithm === 'smart' ? <IconBrain size={22}/> : selectedAlgorithm === 'multi_crane' ? <IconRocket size={22} /> : <IconBolt size={22}/>}
-                    variant={selectedAlgorithm === 'multi_crane' ? "gradient" : "filled"}
-                    gradient={selectedAlgorithm === 'multi_crane' ? {from: "blue", to: "cyan"} : undefined}
-                    color={selectedAlgorithm === 'smart' ? "indigo" : selectedAlgorithm !== 'multi_crane' ? "indigo" : undefined}
+                    leftSection={selectedAlgorithm === 'smart' ? <IconBrain size={22}/> : <IconBolt size={22}/>}
+                    color="indigo"
                     radius="md"
                     style={{ transition: 'all 0.2s', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
                 >
-                    {selectedAlgorithm === 'multi_crane'
-                        ? t('planningScheduling.runMultiCrane', {algo: algorithms.find(a=>a.value === multiCraneAlgorithm)?.label || multiCraneAlgorithm})
-                        : t('planningScheduling.computeScheduleFor', {algo: getAlgoName(selectedAlgorithm)})
-                    }
+                    {t('planningScheduling.computeScheduleFor', {algo: getAlgoName(selectedAlgorithm)})}
                 </Button>
             </Card>
 
-            {/* --- NOTIFICAÇÃO DE ERRO --- */}
             {error && (
                 <Notification icon={<IconAlertTriangle size={20}/>} color="red" radius="md" mb="xl">
                     {error}
                 </Notification>
             )}
 
-            {/* --- ÁREA DE RESULTADOS --- */}
             {Object.keys(allResults).length > 0 && !isLoading && (
                 <Box mt="xl">
-                    {/* Seletor de Comparação (se aplicável) */}
-                    {allResults['multi_crane']?.comparisonData && (
-                        <Group justify="center" mb="lg">
-                            <SegmentedControl
-                                value={showComparisonAnalysis ? 'analysis' : 'standard'}
-                                onChange={(v) => setShowComparisonAnalysis(v === 'analysis')}
-                                data={[
-                                    { value: 'standard', label: t('planningScheduling.standardView') },
-                                    { value: 'analysis', label: (
-                                            <Group gap={6}>
-                                                <Text fw={700} c="blue">{t('planningScheduling.comparison')}</Text>
-                                            </Group>
-                                        )}
-                                ]}
-                            />
-                        </Group>
-                    )}
-
                     {!showComparisonAnalysis && lastComputedAlgorithm !== 'smart' && (
                         <AlgorithmComparisonTable allResults={allResults} t={t as TFunc} />
                     )}
 
                     {!showComparisonAnalysis && scheduleToDisplay && scheduleToDisplay.schedule && (
                         <>
-                            {}
                             {canSave ? (
                                 <Box
                                     mb="xl"
@@ -596,13 +607,12 @@ export default function SchedulePage() {
                                                 radius="xl"
                                                 variant={isPlanSaved ? "filled" : "light"}
                                                 color={isPlanSaved ? "green" : "teal"}
-                                                style={{ transition: "all 0.5s ease" }}
                                             >
                                                 {isPlanSaved ? <IconCheck size={28} /> : <IconClipboardCheck size={28} />}
                                             </ThemeIcon>
                                             <Stack gap={2}>
                                                 <Text size="xs" c={isPlanSaved ? "green.8" : "teal.7"} fw={800} tt="uppercase">
-                                                    {t('planningScheduling.status') || "STATUS"}: {isPlanSaved ? (t('planningScheduling.saved') || "PLAN SAVED") : (t('planningScheduling.readyToSave') || "READY TO SAVE")}
+                                                    {t('planningScheduling.statusLabel')}: {isPlanSaved ? t('planningScheduling.planSaved') : t('planningScheduling.readyToSave')}
                                                 </Text>
                                                 <Title order={3} c="dark.7">
                                                     {t('planningScheduling.scheduleResult', {algo: getAlgoName(lastComputedAlgorithm!)})}
@@ -616,33 +626,11 @@ export default function SchedulePage() {
                                             disabled={isPlanSaved}
                                             leftSection={isPlanSaved ? <IconCheck size={24} stroke={3}/> : <IconDeviceFloppy size={22} />}
                                             variant="gradient"
-                                            gradient={isPlanSaved
-                                                ? { from: 'green', to: 'teal', deg: 105 }
-                                                : { from: 'teal', to: 'green', deg: 105 }
-                                            }
+                                            gradient={{ from: 'teal', to: 'green', deg: 105 }}
                                             size="lg"
                                             radius="md"
-                                            style={{
-                                                transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                                transform: isPlanSaved ? 'scale(1.05)' : 'scale(1)',
-                                                boxShadow: isPlanSaved ? '0 0 0 0 rgba(0,0,0,0)' : '0 4px 14px 0 rgba(0, 150, 136, 0.39)',
-                                                opacity: isPlanSaved ? 0.9 : 1
-                                            }}
-                                            styles={{
-                                                root: {
-                                                    '&:disabled': {
-                                                        opacity: 1,
-                                                        color: 'white',
-                                                        cursor: 'default',
-                                                        backgroundImage: 'linear-gradient(105deg, #10b981 0%, #059669 100%)'
-                                                    }
-                                                }
-                                            }}
                                         >
-                                            {isPlanSaved
-                                                ? (t('planningScheduling.savedSuccessfully') || "Plano Guardado!")
-                                                : (t('planningScheduling.savePlan') || "Guardar Plano")
-                                            }
+                                            {isPlanSaved ? t('planningScheduling.savedSuccessfully') : t('planningScheduling.savePlan')}
                                         </Button>
                                     </Group>
                                 </Box>
@@ -654,7 +642,6 @@ export default function SchedulePage() {
                                 </Group>
                             )}
 
-                            {}
                             {scheduleToDisplay.smartData && (
                                 <Alert icon={<IconInfoCircle size={20}/>} title={t('planningScheduling.smartReasonTitle')} color="indigo" radius="md" mb="xl" variant="light">
                                     <Text size="sm" fw={500}>
@@ -666,7 +653,6 @@ export default function SchedulePage() {
                                 </Alert>
                             )}
 
-                            {/* --- CARD DE RESUMO ESTATÍSTICO --- */}
                             <Card shadow="md" radius="lg" p="lg" withBorder mb="xl" bg="indigo.8" c="white" style={{ background: "linear-gradient(45deg, #3b5bdb 0%, #4c6ef5 100%)" }}>
                                 <Group justify="space-between">
                                     <Stack gap={4}>
@@ -682,27 +668,15 @@ export default function SchedulePage() {
                                 </Group>
                             </Card>
 
-                            {/* --- TABELA DA SEQUÊNCIA DO PROLOG --- */}
                             {scheduleToDisplay.prolog?.best_sequence && (
                                 <PrologSequenceTable sequence={scheduleToDisplay.prolog.best_sequence} />
                             )}
 
-                            {/* --- LISTA DE OPERAÇÕES (CARDS) --- */}
                             <Stack gap="md">
                                 {scheduleToDisplay.schedule.operations?.map((op) => (
                                     <OperationRow key={op.vvnId} op={op} t={t as TFunc} locale={locale}/>
                                 ))}
                             </Stack>
-
-                            {/* --- DADOS CRUS (DEBUG) --- */}
-                            <Box mt="xl" pt="xl" style={{borderTop: "1px solid #ddd"}}>
-                                <Title order={4} mb="md" c="dimmed">{t('planningScheduling.prologRaw')}</Title>
-                                <Box component="pre" style={{
-                                    background: "#1a1b1e", color: "#69db7c", padding: 20, borderRadius: 12, maxHeight: 400, overflowX: "auto", fontSize: '0.85rem'
-                                }}>
-                                    {JSON.stringify(scheduleToDisplay.prolog, null, 2)}
-                                </Box>
-                            </Box>
                         </>
                     )}
                 </Box>

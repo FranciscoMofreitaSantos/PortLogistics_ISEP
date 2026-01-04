@@ -1,0 +1,25 @@
+@startuml
+skinparam style strictuml
+skinparam packageStyle rect
+
+actor "Logistics Operator" as LO
+participant "System" as System
+
+title SSD: Check and Select Missing Plans
+
+LO -> System : Clicks "Check Missing Plans"
+activate System
+
+System -> System : Search for dates without saved plans
+System --> LO : Show Modal with list of missing dates
+deactivate System
+
+LO -> System : Select a specific date from the list
+activate System
+
+System -> System : Update selected date in form
+System -> System : Clear previous calculation results
+System --> LO : Close modal and display date ready for computation
+deactivate System
+
+@enduml

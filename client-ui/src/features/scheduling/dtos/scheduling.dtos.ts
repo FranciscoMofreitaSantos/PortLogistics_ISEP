@@ -60,14 +60,15 @@ export interface UpdateOperationPlanForVvnDto {
 }
 
 export interface UpdateOperationPlanResultDto {
-    plan: any;
+    plan: SaveScheduleDto;
     warnings: OperationPlanWarningDto[];
 }
+
 export interface UpdateOperationPlanVvnChangeDto {
     vvnId: string;
     reasonForChange: string;
     status?: string;
-    operations: any[];
+    operations: SchedulingOperationDto[];
 }
 
 export interface UpdateOperationPlanForVvnsBatchDto {
@@ -77,6 +78,6 @@ export interface UpdateOperationPlanForVvnsBatchDto {
 }
 
 export interface UpdateOperationPlanBatchResultDto {
-    plan: any;
+    plan: SaveScheduleDto;
     warnings: OperationPlanWarningDto[];
 }

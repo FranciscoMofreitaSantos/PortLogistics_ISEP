@@ -1,0 +1,114 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+title Sequence Diagram (Full) – Update VVE with Executed Operations (US 4.1.9)
+
+actor "Logistics Operator" as Operator
+boundary "SPA" as SPA
+boundary "VVE Routes" as Routes
+control "VVE Controller" as Ctrl
+control "VVE Service" as Svc
+entity "VVE Repo" as VveRepo
+entity "Operation Plan Repo" as PlanRepo
+entity "VVE Mapper" as Map
+database "MongoDB (Mongoose)" as DB
+
+== Get VVE + Planned Operations ==
+Operator -> SPA : Open VVE execution screen
+SPA -> Routes : GET /vve/{vveId}
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : getByIdAsync(vveId)
+
+Svc -> VveRepo : findById(vveId)
+VveRepo -> DB : findOne({_id:vveId})
+DB --> VveRepo : doc/null
+VveRepo --> Svc : VVE?/null
+
+alt VVE not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+else found
+  Svc -> Map : toDTO(VVE)
+  Svc --> Ctrl : Result.ok(dto)
+  Ctrl --> SPA : 200 OK\nVVEDTO
+end
+
+== Update Executed Operations ==
+Operator -> SPA : Confirm/adjust operation start/end + resource usage
+SPA -> Routes : PUT /vve/{vveId}/executed-operations\n(ExecutedOperations DTO)
+Routes -> Ctrl : execute(req,res)
+Ctrl -> Svc : updateExecutedOpsAsync(vveId, dto)
+
+'--- Load VVE ---
+Svc -> VveRepo : findById(vveId)
+VveRepo -> DB : findOne({_id:vveId})
+DB --> VveRepo : doc/null
+VveRepo --> Svc : VVE?/null
+
+alt VVE not found
+  Svc --> Ctrl : BusinessRuleValidationError(NotFound)
+  Ctrl --> SPA : 404 Not Found
+
+else found
+  '--- Validate state ---
+  alt VVE status != "In Progress"
+    Svc --> Ctrl : BusinessRuleValidationError(InvalidState)
+    Ctrl --> SPA : 400 Bad Request
+  else status is "In Progress"
+    '--- Validate payload ---
+    Svc -> Svc : validate(dto.operations[])
+
+    alt Invalid data in operations[]
+      Svc --> Ctrl : BusinessRuleValidationError(InvalidData)
+      Ctrl --> SPA : 400 Bad Request
+    else Valid operations[]
+      '--- Load related Operation Plan (to compare planned vs executed) ---
+      Svc -> PlanRepo : findByVveOrVvnRef(vve.referenceVvnId)
+      PlanRepo -> DB : findOne({vvnId: vve.referenceVvnId})
+      DB --> PlanRepo : planDoc/null
+      PlanRepo --> Svc : OperationPlan?/null
+
+      alt Operation Plan not found
+        Svc --> Ctrl : BusinessRuleValidationError(PlanNotFound)
+        Ctrl --> SPA : 404 Not Found
+      else Plan found
+        '--- Apply executed operations updates ---
+        loop for each executedOp in dto.operations[]
+          Svc -> Svc : plannedOp = plan.findOperation(executedOp.plannedOpId)
+
+          alt plannedOp not found
+            Svc --> Ctrl : BusinessRuleValidationError(OperationNotFound)
+            Ctrl --> SPA : 404 Not Found
+            break
+          else plannedOp found
+            ' store execution data
+            Svc -> Svc : vve.upsertExecutedOperation(executedOp)
+            ' update plan status for comparison
+            Svc -> Svc : plannedOp.markStartedOrCompletedOrDelayed(executedOp)
+          end
+        end
+
+        '--- Audit metadata ---
+        Svc -> Svc : vve.appendAudit(operatorId, timestamp, "UPDATE_EXECUTED_OPERATIONS")
+
+        '--- Persist changes ---
+        Svc -> VveRepo : save(vve)
+        VveRepo -> DB : updateOne({_id:vveId}, persistenceVVE)
+        DB --> VveRepo : updatedVveDoc
+        VveRepo --> Svc : VVE
+
+        Svc -> PlanRepo : save(plan)
+        PlanRepo -> DB : updateOne({_id:planId}, persistencePlan)
+        DB --> PlanRepo : updatedPlanDoc
+        PlanRepo --> Svc : OperationPlan
+
+        '--- Return DTO ---
+        Svc -> Map : toDTO(VVE)
+        Svc --> Ctrl : Result.ok(dto)
+        Ctrl --> SPA : 200 OK\nVVEDTO
+      end
+    end
+  end
+end
+
+@enduml
