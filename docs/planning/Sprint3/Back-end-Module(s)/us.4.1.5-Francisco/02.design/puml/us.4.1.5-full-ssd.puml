@@ -1,0 +1,80 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+
+title Sequence Diagram (Full) – Missing Plans & Daily Scheduling
+
+actor "Logistics Operator" as LO
+boundary "SPA (SchedulePage)" as SPA
+boundary "Scheduling Routes" as Routes
+control "Scheduling Controller" as Ctrl
+control "Scheduling Service" as Svc
+control "Prolog Engine" as Prolog
+entity "Scheduling Repo" as Repo
+entity "Scheduling Mapper" as Map
+database "MongoDB" as DB
+
+== Check Missing Plans ==
+LO -> SPA : Click "Check Missing Plans"
+SPA -> Routes : GET /scheduling/missing-plans
+Routes -> Ctrl : getMissingPlans(req, res)
+Ctrl -> Svc : findDatesWithoutPlansAsync()
+
+Svc -> Repo : getAllPlannedDates()
+Repo -> DB : find({}, {planDate: 1})
+DB --> Repo : existingDates[]
+Repo --> Svc : dates[]
+
+Svc -> Svc : Identify gaps in upcoming calendar
+Svc --> Ctrl : Result.ok(missingDates[])
+Ctrl --> SPA : 200 OK (missingDates[])
+SPA -> SPA : Open Modal with list
+
+== Compute Daily Schedule ==
+LO -> SPA : Select Date + Algorithm + Params\nClick "Compute"
+SPA -> Routes : POST /scheduling/compute\n(ComputeConfigDTO)
+Routes -> Ctrl : computeSchedule(req, res)
+Ctrl -> Svc : generateScheduleAsync(dto)
+
+Svc -> Repo : getOperationsDataForDate(date)
+Repo -> DB : find(VVNs/Cargo for date)
+DB --> Repo : rawData
+Repo --> Svc : operationsData
+
+Svc -> Prolog : solve(operationsData, algorithm, params)
+note right: Executes Prolog logic for\nGreedy, Genetic, or Smart
+Prolog --> Svc : rawPrologResult (best_sequence, delay, etc)
+
+Svc -> Map : toResponseDTO(rawPrologResult)
+Svc --> Ctrl : Result.ok(scheduleDTO)
+Ctrl --> SPA : 200 OK (scheduleDTO)
+SPA -> SPA : Render results and Comparison Table
+
+== Save Scheduled Plan ==
+LO -> SPA : Click "Save Plan"
+SPA -> Routes : POST /scheduling/save\n(SaveScheduleDTO)
+Routes -> Ctrl : savePlan(req, res)
+Ctrl -> Svc : saveScheduleAsync(dto)
+
+Svc -> Repo : exists(date)
+Repo -> DB : findOne({planDate: date})
+DB --> Repo : record/null
+
+alt Plan already exists for date
+    Svc --> Ctrl : Error (AlreadyExists)
+    Ctrl --> SPA : 400 Bad Request
+else New Plan
+    Svc -> Svc : PlanFactory.create(dto)
+    Svc -> Repo : save(plan)
+    Repo -> Map : toPersistence(plan)
+    Repo -> DB : create(persistenceDoc)
+    DB --> Repo : createdDoc
+    Repo --> Svc : savedPlan
+    
+    Svc -> Map : toDTO(savedPlan)
+    Svc --> Ctrl : Result.ok(dto)
+    Ctrl --> SPA : 201 Created
+    SPA -> SPA : Update UI (isPlanSaved = true)
+end
+
+@enduml
