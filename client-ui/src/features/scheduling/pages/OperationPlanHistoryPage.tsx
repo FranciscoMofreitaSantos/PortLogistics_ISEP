@@ -546,7 +546,6 @@ export default function OperationPlanHistoryPage() {
                                                                 <Table striped withColumnBorders>
                                                                     <Table.Thead>
                                                                         <Table.Tr>
-                                                                            <Table.Th>VVN</Table.Th>
                                                                             <Table.Th>Navio</Table.Th>
                                                                             <Table.Th>Doca</Table.Th>
                                                                             <Table.Th>Chegada Real</Table.Th>
@@ -559,11 +558,6 @@ export default function OperationPlanHistoryPage() {
                                                                     <Table.Tbody>
                                                                         {(plan.operations as SchedulingOperationDto[] | undefined)?.map((op: any, idx: number) => (
                                                                             <Table.Tr key={idx}>
-                                                                                <Table.Td>
-                                                                                    <Badge variant="light" color="gray">
-                                                                                        {op.vvnId || "-"}
-                                                                                    </Badge>
-                                                                                </Table.Td>
                                                                                 <Table.Td fw={500}>{op.vessel || op.Vessel}</Table.Td>
                                                                                 <Table.Td>{op.dock || op.Dock}</Table.Td>
 
